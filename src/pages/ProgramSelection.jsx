@@ -26,10 +26,10 @@ const ProgramSelection = () => {
       description: 'Tìm hiểu về các định luật cơ bản của vũ trụ, từ chuyển động, năng lượng cho đến các hiện tượng điện từ và quang học.',
       gradient: 'from-green-500 to-teal-600',
       hoverGradient: 'from-green-600 to-teal-700',
-      available: false,
-      grades: [8, 9, 10, 11, 12],
-      totalLessons: 140,
-      highlights: ['Mô phỏng thực tế', 'Video thí nghiệm', 'Giải bài tập chi tiết']
+      available: true,
+      grades: [6, 7, 8, 9, 10],
+      totalLessons: 100,
+      highlights: ['Mô phỏng vật lý', 'Game tương tác', 'Thí nghiệm ảo']
     },
     {
       id: 'biology',

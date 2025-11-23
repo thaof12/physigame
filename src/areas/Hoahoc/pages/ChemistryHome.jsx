@@ -25,7 +25,7 @@ const ChemistryHome = () => {
 
   const availablePrograms = [
     { id: 'chemistry', name: 'Hóa học', icon: '🧪', path: '/program/chemistry', available: true },
-    { id: 'physics', name: 'Vật lý', icon: '⚛️', path: '/program/physics', available: false },
+    { id: 'physics', name: 'Vật lý', icon: '⚛️', path: '/program/physics', available: true },
     { id: 'biology', name: 'Sinh học', icon: '🧬', path: '/program/biology', available: false },
     { id: 'math', name: 'Toán học', icon: '📐', path: '/program/math', available: false }
   ];

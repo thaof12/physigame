@@ -26,6 +26,23 @@ import CauTrucNguyenTu from './areas/Hoahoc/challenges/CauTrucNguyenTu';
 import PhongThiNghiem from './areas/Hoahoc/challenges/PhongThiNghiem';
 import TinhOxiHoa from './areas/Hoahoc/challenges/TinhOxiHoa';
 
+// Physics area
+import PhysicsHome from './areas/Vatly/pages/PhysicsHome';
+import PhysicsDashboard from './areas/Vatly/pages/PhysicsDashboard';
+import PhysicsClassDashboard from './areas/Vatly/pages/PhysicsClassDashboard';
+import AdvancedPhysicsChallenge from './areas/Vatly/gamelist/AdvancedPhysicsChallenge';
+
+// Physics challenge games
+import BalanceChallenge from './areas/Vatly/challenges/BalanceChallenge/BalanceChallenge';
+import ColorMaster from './areas/Vatly/challenges/ColorMaster/ColorMaster';
+import ElectromagneticLab from './areas/Vatly/challenges/ElectromagneticLab/ElectromagneticLab';
+import NanoLab from './areas/Vatly/challenges/NanoLab/NanoLab';
+import PlasmaGame from './areas/Vatly/challenges/PlasmaGame/PlasmaGame';
+import ProjectileMotion from './areas/Vatly/challenges/ProjectileMotion/ProjectileMotion';
+import StaticElectricity from './areas/Vatly/challenges/StaticElectricity/StaticElectricity';
+import ThermoLab from './areas/Vatly/challenges/ThermoLab/ThermoLab';
+import WaterLab from './areas/Vatly/challenges/WaterLab/WaterLab';
+
 
 const AppContent = () => {
   const location = useLocation();
@@ -77,6 +94,23 @@ const AppContent = () => {
           path="/placement-test/:programId?" 
           element={<PlacementTest />}
         />
+
+        {/* Physics Routes */}
+        <Route path="/program/physics" element={<PhysicsHome />} />
+        <Route path="/program/physics/dashboard" element={<PhysicsDashboard />} />
+        <Route path="/physics-class/:classId" element={<PhysicsClassDashboard />} />
+        <Route path="/advanced-physics-challenge" element={<AdvancedPhysicsChallenge />} />
+
+        {/* Physics Challenge Games */}
+        <Route path="/advanced-physics-challenge/balance" element={<BalanceChallenge />} />
+        <Route path="/advanced-physics-challenge/color-master" element={<ColorMaster />} />
+        <Route path="/advanced-physics-challenge/electromagnetic" element={<ElectromagneticLab />} />
+        <Route path="/advanced-physics-challenge/nanolab" element={<NanoLab />} />
+        <Route path="/advanced-physics-challenge/plasma" element={<PlasmaGame />} />
+        <Route path="/advanced-physics-challenge/projectile" element={<ProjectileMotion />} />
+        <Route path="/advanced-physics-challenge/static" element={<StaticElectricity />} />
+        <Route path="/advanced-physics-challenge/thermo" element={<ThermoLab />} />
+        <Route path="/advanced-physics-challenge/water" element={<WaterLab />} />
       </Routes>
     </div>
   )
