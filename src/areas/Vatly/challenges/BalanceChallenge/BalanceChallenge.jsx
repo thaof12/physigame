@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 // Sửa đường dẫn: ra 3 cấp, vào 'data', lấy 'games' (bỏ .js)
-import { GAME_DATA, checkPuzzleResult } from '../../../data/games';
+import { GAME_DATA, checkPuzzleResult } from '../../data/games';
 import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../../data/gameIntroData';
+import { GAME_INTRO_DATA } from '../../data/gameIntroData';
 
 // Sửa đường dẫn: Import file CSS từ thư mục styles
 import './BalanceChallenge.css';

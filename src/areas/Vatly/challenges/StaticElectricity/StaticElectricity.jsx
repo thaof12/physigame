@@ -4,8 +4,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../../data/gameIntroData';
-import './StaticElectricity.css';
+import { GAME_INTRO_DATA } from '../../data/gameIntroData';
+import "./StaticElectricity.css";
 
 // Charge component - electron và proton
 const Charge = ({ type, x, y, isMoving }) => {

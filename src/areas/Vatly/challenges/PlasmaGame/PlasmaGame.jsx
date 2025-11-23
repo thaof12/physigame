@@ -3,9 +3,9 @@ import './PlasmaGame.css';
 // Import toàn bộ logic game và hàm vẽ từ file plasma.js
 import { GameEngine } from './plasma.js';
 // Import dữ liệu game từ data/games.js
-import { PLASMA_GAME_DATA } from '../../../data/games.js';
+import { PLASMA_GAME_DATA } from '../../data/games.js';
 import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../../data/gameIntroData';
+import { GAME_INTRO_DATA } from '../../data/gameIntroData';
 
 // ID cho linh kiện
 let nextComponentId = 0;

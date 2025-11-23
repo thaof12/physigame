@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PROJECTILE_MOTION_DATA } from '../../../data/games';
+import { PROJECTILE_MOTION_DATA } from '../../data/games';
 import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../../data/gameIntroData';
+import { GAME_INTRO_DATA } from '../../data/gameIntroData';
 import './ProjectileMotion.css';
 
 const ProjectileMotion = () => {

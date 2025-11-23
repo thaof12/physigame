@@ -3,8 +3,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../../data/gameIntroData';
-import './ElectromagneticLab.css';
+import { GAME_INTRO_DATA } from '../../data/gameIntroData';
+import "./ElectromagneticLab.css";
 
 // Component hiển thị nam châm với thiết kế 3D
 const Magnet = ({ position, isDragging, onMouseDown, rotation = 0 }) => {

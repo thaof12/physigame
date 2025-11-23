@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Draggable from 'react-draggable';
 // Sửa đường dẫn import nếu cần
-import { COLOR_MASTER_DATA } from '../../../data/colorMasterGameData'; 
+import { COLOR_MASTER_DATA } from '../../data/colorMasterGameData'; 
 import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../../data/gameIntroData';
+import { GAME_INTRO_DATA } from '../../data/gameIntroData';
 import './ColorMaster.css';
 
 // --- COMPONENT CON (Nâng cấp) ---

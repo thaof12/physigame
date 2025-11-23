@@ -5,9 +5,9 @@ import React, { useState, useMemo } from 'react';
 import './NanoLab.css'; 
 
 // 2. IMPORT DATA
-import { NANO_LAB_DATA } from '../../../data/games.js'; // Đảm bảo đường dẫn này ĐÚNG
+import { NANO_LAB_DATA } from '../../data/games.js'; // Đảm bảo đường dẫn này ĐÚNG
 import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../../data/gameIntroData';
+import { GAME_INTRO_DATA } from '../../data/gameIntroData';
 
 // 3. SỬ DỤNG DATA
 const levels = NANO_LAB_DATA; 

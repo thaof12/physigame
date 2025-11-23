@@ -1,9 +1,9 @@
 // src/components/Games/ThermoLab/ThermoLab.jsx
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { THERMO_LAB_DATA } from "../../../data/games";
+import { THERMO_LAB_DATA } from "../../data/games";
 import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../../data/gameIntroData';
+import { GAME_INTRO_DATA } from '../../data/gameIntroData';
 import "./ThermoLab.css";
 
 // Lấy dữ liệu từ file games.js

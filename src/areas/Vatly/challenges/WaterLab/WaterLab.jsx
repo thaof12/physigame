@@ -1,8 +1,8 @@
 // WaterLab.jsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { WATER_LAB_DATA } from '../../../data/waterLabData';
+import { WATER_LAB_DATA } from '../../data/waterLabData';
 import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../../data/gameIntroData';
+import { GAME_INTRO_DATA } from '../../data/gameIntroData';
 import './WaterLab.css';
 
 // --- Hằng số Vật lý ---
