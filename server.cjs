@@ -7,7 +7,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 });
 
 // Database connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://2200002540_db_user:Luan123@dan-1211.epxn7qi.mongodb.net/chemlearn?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://physiquiz:0vh7aFYgpoz90AsR@cluster0.kpsduay.mongodb.net/physicslearn?retryWrites=true&w=majority&appName=Cluster0';
 
 // Set mongoose options
 mongoose.set('strictQuery', false);

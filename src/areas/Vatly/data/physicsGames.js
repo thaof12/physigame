@@ -151,10 +151,28 @@ export const physicsGrades = [
   {
     id: 10,
     title: 'Lớp 10',
-    description: 'Vật lý nâng cao',
+    description: 'Động học - Nhiệt động học',
     color: 'from-red-400 to-red-600',
     icon: '🚀',
     topics: ['Động học', 'Nhiệt động học', 'Dao động sóng'],
+    type: 'class'
+  },
+  {
+    id: 11,
+    title: 'Lớp 11',
+    description: 'Điện học - Từ học',
+    color: 'from-indigo-400 to-indigo-600',
+    icon: '⚡',
+    topics: ['Điện trường', 'Dòng điện', 'Từ trường', 'Cảm ứng điện từ'],
+    type: 'class'
+  },
+  {
+    id: 12,
+    title: 'Lớp 12',
+    description: 'Dao động - Sóng - Lượng tử',
+    color: 'from-pink-400 to-pink-600',
+    icon: '🌌',
+    topics: ['Dao động cơ', 'Sóng điện từ', 'Lượng tử ánh sáng', 'Hạt nhân'],
     type: 'class'
   },
   {

@@ -528,5 +528,120 @@ router.get('/profile/:userId', async (req, res) => {
   }
 });
 
+// Submit physics lesson progress
+router.post('/submit-physics-lesson', async (req, res) => {
+  try {
+    console.log('📤 Physics lesson submission received:', req.body);
+    
+    const { userId, programId, classId, chapterId, lessonId, score, totalQuestions, completed } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Missing userId' 
+      });
+    }
+
+    // Find user
+    let user;
+    try {
+      user = await User.findOne({ 
+        $or: [
+          { email: userId },
+          { firebaseUid: userId },
+          { _id: userId }
+        ] 
+      });
+    } catch (error) {
+      console.log('⚠️ Error finding user:', error.message);
+    }
+    
+    if (!user) {
+      console.log('❌ User not found:', userId);
+      return res.status(404).json({ 
+        success: false,
+        message: 'User not found' 
+      });
+    }
+
+    console.log('✅ Found user:', user.email);
+
+    // Find or create physics program
+    let program = user.programs.find(p => p.programId === programId);
+    
+    if (!program) {
+      // Create new physics program
+      program = {
+        programId: programId || 'physics',
+        programName: 'Vật lý',
+        currentClass: classId,
+        isActive: true,
+        placementTestCompleted: true,
+        enrolledAt: new Date(),
+        progress: {
+          completedLessons: [],
+          totalScore: 0,
+          lastStudyDate: new Date()
+        }
+      };
+      user.programs.push(program);
+    }
+
+    // Create lesson key
+    const lessonKey = `${classId}-${chapterId}-${lessonId}`;
+    
+    // Update progress
+    if (!program.progress) {
+      program.progress = {
+        completedLessons: [],
+        totalScore: 0,
+        lastStudyDate: new Date()
+      };
+    }
+
+    // Add to completed lessons if not already there
+    if (completed && !program.progress.completedLessons.includes(lessonKey)) {
+      program.progress.completedLessons.push(lessonKey);
+      console.log('✅ Added lesson to completed:', lessonKey);
+    }
+
+    // Update score
+    if (score !== undefined) {
+      program.progress.totalScore = (program.progress.totalScore || 0) + score;
+    }
+
+    // Update last study date
+    program.progress.lastStudyDate = new Date();
+
+    // Update XP
+    const xpGained = score * 10; // 10 XP per correct answer
+    user.xp = (user.xp || 0) + xpGained;
+
+    await user.save();
+    
+    console.log('✅ Physics lesson progress saved:', { 
+      user: user.email, 
+      lesson: lessonKey,
+      score,
+      xpGained
+    });
+
+    res.json({
+      success: true,
+      message: 'Progress saved successfully',
+      xpGained,
+      totalXP: user.xp,
+      completedLessons: program.progress.completedLessons
+    });
+  } catch (error) {
+    console.error('❌ Submit physics lesson error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+});
+
 module.exports = router;
 

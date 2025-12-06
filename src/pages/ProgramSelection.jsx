@@ -27,8 +27,8 @@ const ProgramSelection = () => {
       gradient: 'from-green-500 to-teal-600',
       hoverGradient: 'from-green-600 to-teal-700',
       available: true,
-      grades: [6, 7, 8, 9, 10],
-      totalLessons: 100,
+      grades: [6, 7, 8, 9, 10, 11, 12],
+      totalLessons: 200,
       highlights: ['Mô phỏng vật lý', 'Game tương tác', 'Thí nghiệm ảo']
     },
     {
@@ -65,11 +65,21 @@ const ProgramSelection = () => {
 
     if (!user) {
       // Chưa đăng nhập -> chuyển đến trang login
-      navigate('/login', { state: { from: `/placement-test/${program.id}` } });
+      // Nếu là vật lý thì chuyển đến trang vật lý, còn không thì đến placement test
+      const redirectPath = program.id === 'physics' 
+        ? `/program/${program.id}` 
+        : `/placement-test/${program.id}`;
+      navigate('/login', { state: { from: redirectPath } });
       return;
     }
 
-    // Kiểm tra xem user đã đăng ký chương trình này chưa
+    // Đặc biệt cho môn Vật lý: vào thẳng trang Vật lý, không qua placement test
+    if (program.id === 'physics') {
+      navigate(`/program/${program.id}`);
+      return;
+    }
+
+    // Kiểm tra xem user đã đăng ký chương trình này chưa (áp dụng cho các môn khác)
     const userProgram = user.programs?.find(p => p.programId === program.id);
     
     if (userProgram && userProgram.placementTestCompleted) {

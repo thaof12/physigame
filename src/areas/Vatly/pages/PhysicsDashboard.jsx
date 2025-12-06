@@ -6,7 +6,7 @@ const PhysicsDashboard = () => {
 
   const handleSelectGrade = (grade) => {
     if (grade.type === 'challenge') {
-      navigate('/advanced-physics-challenge');
+      navigate('/physics-games/grades');
     } else {
       navigate(`/physics-class/${grade.id}`);
     }

@@ -1,126 +1,62 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, BookOpen, Trophy, Lock } from 'lucide-react';
+import { physicsLessons, getLessonStats } from '../data/physicsLessons';
 
 const PhysicsClassDashboard = () => {
   const { classId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [userProgress, setUserProgress] = useState({});
 
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => setLoading(false), 500);
+    // Simulate loading và lấy progress từ localStorage hoặc backend
+    const loadProgress = async () => {
+      // Load from localStorage first
+      const savedProgress = localStorage.getItem(`physics-progress-${classId}`);
+      if (savedProgress) {
+        setUserProgress(JSON.parse(savedProgress));
+      }
+      
+      // Then try to load from backend
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user?.email || user?.uid) {
+          const userId = user.email || user.uid;
+          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/users/profile/${userId}`);
+          
+          if (response.ok) {
+            const userData = await response.json();
+            const physicsProgram = userData.programs?.find(p => p.programId === 'physics');
+            
+            if (physicsProgram?.progress?.completedLessons) {
+              // Convert completed lessons array to progress object
+              const progressObj = {};
+              physicsProgram.progress.completedLessons.forEach(lessonKey => {
+                progressObj[lessonKey] = 'completed';
+              });
+              setUserProgress(progressObj);
+              localStorage.setItem(`physics-progress-${classId}`, JSON.stringify(progressObj));
+            }
+          }
+        }
+      } catch (error) {
+        console.log('Could not load progress from backend:', error);
+      }
+      
+      setTimeout(() => setLoading(false), 500);
+    };
+    
+    loadProgress();
   }, [classId]);
 
-  const gradeData = {
-    6: {
-      title: 'Lớp 6',
-      icon: '🔭',
-      color: 'from-blue-400 to-blue-600',
-      chapters: [
-        {
-          id: 1,
-          title: 'Chương 1: Đại cương vật lý',
-          lessons: ['Vật lý học là gì?', 'Đo lường trong vật lý', 'Đơn vị đo'],
-          completed: 0,
-          total: 3
-        },
-        {
-          id: 2,
-          title: 'Chương 2: Chuyển động cơ học',
-          lessons: ['Chuyển động và đứng yên', 'Tốc độ', 'Đồ thị chuyển động'],
-          completed: 0,
-          total: 3
-        }
-      ]
-    },
-    7: {
-      title: 'Lớp 7',
-      icon: '🌟',
-      color: 'from-green-400 to-green-600',
-      chapters: [
-        {
-          id: 1,
-          title: 'Chương 1: Ánh sáng',
-          lessons: ['Nguồn sáng', 'Truyền ánh sáng', 'Gương phẳng', 'Khúc xạ ánh sáng'],
-          completed: 0,
-          total: 4
-        },
-        {
-          id: 2,
-          title: 'Chương 2: Âm thanh',
-          lessons: ['Âm thanh là gì?', 'Truyền âm', 'Đặc trưng âm thanh'],
-          completed: 0,
-          total: 3
-        }
-      ]
-    },
-    8: {
-      title: 'Lớp 8',
-      icon: '⚙️',
-      color: 'from-yellow-400 to-yellow-600',
-      chapters: [
-        {
-          id: 1,
-          title: 'Chương 1: Cơ học',
-          lessons: ['Lực', 'Máy cơ đơn giản', 'Công và công suất'],
-          completed: 0,
-          total: 3
-        },
-        {
-          id: 2,
-          title: 'Chương 2: Áp suất',
-          lessons: ['Áp suất chất rắn', 'Áp suất chất lỏng', 'Áp suất khí quyển'],
-          completed: 0,
-          total: 3
-        }
-      ]
-    },
-    9: {
-      title: 'Lớp 9',
-      icon: '🔌',
-      color: 'from-purple-400 to-purple-600',
-      chapters: [
-        {
-          id: 1,
-          title: 'Chương 1: Điện học',
-          lessons: ['Dòng điện', 'Định luật Ohm', 'Công suất điện'],
-          completed: 0,
-          total: 3
-        },
-        {
-          id: 2,
-          title: 'Chương 2: Điện từ',
-          lessons: ['Từ trường', 'Cảm ứng điện từ', 'Động cơ điện'],
-          completed: 0,
-          total: 3
-        }
-      ]
-    },
-    10: {
-      title: 'Lớp 10',
-      icon: '🚀',
-      color: 'from-red-400 to-red-600',
-      chapters: [
-        {
-          id: 1,
-          title: 'Chương 1: Động học',
-          lessons: ['Chuyển động thẳng đều', 'Chuyển động biến đổi đều', 'Rơi tự do'],
-          completed: 0,
-          total: 3
-        },
-        {
-          id: 2,
-          title: 'Chương 2: Động lực học',
-          lessons: ['Định luật Newton 1', 'Định luật Newton 2', 'Định luật Newton 3'],
-          completed: 0,
-          total: 3
-        }
-      ]
-    }
-  };
+  const currentGrade = physicsLessons[classId];
+  const stats = currentGrade ? getLessonStats(classId, userProgress) : { total: 0, completed: 0 };
 
-  const currentGrade = gradeData[classId];
+  const handleLessonClick = (chapterId, lessonId) => {
+    // Navigate to lesson page
+    navigate(`/physics-lesson/${classId}/${chapterId}/${lessonId}`);
+  };
 
   if (loading) {
     return (
@@ -166,13 +102,15 @@ const PhysicsClassDashboard = () => {
           </button>
           
           <div className="flex items-center mb-4">
-            <div className="text-5xl mr-4">{currentGrade.icon}</div>
+            <div className="text-5xl mr-4">
+              {classId == 6 ? '🔭' : classId == 7 ? '🌟' : classId == 8 ? '⚙️' : classId == 9 ? '🔌' : classId == 10 ? '🚀' : classId == 11 ? '⚡' : classId == 12 ? '🌌' : '⚛️'}
+            </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
                 {currentGrade.title}
               </h1>
               <p className="text-gray-600">
-                Chương trình Vật lý {currentGrade.title}
+                {currentGrade.description}
               </p>
             </div>
           </div>
@@ -181,12 +119,12 @@ const PhysicsClassDashboard = () => {
           <div className="grid md:grid-cols-3 gap-4 mt-6">
             <div className="bg-white rounded-xl p-4 shadow-md">
               <div className="flex items-center gap-3">
-                <div className={`p-3 bg-gradient-to-br ${currentGrade.color} rounded-lg`}>
+                <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg">
                   <BookOpen className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-800">
-                    {currentGrade.chapters.reduce((sum, ch) => sum + ch.total, 0)}
+                    {stats.total}
                   </p>
                   <p className="text-sm text-gray-600">Tổng số bài</p>
                 </div>
@@ -200,7 +138,7 @@ const PhysicsClassDashboard = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-800">
-                    {currentGrade.chapters.reduce((sum, ch) => sum + ch.completed, 0)}
+                    {stats.completed}
                   </p>
                   <p className="text-sm text-gray-600">Đã hoàn thành</p>
                 </div>
@@ -214,7 +152,7 @@ const PhysicsClassDashboard = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-800">
-                    {currentGrade.chapters.reduce((sum, ch) => sum + (ch.total - ch.completed), 0)}
+                    {stats.total - stats.completed}
                   </p>
                   <p className="text-sm text-gray-600">Chưa học</p>
                 </div>
@@ -226,7 +164,12 @@ const PhysicsClassDashboard = () => {
         {/* Chapters */}
         <div className="space-y-6">
           {currentGrade.chapters.map((chapter) => {
-            const progress = chapter.total > 0 ? (chapter.completed / chapter.total) * 100 : 0;
+            const chapterCompleted = chapter.lessons.filter(lesson => {
+              const lessonKey = `${classId}-${chapter.id}-${lesson.id}`;
+              return userProgress[lessonKey] === 'completed';
+            }).length;
+            const chapterTotal = chapter.lessons.length;
+            const progress = chapterTotal > 0 ? (chapterCompleted / chapterTotal) * 100 : 0;
 
             return (
               <div key={chapter.id} className="bg-white rounded-2xl p-6 shadow-lg">
@@ -235,36 +178,52 @@ const PhysicsClassDashboard = () => {
                     {chapter.title}
                   </h2>
                   <span className="text-sm text-gray-600">
-                    {chapter.completed}/{chapter.total} bài
+                    {chapterCompleted}/{chapterTotal} bài
                   </span>
                 </div>
 
                 {/* Progress Bar */}
                 <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
                   <div
-                    className={`h-2 rounded-full bg-gradient-to-r ${currentGrade.color}`}
+                    className="h-2 rounded-full bg-gradient-to-r from-green-400 to-green-600"
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
 
                 {/* Lessons */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {chapter.lessons.map((lesson, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-all cursor-pointer border-2 border-transparent hover:border-green-300"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${currentGrade.color} flex items-center justify-center text-white font-bold`}>
-                          {idx + 1}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-800">{lesson}</p>
-                          <p className="text-xs text-gray-500">Chưa học</p>
+                  {chapter.lessons.map((lesson) => {
+                    const lessonKey = `${classId}-${chapter.id}-${lesson.id}`;
+                    const isCompleted = userProgress[lessonKey] === 'completed';
+
+                    return (
+                      <div
+                        key={lesson.id}
+                        onClick={() => handleLessonClick(chapter.id, lesson.id)}
+                        className={`rounded-xl p-4 transition-all cursor-pointer border-2 ${
+                          isCompleted
+                            ? 'bg-green-50 border-green-300 hover:border-green-400'
+                            : 'bg-gray-50 border-transparent hover:bg-gray-100 hover:border-green-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                            isCompleted
+                              ? 'bg-gradient-to-br from-green-400 to-green-600'
+                              : 'bg-gradient-to-br from-blue-400 to-blue-600'
+                          }`}>
+                            {isCompleted ? '✓' : lesson.id}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-800">{lesson.title}</p>
+                            <p className={`text-xs ${isCompleted ? 'text-green-600' : 'text-gray-500'}`}>
+                              {isCompleted ? 'Đã hoàn thành' : 'Chưa học'}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );

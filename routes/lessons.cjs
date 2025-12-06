@@ -97,18 +97,43 @@ router.get('/class/:classId/chapter/:chapterId', async (req, res) => {
 // Get specific lesson by classId, chapterId, lessonId
 router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, res) => {
   try {
+    const { classId, chapterId, lessonId } = req.params;
+    const subject = req.query.subject || 'chemistry'; // Default to chemistry for backward compatibility
+    
+    // Try to find lesson in MongoDB
     const lesson = await Lesson.findOne({ 
-      classId: parseInt(req.params.classId),
-      chapterId: parseInt(req.params.chapterId),
-      lessonId: parseInt(req.params.lessonId)
+      classId: parseInt(classId),
+      chapterId: parseInt(chapterId),
+      lessonId: parseInt(lessonId)
     });
     
-    if (!lesson) {
-      return res.status(404).json({ message: 'Lesson not found' });
+    if (lesson) {
+      return res.json(lesson);
     }
     
-    res.json(lesson);
+    // If not found in MongoDB, try to load from file system
+    console.log(`📂 Attempting to load lesson from file: ${subject}/class${classId}/lesson${lessonId}`);
+    
+    try {
+      let lessonData;
+      if (subject === 'physics') {
+        lessonData = require(`../areas/Vatly/class${classId}/lesson${lessonId}.cjs`);
+      } else {
+        lessonData = require(`../areas/Hoahoc/class${classId}/lesson${lessonId}.cjs`);
+      }
+      
+      if (lessonData) {
+        console.log('✅ Loaded lesson from file system');
+        return res.json(lessonData);
+      }
+    } catch (fileError) {
+      console.log('⚠️ Could not load from file system:', fileError.message);
+    }
+    
+    // If still not found, return 404
+    return res.status(404).json({ message: 'Lesson not found' });
   } catch (error) {
+    console.error('❌ Error fetching lesson:', error);
     res.status(500).json({ message: error.message });
   }
 });
