@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Zap, Trophy, Target, TrendingUp } from 'lucide-react';
 import './EnergyLab.css';
 
-const EnergyLab = () => {
+const EnergyLab = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }) => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
 
-  const [gameState, setGameState] = useState('menu'); // menu, playing, victory
+  const [gameState, setGameState] = useState(isPKMode ? 'playing' : 'menu'); // menu, playing, victory
   const [level, setLevel] = useState(1);
   const [score, setScore] = useState(0);
+  const [pkTimeLeft, setPkTimeLeft] = useState(pkTimeLimit || 90);
 
   // Physics simulation
   const [pendulum, setPendulum] = useState({
@@ -88,6 +89,25 @@ const EnergyLab = () => {
       }
     };
   }, [isSimulating, pendulum, gameState]);
+
+  // PK Mode timer
+  useEffect(() => {
+    if (!isPKMode || gameState === 'menu') return;
+    
+    if (pkTimeLeft > 0 && gameState !== 'victory') {
+      const timer = setTimeout(() => setPkTimeLeft(pkTimeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (pkTimeLeft === 0 || gameState === 'victory') {
+      if (onComplete) {
+        onComplete({
+          completed: true,
+          success: gameState === 'victory' || level > 1,
+          score: score,
+          accuracy: Math.round((level / levels.length) * 100)
+        });
+      }
+    }
+  }, [isPKMode, pkTimeLeft, gameState, score, level, onComplete]);
 
   const resetLevel = () => {
     setPendulum({

@@ -3,15 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Zap, TestTube, Lightbulb, Magnet, Thermometer } from 'lucide-react';
 import './ElectricChargeLab.css';
 
-const ElectricChargeLab = () => {
+const ElectricChargeLab = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }) => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
 
-  const [gameState, setGameState] = useState('tutorial');
+  const [gameState, setGameState] = useState(isPKMode ? 'playing' : 'tutorial');
   const [objects, setObjects] = useState([]);
   const [selectedObject, setSelectedObject] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [message, setMessage] = useState('Chọn một vật và cọ xát vào áo len!');
+  const [score, setScore] = useState(0);
+  const [pkTimeLeft, setPkTimeLeft] = useState(pkTimeLimit || 90);
   const animationFrameRef = useRef(null);
 
   const setupInitialObjects = () => {
@@ -52,6 +54,25 @@ const ElectricChargeLab = () => {
       };
     }
   }, [gameState]);
+
+  // PK Mode timer
+  useEffect(() => {
+    if (!isPKMode || gameState === 'tutorial') return;
+    
+    if (pkTimeLeft > 0) {
+      const timer = setTimeout(() => setPkTimeLeft(pkTimeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      if (onComplete) {
+        onComplete({
+          completed: true,
+          success: true,
+          score: score,
+          accuracy: 100
+        });
+      }
+    }
+  }, [isPKMode, pkTimeLeft, gameState, score, onComplete]);
 
   const drawObject = (ctx, obj) => {
     ctx.fillStyle = obj.color;

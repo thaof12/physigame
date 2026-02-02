@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Award, RotateCcw, HelpCircle, Lightbulb, Target } from 'lucide-react';
 import './LightReflectionGame.css';
 
-const LightReflectionGame = () => {
+const LightReflectionGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }) => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
-  const [gameState, setGameState] = useState('tutorial'); // tutorial, playing, success, gameover
+  const [gameState, setGameState] = useState(isPKMode ? 'playing' : 'tutorial'); // tutorial, playing, success, gameover
+  const [pkTimeLeft, setPkTimeLeft] = useState(pkTimeLimit || 60);
   const [currentChallenge, setCurrentChallenge] = useState(null);
   const [mirrorAngle, setMirrorAngle] = useState(45);
   const [lightRay, setLightRay] = useState(null);
@@ -96,6 +97,31 @@ const LightReflectionGame = () => {
     setCorrectReflections(0);
     setAttempts(3);
     loadChallenge(1);
+  };
+
+  // PK Mode Timer
+  useEffect(() => {
+    if (!isPKMode || gameState !== 'playing') return;
+    
+    if (pkTimeLeft <= 0) {
+      if (onComplete) onComplete({ score, completed: correctReflections });
+      return;
+    }
+    
+    const timer = setInterval(() => {
+      setPkTimeLeft(prev => prev - 1);
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [isPKMode, gameState, pkTimeLeft, score, correctReflections, onComplete]);
+
+  // Handle exit for PK mode
+  const handleExit = () => {
+    if (isPKMode && onExit) {
+      onExit();
+    } else {
+      navigate('/physics-games/grade/7');
+    }
   };
 
   const loadChallenge = (levelNum) => {
@@ -307,8 +333,10 @@ const LightReflectionGame = () => {
 
   const handleSuccess = () => {
     const points = 100 + (attempts * 50);
-    setScore(score + points);
-    setCorrectReflections(correctReflections + 1);
+    const newScore = score + points;
+    const newCorrectReflections = correctReflections + 1;
+    setScore(newScore);
+    setCorrectReflections(newCorrectReflections);
     
     setTimeout(() => {
       if (level < challenges.length) {
@@ -317,6 +345,9 @@ const LightReflectionGame = () => {
         setAttempts(3);
       } else {
         setGameState('success');
+        if (isPKMode && onComplete) {
+          onComplete({ score: newScore, completed: newCorrectReflections });
+        }
       }
     }, 1500);
   };
@@ -340,26 +371,28 @@ const LightReflectionGame = () => {
 
   return (
     <div className="light-reflection-game">
-      <div className="game-header">
-        <button onClick={() => navigate('/physics-games/grade/7')} className="back-button">
-          <ArrowLeft size={20} />
-          <span>Quay lại</span>
-        </button>
-        <div className="game-title">
-          <Lightbulb className="title-icon" />
-          <h1>Phản Xạ Ánh Sáng</h1>
-        </div>
-        <div className="game-stats">
-          <div className="stat-item">
-            <Award className="stat-icon" />
-            <span>{score} điểm</span>
+      {!isPKMode && (
+        <div className="game-header">
+          <button onClick={handleExit} className="back-button">
+            <ArrowLeft size={20} />
+            <span>Quay lại</span>
+          </button>
+          <div className="game-title">
+            <Lightbulb className="title-icon" />
+            <h1>Phản Xạ Ánh Sáng</h1>
           </div>
-          <div className="stat-item">
-            <Target className="stat-icon" />
-            <span>Cấp {level}</span>
+          <div className="game-stats">
+            <div className="stat-item">
+              <Award className="stat-icon" />
+              <span>{score} điểm</span>
+            </div>
+            <div className="stat-item">
+              <Target className="stat-icon" />
+              <span>Cấp {level}</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {gameState === 'tutorial' && (
         <div className="tutorial-overlay">

@@ -31,14 +31,31 @@ export const AuthProvider = ({ children }) => {
           // Optionally verify token is still valid by fetching fresh user data
           // This ensures data is up-to-date after reload
           try {
-            const userUid = userData.firebaseUid || userData.uid;
-            if (userUid) {
-              const response = await api.get(`/users/firebase/${userUid}`);
-              if (response.data) {
-                localStorage.setItem('user', JSON.stringify(response.data));
-                setUser(response.data);
-                console.log('✅ User data refreshed from server');
+            const userUid = userData.firebaseUid || userData.uid || userData.id;
+            console.log('🔍 User UID for refresh:', userUid);
+            
+            if (userUid && userUid !== 'undefined' && userUid !== 'null') {
+              // Try firebase endpoint first, fallback to profile endpoint
+              try {
+                const response = await api.get(`/users/firebase/${userUid}`);
+                if (response.data) {
+                  localStorage.setItem('user', JSON.stringify(response.data));
+                  setUser(response.data);
+                  console.log('✅ User data refreshed from server');
+                }
+              } catch (firebaseError) {
+                // If firebase endpoint fails, try profile endpoint with user ID
+                if (userData.id) {
+                  const profileResponse = await api.get(`/users/profile/${userData.id}`);
+                  if (profileResponse.data) {
+                    localStorage.setItem('user', JSON.stringify(profileResponse.data));
+                    setUser(profileResponse.data);
+                    console.log('✅ User data refreshed from profile endpoint');
+                  }
+                }
               }
+            } else {
+              console.warn('⚠️ No valid User ID found, skipping refresh');
             }
           } catch (refreshError) {
             console.warn('⚠️ Could not refresh user data, using cached data:', refreshError.message);
@@ -101,15 +118,34 @@ export const AuthProvider = ({ children }) => {
   const refreshUser = async () => {
     try {
       const currentUser = JSON.parse(localStorage.getItem('user'));
-      const userUid = currentUser?.firebaseUid || currentUser?.uid;
+      const userUid = currentUser?.firebaseUid || currentUser?.uid || currentUser?.id;
       
-      if (!userUid) return;
+      console.log('🔄 Refreshing user with UID:', userUid);
       
-      const response = await api.get(`/users/firebase/${userUid}`);
-      if (response.data) {
-        localStorage.setItem('user', JSON.stringify(response.data));
-        setUser(response.data);
-        console.log('✅ User data refreshed');
+      if (!userUid || userUid === 'undefined' || userUid === 'null') {
+        console.warn('⚠️ No valid UID for refresh');
+        return;
+      }
+      
+      // Try firebase endpoint first, fallback to profile
+      try {
+        const response = await api.get(`/users/firebase/${userUid}`);
+        if (response.data) {
+          localStorage.setItem('user', JSON.stringify(response.data));
+          setUser(response.data);
+          console.log('✅ User data refreshed');
+          return;
+        }
+      } catch (firebaseError) {
+        // Fallback to profile endpoint
+        if (currentUser?.id) {
+          const profileResponse = await api.get(`/users/profile/${currentUser.id}`);
+          if (profileResponse.data) {
+            localStorage.setItem('user', JSON.stringify(profileResponse.data));
+            setUser(profileResponse.data);
+            console.log('✅ User data refreshed from profile');
+          }
+        }
       }
     } catch (error) {
       console.error('Error refreshing user data:', error);

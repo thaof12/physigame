@@ -166,7 +166,8 @@ router.post('/login', async (req, res) => {
         displayName: user.displayName,
         xp: user.xp,
         level: user.level,
-        learningPrograms: user.learningPrograms
+        learningPrograms: user.learningPrograms,
+        firebaseUid: user.firebaseUid || user._id.toString()
       }
     });
   } catch (error) {
@@ -480,7 +481,20 @@ router.post('/enroll-program', async (req, res) => {
 // Get user by firebaseUid
 router.get('/firebase/:firebaseUid', async (req, res) => {
   try {
-    const user = await User.findOne({ firebaseUid: req.params.firebaseUid });
+    const { firebaseUid } = req.params;
+    
+    // Reject invalid firebaseUid values
+    if (!firebaseUid || firebaseUid === 'undefined' || firebaseUid === 'null') {
+      return res.status(400).json({ message: 'Invalid Firebase UID' });
+    }
+    
+    // Try to find by firebaseUid first, then by _id (MongoDB ObjectId)
+    let user = await User.findOne({ firebaseUid });
+    
+    // If not found by firebaseUid, try finding by _id (for email/password users)
+    if (!user && firebaseUid.match(/^[0-9a-fA-F]{24}$/)) {
+      user = await User.findById(firebaseUid);
+    }
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -496,7 +510,7 @@ router.get('/firebase/:firebaseUid', async (req, res) => {
       level: user.level,
       programs: user.programs,
       profile: user.profile,
-      firebaseUid: user.firebaseUid
+      firebaseUid: user.firebaseUid || user._id.toString()
     });
   } catch (error) {
     console.error('❌ Error fetching user by firebaseUid:', error);
@@ -517,13 +531,64 @@ router.get('/profile/:userId', async (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
+      displayName: user.displayName,
       xp: user.xp,
       level: user.level,
       programs: user.programs,
       profile: user.profile,
-      firebaseUid: user.firebaseUid
+      firebaseUid: user.firebaseUid,
+      createdAt: user.createdAt,
+      progress: user.progress,
+      pkStats: user.pkStats || { wins: 0, losses: 0, rating: 1000 },
+      recentActivity: user.recentActivity || []
     });
   } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Update user profile
+router.put('/profile/:userId', async (req, res) => {
+  try {
+    const { displayName, bio, school, grade } = req.body;
+    
+    const user = await User.findOne({ 
+      $or: [{ firebaseUid: req.params.userId }, { _id: req.params.userId }] 
+    });
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update displayName
+    if (displayName !== undefined) {
+      user.displayName = displayName;
+    }
+
+    // Update profile fields
+    if (!user.profile) {
+      user.profile = {};
+    }
+    
+    if (bio !== undefined) user.profile.bio = bio;
+    if (school !== undefined) user.profile.school = school;
+    if (grade !== undefined) user.profile.grade = grade;
+
+    await user.save();
+    
+    console.log('✅ Profile updated for user:', user.email);
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        displayName: user.displayName,
+        profile: user.profile
+      }
+    });
+  } catch (error) {
+    console.error('❌ Update profile error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });

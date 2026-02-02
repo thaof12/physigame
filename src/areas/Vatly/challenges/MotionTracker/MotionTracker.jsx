@@ -8,17 +8,18 @@ import './MotionTracker.css';
  * Physics: v = v0 + at, x = x0 + v0*t + 0.5*a*t²
  */
 
-const MotionTracker = () => {
+const MotionTracker = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }) => {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
 
-  const [gameState, setGameState] = useState('menu');
+  const [gameState, setGameState] = useState(isPKMode ? 'playing' : 'menu');
   const [selectedLevel, setSelectedLevel] = useState(1);
   
   // Game stats
   const [score, setScore] = useState(0);
   const [completedChallenges, setCompletedChallenges] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(180);
+  const [timeLeft, setTimeLeft] = useState(isPKMode ? (pkTimeLimit || 60) : 180);
+  const [pkTimeLeft, setPkTimeLeft] = useState(pkTimeLimit || 60);
 
   // Motion parameters
   const [motionType, setMotionType] = useState('uniform'); // uniform, accelerated
@@ -199,6 +200,9 @@ const MotionTracker = () => {
       setTimeLeft(prev => {
         if (prev <= 1) {
           setGameState('victory');
+          if (isPKMode && onComplete) {
+            onComplete({ score, completedChallenges });
+          }
           return 0;
         }
         return prev - 1;
@@ -206,7 +210,32 @@ const MotionTracker = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameState, timeLeft]);
+  }, [gameState, timeLeft, isPKMode, score, completedChallenges, onComplete]);
+
+  // PK Mode Timer
+  useEffect(() => {
+    if (!isPKMode || gameState !== 'playing') return;
+    
+    if (pkTimeLeft <= 0) {
+      if (onComplete) onComplete({ score, completedChallenges });
+      return;
+    }
+    
+    const timer = setInterval(() => {
+      setPkTimeLeft(prev => prev - 1);
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [isPKMode, gameState, pkTimeLeft, score, completedChallenges, onComplete]);
+
+  // Handle exit for PK mode
+  const handleExit = () => {
+    if (isPKMode && onExit) {
+      onExit();
+    } else {
+      window.history.back();
+    }
+  };
 
   // Canvas drawing
   useEffect(() => {
@@ -422,16 +451,18 @@ const MotionTracker = () => {
   if (gameState === 'menu') {
     return (
       <div className="motion-tracker">
-        <header className="game-header">
-          <button className="back-button" onClick={() => window.history.back()}>
-            <Home size={20} />
-            <span>Trang chủ</span>
-          </button>
-          <h1 className="game-title">
-            <TrendingUp className="title-icon" size={40} />
-            Motion Tracker
-          </h1>
-        </header>
+        {!isPKMode && (
+          <header className="game-header">
+            <button className="back-button" onClick={handleExit}>
+              <Home size={20} />
+              <span>Trang chủ</span>
+            </button>
+            <h1 className="game-title">
+              <TrendingUp className="title-icon" size={40} />
+              Motion Tracker
+            </h1>
+          </header>
+        )}
 
         <div className="menu-screen">
           <div className="menu-content">

@@ -3,17 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Volume2, Music, Trophy } from 'lucide-react';
 import './WaveFrequencyGame.css';
 
-const WaveFrequencyGame = () => {
+const WaveFrequencyGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }) => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   
-  const [gameState, setGameState] = useState('tutorial');
+  const [gameState, setGameState] = useState(isPKMode ? 'playing' : 'tutorial');
   const [currentLevel, setCurrentLevel] = useState(1);
   const [frequency, setFrequency] = useState(440);
   const [amplitude, setAmplitude] = useState(50);
   const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState(3);
   const [message, setMessage] = useState('');
+  const [pkTimeLeft, setPkTimeLeft] = useState(pkTimeLimit || 60);
 
   const levels = [
     {
@@ -251,6 +252,25 @@ const WaveFrequencyGame = () => {
     setMessage('');
   };
 
+  // PK Mode timer
+  useEffect(() => {
+    if (!isPKMode || gameState === 'tutorial') return;
+    
+    if (pkTimeLeft > 0 && gameState === 'playing') {
+      const timer = setTimeout(() => setPkTimeLeft(pkTimeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (pkTimeLeft === 0 || gameState === 'victory' || gameState === 'gameover') {
+      if (onComplete) {
+        onComplete({
+          completed: true,
+          success: gameState === 'victory',
+          score: score,
+          accuracy: Math.round((currentLevel / levels.length) * 100)
+        });
+      }
+    }
+  }, [isPKMode, pkTimeLeft, gameState, score, currentLevel, onComplete]);
+
   if (gameState === 'tutorial') {
     return (
       <div className="wave-frequency-game">
@@ -336,16 +356,18 @@ const WaveFrequencyGame = () => {
 
   return (
     <div className="wave-frequency-game">
-      <div className="game-header">
-        <button onClick={() => navigate('/physics-games/grade/7')} className="back-button">
-          <ArrowLeft size={20} />
-          Quay lại
-        </button>
-        <div className="game-info">
-          <span className="level-badge">Cấp {currentLevel}/{levels.length}</span>
-          <span className="score-display">⭐ {score}</span>
+      {!isPKMode && (
+        <div className="game-header">
+          <button onClick={() => navigate('/physics-games/grade/7')} className="back-button">
+            <ArrowLeft size={20} />
+            Quay lại
+          </button>
+          <div className="game-info">
+            <span className="level-badge">Cấp {currentLevel}/{levels.length}</span>
+            <span className="score-display">⭐ {score}</span>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="game-content">
         <div className="level-info">

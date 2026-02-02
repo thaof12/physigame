@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Droplets, Trophy, Target, Info } from 'lucide-react';
+import { ArrowLeft, Award, RotateCcw, Star, Target, Clock, Check, X, Waves, Anchor } from 'lucide-react';
 import './ArchimedesChallenge.css';
 
 const ArchimedesChallenge = () => {
@@ -8,85 +8,181 @@ const ArchimedesChallenge = () => {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
 
-  const [gameState, setGameState] = useState('menu'); // menu, playing, victory
+  const [showTutorial, setShowTutorial] = useState(true);
+  const [gameState, setGameState] = useState('playing');
   const [level, setLevel] = useState(1);
   const [score, setScore] = useState(0);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [feedback, setFeedback] = useState(null);
 
-  // Physics state
+  // Physics
   const [objects, setObjects] = useState([]);
   const [selectedObject, setSelectedObject] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [waterLevel, setWaterLevel] = useState(300);
-  const [targetCondition, setTargetCondition] = useState('');
-  const [feedback, setFeedback] = useState('');
+  const [levelComplete, setLevelComplete] = useState(false);
 
-  const WATER_DENSITY = 1000; // kg/m³
-  const GRAVITY = 9.81; // m/s²
-  const WATER_SURFACE_Y = 200;
+  const WATER_DENSITY = 1000;
+  const GRAVITY = 9.81;
+  const WATER_SURFACE_Y = 180;
+  const CONTAINER_LEFT = 50;
+  const CONTAINER_RIGHT = 550;
+  const CONTAINER_BOTTOM = 420;
 
   const levels = [
     {
       id: 1,
-      name: 'Nguyên Lý Cơ Bản',
-      description: 'Thả vật vào nước và quan sát lực đẩy Archimedes',
+      name: 'Vật Nổi',
+      description: 'Thả vật có mật độ < 1000 kg/m³ vào nước',
       objects: [
-        { id: 1, name: 'Khối Gỗ', mass: 0.5, volume: 0.001, density: 500, color: '#d97706', x: 100, y: 50 },
-        { id: 2, name: 'Khối Sắt', mass: 7.8, volume: 0.001, density: 7800, color: '#64748b', x: 200, y: 50 },
-        { id: 3, name: 'Khối Nhôm', mass: 2.7, volume: 0.001, density: 2700, color: '#94a3b8', x: 300, y: 50 }
+        { id: 1, name: 'Gỗ', emoji: '🪵', mass: 0.6, volume: 0.001, density: 600, color: '#d97706' },
+        { id: 2, name: 'Sắt', emoji: '🔩', mass: 7.8, volume: 0.001, density: 7800, color: '#64748b' },
+        { id: 3, name: 'Nhôm', emoji: '🥄', mass: 2.7, volume: 0.001, density: 2700, color: '#94a3b8' }
       ],
       target: 'float',
-      instruction: 'Tìm vật nổi trên mặt nước'
+      targetDensity: '<1000'
     },
     {
       id: 2,
       name: 'Vật Chìm',
-      description: 'Xác định vật nào sẽ chìm xuống đáy',
+      description: 'Thả vật có mật độ > 1000 kg/m³ vào nước',
       objects: [
-        { id: 1, name: 'Bi Nhựa', mass: 0.3, volume: 0.0005, density: 600, color: '#ef4444', x: 100, y: 50 },
-        { id: 2, name: 'Bi Thép', mass: 3.9, volume: 0.0005, density: 7800, color: '#475569', x: 200, y: 50 },
-        { id: 3, name: 'Bi Nhôm', mass: 1.35, volume: 0.0005, density: 2700, color: '#9ca3af', x: 300, y: 50 }
+        { id: 1, name: 'Nhựa', emoji: '🧴', mass: 0.7, volume: 0.001, density: 700, color: '#22c55e' },
+        { id: 2, name: 'Thép', emoji: '⚙️', mass: 7.9, volume: 0.001, density: 7900, color: '#475569' },
+        { id: 3, name: 'Bấc', emoji: '🧈', mass: 0.5, volume: 0.001, density: 500, color: '#fbbf24' }
       ],
       target: 'sink',
-      instruction: 'Tìm vật chìm xuống đáy'
+      targetDensity: '>1000'
     },
     {
       id: 3,
-      name: 'Vật Lơ Lửng',
-      description: 'Tìm vật có mật độ bằng nước (lơ lửng)',
+      name: 'Thử Thách Sắp Xếp',
+      description: 'Thả TẤT CẢ vật vào nước và quan sát',
       objects: [
-        { id: 1, name: 'Khối A', mass: 1.0, volume: 0.001, density: 1000, color: '#3b82f6', x: 100, y: 50 },
-        { id: 2, name: 'Khối B', mass: 0.8, volume: 0.001, density: 800, color: '#10b981', x: 200, y: 50 },
-        { id: 3, name: 'Khối C', mass: 1.5, volume: 0.001, density: 1500, color: '#8b5cf6', x: 300, y: 50 }
+        { id: 1, name: 'Gỗ', emoji: '🪵', mass: 0.5, volume: 0.001, density: 500, color: '#d97706' },
+        { id: 2, name: 'Nước Đá', emoji: '🧊', mass: 0.92, volume: 0.001, density: 920, color: '#60a5fa' },
+        { id: 3, name: 'Đá', emoji: '🪨', mass: 2.6, volume: 0.001, density: 2600, color: '#78716c' },
+        { id: 4, name: 'Kim Loại', emoji: '🔧', mass: 8.0, volume: 0.001, density: 8000, color: '#71717a' }
       ],
-      target: 'suspend',
-      instruction: 'Tìm vật lơ lửng trong nước'
+      target: 'all',
+      targetDensity: 'all'
     },
     {
       id: 4,
-      name: 'Thử Thách Cuối',
-      description: 'Sắp xếp các vật theo thứ tự chìm, lơ lửng, nổi',
+      name: 'Bậc Thầy Archimedes',
+      description: 'Dự đoán và thả đúng vật',
       objects: [
-        { id: 1, name: 'Gỗ', mass: 0.6, volume: 0.001, density: 600, color: '#d97706', x: 100, y: 50 },
-        { id: 2, name: 'Nước Đá', mass: 0.92, volume: 0.001, density: 920, color: '#60a5fa', x: 200, y: 50 },
-        { id: 3, name: 'Thủy Tinh', mass: 2.5, volume: 0.001, density: 2500, color: '#06b6d4', x: 300, y: 50 },
-        { id: 4, name: 'Nhựa', mass: 0.95, volume: 0.001, density: 950, color: '#22c55e', x: 400, y: 50 }
+        { id: 1, name: 'Cao Su', emoji: '🎈', mass: 1.1, volume: 0.001, density: 1100, color: '#f43f5e' },
+        { id: 2, name: 'Xốp', emoji: '📦', mass: 0.1, volume: 0.001, density: 100, color: '#fef08a' },
+        { id: 3, name: 'Thủy Tinh', emoji: '🔮', mass: 2.5, volume: 0.001, density: 2500, color: '#a5b4fc' },
+        { id: 4, name: 'Bóng', emoji: '⚽', mass: 0.4, volume: 0.001, density: 400, color: '#fb923c' }
       ],
-      target: 'all',
-      instruction: 'Thả tất cả vật vào nước'
+      target: 'float',
+      targetDensity: '<1000'
     }
   ];
 
   const currentLevel = levels[level - 1];
 
+  // Timer
   useEffect(() => {
-    if (gameState === 'playing') {
-      resetLevel();
+    let timer;
+    if (gameState === 'playing' && !showTutorial && !levelComplete) {
+      timer = setInterval(() => setTimeElapsed(t => t + 1), 1000);
     }
-  }, [gameState, level]);
+    return () => clearInterval(timer);
+  }, [gameState, showTutorial, levelComplete]);
+
+  // Initialize level
+  const initLevel = useCallback(() => {
+    const startX = 620;
+    const objs = currentLevel.objects.map((obj, i) => ({
+      ...obj,
+      x: startX,
+      y: 100 + i * 80,
+      vy: 0,
+      inWater: false,
+      settled: false
+    }));
+    setObjects(objs);
+    setSelectedObject(null);
+    setIsDragging(false);
+    setLevelComplete(false);
+    setTimeElapsed(0);
+  }, [currentLevel]);
 
   useEffect(() => {
-    if (gameState === 'playing') {
+    if (!showTutorial && gameState === 'playing') {
+      initLevel();
+    }
+  }, [showTutorial, level, initLevel, gameState]);
+
+  // Game loop
+  const gameLoop = useCallback(() => {
+    if (gameState !== 'playing' || showTutorial || levelComplete) return;
+
+    setObjects(prevObjects => {
+      const newObjects = prevObjects.map(obj => {
+        if (obj.settled || (isDragging && selectedObject === obj.id)) {
+          return obj;
+        }
+
+        // Only process if in container zone
+        if (obj.x < CONTAINER_LEFT || obj.x > CONTAINER_RIGHT) {
+          return obj;
+        }
+
+        let newY = obj.y;
+        let newVy = obj.vy;
+        const objectSize = 50;
+        const halfSize = objectSize / 2;
+
+        const inWater = obj.y + halfSize > WATER_SURFACE_Y && obj.y < CONTAINER_BOTTOM;
+
+        if (inWater) {
+          const weight = obj.mass * GRAVITY;
+          const buoyancy = WATER_DENSITY * obj.volume * GRAVITY;
+          const netForce = weight - buoyancy;
+          const acceleration = netForce / obj.mass;
+
+          newVy = (newVy + acceleration * 0.016) * 0.92;
+          newY += newVy;
+
+          // Settled check
+          if (Math.abs(newVy) < 0.15) {
+            if (obj.density < WATER_DENSITY) {
+              // Float
+              const submergedRatio = obj.density / WATER_DENSITY;
+              newY = WATER_SURFACE_Y + (objectSize * submergedRatio) - halfSize;
+            } else {
+              // Sink
+              newY = Math.min(newY, CONTAINER_BOTTOM - halfSize);
+            }
+            return { ...obj, y: newY, vy: 0, inWater: true, settled: true };
+          }
+
+          return { ...obj, y: newY, vy: newVy, inWater: true };
+        } else if (obj.y < WATER_SURFACE_Y && obj.x >= CONTAINER_LEFT && obj.x <= CONTAINER_RIGHT) {
+          // Falling into water
+          newVy += GRAVITY * 0.016 * 5;
+          newY += newVy;
+          return { ...obj, y: newY, vy: newVy, inWater: false };
+        }
+
+        return obj;
+      });
+
+      // Check victory
+      checkVictory(newObjects);
+
+      return newObjects;
+    });
+
+    animationRef.current = requestAnimationFrame(gameLoop);
+  }, [gameState, showTutorial, levelComplete, isDragging, selectedObject]);
+
+  useEffect(() => {
+    if (gameState === 'playing' && !showTutorial && !levelComplete) {
       animationRef.current = requestAnimationFrame(gameLoop);
     }
     return () => {
@@ -94,435 +190,466 @@ const ArchimedesChallenge = () => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [objects, gameState]);
-
-  const resetLevel = () => {
-    setObjects(currentLevel.objects.map(obj => ({
-      ...obj,
-      x: obj.x,
-      y: obj.y,
-      vy: 0,
-      inWater: false,
-      settled: false
-    })));
-    setSelectedObject(null);
-    setIsDragging(false);
-    setFeedback('');
-  };
-
-  const gameLoop = () => {
-    updatePhysics();
-    drawGame();
-    
-    if (gameState === 'playing') {
-      animationRef.current = requestAnimationFrame(gameLoop);
-    }
-  };
-
-  const updatePhysics = () => {
-    setObjects(prevObjects => {
-      const newObjects = prevObjects.map(obj => {
-        if (obj.settled || isDragging && selectedObject === obj.id) {
-          return obj;
-        }
-
-        let newY = obj.y;
-        let newVy = obj.vy;
-        const objectSize = Math.cbrt(obj.volume) * 100; // Convert to pixels
-
-        // Check if in water
-        const inWater = obj.y + objectSize / 2 > WATER_SURFACE_Y;
-
-        if (inWater) {
-          // Calculate forces
-          const weight = obj.mass * GRAVITY; // Weight force (down)
-          const buoyancy = WATER_DENSITY * obj.volume * GRAVITY; // Buoyancy force (up)
-          const netForce = weight - buoyancy;
-          
-          // Acceleration
-          const acceleration = netForce / obj.mass;
-          
-          // Apply water resistance
-          newVy = (newVy + acceleration * 0.016) * 0.95;
-
-          // Update position
-          newY += newVy;
-
-          // Check if settled
-          if (Math.abs(newVy) < 0.1) {
-            // Determine final position based on density
-            if (obj.density < WATER_DENSITY) {
-              // Float - partially submerged
-              const submergedRatio = obj.density / WATER_DENSITY;
-              newY = WATER_SURFACE_Y + (objectSize * submergedRatio) - objectSize / 2;
-            } else if (obj.density > WATER_DENSITY) {
-              // Sink - rest at bottom
-              newY = Math.min(newY, 550 - objectSize / 2);
-            } else {
-              // Suspend - stay in middle
-              newY = WATER_SURFACE_Y + 100;
-            }
-            
-            return { ...obj, y: newY, vy: 0, inWater: true, settled: true };
-          }
-
-          return { ...obj, y: newY, vy: newVy, inWater: true };
-        } else {
-          // In air - fall
-          newVy += GRAVITY * 0.016;
-          newY += newVy;
-          return { ...obj, y: newY, vy: newVy, inWater: false };
-        }
-      });
-
-      // Check victory condition
-      checkVictory(newObjects);
-
-      return newObjects;
-    });
-  };
+  }, [gameState, showTutorial, levelComplete, gameLoop]);
 
   const checkVictory = (currentObjects) => {
-    const settledCount = currentObjects.filter(obj => obj.settled).length;
-    
-    if (settledCount === currentLevel.objects.length) {
-      const floatingObjects = currentObjects.filter(obj => obj.density < WATER_DENSITY);
-      const sinkingObjects = currentObjects.filter(obj => obj.density > WATER_DENSITY);
-      const suspendingObjects = currentObjects.filter(obj => obj.density === WATER_DENSITY);
+    const inWaterObjects = currentObjects.filter(obj => 
+      obj.settled && obj.x >= CONTAINER_LEFT && obj.x <= CONTAINER_RIGHT
+    );
 
-      let success = false;
-      let message = '';
+    if (inWaterObjects.length === 0) return;
 
-      if (currentLevel.target === 'float' && floatingObjects.length > 0) {
+    let success = false;
+    let message = '';
+
+    if (currentLevel.target === 'float') {
+      const floatingObj = inWaterObjects.find(obj => obj.density < WATER_DENSITY);
+      if (floatingObj) {
         success = true;
-        message = `✓ Đúng! ${floatingObjects[0].name} có mật độ < 1000 kg/m³ nên nổi`;
-      } else if (currentLevel.target === 'sink' && sinkingObjects.length > 0) {
-        success = true;
-        message = `✓ Đúng! ${sinkingObjects[0].name} có mật độ > 1000 kg/m³ nên chìm`;
-      } else if (currentLevel.target === 'suspend' && suspendingObjects.length > 0) {
-        success = true;
-        message = `✓ Đúng! ${suspendingObjects[0].name} có mật độ = 1000 kg/m³ nên lơ lửng`;
-      } else if (currentLevel.target === 'all') {
-        success = true;
-        message = `✓ Hoàn thành! ${floatingObjects.length} nổi, ${suspendingObjects.length} lơ lửng, ${sinkingObjects.length} chìm`;
+        message = `${floatingObj.emoji} ${floatingObj.name} nổi! (ρ=${floatingObj.density} < 1000)`;
       }
-
-      if (success) {
-        setFeedback(message);
-        setTimeout(() => {
-          if (level < levels.length) {
-            setLevel(l => l + 1);
-            setScore(s => s + 250);
-            setGameState('playing');
-          } else {
-            setScore(s => s + 250);
-            setGameState('victory');
-          }
-        }, 2500);
+    } else if (currentLevel.target === 'sink') {
+      const sinkingObj = inWaterObjects.find(obj => obj.density > WATER_DENSITY);
+      if (sinkingObj) {
+        success = true;
+        message = `${sinkingObj.emoji} ${sinkingObj.name} chìm! (ρ=${sinkingObj.density} > 1000)`;
       }
+    } else if (currentLevel.target === 'all') {
+      if (inWaterObjects.length === currentLevel.objects.length) {
+        success = true;
+        const floating = inWaterObjects.filter(o => o.density < WATER_DENSITY).length;
+        const sinking = inWaterObjects.filter(o => o.density > WATER_DENSITY).length;
+        message = `Hoàn thành! ${floating} nổi, ${sinking} chìm`;
+      }
+    }
+
+    if (success && !levelComplete) {
+      setLevelComplete(true);
+      const points = Math.max(50, 200 - timeElapsed * 2);
+      setScore(s => s + points);
+      setFeedback({ type: 'success', message: `+${points} điểm! ${message}` });
+
+      setTimeout(() => {
+        setFeedback(null);
+        if (level < levels.length) {
+          setLevel(l => l + 1);
+        } else {
+          setGameState('victory');
+        }
+      }, 2000);
     }
   };
 
-  const drawGame = () => {
+  // Draw
+  const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
 
-    // Clear
-    ctx.fillStyle = '#f0f9ff';
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    // Background
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+    bgGrad.addColorStop(0, '#0c4a6e');
+    bgGrad.addColorStop(1, '#0f172a');
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Draw container
-    ctx.strokeStyle = '#1e293b';
+    // Container
+    ctx.strokeStyle = '#64748b';
     ctx.lineWidth = 4;
-    ctx.strokeRect(50, WATER_SURFACE_Y, 700, 360);
-
-    // Draw water
-    const gradient = ctx.createLinearGradient(0, WATER_SURFACE_Y, 0, 560);
-    gradient.addColorStop(0, '#3b82f680');
-    gradient.addColorStop(1, '#1e40af80');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(50, WATER_SURFACE_Y, 700, 360);
-
-    // Water surface line
-    ctx.strokeStyle = '#0ea5e9';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([15, 10]);
     ctx.beginPath();
-    ctx.moveTo(50, WATER_SURFACE_Y);
-    ctx.lineTo(750, WATER_SURFACE_Y);
+    ctx.moveTo(CONTAINER_LEFT, WATER_SURFACE_Y - 50);
+    ctx.lineTo(CONTAINER_LEFT, CONTAINER_BOTTOM);
+    ctx.lineTo(CONTAINER_RIGHT, CONTAINER_BOTTOM);
+    ctx.lineTo(CONTAINER_RIGHT, WATER_SURFACE_Y - 50);
+    ctx.stroke();
+
+    // Water
+    const waterGrad = ctx.createLinearGradient(0, WATER_SURFACE_Y, 0, CONTAINER_BOTTOM);
+    waterGrad.addColorStop(0, 'rgba(59, 130, 246, 0.6)');
+    waterGrad.addColorStop(1, 'rgba(30, 64, 175, 0.8)');
+    ctx.fillStyle = waterGrad;
+    ctx.fillRect(CONTAINER_LEFT + 2, WATER_SURFACE_Y, CONTAINER_RIGHT - CONTAINER_LEFT - 4, CONTAINER_BOTTOM - WATER_SURFACE_Y - 2);
+
+    // Water surface
+    ctx.strokeStyle = '#60a5fa';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([10, 5]);
+    ctx.beginPath();
+    ctx.moveTo(CONTAINER_LEFT, WATER_SURFACE_Y);
+    ctx.lineTo(CONTAINER_RIGHT, WATER_SURFACE_Y);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Draw water level markers
-    for (let i = 0; i <= 3; i++) {
-      const y = WATER_SURFACE_Y + i * 90;
-      ctx.strokeStyle = '#ffffff40';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(50, y);
-      ctx.lineTo(750, y);
-      ctx.stroke();
-    }
+    // Surface label
+    ctx.fillStyle = '#60a5fa';
+    ctx.font = 'bold 12px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText('Mặt nước', CONTAINER_LEFT + 10, WATER_SURFACE_Y - 10);
 
-    // Draw objects
+    // Objects
     objects.forEach(obj => {
-      const size = Math.cbrt(obj.volume) * 100;
+      const size = 50;
+      const halfSize = size / 2;
       const x = obj.x;
       const y = obj.y;
 
-      // Shadow
-      if (!obj.inWater) {
-        ctx.fillStyle = '#00000020';
-        ctx.fillRect(x - size / 2 + 5, y + size / 2 + 5, size, 8);
-      }
-
-      // Object body
+      // Object background
       ctx.fillStyle = obj.color;
-      ctx.fillRect(x - size / 2, y - size / 2, size, size);
-      
-      ctx.strokeStyle = '#00000040';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x - size / 2, y - size / 2, size, size);
+      ctx.beginPath();
+      ctx.roundRect(x - halfSize, y - halfSize, size, size, 8);
+      ctx.fill();
 
-      // Highlight if dragging
-      if (isDragging && selectedObject === obj.id) {
-        ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(x - size / 2 - 3, y - size / 2 - 3, size + 6, size + 6);
-      }
+      // Border
+      ctx.strokeStyle = isDragging && selectedObject === obj.id ? '#fbbf24' : 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = isDragging && selectedObject === obj.id ? 3 : 2;
+      ctx.stroke();
 
-      // Label
-      ctx.fillStyle = '#1e293b';
-      ctx.font = 'bold 12px Arial';
+      // Emoji
+      ctx.font = '24px system-ui';
       ctx.textAlign = 'center';
-      ctx.fillText(obj.name, x, y);
-      ctx.font = '10px Arial';
-      ctx.fillText(`ρ=${obj.density}`, x, y + 12);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(obj.emoji, x, y - 2);
 
-      // Force arrows when in water
-      if (obj.inWater && obj.settled) {
+      // Density label
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 10px system-ui';
+      ctx.fillText(`ρ=${obj.density}`, x, y + 20);
+
+      // Force arrows when settled in water
+      if (obj.settled && obj.inWater) {
         const weight = obj.mass * GRAVITY;
         const buoyancy = WATER_DENSITY * obj.volume * GRAVITY;
 
-        // Weight arrow (down) - red
-        const weightLength = weight * 5;
+        // Weight (down)
         ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + weightLength);
+        ctx.moveTo(x - 15, y);
+        ctx.lineTo(x - 15, y + 30);
         ctx.stroke();
-        
-        // Arrow head
         ctx.fillStyle = '#ef4444';
         ctx.beginPath();
-        ctx.moveTo(x, y + weightLength);
-        ctx.lineTo(x - 5, y + weightLength - 8);
-        ctx.lineTo(x + 5, y + weightLength - 8);
+        ctx.moveTo(x - 15, y + 30);
+        ctx.lineTo(x - 19, y + 24);
+        ctx.lineTo(x - 11, y + 24);
         ctx.closePath();
         ctx.fill();
 
-        // Buoyancy arrow (up) - blue
-        const buoyancyLength = buoyancy * 5;
-        ctx.strokeStyle = '#3b82f6';
-        ctx.lineWidth = 3;
+        // Buoyancy (up)
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y - buoyancyLength);
+        ctx.moveTo(x + 15, y);
+        ctx.lineTo(x + 15, y - 30);
         ctx.stroke();
-
-        // Arrow head
-        ctx.fillStyle = '#3b82f6';
+        ctx.fillStyle = '#22c55e';
         ctx.beginPath();
-        ctx.moveTo(x, y - buoyancyLength);
-        ctx.lineTo(x - 5, y - buoyancyLength + 8);
-        ctx.lineTo(x + 5, y - buoyancyLength + 8);
+        ctx.moveTo(x + 15, y - 30);
+        ctx.lineTo(x + 11, y - 24);
+        ctx.lineTo(x + 19, y - 24);
         ctx.closePath();
         ctx.fill();
-
-        // Force labels
-        ctx.fillStyle = '#ef4444';
-        ctx.font = '11px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(`P=${weight.toFixed(1)}N`, x + 8, y + weightLength / 2);
-        
-        ctx.fillStyle = '#3b82f6';
-        ctx.fillText(`FA=${buoyancy.toFixed(1)}N`, x + 8, y - buoyancyLength / 2);
       }
     });
 
-    // Draw formula
-    ctx.fillStyle = '#1e293b';
-    ctx.font = 'bold 16px Arial';
+    // Formula panel
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(10, 10, 200, 80, 10);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(96, 165, 250, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = '#60a5fa';
+    ctx.font = 'bold 14px system-ui';
     ctx.textAlign = 'left';
-    ctx.fillText('Công thức: FA = ρ × V × g', 60, 30);
-    ctx.font = '14px Arial';
-    ctx.fillText('ρnước = 1000 kg/m³', 60, 55);
-    ctx.fillText('Nổi: ρvật < ρnước | Chìm: ρvật > ρnước | Lơ lửng: ρvật = ρnước', 60, 80);
+    ctx.fillText('Lực đẩy Archimedes', 20, 32);
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = '16px monospace';
+    ctx.fillText('FA = ρ × V × g', 20, 55);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '11px system-ui';
+    ctx.fillText('ρ nước = 1000 kg/m³', 20, 78);
 
-    // Draw instruction
-    ctx.font = 'bold 16px Arial';
+    // Objects area label
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '12px system-ui';
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#0ea5e9';
-    ctx.fillText(currentLevel.instruction, width / 2, 130);
-  };
+    ctx.fillText('Kéo vật vào nước →', 640, 60);
 
-  const handleMouseDown = (e) => {
+    ctx.restore();
+  }, [objects, isDragging, selectedObject]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+  }, []);
 
-    // Check if clicked on object
-    const clickedObject = objects.find(obj => {
-      const size = Math.cbrt(obj.volume) * 100;
+  useEffect(() => {
+    if (!showTutorial && gameState === 'playing') {
+      drawCanvas();
+    }
+  }, [objects, showTutorial, gameState, drawCanvas]);
+
+  // Handlers
+  const getEventPos = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  };
+
+  const handleStart = (e) => {
+    if (gameState !== 'playing' || levelComplete) return;
+    e.preventDefault();
+    const pos = getEventPos(e);
+
+    const clickedObj = objects.find(obj => {
+      const size = 50;
       return (
-        x >= obj.x - size / 2 &&
-        x <= obj.x + size / 2 &&
-        y >= obj.y - size / 2 &&
-        y <= obj.y + size / 2
+        pos.x >= obj.x - size / 2 &&
+        pos.x <= obj.x + size / 2 &&
+        pos.y >= obj.y - size / 2 &&
+        pos.y <= obj.y + size / 2
       );
     });
 
-    if (clickedObject) {
-      setSelectedObject(clickedObject.id);
+    if (clickedObj) {
+      setSelectedObject(clickedObj.id);
       setIsDragging(true);
-      setDragOffset({ x: x - clickedObject.x, y: y - clickedObject.y });
+      setDragOffset({ x: pos.x - clickedObj.x, y: pos.y - clickedObj.y });
     }
   };
 
-  const handleMouseMove = (e) => {
+  const handleMove = (e) => {
     if (!isDragging) return;
+    e.preventDefault();
+    const pos = getEventPos(e);
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    setObjects(prevObjects =>
-      prevObjects.map(obj =>
+    setObjects(prev =>
+      prev.map(obj =>
         obj.id === selectedObject
-          ? { ...obj, x: x - dragOffset.x, y: y - dragOffset.y, vy: 0, settled: false }
+          ? { ...obj, x: pos.x - dragOffset.x, y: pos.y - dragOffset.y, vy: 0, settled: false, inWater: false }
           : obj
       )
     );
+    drawCanvas();
   };
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
     setIsDragging(false);
     setSelectedObject(null);
   };
 
-  return (
-    <div className="archimedes-challenge">
-      <button onClick={() => navigate(-1)} className="back-button">
-        <ArrowLeft size={20} />
-        Quay lại
-      </button>
+  const restartGame = () => {
+    setLevel(1);
+    setScore(0);
+    setTimeElapsed(0);
+    setGameState('playing');
+    initLevel();
+  };
 
-      <div className="game-header">
-        <h1>🛟 Thử Thách Archimedes</h1>
-        <div className="game-info">
-          <span className="level-badge">Cấp {level}</span>
-          <span className="score-badge">
-            <Target size={16} />
-            {score} điểm
-          </span>
-        </div>
-      </div>
+  const getBadge = () => {
+    if (score >= 600) return { name: 'Bậc Thầy Archimedes', class: 'gold' };
+    if (score >= 400) return { name: 'Nhà Vật Lý Học', class: 'silver' };
+    return { name: 'Nhà Thí Nghiệm', class: 'bronze' };
+  };
 
-      {gameState === 'menu' && (
-        <div className="menu-screen">
-          <div className="intro-card">
-            <h2>{currentLevel.name}</h2>
-            <p className="level-desc">{currentLevel.description}</p>
+  // Tutorial
+  if (showTutorial) {
+    return (
+      <div className="archimedes-challenge">
+        <div className="ac-tutorial-overlay">
+          <div className="ac-tutorial-card">
+            <div className="ac-tutorial-icon">
+              <Waves size={40} />
+            </div>
+            <h2>Thử Thách Archimedes</h2>
+            <p className="ac-tutorial-subtitle">Khám phá lực đẩy Archimedes!</p>
 
-            <div className="theory-box">
-              <h3>
-                <Info size={20} />
-                Nguyên lý Archimedes
-              </h3>
-              <div className="theory-content">
-                <p>
-                  <strong>Lực đẩy Archimedes:</strong> Một vật nhúng trong chất lỏng sẽ chịu một lực đẩy hướng lên có độ lớn bằng trọng lượng của phần chất lỏng bị vật chiếm chỗ.
-                </p>
-                <div className="formula-box">
-                  <strong>Công thức:</strong> F<sub>A</sub> = ρ × V × g
+            <div className="ac-tutorial-steps">
+              <div className="ac-tutorial-step">
+                <span className="ac-step-icon">👆</span>
+                <div className="ac-step-content">
+                  <strong>Kéo & Thả</strong>
+                  <span>Kéo vật vào bể nước</span>
                 </div>
-                <ul className="theory-list">
-                  <li><strong>Vật nổi:</strong> ρ<sub>vật</sub> &lt; ρ<sub>nước</sub> → F<sub>A</sub> &gt; P</li>
-                  <li><strong>Vật chìm:</strong> ρ<sub>vật</sub> &gt; ρ<sub>nước</sub> → F<sub>A</sub> &lt; P</li>
-                  <li><strong>Vật lơ lửng:</strong> ρ<sub>vật</sub> = ρ<sub>nước</sub> → F<sub>A</sub> = P</li>
-                </ul>
+              </div>
+              <div className="ac-tutorial-step">
+                <span className="ac-step-icon">🔬</span>
+                <div className="ac-step-content">
+                  <strong>Quan sát</strong>
+                  <span>Xem vật nổi hay chìm</span>
+                </div>
+              </div>
+              <div className="ac-tutorial-step">
+                <span className="ac-step-icon">📐</span>
+                <div className="ac-step-content">
+                  <strong>Công thức</strong>
+                  <span>FA = ρ × V × g</span>
+                </div>
+              </div>
+              <div className="ac-tutorial-step">
+                <span className="ac-step-icon">💡</span>
+                <div className="ac-step-content">
+                  <strong>Quy tắc</strong>
+                  <span>ρ vật {'<'} ρ nước → Nổi | ρ vật {'>'} ρ nước → Chìm</span>
+                </div>
               </div>
             </div>
 
-            <button className="start-button" onClick={() => setGameState('playing')}>
-              <Droplets size={20} />
-              Bắt đầu thí nghiệm
+            <button className="ac-start-btn" onClick={() => setShowTutorial(false)}>
+              <Anchor size={20} />
+              Bắt Đầu Thí Nghiệm
             </button>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {gameState === 'playing' && (
-        <div className="playing-screen">
-          <div className="instruction-panel">
-            <p>👆 Kéo và thả vật vào nước để xem chúng nổi, chìm hay lơ lửng</p>
+  // Victory
+  if (gameState === 'victory') {
+    const badge = getBadge();
+    return (
+      <div className="archimedes-challenge">
+        <div className="ac-game-over">
+          <Award size={80} className="ac-trophy" />
+          <h2>🎉 Xuất Sắc!</h2>
+
+          <div className="ac-final-stats">
+            <div className="ac-final-stat">
+              <div className="ac-final-stat-icon gold"><Star size={24} /></div>
+              <div className="ac-final-stat-value">{score}</div>
+              <div className="ac-final-stat-label">Tổng điểm</div>
+            </div>
+            <div className="ac-final-stat">
+              <div className="ac-final-stat-icon green"><Target size={24} /></div>
+              <div className="ac-final-stat-value">{levels.length}</div>
+              <div className="ac-final-stat-label">Cấp hoàn thành</div>
+            </div>
+            <div className="ac-final-stat">
+              <div className="ac-final-stat-icon blue"><Clock size={24} /></div>
+              <div className="ac-final-stat-value">{Math.floor(timeElapsed / 60)}:{(timeElapsed % 60).toString().padStart(2, '0')}</div>
+              <div className="ac-final-stat-label">Thời gian</div>
+            </div>
           </div>
 
+          <div className="ac-achievement">
+            <span className={`ac-badge ${badge.class}`}>🏆 {badge.name}</span>
+          </div>
+
+          <div className="ac-actions">
+            <button className="ac-restart-btn" onClick={restartGame}>
+              <RotateCcw size={18} />
+              Chơi Lại
+            </button>
+            <button className="ac-menu-btn" onClick={() => navigate(-1)}>
+              <ArrowLeft size={18} />
+              Thoát
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="archimedes-challenge">
+      {/* Header */}
+      <header className="ac-header">
+        <button className="ac-back-btn" onClick={() => navigate(-1)}>
+          <ArrowLeft size={20} />
+          <span>Thoát</span>
+        </button>
+        <div className="ac-title">
+          <h1>🌊 Thử Thách Archimedes</h1>
+        </div>
+        <div className="ac-level-badge">Cấp {level}/{levels.length}</div>
+      </header>
+
+      <main className="ac-main">
+        {/* Stats */}
+        <div className="ac-stats-bar">
+          <div className="ac-stat">
+            <Star size={20} className="ac-stat-icon gold" />
+            <div className="ac-stat-info">
+              <span className="ac-stat-label">Điểm</span>
+              <span className="ac-stat-value">{score}</span>
+            </div>
+          </div>
+          <div className="ac-stat">
+            <Clock size={20} className="ac-stat-icon blue" />
+            <div className="ac-stat-info">
+              <span className="ac-stat-label">Thời gian</span>
+              <span className="ac-stat-value">{Math.floor(timeElapsed / 60)}:{(timeElapsed % 60).toString().padStart(2, '0')}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress */}
+        <div className="ac-progress-container">
+          <div className="ac-progress-bar">
+            <div className="ac-progress-fill" style={{ width: `${(level / levels.length) * 100}%` }} />
+          </div>
+        </div>
+
+        {/* Level Info */}
+        <div className="ac-level-panel">
+          <h3>{currentLevel.name}</h3>
+          <p>{currentLevel.description}</p>
+          <div className="ac-target-badge">
+            Mục tiêu: {currentLevel.target === 'float' ? '🔺 Tìm vật NỔI' : currentLevel.target === 'sink' ? '🔻 Tìm vật CHÌM' : '🎯 Thả TẤT CẢ vật'}
+          </div>
+        </div>
+
+        {/* Canvas */}
+        <div className="ac-canvas-container">
           <canvas
             ref={canvasRef}
-            width={800}
-            height={600}
-            className="game-canvas"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
+            className="ac-canvas"
+            style={{ width: 700, height: 480 }}
+            onMouseDown={handleStart}
+            onMouseMove={handleMove}
+            onMouseUp={handleEnd}
+            onMouseLeave={handleEnd}
+            onTouchStart={handleStart}
+            onTouchMove={handleMove}
+            onTouchEnd={handleEnd}
           />
-
-          {feedback && (
-            <div className="feedback-panel success">
-              {feedback}
-            </div>
-          )}
         </div>
-      )}
 
-      {gameState === 'victory' && (
-        <div className="victory-screen">
-          <Trophy size={80} className="trophy-icon" />
-          <h2>🎉 Hoàn thành xuất sắc!</h2>
-          <p>Bạn đã hiểu rõ nguyên lý Archimedes!</p>
-          <div className="victory-stats">
-            <div className="stat-item">
-              <strong>Tổng điểm:</strong>
-              <span>{score}</span>
+        {/* Feedback */}
+        {feedback && (
+          <div className={`ac-feedback ${feedback.type}`}>
+            <div className="ac-feedback-icon">
+              {feedback.type === 'success' ? <Check size={24} /> : <X size={24} />}
             </div>
-            <div className="stat-item">
-              <strong>Cấp độ hoàn thành:</strong>
-              <span>{levels.length}</span>
-            </div>
+            <span className="ac-feedback-message">{feedback.message}</span>
           </div>
-          <div className="victory-actions">
-            <button onClick={() => { setLevel(1); setScore(0); setGameState('menu'); }}>
-              Chơi lại
-            </button>
-            <button onClick={() => navigate(-1)}>
-              Về trang chủ
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+
+        {/* Reset */}
+        <button className="ac-reset-btn" onClick={initLevel}>
+          <RotateCcw size={16} />
+          Đặt lại
+        </button>
+      </main>
     </div>
   );
 };

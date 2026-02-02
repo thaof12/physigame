@@ -3,15 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, Pause, RotateCcw, Trophy, Timer } from 'lucide-react';
 import './RaceTracker.css';
 
-const RaceTracker = () => {
+const RaceTracker = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }) => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
 
-  const [gameState, setGameState] = useState('menu'); // menu, racing, victory
+  const [gameState, setGameState] = useState(isPKMode ? 'racing' : 'menu'); // menu, racing, victory
   const [level, setLevel] = useState(1);
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [score, setScore] = useState(0);
+  const [pkTimeLeft, setPkTimeLeft] = useState(pkTimeLimit || 60);
   
   // Racing data
   const [cars, setCars] = useState([
@@ -100,6 +102,25 @@ const RaceTracker = () => {
       }
     };
   }, [isRunning, cars, gameState]);
+
+  // PK Mode timer
+  useEffect(() => {
+    if (!isPKMode || gameState === 'menu') return;
+    
+    if (pkTimeLeft > 0 && gameState !== 'victory') {
+      const timer = setTimeout(() => setPkTimeLeft(pkTimeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (pkTimeLeft === 0 || gameState === 'victory') {
+      if (onComplete) {
+        onComplete({
+          completed: true,
+          success: gameState === 'victory',
+          score: score,
+          accuracy: Math.round((level / levels.length) * 100)
+        });
+      }
+    }
+  }, [isPKMode, pkTimeLeft, gameState, score, level, onComplete]);
 
   const updatePositions = () => {
     if (!isRunning) return;

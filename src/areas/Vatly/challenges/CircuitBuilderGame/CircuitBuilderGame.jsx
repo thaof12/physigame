@@ -11,16 +11,18 @@ const components = {
   switch: { type: 'switch', label: 'Công Tắc', isOpen: true },
 };
 
-const CircuitBuilderGame = () => {
+const CircuitBuilderGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }) => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
 
-  const [gameState, setGameState] = useState('tutorial');
+  const [gameState, setGameState] = useState(isPKMode ? 'playing' : 'tutorial');
   const [nodes, setNodes] = useState([]);
   const [elements, setElements] = useState([]);
   const [selectedComponent, setSelectedComponent] = useState('wire');
   const [startNode, setStartNode] = useState(null);
   const [circuitInfo, setCircuitInfo] = useState(null);
+  const [pkTimeLeft, setPkTimeLeft] = useState(pkTimeLimit || 90);
+  const [score, setScore] = useState(0);
 
   const gridSize = 40;
 
@@ -41,6 +43,49 @@ const CircuitBuilderGame = () => {
       analyzeCircuit();
     }
   }, [elements]);
+
+  // PK mode timer
+  useEffect(() => {
+    if (isPKMode && gameState === 'playing' && pkTimeLeft > 0) {
+      const timer = setTimeout(() => setPkTimeLeft(t => t - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (isPKMode && pkTimeLeft === 0 && gameState === 'playing') {
+      // Time's up in PK mode
+      if (onComplete) {
+        onComplete({
+          completed: circuitInfo?.isComplete || false,
+          score: score,
+          circuitWorking: circuitInfo?.isComplete || false
+        });
+      }
+    }
+  }, [isPKMode, pkTimeLeft, gameState, onComplete, score, circuitInfo]);
+
+  // Handle exit
+  const handleExit = () => {
+    if (isPKMode && onExit) {
+      onExit();
+    } else {
+      navigate(-1);
+    }
+  };
+
+  // PK mode circuit complete handler
+  useEffect(() => {
+    if (isPKMode && circuitInfo?.isComplete) {
+      const newScore = 100 + Math.floor(pkTimeLeft * 2);
+      setScore(newScore);
+      setTimeout(() => {
+        if (onComplete) {
+          onComplete({
+            completed: true,
+            score: newScore,
+            circuitWorking: true
+          });
+        }
+      }, 1500);
+    }
+  }, [circuitInfo, isPKMode, pkTimeLeft, onComplete]);
 
   const initializeGrid = () => {
     const canvas = canvasRef.current;
@@ -290,16 +335,28 @@ const CircuitBuilderGame = () => {
 
   return (
     <div className="circuit-builder-game">
-      {gameState === 'tutorial' && renderTutorial()}
-      <div className="cb-header">
-        <button onClick={() => navigate('/physics-games/grade/7')} className="cb-back-button">
-          <ArrowLeft size={20} /> Quay lại
-        </button>
-        <h1>Xây Dựng Mạch Điện</h1>
-        <button onClick={resetCircuit} className="cb-reset-button">
-          Làm Mới
-        </button>
-      </div>
+      {gameState === 'tutorial' && !isPKMode && renderTutorial()}
+      
+      {/* Header - conditional for PK mode */}
+      {!isPKMode ? (
+        <div className="cb-header">
+          <button onClick={handleExit} className="cb-back-button">
+            <ArrowLeft size={20} /> Quay lại
+          </button>
+          <h1>Xây Dựng Mạch Điện</h1>
+          <button onClick={resetCircuit} className="cb-reset-button">
+            Làm Mới
+          </button>
+        </div>
+      ) : (
+        <div className="cb-header pk-mode">
+          <div className="pk-timer" style={{ color: pkTimeLeft < 15 ? '#ef4444' : 'white' }}>
+            ⏱️ {pkTimeLeft}s
+          </div>
+          <h1>Xây Dựng Mạch Điện</h1>
+          <div className="pk-score">⭐ {score}</div>
+        </div>
+      )}
       <div className="cb-main-layout">
         <div className="cb-toolbar">
           <h3>Linh Kiện</h3>

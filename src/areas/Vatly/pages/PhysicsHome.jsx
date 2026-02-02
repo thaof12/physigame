@@ -2,8 +2,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../../components/ui/Button';
 import { useEffect, useState } from 'react';
-import { BookOpen, Trophy, Target, Clock, Star, Flame, Zap, Award, TrendingUp, Play, LogOut, ChevronDown } from 'lucide-react';
+import { BookOpen, Trophy, Target, Clock, Star, Flame, Zap, Award, TrendingUp, Play, LogOut, ChevronDown, Swords, Calculator, FlaskConical } from 'lucide-react';
 import api from '../../../config/api';
+import QuestModal from '../../../components/Quest/QuestModal';
+import Leaderboard from '../../../components/Leaderboard/Leaderboard';
 
 const PhysicsHome = () => {
   const { user, logout } = useAuth();
@@ -13,6 +15,8 @@ const PhysicsHome = () => {
   const [grades, setGrades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [computedStats, setComputedStats] = useState(null);
+  const [showQuestModal, setShowQuestModal] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -217,14 +221,38 @@ const PhysicsHome = () => {
               )}
             </div>
 
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-red-50 text-gray-700 hover:text-red-600 rounded-xl font-medium transition-all shadow-md hover:shadow-lg border border-gray-200"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Đăng xuất</span>
-            </button>
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              {/* Quest Button */}
+              <button
+                onClick={() => setShowQuestModal(true)}
+                className="relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-xl font-medium transition-all shadow-md hover:shadow-lg hover:scale-105"
+                title="Nhiệm vụ"
+              >
+                <Target className="w-5 h-5" />
+                <span className="hidden sm:inline">Nhiệm vụ</span>
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+              </button>
+
+              {/* Leaderboard Button */}
+              <button
+                onClick={() => setShowLeaderboard(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium transition-all shadow-md hover:shadow-lg hover:scale-105"
+                title="Bảng xếp hạng"
+              >
+                <Trophy className="w-5 h-5" />
+                <span className="hidden sm:inline">Xếp hạng</span>
+              </button>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-red-50 text-gray-700 hover:text-red-600 rounded-xl font-medium transition-all shadow-md hover:shadow-lg border border-gray-200"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="hidden sm:inline">Đăng xuất</span>
+              </button>
+            </div>
           </div>
 
           {/* Welcome Banner */}
@@ -298,7 +326,7 @@ const PhysicsHome = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid md:grid-cols-3 gap-4 mb-6">
+          <div className="grid md:grid-cols-4 gap-4 mb-6">
             <button
               onClick={() => navigate('/program/physics/dashboard')}
               className="group bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
@@ -331,6 +359,33 @@ const PhysicsHome = () => {
               <p className="text-orange-100 text-sm">Game vật lý tương tác</p>
             </button>
 
+            {/* PK Battle Button */}
+            <button
+              onClick={() => navigate('/pk-battle')}
+              className="group bg-gradient-to-br from-red-500 via-pink-500 to-purple-600 hover:from-red-600 hover:via-pink-600 hover:to-purple-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+            >
+              {/* Animated background effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <div className="relative">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Swords className="w-6 h-6" />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold mb-2">⚔️ Thi đấu PK</h3>
+                <p className="text-pink-100 text-sm">Đấu trí với người chơi khác</p>
+              </div>
+            </button>
+
             <button
               onClick={() => navigate('/profile')}
               className="group bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
@@ -345,6 +400,62 @@ const PhysicsHome = () => {
               </div>
               <h3 className="text-xl font-bold mb-2">Hồ sơ</h3>
               <p className="text-purple-100 text-sm">Xem thành tích của bạn</p>
+            </button>
+          </div>
+
+          {/* Physics Tools - Calculator */}
+          <div className="grid md:grid-cols-2 gap-4 mb-6">
+            <button
+              onClick={() => navigate('/physics-calculator')}
+              className="group bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600 hover:from-cyan-600 hover:via-blue-600 hover:to-indigo-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+            >
+              {/* Animated background effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <div className="relative flex items-center gap-4">
+                <div className="p-4 bg-white/20 rounded-2xl">
+                  <Calculator className="w-8 h-8" />
+                </div>
+                <div className="flex-1 text-left">
+                  <h3 className="text-xl font-bold mb-1">🧮 Máy tính Vật lý</h3>
+                  <p className="text-cyan-100 text-sm">Công cụ giải bài tập thông minh với 80+ công thức từ lớp 6-12</p>
+                </div>
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+
+            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border-2 border-dashed border-gray-300 flex items-center justify-center">
+              <div className="text-center text-gray-500">
+                <span className="text-3xl mb-2 block">🔧</span>
+                <p className="font-medium">Thêm công cụ sắp ra mắt...</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Virtual Lab Button - Full Width */}
+          <div className="mt-4">
+            <button
+              onClick={() => navigate('/vatly/virtual-lab')}
+              className="w-full group bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+            >
+              {/* Animated background effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <div className="relative flex items-center gap-4">
+                <div className="p-4 bg-white/20 rounded-2xl">
+                  <FlaskConical className="w-8 h-8" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-xl font-bold">🔬 Phòng Thí Nghiệm Ảo</h3>
+                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">MỚI</span>
+                  </div>
+                  <p className="text-emerald-100 text-sm">Thực hành thí nghiệm Vật lý trực tuyến - Thu thập số liệu và phân tích kết quả</p>
+                </div>
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
             </button>
           </div>
         </div>
@@ -488,6 +599,18 @@ const PhysicsHome = () => {
           </div>
         </div>
       </section>
+
+      {/* Quest Modal */}
+      <QuestModal 
+        isOpen={showQuestModal} 
+        onClose={() => setShowQuestModal(false)} 
+      />
+
+      {/* Leaderboard Modal */}
+      <Leaderboard 
+        isOpen={showLeaderboard} 
+        onClose={() => setShowLeaderboard(false)} 
+      />
     </div>
   );
 };

@@ -167,6 +167,31 @@ import SpectrumExplorer from './areas/Vatly/challenges/SpectrumExplorer/Spectrum
 import PhotoelectricEffectLab from './areas/Vatly/challenges/PhotoelectricEffectLab/PhotoelectricEffectLab';
 import SolarCellOptimizer from './areas/Vatly/challenges/SolarCellOptimizer/SolarCellOptimizer';
 
+// Grade 12 Physics Games - Chapter 4: Nuclear Physics (Vật lý hạt nhân)
+import NuclearReactionChamber from './areas/Vatly/challenges/NuclearReactionChamber/NuclearReactionChamber';
+import RadioactiveDecaySimulator from './areas/Vatly/challenges/RadioactiveDecaySimulator/RadioactiveDecaySimulator';
+
+// PK Battle System
+import PKLobby from './pages/PKBattle/PKLobby';
+import PKMatchmaking from './pages/PKBattle/PKMatchmaking';
+import PKBattleRoom from './pages/PKBattle/PKBattleRoom';
+import PKResult from './pages/PKBattle/PKResult';
+
+// Physics Calculator Tool
+import { PhysicsCalculatorPage } from './areas/Vatly/PhysicsCalculator';
+
+// Virtual Lab (Phòng thí nghiệm ảo)
+import VirtualLabHome from './areas/Vatly/VirtualLab/pages/VirtualLabHome';
+import PendulumLab from './areas/Vatly/VirtualLab/experiments/PendulumLab';
+import FreeFallLabVirtual from './areas/Vatly/VirtualLab/experiments/FreeFallLab';
+import OhmLawLab from './areas/Vatly/VirtualLab/experiments/OhmLawLab';
+import LensOpticsLab from './areas/Vatly/VirtualLab/experiments/LensOpticsLab';
+import StandingWaveLab from './areas/Vatly/VirtualLab/experiments/StandingWaveLab';
+import CalorimeterLab from './areas/Vatly/VirtualLab/experiments/CalorimeterLab';
+import InclinedPlaneLab from './areas/Vatly/VirtualLab/experiments/InclinedPlaneLab';
+import ResistorCircuitLab from './areas/Vatly/VirtualLab/experiments/ResistorCircuitLab';
+import LightInterferenceLab from './areas/Vatly/VirtualLab/experiments/LightInterferenceLab';
+
 
 const AppContent = () => {
   const location = useLocation();
@@ -219,11 +244,32 @@ const AppContent = () => {
           element={<PlacementTest />}
         />
 
+        {/* PK Battle Routes */}
+        <Route path="/pk-battle" element={<PKLobby />} />
+        <Route path="/pk-battle/matchmaking" element={<PKMatchmaking />} />
+        <Route path="/pk-battle/room/:roomId" element={<PKBattleRoom />} />
+        <Route path="/pk-battle/result" element={<PKResult />} />
+
         {/* Physics Routes */}
         <Route path="/program/physics" element={<PhysicsHome />} />
         <Route path="/program/physics/dashboard" element={<PhysicsDashboard />} />
         <Route path="/physics-class/:classId" element={<PhysicsClassDashboard />} />
         <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<PhysicsLesson />} />
+        
+        {/* Physics Calculator Tool */}
+        <Route path="/physics-calculator" element={<PhysicsCalculatorPage />} />
+        
+        {/* Virtual Lab - Phòng thí nghiệm ảo */}
+        <Route path="/vatly/virtual-lab" element={<VirtualLabHome />} />
+        <Route path="/vatly/virtual-lab/pendulum" element={<PendulumLab />} />
+        <Route path="/vatly/virtual-lab/free-fall" element={<FreeFallLabVirtual />} />
+        <Route path="/vatly/virtual-lab/ohm-law" element={<OhmLawLab />} />
+        <Route path="/vatly/virtual-lab/lens-focal" element={<LensOpticsLab />} />
+        <Route path="/vatly/virtual-lab/standing-wave" element={<StandingWaveLab />} />
+        <Route path="/vatly/virtual-lab/calorimeter" element={<CalorimeterLab />} />
+        <Route path="/vatly/virtual-lab/inclined-plane" element={<InclinedPlaneLab />} />
+        <Route path="/vatly/virtual-lab/resistor-circuit" element={<ResistorCircuitLab />} />
+        <Route path="/vatly/virtual-lab/light-interference" element={<LightInterferenceLab />} />
         
         {/* Physics Games - New grade-based navigation */}
         <Route path="/physics-games/grades" element={<PhysicsGradeSelector />} />
@@ -367,6 +413,10 @@ const AppContent = () => {
         {/* Grade 12 Physics Games - Chapter 3: Quantum of Light (Lượng tử ánh sáng) */}
         <Route path="/physics-games/grade/12/photoelectric-effect-lab" element={<PhotoelectricEffectLab />} />
         <Route path="/physics-games/grade/12/solar-cell-optimizer" element={<SolarCellOptimizer />} />
+        
+        {/* Grade 12 Physics Games - Chapter 4: Nuclear Physics (Vật lý hạt nhân) */}
+        <Route path="/physics-games/grade/12/nuclear-reaction-chamber" element={<NuclearReactionChamber />} />
+        <Route path="/physics-games/grade/12/radioactive-decay-simulator" element={<RadioactiveDecaySimulator />} />
       </Routes>
     </div>
   )

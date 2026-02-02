@@ -1,546 +1,718 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Droplet, Wind, Trophy, Gauge } from 'lucide-react';
+import { ArrowLeft, Award, RotateCcw, Star, Target, Clock, Check, X, Gauge, Droplets, Weight } from 'lucide-react';
 import './PressureMaster.css';
 
-const PressureMaster = () => {
+const PressureMaster = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }) => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
-  const animationRef = useRef(null);
 
-  const [gameState, setGameState] = useState('menu'); // menu, playing, victory
+  const [showTutorial, setShowTutorial] = useState(!isPKMode);
+  const [pkTimeLeft, setPkTimeLeft] = useState(pkTimeLimit || 60);
+  const [gameState, setGameState] = useState('playing');
   const [level, setLevel] = useState(1);
   const [score, setScore] = useState(0);
-  const [time, setTime] = useState(0);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [feedback, setFeedback] = useState(null);
 
-  // Game mechanics
-  const [selectedTool, setSelectedTool] = useState(null); // weight, liquid, piston
-  const [containers, setContainers] = useState([]);
+  // Game state
   const [weights, setWeights] = useState([]);
   const [liquidLevel, setLiquidLevel] = useState(0);
-  const [targetPressure, setTargetPressure] = useState(0);
   const [currentPressure, setCurrentPressure] = useState(0);
-  const [tolerance, setTolerance] = useState(10);
+  const [levelCompleted, setLevelCompleted] = useState(false);
 
   const levels = [
     {
       id: 1,
-      name: 'Áp Suất Cơ Bản',
-      description: 'Tạo áp suất bằng cách đặt vật nặng',
+      name: 'Áp Suất Chất Rắn',
+      description: 'Đặt vật nặng lên bề mặt để tạo áp suất mục tiêu',
       mode: 'solid',
-      targetPressure: 5000,
-      tolerance: 500,
-      area: 0.01, // 100cm²
-      maxWeights: 3
+      targetPressure: 4905, // 50kg * 9.81 / 0.01m²
+      tolerance: 300,
+      area: 0.01, // 100cm² = 0.01m²
+      maxWeights: 5,
+      formula: 'P = F/A = mg/A'
     },
     {
       id: 2,
       name: 'Áp Suất Chất Lỏng',
-      description: 'Điều chỉnh độ cao cột nước để đạt áp suất',
+      description: 'Điều chỉnh mực nước để đạt áp suất đáy',
       mode: 'liquid',
-      targetPressure: 9810, // ρgh, h=1m
-      tolerance: 500,
-      density: 1000, // kg/m³
-      gravity: 9.81
+      targetPressure: 4905, // ρgh = 1000 * 9.81 * 0.5
+      tolerance: 300,
+      density: 1000,
+      gravity: 9.81,
+      formula: 'P = ρgh'
     },
     {
       id: 3,
-      name: 'Bình Thông Nhau',
-      description: 'Cân bằng áp suất trong bình thông nhau',
-      mode: 'connected',
-      targetPressure: 4905,
-      tolerance: 300,
-      containers: 2
+      name: 'Thử Thách Kết Hợp',
+      description: 'Sử dụng cả vật nặng và chất lỏng',
+      mode: 'combined',
+      targetPressure: 7357, // Combined
+      tolerance: 400,
+      area: 0.01,
+      density: 1000,
+      gravity: 9.81,
+      maxWeights: 3,
+      formula: 'P = mg/A + ρgh'
     },
     {
       id: 4,
-      name: 'Áp Suất Khí Quyển',
-      description: 'Mô phỏng áp suất ở các độ cao khác nhau',
-      mode: 'atmospheric',
-      targetPressure: 101325, // Pa at sea level
-      tolerance: 5000,
-      altitudes: [0, 1000, 2000, 3000]
+      name: 'Bậc Thầy Áp Suất',
+      description: 'Đạt chính xác áp suất yêu cầu',
+      mode: 'solid',
+      targetPressure: 9810,
+      tolerance: 200,
+      area: 0.01,
+      maxWeights: 5,
+      formula: 'P = F/A'
     }
   ];
 
   const currentLevel = levels[level - 1];
+  const availableWeights = [5, 10, 20, 50];
 
+  // Timer
   useEffect(() => {
-    if (gameState === 'playing') {
-      resetLevel();
-      const interval = setInterval(() => {
-        setTime(t => t + 1);
-      }, 1000);
-      return () => clearInterval(interval);
+    let timer;
+    if (gameState === 'playing' && !showTutorial && !levelCompleted) {
+      timer = setInterval(() => setTimeElapsed(t => t + 1), 1000);
     }
-  }, [gameState, level]);
+    return () => clearInterval(timer);
+  }, [gameState, showTutorial, levelCompleted]);
 
+  // PK Mode Timer
   useEffect(() => {
-    if (gameState === 'playing') {
-      animate();
+    if (!isPKMode || gameState !== 'playing' || showTutorial) return;
+    
+    if (pkTimeLeft <= 0) {
+      if (onComplete) onComplete({ score, level, completed: level - 1 });
+      return;
     }
-  }, [currentPressure, liquidLevel, weights, gameState]);
+    
+    const timer = setInterval(() => {
+      setPkTimeLeft(prev => prev - 1);
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [isPKMode, gameState, showTutorial, pkTimeLeft, score, level, onComplete]);
 
-  const resetLevel = () => {
-    setWeights([]);
-    setLiquidLevel(0);
-    setCurrentPressure(0);
-    setTargetPressure(currentLevel.targetPressure);
-    setTolerance(currentLevel.tolerance);
-    setSelectedTool(null);
-    setTime(0);
+  // Handle exit for PK mode
+  const handleExit = () => {
+    if (isPKMode && onExit) {
+      onExit();
+    } else {
+      navigate(-1);
+    }
   };
 
-  const animate = () => {
+  // Calculate pressure
+  useEffect(() => {
+    let pressure = 0;
+    const lvl = currentLevel;
+
+    if (lvl.mode === 'solid' || lvl.mode === 'combined') {
+      const totalMass = weights.reduce((sum, w) => sum + w, 0);
+      const force = totalMass * 9.81;
+      pressure += lvl.area > 0 ? force / lvl.area : 0;
+    }
+
+    if (lvl.mode === 'liquid' || lvl.mode === 'combined') {
+      const h = liquidLevel / 100; // Convert to meters (0-1m range)
+      pressure += (lvl.density || 1000) * (lvl.gravity || 9.81) * h;
+    }
+
+    setCurrentPressure(pressure);
+
+    // Check win condition
+    if (!levelCompleted && Math.abs(pressure - lvl.targetPressure) <= lvl.tolerance && pressure > 0) {
+      setLevelCompleted(true);
+      const points = Math.max(50, 200 - timeElapsed * 2);
+      setScore(s => s + points);
+      setFeedback({ type: 'success', message: `Tuyệt vời! +${points} điểm` });
+
+      setTimeout(() => {
+        setFeedback(null);
+        if (level < levels.length) {
+          setLevel(l => l + 1);
+          resetLevel();
+        } else {
+          setGameState('victory');
+          if (isPKMode && onComplete) {
+            onComplete({ score: score + points, level: levels.length, completed: levels.length });
+          }
+        }
+      }, 1500);
+    }
+  }, [weights, liquidLevel, currentLevel, levelCompleted, level, timeElapsed]);
+
+  // Reset level
+  const resetLevel = useCallback(() => {
+    setWeights([]);
+    setLiquidLevel(0);
+    setLevelCompleted(false);
+    setTimeElapsed(0);
+  }, []);
+
+  useEffect(() => {
+    if (!showTutorial && gameState === 'playing') {
+      resetLevel();
+    }
+  }, [showTutorial, level, resetLevel, gameState]);
+
+  // Draw canvas
+  const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.width / dpr;
+    const height = canvas.height / dpr;
 
-    // Clear
-    ctx.fillStyle = '#1e293b';
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    // Background
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+    bgGrad.addColorStop(0, '#1e293b');
+    bgGrad.addColorStop(1, '#0f172a');
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Draw based on mode
-    if (currentLevel.mode === 'solid') {
-      drawSolidPressure(ctx, width, height);
-    } else if (currentLevel.mode === 'liquid') {
-      drawLiquidPressure(ctx, width, height);
-    } else if (currentLevel.mode === 'connected') {
-      drawConnectedVessels(ctx, width, height);
-    } else if (currentLevel.mode === 'atmospheric') {
-      drawAtmospheric(ctx, width, height);
+    const lvl = currentLevel;
+    const centerX = width / 2;
+
+    if (lvl.mode === 'solid') {
+      drawSolidMode(ctx, width, height, centerX);
+    } else if (lvl.mode === 'liquid') {
+      drawLiquidMode(ctx, width, height, centerX);
+    } else if (lvl.mode === 'combined') {
+      drawCombinedMode(ctx, width, height, centerX);
     }
 
     // Draw pressure gauge
     drawPressureGauge(ctx, width, height);
-  };
 
-  const drawSolidPressure = (ctx, width, height) => {
-    // Draw surface
-    const surfaceY = height - 150;
-    ctx.fillStyle = '#475569';
-    ctx.fillRect(0, surfaceY, width, 150);
+    ctx.restore();
+  }, [currentLevel, weights, liquidLevel, currentPressure]);
 
-    // Draw area rectangle
-    const areaX = width / 2 - 50;
-    const areaY = surfaceY - 100;
-    ctx.strokeStyle = '#10b981';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([10, 5]);
-    ctx.strokeRect(areaX, areaY, 100, 100);
-    ctx.setLineDash([]);
+  const drawSolidMode = (ctx, width, height, centerX) => {
+    // Platform
+    const platformY = height - 80;
+    const platformWidth = 160;
+    const platformHeight = 20;
 
-    // Draw weights
-    weights.forEach((w, index) => {
-      const y = surfaceY - 110 - index * 40;
-      ctx.fillStyle = '#ef4444';
-      ctx.fillRect(areaX + 10, y, 80, 35);
-      
-      ctx.strokeStyle = '#dc2626';
+    ctx.fillStyle = '#64748b';
+    ctx.fillRect(centerX - platformWidth / 2, platformY, platformWidth, platformHeight);
+
+    // Surface area label
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '14px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(`S = 100 cm²`, centerX, platformY + platformHeight + 20);
+
+    // Draw weights stacked
+    weights.forEach((w, i) => {
+      const weightY = platformY - 30 - i * 35;
+      const weightWidth = 80 + w;
+      const weightHeight = 30;
+
+      // Weight block
+      const wGrad = ctx.createLinearGradient(0, weightY, 0, weightY + weightHeight);
+      wGrad.addColorStop(0, '#ef4444');
+      wGrad.addColorStop(1, '#dc2626');
+      ctx.fillStyle = wGrad;
+      ctx.beginPath();
+      ctx.roundRect(centerX - weightWidth / 2, weightY, weightWidth, weightHeight, 6);
+      ctx.fill();
+
+      ctx.strokeStyle = '#fca5a5';
       ctx.lineWidth = 2;
-      ctx.strokeRect(areaX + 10, y, 80, 35);
+      ctx.stroke();
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 14px Arial';
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 14px system-ui';
       ctx.textAlign = 'center';
-      ctx.fillText(`${w}kg`, areaX + 50, y + 22);
+      ctx.fillText(`${w} kg`, centerX, weightY + 20);
     });
 
-    // Draw formula
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText('Công thức: P = F / A', 20, 30);
-    ctx.fillText(`Diện tích: A = ${(currentLevel.area * 10000).toFixed(0)} cm²`, 20, 55);
-    
-    const totalMass = weights.reduce((sum, w) => sum + w, 0);
-    const force = totalMass * 9.81;
-    const pressure = currentLevel.area > 0 ? force / currentLevel.area : 0;
-    setCurrentPressure(pressure);
+    // Force arrow
+    if (weights.length > 0) {
+      const totalMass = weights.reduce((s, w) => s + w, 0);
+      const arrowStartY = platformY - 30 - weights.length * 35 - 20;
+      
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(centerX, arrowStartY - 40);
+      ctx.lineTo(centerX, arrowStartY);
+      ctx.stroke();
+
+      // Arrow head
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.moveTo(centerX, arrowStartY);
+      ctx.lineTo(centerX - 8, arrowStartY - 12);
+      ctx.lineTo(centerX + 8, arrowStartY - 12);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 14px system-ui';
+      ctx.fillText(`F = ${(totalMass * 9.81).toFixed(1)} N`, centerX, arrowStartY - 50);
+    }
   };
 
-  const drawLiquidPressure = (ctx, width, height) => {
+  const drawLiquidMode = (ctx, width, height, centerX) => {
     // Container
-    const containerX = width / 2 - 100;
-    const containerY = 100;
-    const containerWidth = 200;
-    const containerHeight = 400;
+    const containerX = centerX - 80;
+    const containerY = 80;
+    const containerWidth = 160;
+    const containerHeight = 300;
 
+    // Container walls
     ctx.strokeStyle = '#94a3b8';
     ctx.lineWidth = 4;
-    ctx.strokeRect(containerX, containerY, containerWidth, containerHeight);
+    ctx.beginPath();
+    ctx.moveTo(containerX, containerY);
+    ctx.lineTo(containerX, containerY + containerHeight);
+    ctx.lineTo(containerX + containerWidth, containerY + containerHeight);
+    ctx.lineTo(containerX + containerWidth, containerY);
+    ctx.stroke();
 
     // Water
     const waterHeight = (liquidLevel / 100) * containerHeight;
     const waterY = containerY + containerHeight - waterHeight;
-    
-    const gradient = ctx.createLinearGradient(0, waterY, 0, containerY + containerHeight);
-    gradient.addColorStop(0, '#3b82f6');
-    gradient.addColorStop(1, '#1e40af');
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(containerX, waterY, containerWidth, waterHeight);
 
-    // Water level marker
-    ctx.strokeStyle = '#fbbf24';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([5, 5]);
-    ctx.beginPath();
-    ctx.moveTo(containerX - 30, waterY);
-    ctx.lineTo(containerX + containerWidth + 30, waterY);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    if (waterHeight > 0) {
+      const waterGrad = ctx.createLinearGradient(0, waterY, 0, containerY + containerHeight);
+      waterGrad.addColorStop(0, '#3b82f6');
+      waterGrad.addColorStop(1, '#1d4ed8');
+      ctx.fillStyle = waterGrad;
+      ctx.fillRect(containerX + 2, waterY, containerWidth - 4, waterHeight - 2);
 
-    ctx.fillStyle = '#fbbf24';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText(`h = ${(liquidLevel / 100).toFixed(2)}m`, containerX - 40, waterY + 5);
-
-    // Depth markers
-    for (let i = 0; i <= 4; i++) {
-      const y = containerY + (containerHeight / 4) * i;
-      ctx.strokeStyle = '#ffffff33';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(containerX, y);
-      ctx.lineTo(containerX + containerWidth, y);
-      ctx.stroke();
-
-      ctx.fillStyle = '#ffffff66';
-      ctx.font = '12px Arial';
-      ctx.textAlign = 'left';
-      ctx.fillText(`${((4 - i) * 0.25).toFixed(2)}m`, containerX + containerWidth + 10, y + 4);
+      // Water surface shine
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.fillRect(containerX + 10, waterY + 5, containerWidth - 20, 3);
     }
 
-    // Formula
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Công thức: P = ρgh', width / 2, 30);
-    ctx.fillText(`ρ = ${currentLevel.density} kg/m³`, width / 2, 55);
-    ctx.fillText(`g = ${currentLevel.gravity} m/s²`, width / 2, 80);
-
-    // Calculate pressure
-    const h = liquidLevel / 100; // meters
-    const pressure = currentLevel.density * currentLevel.gravity * h;
-    setCurrentPressure(pressure);
-  };
-
-  const drawConnectedVessels = (ctx, width, height) => {
-    // Two containers connected at bottom
-    const container1X = width / 3 - 75;
-    const container2X = 2 * width / 3 - 75;
-    const containerWidth = 150;
-    const containerHeight = 300;
-    const containerY = 150;
-
-    // Container 1
-    ctx.strokeStyle = '#94a3b8';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(container1X, containerY, containerWidth, containerHeight);
-
-    // Container 2
-    ctx.strokeRect(container2X, containerY, containerWidth, containerHeight);
-
-    // Connecting pipe
-    const pipeY = containerY + containerHeight - 20;
-    ctx.fillStyle = '#475569';
-    ctx.fillRect(container1X + containerWidth, pipeY, container2X - (container1X + containerWidth), 40);
-    ctx.strokeRect(container1X + containerWidth, pipeY, container2X - (container1X + containerWidth), 40);
-
-    // Water in both containers (same level due to connected vessels)
-    const waterHeight = (liquidLevel / 100) * containerHeight;
-    const waterY = containerY + containerHeight - waterHeight;
-
-    const gradient = ctx.createLinearGradient(0, waterY, 0, containerY + containerHeight);
-    gradient.addColorStop(0, '#3b82f6');
-    gradient.addColorStop(1, '#1e40af');
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(container1X, waterY, containerWidth, waterHeight);
-    ctx.fillRect(container2X, waterY, containerWidth, waterHeight);
-
-    // Water level line
-    ctx.strokeStyle = '#10b981';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([10, 5]);
-    ctx.beginPath();
-    ctx.moveTo(container1X, waterY);
-    ctx.lineTo(container2X + containerWidth, waterY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Labels
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 16px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Bình 1', container1X + containerWidth / 2, containerY - 10);
-    ctx.fillText('Bình 2', container2X + containerWidth / 2, containerY - 10);
-
-    ctx.font = '14px Arial';
-    ctx.fillText('Bình thông nhau', width / 2, 30);
-    ctx.fillText('Mực nước luôn bằng nhau', width / 2, 55);
-
-    const h = liquidLevel / 100;
-    const pressure = 1000 * 9.81 * h;
-    setCurrentPressure(pressure);
-  };
-
-  const drawAtmospheric = (ctx, width, height) => {
-    // Atmosphere layers
-    const layers = [
-      { altitude: 0, pressure: 101325, color: '#3b82f6', name: 'Mực nước biển' },
-      { altitude: 1000, pressure: 89876, color: '#60a5fa', name: '1000m' },
-      { altitude: 2000, pressure: 79501, color: '#93c5fd', name: '2000m' },
-      { altitude: 3000, pressure: 70121, color: '#bfdbfe', name: '3000m' }
-    ];
-
-    const layerHeight = height / layers.length;
-
-    layers.forEach((layer, index) => {
-      const y = height - (index + 1) * layerHeight;
-      
-      ctx.fillStyle = layer.color + '44';
-      ctx.fillRect(0, y, width, layerHeight);
-
-      ctx.strokeStyle = '#ffffff';
+    // Height marker
+    if (liquidLevel > 0) {
+      const h = (liquidLevel / 100).toFixed(2);
+      ctx.strokeStyle = '#fbbf24';
       ctx.lineWidth = 2;
-      ctx.setLineDash([10, 5]);
+      ctx.setLineDash([5, 5]);
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
+      ctx.moveTo(containerX - 20, waterY);
+      ctx.lineTo(containerX + containerWidth + 20, waterY);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 16px Arial';
-      ctx.textAlign = 'left';
-      ctx.fillText(layer.name, 20, y + 30);
-      ctx.font = '14px Arial';
-      ctx.fillText(`P = ${layer.pressure.toFixed(0)} Pa`, 20, y + 55);
-    });
-
-    // Airplane
-    const altitudeIndex = Math.floor(liquidLevel / 25);
-    const planeY = height - (altitudeIndex + 0.5) * layerHeight;
-    ctx.fillStyle = '#fbbf24';
-    ctx.font = '40px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('✈️', width / 2, planeY);
-
-    if (altitudeIndex < layers.length) {
-      setCurrentPressure(layers[altitudeIndex].pressure);
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'right';
+      ctx.fillText(`h = ${h} m`, containerX - 25, waterY + 5);
     }
+
+    // Bottom pressure indicator
+    ctx.fillStyle = '#22c55e';
+    ctx.font = 'bold 12px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Áp suất đáy', centerX, containerY + containerHeight + 25);
+
+    // Scale markers
+    for (let i = 0; i <= 4; i++) {
+      const y = containerY + (containerHeight / 4) * i;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(containerX + containerWidth + 5, y);
+      ctx.lineTo(containerX + containerWidth + 15, y);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${(1 - i * 0.25).toFixed(2)}m`, containerX + containerWidth + 20, y + 4);
+    }
+  };
+
+  const drawCombinedMode = (ctx, width, height, centerX) => {
+    // Container with piston
+    const containerX = centerX - 80;
+    const containerY = 120;
+    const containerWidth = 160;
+    const containerHeight = 250;
+
+    // Container walls
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(containerX, containerY);
+    ctx.lineTo(containerX, containerY + containerHeight);
+    ctx.lineTo(containerX + containerWidth, containerY + containerHeight);
+    ctx.lineTo(containerX + containerWidth, containerY);
+    ctx.stroke();
+
+    // Water
+    const waterHeight = (liquidLevel / 100) * containerHeight * 0.7;
+    const waterY = containerY + containerHeight - waterHeight;
+
+    if (waterHeight > 0) {
+      const waterGrad = ctx.createLinearGradient(0, waterY, 0, containerY + containerHeight);
+      waterGrad.addColorStop(0, '#3b82f6');
+      waterGrad.addColorStop(1, '#1d4ed8');
+      ctx.fillStyle = waterGrad;
+      ctx.fillRect(containerX + 2, waterY, containerWidth - 4, waterHeight - 2);
+    }
+
+    // Piston
+    const pistonY = containerY - 10;
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(containerX + 10, pistonY, containerWidth - 20, 20);
+
+    // Weights on piston
+    weights.forEach((w, i) => {
+      const weightY = pistonY - 25 - i * 30;
+      const weightWidth = 70 + w * 0.5;
+
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.roundRect(centerX - weightWidth / 2, weightY, weightWidth, 25, 4);
+      ctx.fill();
+
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${w}kg`, centerX, weightY + 17);
+    });
   };
 
   const drawPressureGauge = (ctx, width, height) => {
-    const gaugeX = width - 180;
+    const gaugeX = 20;
     const gaugeY = 20;
-    const gaugeWidth = 160;
-    const gaugeHeight = 200;
+    const gaugeWidth = 200;
+    const gaugeHeight = 140;
 
     // Background
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(gaugeX, gaugeY, gaugeWidth, gaugeHeight);
-    ctx.strokeStyle = '#ffffff';
+    ctx.fillStyle = 'rgba(30, 41, 59, 0.95)';
+    ctx.beginPath();
+    ctx.roundRect(gaugeX, gaugeY, gaugeWidth, gaugeHeight, 12);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
     ctx.lineWidth = 2;
-    ctx.strokeRect(gaugeX, gaugeY, gaugeWidth, gaugeHeight);
+    ctx.stroke();
 
     // Title
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 14px system-ui';
     ctx.textAlign = 'center';
-    ctx.fillText('ÁP KẾ', gaugeX + gaugeWidth / 2, gaugeY + 25);
+    ctx.fillText('⚡ ÁP KẾ', gaugeX + gaugeWidth / 2, gaugeY + 25);
 
-    // Target pressure
-    ctx.font = '12px Arial';
-    ctx.fillStyle = '#10b981';
-    ctx.fillText(`Mục tiêu: ${targetPressure.toFixed(0)} Pa`, gaugeX + gaugeWidth / 2, gaugeY + 50);
+    // Target
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '12px system-ui';
+    ctx.fillText(`Mục tiêu: ${currentLevel.targetPressure.toFixed(0)} Pa`, gaugeX + gaugeWidth / 2, gaugeY + 48);
 
     // Current pressure
-    ctx.font = 'bold 18px Arial';
-    ctx.fillStyle = '#fbbf24';
+    const isClose = Math.abs(currentPressure - currentLevel.targetPressure) <= currentLevel.tolerance;
+    ctx.fillStyle = isClose ? '#22c55e' : '#fbbf24';
+    ctx.font = 'bold 24px system-ui';
     ctx.fillText(`${currentPressure.toFixed(0)} Pa`, gaugeX + gaugeWidth / 2, gaugeY + 80);
 
-    // Pressure bar
-    const barX = gaugeX + 20;
-    const barY = gaugeY + 100;
-    const barWidth = gaugeWidth - 40;
-    const barHeight = 30;
+    // Progress bar
+    const barX = gaugeX + 15;
+    const barY = gaugeY + 95;
+    const barWidth = gaugeWidth - 30;
+    const barHeight = 12;
 
-    ctx.fillStyle = '#334155';
-    ctx.fillRect(barX, barY, barWidth, barHeight);
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.roundRect(barX, barY, barWidth, barHeight, 6);
+    ctx.fill();
 
-    const ratio = Math.min(currentPressure / targetPressure, 1);
-    const fillWidth = ratio * barWidth;
+    const ratio = Math.min(currentPressure / currentLevel.targetPressure, 1.2);
+    const fillWidth = Math.min(ratio * barWidth, barWidth);
 
-    const diff = Math.abs(currentPressure - targetPressure);
-    const isClose = diff <= tolerance;
-    
-    ctx.fillStyle = isClose ? '#10b981' : '#3b82f6';
-    ctx.fillRect(barX, barY, fillWidth, barHeight);
+    ctx.fillStyle = isClose ? '#22c55e' : ratio > 1 ? '#ef4444' : '#3b82f6';
+    ctx.beginPath();
+    ctx.roundRect(barX, barY, fillWidth, barHeight, 6);
+    ctx.fill();
 
-    ctx.strokeStyle = '#ffffff';
+    // Target marker
+    const targetX = barX + barWidth * (currentLevel.targetPressure / (currentLevel.targetPressure * 1.2));
+    ctx.strokeStyle = '#fbbf24';
     ctx.lineWidth = 2;
-    ctx.strokeRect(barX, barY, barWidth, barHeight);
+    ctx.beginPath();
+    ctx.moveTo(targetX, barY - 3);
+    ctx.lineTo(targetX, barY + barHeight + 3);
+    ctx.stroke();
 
     // Status
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    if (isClose) {
-      ctx.fillStyle = '#10b981';
-      ctx.fillText('✓ ĐẠT YÊU CẦU', gaugeX + gaugeWidth / 2, gaugeY + 155);
-    } else {
-      ctx.fillStyle = '#ef4444';
-      const diff = targetPressure - currentPressure;
-      if (diff > 0) {
-        ctx.fillText(`↑ Cần tăng ${diff.toFixed(0)} Pa`, gaugeX + gaugeWidth / 2, gaugeY + 155);
-      } else {
-        ctx.fillText(`↓ Cần giảm ${Math.abs(diff).toFixed(0)} Pa`, gaugeX + gaugeWidth / 2, gaugeY + 155);
-      }
-    }
-
-    // Check victory
-    if (isClose && gameState === 'playing') {
-      setTimeout(() => {
-        if (level < levels.length) {
-          setLevel(l => l + 1);
-          setScore(s => s + Math.max(1000 - time * 10, 500));
-          setGameState('playing');
-        } else {
-          setScore(s => s + Math.max(1000 - time * 10, 500));
-          setGameState('victory');
-        }
-      }, 1000);
-    }
+    ctx.font = '11px system-ui';
+    ctx.fillStyle = isClose ? '#22c55e' : '#94a3b8';
+    const diff = currentLevel.targetPressure - currentPressure;
+    const status = isClose ? '✓ Đạt yêu cầu!' : diff > 0 ? `↑ Cần thêm ${diff.toFixed(0)} Pa` : `↓ Cần giảm ${Math.abs(diff).toFixed(0)} Pa`;
+    ctx.fillText(status, gaugeX + gaugeWidth / 2, gaugeY + 130);
   };
+
+  // Setup canvas
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
+    if (!showTutorial) {
+      drawCanvas();
+    }
+  }, [showTutorial, drawCanvas]);
+
+  useEffect(() => {
+    if (!showTutorial && gameState === 'playing') {
+      drawCanvas();
+    }
+  }, [weights, liquidLevel, showTutorial, gameState, drawCanvas]);
 
   const addWeight = (mass) => {
-    if (weights.length < currentLevel.maxWeights) {
-      setWeights([...weights, mass]);
-    }
+    if (currentLevel.maxWeights && weights.length >= currentLevel.maxWeights) return;
+    setWeights([...weights, mass]);
   };
 
-  const adjustLiquid = (change) => {
-    setLiquidLevel(Math.max(0, Math.min(100, liquidLevel + change)));
+  const removeLastWeight = () => {
+    setWeights(weights.slice(0, -1));
   };
+
+  const restartGame = () => {
+    setLevel(1);
+    setScore(0);
+    setTimeElapsed(0);
+    setGameState('playing');
+    resetLevel();
+  };
+
+  const getBadge = () => {
+    if (score >= 600) return { name: 'Bậc Thầy Áp Suất', class: 'gold' };
+    if (score >= 400) return { name: 'Chuyên Gia Vật Lý', class: 'silver' };
+    return { name: 'Nhà Thí Nghiệm', class: 'bronze' };
+  };
+
+  // Tutorial
+  if (showTutorial) {
+    return (
+      <div className="pressure-master">
+        <div className="pm-tutorial-overlay">
+          <div className="pm-tutorial-card">
+            <div className="pm-tutorial-icon">
+              <Gauge size={40} />
+            </div>
+            <h2>Bậc Thầy Áp Suất</h2>
+            <p className="pm-tutorial-subtitle">Khám phá công thức áp suất!</p>
+
+            <div className="pm-tutorial-steps">
+              <div className="pm-tutorial-step">
+                <span className="pm-step-icon">⚖️</span>
+                <div className="pm-step-content">
+                  <strong>Áp suất chất rắn</strong>
+                  <span>P = F/A (Lực chia diện tích)</span>
+                </div>
+              </div>
+              <div className="pm-tutorial-step">
+                <span className="pm-step-icon">💧</span>
+                <div className="pm-step-content">
+                  <strong>Áp suất chất lỏng</strong>
+                  <span>P = ρgh (Mật độ × g × độ sâu)</span>
+                </div>
+              </div>
+              <div className="pm-tutorial-step">
+                <span className="pm-step-icon">🎯</span>
+                <div className="pm-step-content">
+                  <strong>Mục tiêu</strong>
+                  <span>Điều chỉnh để đạt áp suất yêu cầu</span>
+                </div>
+              </div>
+            </div>
+
+            <button className="pm-start-btn" onClick={() => setShowTutorial(false)}>
+              <Gauge size={20} />
+              Bắt Đầu Thí Nghiệm
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Victory
+  if (gameState === 'victory') {
+    const badge = getBadge();
+    return (
+      <div className="pressure-master">
+        <div className="pm-game-over">
+          <Award size={80} className="pm-trophy" />
+          <h2>🎉 Xuất Sắc!</h2>
+
+          <div className="pm-final-stats">
+            <div className="pm-final-stat">
+              <div className="pm-final-stat-icon gold"><Star size={24} /></div>
+              <div className="pm-final-stat-value">{score}</div>
+              <div className="pm-final-stat-label">Tổng điểm</div>
+            </div>
+            <div className="pm-final-stat">
+              <div className="pm-final-stat-icon green"><Target size={24} /></div>
+              <div className="pm-final-stat-value">{levels.length}</div>
+              <div className="pm-final-stat-label">Cấp hoàn thành</div>
+            </div>
+            <div className="pm-final-stat">
+              <div className="pm-final-stat-icon blue"><Clock size={24} /></div>
+              <div className="pm-final-stat-value">{Math.floor(timeElapsed / 60)}:{(timeElapsed % 60).toString().padStart(2, '0')}</div>
+              <div className="pm-final-stat-label">Thời gian</div>
+            </div>
+          </div>
+
+          <div className="pm-achievement">
+            <span className={`pm-badge ${badge.class}`}>🏆 {badge.name}</span>
+          </div>
+
+          <div className="pm-actions">
+            <button className="pm-restart-btn" onClick={restartGame}>
+              <RotateCcw size={18} />
+              Chơi Lại
+            </button>
+            <button className="pm-menu-btn" onClick={() => navigate(-1)}>
+              <ArrowLeft size={18} />
+              Thoát
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pressure-master">
-      <button onClick={() => navigate(-1)} className="back-button">
-        <ArrowLeft size={20} />
-        Quay lại
-      </button>
-
-      <div className="game-header">
-        <h1>⚗️ Bậc Thầy Áp Suất</h1>
-        <div className="game-info">
-          <span className="level-badge">Cấp {level}</span>
-          <span className="score-badge">
-            <Gauge size={16} />
-            {score} điểm
-          </span>
-          <span className="time-badge">{time}s</span>
-        </div>
-      </div>
-
-      {gameState === 'menu' && (
-        <div className="menu-screen">
-          <div className="intro-card">
-            <h2>{currentLevel.name}</h2>
-            <p className="level-desc">{currentLevel.description}</p>
-
-            <div className="formulas">
-              <h3>📐 Công thức áp suất:</h3>
-              <ul>
-                <li><strong>Áp suất chất rắn:</strong> P = F/A (Pa)</li>
-                <li><strong>Áp suất chất lỏng:</strong> P = ρgh (Pa)</li>
-                <li><strong>Bình thông nhau:</strong> P₁ = P₂</li>
-                <li><strong>Áp suất khí quyển:</strong> Giảm theo độ cao</li>
-              </ul>
-            </div>
-
-            <button className="start-button" onClick={() => setGameState('playing')}>
-              <Droplet size={20} />
-              Bắt đầu thử nghiệm
-            </button>
+      {/* Header */}
+      {!isPKMode && (
+        <header className="pm-header">
+          <button className="pm-back-btn" onClick={handleExit}>
+            <ArrowLeft size={20} />
+            <span>Thoát</span>
+          </button>
+          <div className="pm-title">
+            <h1>⚗️ Bậc Thầy Áp Suất</h1>
           </div>
-        </div>
+          <div className="pm-level-badge">Cấp {level}/{levels.length}</div>
+        </header>
       )}
 
-      {gameState === 'playing' && (
-        <div className="playing-screen">
-          <div className="controls-panel">
-            <h3>Điều khiển:</h3>
-            {currentLevel.mode === 'solid' && (
-              <div className="weight-controls">
-                <button onClick={() => addWeight(10)}>Thêm 10kg</button>
-                <button onClick={() => addWeight(20)}>Thêm 20kg</button>
-                <button onClick={() => addWeight(50)}>Thêm 50kg</button>
-                <button onClick={() => setWeights([])}>Xóa hết</button>
-              </div>
-            )}
-            {(currentLevel.mode === 'liquid' || currentLevel.mode === 'connected') && (
-              <div className="liquid-controls">
-                <button onClick={() => adjustLiquid(10)}>
-                  <Wind size={16} /> Tăng mực nước
+      <main className="pm-main">
+        {/* Stats */}
+        <div className="pm-stats-bar">
+          <div className="pm-stat">
+            <Star size={20} className="pm-stat-icon gold" />
+            <div className="pm-stat-info">
+              <span className="pm-stat-label">Điểm</span>
+              <span className="pm-stat-value">{score}</span>
+            </div>
+          </div>
+          <div className="pm-stat">
+            <Clock size={20} className="pm-stat-icon blue" />
+            <div className="pm-stat-info">
+              <span className="pm-stat-label">Thời gian</span>
+              <span className="pm-stat-value">{Math.floor(timeElapsed / 60)}:{(timeElapsed % 60).toString().padStart(2, '0')}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress */}
+        <div className="pm-progress-container">
+          <div className="pm-progress-bar">
+            <div className="pm-progress-fill" style={{ width: `${(level / levels.length) * 100}%` }} />
+          </div>
+        </div>
+
+        {/* Level Info */}
+        <div className="pm-level-panel">
+          <h3>{currentLevel.name}</h3>
+          <p>{currentLevel.description}</p>
+          <div className="pm-formula-badge">{currentLevel.formula}</div>
+        </div>
+
+        {/* Game Area */}
+        <div className="pm-game-area">
+          {/* Canvas */}
+          <div className="pm-canvas-container">
+            <canvas
+              ref={canvasRef}
+              className="pm-canvas"
+              style={{ width: 500, height: 450 }}
+            />
+          </div>
+
+          {/* Controls */}
+          <div className="pm-controls">
+            {(currentLevel.mode === 'solid' || currentLevel.mode === 'combined') && (
+              <div className="pm-control-section">
+                <h4><Weight size={18} /> Vật nặng</h4>
+                <div className="pm-weight-buttons">
+                  {availableWeights.map(w => (
+                    <button
+                      key={w}
+                      className="pm-weight-btn"
+                      onClick={() => addWeight(w)}
+                      disabled={currentLevel.maxWeights && weights.length >= currentLevel.maxWeights}
+                    >
+                      +{w} kg
+                    </button>
+                  ))}
+                </div>
+                <button className="pm-remove-btn" onClick={removeLastWeight} disabled={weights.length === 0}>
+                  Bỏ vật cuối
                 </button>
-                <button onClick={() => adjustLiquid(-10)}>
-                  <Droplet size={16} /> Giảm mực nước
-                </button>
-                <div className="liquid-slider">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={liquidLevel}
-                    onChange={(e) => setLiquidLevel(Number(e.target.value))}
-                  />
-                  <span>{liquidLevel}%</span>
+                <div className="pm-weight-info">
+                  Đã đặt: {weights.length}/{currentLevel.maxWeights || '∞'} vật
+                  ({weights.reduce((s, w) => s + w, 0)} kg)
                 </div>
               </div>
             )}
-            {currentLevel.mode === 'atmospheric' && (
-              <div className="altitude-controls">
-                <button onClick={() => adjustLiquid(25)}>Tăng độ cao</button>
-                <button onClick={() => adjustLiquid(-25)}>Giảm độ cao</button>
+
+            {(currentLevel.mode === 'liquid' || currentLevel.mode === 'combined') && (
+              <div className="pm-control-section">
+                <h4><Droplets size={18} /> Mực nước</h4>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={liquidLevel}
+                  onChange={(e) => setLiquidLevel(Number(e.target.value))}
+                  className="pm-slider"
+                />
+                <div className="pm-slider-value">h = {(liquidLevel / 100).toFixed(2)} m</div>
               </div>
             )}
+
+            <button className="pm-reset-btn" onClick={resetLevel}>
+              <RotateCcw size={16} />
+              Đặt lại
+            </button>
           </div>
-
-          <canvas
-            ref={canvasRef}
-            width={800}
-            height={550}
-            className="game-canvas"
-          />
         </div>
-      )}
 
-      {gameState === 'victory' && (
-        <div className="victory-screen">
-          <Trophy size={80} className="trophy-icon" />
-          <h2>🎉 Xuất sắc!</h2>
-          <p>Bạn đã thành thạo các kiến thức về áp suất!</p>
-          <div className="victory-stats">
-            <div className="stat-item">
-              <strong>Tổng điểm:</strong>
-              <span>{score}</span>
+        {/* Feedback */}
+        {feedback && (
+          <div className={`pm-feedback ${feedback.type}`}>
+            <div className="pm-feedback-icon">
+              {feedback.type === 'success' ? <Check size={24} /> : <X size={24} />}
             </div>
+            <span className="pm-feedback-message">{feedback.message}</span>
           </div>
-          <div className="victory-actions">
-            <button onClick={() => { setLevel(1); setScore(0); setGameState('menu'); }}>
-              Chơi lại
-            </button>
-            <button onClick={() => navigate(-1)}>
-              Về trang chủ
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   );
 };
