@@ -87,6 +87,71 @@ const PhysicsLesson = () => {
     fetchLesson();
   }, [classId, chapterId, lessonId]);
 
+<<<<<<< HEAD
+=======
+  useEffect(() => {
+    const fetchCompletionStatus = async () => {
+      if (lessonData) {
+        try {
+          const user = JSON.parse(localStorage.getItem('user'));
+          const userEmail = user?.id || user?.email;
+          if (userEmail) {
+            const response = await axios.get(`${API_BASE_URL}/lesson-completions`, {
+              params: {
+                userId: userEmail,
+                lessonId: lessonData.id
+              }
+            });
+            if (response.data) {
+              const { score, quizAnswers, completed } = response.data;
+              setScore(score);
+              setQuizAnswers(quizAnswers);
+              setIsCompleted(completed);
+              if (completed) {
+                setActiveTab('exercises');
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching lesson completion status:', error);
+        }
+      }
+    };
+    fetchCompletionStatus();
+  }, [lessonData]);
+
+  const saveFinalProgress = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const userEmail = user?.id || user?.email ;
+      
+      if (userEmail && lessonData) {
+        const progressData = {
+          userId: userEmail,
+          lessonId: lessonData.id,
+          classId: parseInt(classId),
+          chapterId: parseInt(chapterId),
+          lessonNumber: parseInt(lessonId),
+          score: score,
+          totalQuestions: exercises.length,
+          completed: true,
+          quizAnswers: quizAnswers
+        };
+
+        await axios.post(`${API_BASE_URL}/lesson-completions`, progressData);
+      }
+    } catch (error) {
+      console.error('Error saving final progress:', error);
+    }
+  }
+
+  useEffect(() => {
+    if (isCompleted) {
+      saveFinalProgress();
+    }
+  }, [isCompleted]);
+
+>>>>>>> d7d3174 (new push)
   const exercises = lessonData?.content?.exercises || [];
   const currentExercise = exercises[currentQuizIndex];
 
@@ -120,6 +185,7 @@ const PhysicsLesson = () => {
     }
   };
 
+<<<<<<< HEAD
   const handleFinish = async () => {
     try {
       const user = JSON.parse(localStorage.getItem('user'));
@@ -155,6 +221,9 @@ const PhysicsLesson = () => {
     }
     
     // Navigate back to class dashboard
+=======
+  const handleFinish = () => {
+>>>>>>> d7d3174 (new push)
     navigate(`/physics-class/${classId}`);
   };
 
@@ -277,6 +346,7 @@ const PhysicsLesson = () => {
             )}
 
             {/* Exercises Tab */}
+<<<<<<< HEAD
             {activeTab === 'exercises' && !isCompleted && (
               <div>
                 <div className="mb-6">
@@ -417,6 +487,205 @@ const PhysicsLesson = () => {
                 >
                   Hoàn thành và quay lại
                 </button>
+=======
+            {activeTab === 'exercises' && (
+              <div>
+                {!isCompleted ? (
+                  <div>
+                    <div className="mb-6">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm text-gray-600">
+                          Câu {currentQuizIndex + 1} / {exercises.length}
+                        </span>
+                        <span className="text-sm font-medium text-green-600">
+                          Điểm: {score} / {exercises.length}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all"
+                          style={{ width: `${((currentQuizIndex + 1) / exercises.length) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-xl p-6 mb-6">
+                      <h3 className="text-xl font-bold text-gray-800 mb-4">
+                        {currentExercise?.question}
+                      </h3>
+                      
+                      <div className="space-y-3">
+                        {currentExercise?.options?.map((option, index) => (
+                          <button
+                            key={index}
+                            onClick={() => !showResult && handleAnswerSelect(index)}
+                            disabled={showResult}
+                            className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                              showResult
+                                ? index === currentExercise.correctAnswer
+                                  ? 'border-green-500 bg-green-50'
+                                  : index === selectedAnswer
+                                  ? 'border-red-500 bg-red-50'
+                                  : 'border-gray-200 bg-white'
+                                : selectedAnswer === index
+                                ? 'border-green-500 bg-green-50'
+                                : 'border-gray-200 bg-white hover:border-green-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                                showResult
+                                  ? index === currentExercise.correctAnswer
+                                    ? 'bg-green-500 text-white'
+                                    : index === selectedAnswer
+                                    ? 'bg-red-500 text-white'
+                                    : 'bg-gray-200 text-gray-600'
+                                  : selectedAnswer === index
+                                  ? 'bg-green-500 text-white'
+                                  : 'bg-gray-200 text-gray-600'
+                              }`}>
+                                {String.fromCharCode(65 + index)}
+                              </div>
+                              <span className="flex-1">{option}</span>
+                              {showResult && index === currentExercise.correctAnswer && (
+                                <CheckCircle className="w-6 h-6 text-green-500" />
+                              )}
+                              {showResult && index === selectedAnswer && index !== currentExercise.correctAnswer && (
+                                <XCircle className="w-6 h-6 text-red-500" />
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {showResult && (
+                      <div className={`rounded-xl p-6 mb-6 ${
+                        selectedAnswer === currentExercise.correctAnswer
+                          ? 'bg-green-50 border-2 border-green-200'
+                          : 'bg-red-50 border-2 border-red-200'
+                      }`}>
+                        <div className="flex items-center gap-3 mb-2">
+                          {selectedAnswer === currentExercise.correctAnswer ? (
+                            <>
+                              <CheckCircle className="w-6 h-6 text-green-600" />
+                              <span className="font-bold text-green-600">Chính xác!</span>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="w-6 h-6 text-red-600" />
+                              <span className="font-bold text-red-600">Chưa đúng!</span>
+                            </>
+                          )}
+                        </div>
+                        {currentExercise.explanation && (
+                          <p className="text-gray-700">{currentExercise.explanation}</p>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex gap-4">
+                      {!showResult && selectedAnswer !== null && (
+                        <button
+                          onClick={handleCheckAnswer}
+                          className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                        >
+                          Kiểm tra đáp án
+                        </button>
+                      )}
+                      
+                      {showResult && (
+                        <button
+                          onClick={handleNextQuestion}
+                          className="flex-1 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                        >
+                          {currentQuizIndex < exercises.length - 1 ? 'Câu tiếp theo →' : 'Xem kết quả'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="text-center py-8">
+                      <div className="text-6xl mb-4">🎉</div>
+                      <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                        Hoàn thành bài học!
+                      </h2>
+                      <p className="text-xl text-gray-600 mb-8">
+                        Bạn đã trả lời đúng {score}/{exercises.length} câu hỏi
+                      </p>
+                      
+                      <div className="bg-green-50 rounded-xl p-6 max-w-md mx-auto mb-8">
+                        <div className="text-5xl font-bold text-green-600 mb-2">
+                          {exercises.length > 0 ? Math.round((score / exercises.length) * 100) : 100}%
+                        </div>
+                        <div className="text-gray-600">Độ chính xác</div>
+                      </div>
+                    </div>
+
+                    {exercises.map((exercise, index) => {
+                      const answer = quizAnswers.find(a => a.questionIndex === index);
+                      const selected = answer ? answer.selectedAnswer : null;
+                      
+                      return (
+                        <div key={index} className="bg-gray-50 rounded-xl p-6 mb-6">
+                          <h3 className="text-xl font-bold text-gray-800 mb-4">
+                            Câu {index + 1}: {exercise.question}
+                          </h3>
+                          
+                          <div className="space-y-3">
+                            {exercise.options.map((option, optionIndex) => (
+                              <div
+                                key={optionIndex}
+                                className={`w-full text-left p-4 rounded-lg border-2 ${
+                                  optionIndex === exercise.correctAnswer
+                                    ? 'border-green-500 bg-green-50'
+                                    : optionIndex === selected
+                                    ? 'border-red-500 bg-red-50'
+                                    : 'border-gray-200 bg-white'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                                    optionIndex === exercise.correctAnswer
+                                      ? 'bg-green-500 text-white'
+                                      : optionIndex === selected
+                                      ? 'bg-red-500 text-white'
+                                      : 'bg-gray-200 text-gray-600'
+                                  }`}>
+                                    {String.fromCharCode(65 + optionIndex)}
+                                  </div>
+                                  <span className="flex-1">{option}</span>
+                                  {optionIndex === exercise.correctAnswer && (
+                                    <CheckCircle className="w-6 h-6 text-green-500" />
+                                  )}
+                                  {optionIndex === selected && optionIndex !== exercise.correctAnswer && (
+                                    <XCircle className="w-6 h-6 text-red-500" />
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          {exercise.explanation && (
+                            <div className="mt-4 rounded-xl p-4 bg-blue-50 border-2 border-blue-200">
+                                <p className="text-gray-700">{exercise.explanation}</p>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+
+                    <div className="text-center mt-8">
+                        <button
+                          onClick={handleFinish}
+                          className="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                        >
+                          Quay lại
+                        </button>
+                    </div>
+                  </div>
+                )}
+>>>>>>> d7d3174 (new push)
               </div>
             )}
           </div>

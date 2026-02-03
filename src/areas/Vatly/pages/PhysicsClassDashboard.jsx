@@ -1,5 +1,10 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+<<<<<<< HEAD
+=======
+import axios from 'axios';
+import { API_BASE_URL } from '../../../config/api';
+>>>>>>> d7d3174 (new push)
 import { ArrowLeft, BookOpen, Trophy, Lock } from 'lucide-react';
 import { physicsLessons, getLessonStats } from '../data/physicsLessons';
 
@@ -10,6 +15,7 @@ const PhysicsClassDashboard = () => {
   const [userProgress, setUserProgress] = useState({});
 
   useEffect(() => {
+<<<<<<< HEAD
     // Simulate loading và lấy progress từ localStorage hoặc backend
     const loadProgress = async () => {
       // Load from localStorage first
@@ -45,6 +51,35 @@ const PhysicsClassDashboard = () => {
       }
       
       setTimeout(() => setLoading(false), 500);
+=======
+    const loadProgress = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const userEmail = user?.id || user?.email;
+        if (userEmail) {
+          const response = await axios.get(`${API_BASE_URL}/lesson-completions/class/${classId}`, {
+            params: {
+              userId: userEmail
+            }
+          });
+          
+          if (response.data) {
+            const progressObj = {};
+            response.data.forEach(completion => {
+              const lessonKey = `${completion.classId}-${completion.chapterId}-${completion.lessonNumber}`;
+              if (completion.completed) {
+                progressObj[lessonKey] = 'completed';
+              }
+            });
+            setUserProgress(progressObj);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching completed lessons:', error);
+      } finally {
+        setLoading(false);
+      }
+>>>>>>> d7d3174 (new push)
     };
     
     loadProgress();

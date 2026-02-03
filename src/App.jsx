@@ -1,12 +1,22 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+<<<<<<< HEAD
+=======
+import { GameProgressProvider } from './contexts/GameProgressContext';
+>>>>>>> d7d3174 (new push)
 import Home from './pages/Home';
 import ProgramSelection from './pages/ProgramSelection';
 import Profile from './pages/Profile';
 import PlacementTest from './pages/PlacementTest';
 import Login from './pages/Login';
 import Register from './pages/Register';
+<<<<<<< HEAD
 
+=======
+import GameJourney from './pages/GameJourney';
+import ThemeSwitcher from './ui/ThemeSwitcher';
+import "./index.css";
+>>>>>>> d7d3174 (new push)
 // Hóa học area
 import ChemistryHome from './areas/Hoahoc/pages/ChemistryHome';
 import Dashboard from './areas/Hoahoc/pages/Dashboard';
@@ -167,6 +177,21 @@ import SpectrumExplorer from './areas/Vatly/challenges/SpectrumExplorer/Spectrum
 import PhotoelectricEffectLab from './areas/Vatly/challenges/PhotoelectricEffectLab/PhotoelectricEffectLab';
 import SolarCellOptimizer from './areas/Vatly/challenges/SolarCellOptimizer/SolarCellOptimizer';
 
+<<<<<<< HEAD
+=======
+// Physics Tools
+import PhysicsToolsHub from './pages/PhysicsToolsHub';
+import PhysicsCalculator from './components/PhysicsTools/PhysicsCalculator';
+import ConstantsReference from './components/PhysicsTools/ConstantsReference';
+import UnitConverter from './components/PhysicsTools/UnitConverter';
+
+// Interactive Lecture Hub
+import InteractiveLectureHub from './pages/InteractiveLectureHub';
+import LectureGradeSelector from './pages/LectureGradeSelector';
+import LectureViewer from './components/LectureViewer';
+import LectureClassSelector from './components/LectureClassSelector';
+
+>>>>>>> d7d3174 (new push)
 
 const AppContent = () => {
   const location = useLocation();
@@ -176,8 +201,15 @@ const AppContent = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+<<<<<<< HEAD
         <Route path="/" element={<ProgramSelection />} />
         <Route path="/home" element={<Home />} />
+=======
+        <Route path="/" element={<Login />} />
+        <Route path="/program-selection" element={<ProgramSelection />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/game-journey" element={<GameJourney />} />
+>>>>>>> d7d3174 (new push)
         <Route path="/program/chemistry" element={<ChemistryHome />} />
         <Route path="/advanced-challenge" element={<AdvancedChallenge />} />
         <Route path="/advanced-challenge/ghep-nguyen-tu" element={<GhepNguyenTu />} />
@@ -225,6 +257,21 @@ const AppContent = () => {
         <Route path="/physics-class/:classId" element={<PhysicsClassDashboard />} />
         <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<PhysicsLesson />} />
         
+<<<<<<< HEAD
+=======
+        {/* Physics Tools Routes */}
+        <Route path="/physics-tools" element={<PhysicsToolsHub />} />
+        <Route path="/physics-tools/calculator" element={<PhysicsCalculator />} />
+        <Route path="/physics-tools/constants" element={<ConstantsReference />} />
+        <Route path="/physics-tools/converter" element={<UnitConverter />} />
+        
+        {/* Interactive Lecture Hub Routes */}
+        <Route path="/interactive-lectures" element={<InteractiveLectureHub />} />
+        <Route path="/interactive-lectures/:subject" element={<LectureGradeSelector />} />
+        <Route path="/interactive-lectures/:subject/:grade" element={<LectureClassSelector />} />
+        <Route path="/interactive-lectures/:subject/:grade/:lectureId" element={<LectureViewer />} />
+        
+>>>>>>> d7d3174 (new push)
         {/* Physics Games - New grade-based navigation */}
         <Route path="/physics-games/grades" element={<PhysicsGradeSelector />} />
         <Route path="/physics-games/grade/:gradeId" element={<PhysicsGradeGames />} />
@@ -376,10 +423,30 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+<<<<<<< HEAD
         <AppContent />
       </AuthProvider>
+=======
+        <GameProgressProvider>
+
+          {/* HEADER - thêm component chuyển theme */}
+          <header style={{ padding: "10px" }}>
+            <ThemeSwitcher />
+          </header>
+
+          <AppContent />
+
+        </GameProgressProvider>
+      </AuthProvider>
+      
+>>>>>>> d7d3174 (new push)
     </Router>
   );
 }
 
 export default App;
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> d7d3174 (new push)

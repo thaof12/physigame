@@ -2,7 +2,13 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+<<<<<<< HEAD
 const User = require('../models/User.cjs');
+=======
+const mongoose = require('mongoose');
+const User = require('../models/User.cjs');
+const PhysicsGameProgress = require('../models/PhysicsGameProgress.cjs');
+>>>>>>> d7d3174 (new push)
 
 // Register route
 router.post('/register', async (req, res) => {
@@ -12,7 +18,12 @@ router.post('/register', async (req, res) => {
       email: req.body.email 
     });
     
+<<<<<<< HEAD
     const { username, email, password, isGoogleAuth } = req.body;
+=======
+    const { username, password, isGoogleAuth } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+>>>>>>> d7d3174 (new push)
 
     // Validation
     if (!username || !email || (!password && !isGoogleAuth)) {
@@ -22,6 +33,7 @@ router.post('/register', async (req, res) => {
       });
     }
 
+<<<<<<< HEAD
     // Check if user exists in MongoDB
     const existingUser = await User.findOne({ 
       $or: [{ email }, { username }] 
@@ -32,6 +44,34 @@ router.post('/register', async (req, res) => {
       const field = existingUser.email === email ? 'Email' : 'Tên người dùng';
       return res.status(400).json({ 
         message: `${field} đã được sử dụng` 
+=======
+    // Check MongoDB connection
+    if (mongoose.connection.readyState !== 1) {
+      console.log('❌ MongoDB not connected');
+      return res.status(503).json({ 
+        message: 'Database chưa sẵn sàng. Vui lòng thử lại sau.' 
+      });
+    }
+
+    // Check if user exists in MongoDB (case-insensitive)
+    const existingUser = await User.findOne({ 
+      email: { $regex: `^${email}$`, $options: 'i' } 
+    });
+    
+    // Also check if username already exists
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      console.log('❌ Username already exists:', username);
+      return res.status(400).json({ 
+        message: 'Tên người dùng đã được sử dụng' 
+      });
+    }
+    
+    if (existingUser) {
+      console.log('❌ User already exists:', email);
+      return res.status(400).json({ 
+        message: 'Email đã được sử dụng' 
+>>>>>>> d7d3174 (new push)
       });
     }
 
@@ -45,6 +85,7 @@ router.post('/register', async (req, res) => {
     const newUser = new User({
       username,
       email,
+<<<<<<< HEAD
       hashedPassword,
       displayName: username,
       xp: 0,
@@ -62,6 +103,14 @@ router.post('/register', async (req, res) => {
         soundEffects: true,
         dailyGoal: 30
       }
+=======
+      password: hashedPassword,
+      displayName: username,
+      xp: 0,
+      level: 1,
+      programs: [],
+      profile: {}
+>>>>>>> d7d3174 (new push)
     });
 
     await newUser.save();
@@ -88,7 +137,11 @@ router.post('/register', async (req, res) => {
         displayName: newUser.displayName,
         xp: newUser.xp,
         level: newUser.level,
+<<<<<<< HEAD
         learningPrograms: newUser.learningPrograms
+=======
+        programs: newUser.programs || []
+>>>>>>> d7d3174 (new push)
       }
     });
   } catch (error) {
@@ -110,9 +163,17 @@ router.post('/register', async (req, res) => {
 // Login route
 router.post('/login', async (req, res) => {
   try {
+<<<<<<< HEAD
     console.log('📝 Login request received:', { email: req.body.email });
     
     const { email, password } = req.body;
+=======
+    console.log("LOGIN ACTIVE");
+    console.log('📝 Login request received:', { email: req.body.email });
+    
+    const { password } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+>>>>>>> d7d3174 (new push)
 
     // Validation
     if (!email || !password) {
@@ -122,30 +183,65 @@ router.post('/login', async (req, res) => {
       });
     }
 
+<<<<<<< HEAD
     // Find user in MongoDB
     const user = await User.findOne({ email });
+=======
+    // Check MongoDB connection
+    if (mongoose.connection.readyState !== 1) {
+      console.log('❌ MongoDB not connected');
+      return res.status(503).json({ 
+        message: 'Database chưa sẵn sàng. Vui lòng thử lại sau.' 
+      });
+    }
+
+    // Find user in MongoDB (case-insensitive)
+    // Try exact match first (for old accounts that might not be lowercase)
+    let user = await User.findOne({ email: email });
+    
+    // If not found, try case-insensitive regex for backwards compatibility
+    if (!user) {
+      user = await User.findOne({ 
+        email: { $regex: new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } 
+      });
+    }
+    
+>>>>>>> d7d3174 (new push)
     if (!user) {
       console.log('❌ User not found:', email);
       return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
     }
 
     // Check password
+<<<<<<< HEAD
     if (!user.hashedPassword) {
+=======
+    if (!user.password) {
+>>>>>>> d7d3174 (new push)
       console.log('❌ User has no password (might be OAuth user):', email);
       return res.status(400).json({ 
         message: 'Vui lòng đăng nhập bằng Google' 
       });
     }
 
+<<<<<<< HEAD
     const isMatch = await bcrypt.compare(password, user.hashedPassword);
+=======
+    const isMatch = await bcrypt.compare(password, user.password);
+>>>>>>> d7d3174 (new push)
     if (!isMatch) {
       console.log('❌ Password mismatch for:', email);
       return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
     }
 
+<<<<<<< HEAD
     // Update last active date
     user.progress.lastActiveDate = new Date();
     await user.save();
+=======
+    // updatedAt sẽ tự động cập nhật qua middleware
+    // Không cần update manually
+>>>>>>> d7d3174 (new push)
 
     // Generate token
     const token = jwt.sign(
@@ -166,7 +262,11 @@ router.post('/login', async (req, res) => {
         displayName: user.displayName,
         xp: user.xp,
         level: user.level,
+<<<<<<< HEAD
         learningPrograms: user.learningPrograms
+=======
+        programs: user.programs || []
+>>>>>>> d7d3174 (new push)
       }
     });
   } catch (error) {
@@ -192,6 +292,7 @@ router.post('/auth/google', async (req, res) => {
         firebaseUid: googleId,
         xp: 0,
         level: 1,
+<<<<<<< HEAD
         progress: {
           completedLessons: [],
           currentStreak: 0,
@@ -205,6 +306,10 @@ router.post('/auth/google', async (req, res) => {
           soundEffects: true,
           dailyGoal: 30
         }
+=======
+        programs: [],
+        profile: {}
+>>>>>>> d7d3174 (new push)
       });
       
       await user.save();
@@ -230,7 +335,11 @@ router.post('/auth/google', async (req, res) => {
         displayName: user.displayName,
         xp: user.xp,
         level: user.level,
+<<<<<<< HEAD
         learningPrograms: user.learningPrograms
+=======
+        programs: user.programs || []
+>>>>>>> d7d3174 (new push)
       }
     });
   } catch (error) {
@@ -587,8 +696,13 @@ router.post('/submit-physics-lesson', async (req, res) => {
       user.programs.push(program);
     }
 
+<<<<<<< HEAD
     // Create lesson key
     const lessonKey = `${classId}-${chapterId}-${lessonId}`;
+=======
+    // Create lesson key. It should be a number to be consistent with challenges logic.
+    const lessonKey = classId * 1000 + lessonId;
+>>>>>>> d7d3174 (new push)
     
     // Update progress
     if (!program.progress) {
@@ -643,5 +757,145 @@ router.post('/submit-physics-lesson', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 module.exports = router;
 
+=======
+// Save physics game progress (Hành trình game Vật lý)
+router.post('/physics-game-progress/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { grade, completed, current } = req.body;
+
+    if (!userId || !grade) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Missing userId or grade' 
+      });
+    }
+
+    // Find user first
+    let user = await User.findOne({ 
+      $or: [
+        { email: userId },
+        { firebaseUid: userId },
+        { _id: userId }
+      ] 
+    });
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'User not found' 
+      });
+    }
+
+    // Save to PhysicsGameProgress collection
+    const progress = await PhysicsGameProgress.saveProgress(
+      user._id,
+      user.email,
+      parseInt(grade),
+      completed,
+      current
+    );
+
+    res.json({
+      success: true,
+      message: 'Game progress saved',
+      grade,
+      progress: {
+        completed: progress.completedGames,
+        current: progress.currentGame,
+        totalScore: progress.totalScore,
+        totalTrophies: progress.totalTrophies
+      }
+    });
+  } catch (error) {
+    console.error('❌ Save physics game progress error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+});
+
+// Get physics game progress for a specific grade
+router.get('/physics-game-progress/:userId/:grade', async (req, res) => {
+  try {
+    const { userId, grade } = req.params;
+
+    // Find user
+    let user = await User.findOne({ 
+      $or: [
+        { email: userId },
+        { firebaseUid: userId },
+        { _id: userId }
+      ] 
+    });
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'User not found' 
+      });
+    }
+
+    // Get progress from PhysicsGameProgress collection
+    const progress = await PhysicsGameProgress.getProgress(user._id, parseInt(grade));
+
+    res.json({
+      success: true,
+      grade,
+      progress
+    });
+  } catch (error) {
+    console.error('❌ Get physics game progress error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+});
+
+// Get all physics game progress for user
+router.get('/physics-game-progress/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find user
+    let user = await User.findOne({ 
+      $or: [
+        { email: userId },
+        { firebaseUid: userId },
+        { _id: userId }
+      ] 
+    });
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'User not found' 
+      });
+    }
+
+    // Get all progress from PhysicsGameProgress collection
+    const allProgress = await PhysicsGameProgress.getAllProgress(user._id);
+
+    res.json({
+      success: true,
+      allProgress
+    });
+  } catch (error) {
+    console.error('❌ Get all physics game progress error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+});
+
+module.exports = router;
+>>>>>>> d7d3174 (new push)

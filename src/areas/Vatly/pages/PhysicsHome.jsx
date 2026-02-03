@@ -14,9 +14,15 @@ const PhysicsHome = () => {
   const [loading, setLoading] = useState(true);
   const [computedStats, setComputedStats] = useState(null);
 
+<<<<<<< HEAD
   const handleLogout = async () => {
     try {
       await logout();
+=======
+  const handleLogout = () => {
+    try {
+      logout();
+>>>>>>> d7d3174 (new push)
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
@@ -75,6 +81,7 @@ const PhysicsHome = () => {
         return;
       }
 
+<<<<<<< HEAD
       const physicsProgram = user.programs?.find(p => p.programId === 'physics' && p.isActive);
       if (!physicsProgram) {
         navigate('/placement-test/physics');
@@ -82,6 +89,12 @@ const PhysicsHome = () => {
       }
 
       setProgramData(physicsProgram);
+=======
+      // Bỏ kiểm tra placement test - cho phép vào thẳng
+      const physicsProgram = user.programs?.find(p => p.programId === 'physics' && p.isActive);
+      
+      setProgramData(physicsProgram || { programId: 'physics', isActive: true });
+>>>>>>> d7d3174 (new push)
 
       try {
         setLoading(true);
@@ -298,7 +311,11 @@ const PhysicsHome = () => {
           </div>
 
           {/* Quick Actions */}
+<<<<<<< HEAD
           <div className="grid md:grid-cols-3 gap-4 mb-6">
+=======
+          <div className="grid md:grid-cols-4 gap-4 mb-6">
+>>>>>>> d7d3174 (new push)
             <button
               onClick={() => navigate('/program/physics/dashboard')}
               className="group bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
@@ -316,6 +333,57 @@ const PhysicsHome = () => {
             </button>
 
             <button
+<<<<<<< HEAD
+=======
+              onClick={() => navigate('/physics-tools')}
+              className="group bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <Zap className="w-6 h-6" />
+                </div>
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Công Cụ Vật Lý</h3>
+              <p className="text-cyan-100 text-sm">Máy tính & tra cứu</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/game-journey')}
+              className="group bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <Trophy className="w-6 h-6" />
+                </div>
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Hành trình Game</h3>
+              <p className="text-blue-100 text-sm">Chinh phục các trò chơi vật lý</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/interactive-lectures/physics/class6')}
+              className="group bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Thư Viện Bài Giảng</h3>
+              <p className="text-pink-100 text-sm">Video, tài liệu & câu hỏi dừa</p>
+            </button>
+
+            <button
+>>>>>>> d7d3174 (new push)
               onClick={() => navigate('/advanced-physics-challenge')}
               className="group bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
             >
@@ -330,6 +398,7 @@ const PhysicsHome = () => {
               <h3 className="text-xl font-bold mb-2">Thử thách</h3>
               <p className="text-orange-100 text-sm">Game vật lý tương tác</p>
             </button>
+<<<<<<< HEAD
 
             <button
               onClick={() => navigate('/profile')}
@@ -347,6 +416,10 @@ const PhysicsHome = () => {
               <p className="text-purple-100 text-sm">Xem thành tích của bạn</p>
             </button>
           </div>
+=======
+          </div>
+
+>>>>>>> d7d3174 (new push)
         </div>
       </section>
 

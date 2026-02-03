@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Node modules
 node_modules/
 
@@ -76,3 +77,6 @@ out/
 
 # Local envs
 local-*.env
+=======
+node_modules
+>>>>>>> d7d3174 (new push)

@@ -26,17 +26,24 @@ const Login = () => {
   };
 
   const handleGoogleLogin = async () => {
+<<<<<<< HEAD
     console.log('🔵 Google login button clicked');
+=======
+>>>>>>> d7d3174 (new push)
     setLoading(true);
     setError('');
     
     try {
+<<<<<<< HEAD
       console.log('🔵 Opening Google Sign-In popup...');
       
+=======
+>>>>>>> d7d3174 (new push)
       // Đăng nhập với Google
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
+<<<<<<< HEAD
       console.log('✅ Google Sign-In successful:', {
         email: user.email,
         uid: user.uid,
@@ -45,6 +52,9 @@ const Login = () => {
 
       // Gửi thông tin đến backend
       console.log('🔵 Sending user data to backend...');
+=======
+      // Gửi thông tin đến backend
+>>>>>>> d7d3174 (new push)
       const response = await fetch(`${API_BASE_URL}/auth/google-login`, {
         method: 'POST',
         headers: {
@@ -59,12 +69,18 @@ const Login = () => {
         })
       });
 
+<<<<<<< HEAD
       console.log('🔵 Backend response status:', response.status);
       const data = await response.json();
       console.log('🔵 Backend response data:', data);
       
       if (data.success) {
         console.log('✅ Login successful, saving user data...');
+=======
+      const data = await response.json();
+      
+      if (data.success) {
+>>>>>>> d7d3174 (new push)
         
         // Cập nhật user trong context và localStorage
         setUser(data.user);
@@ -73,16 +89,26 @@ const Login = () => {
         
         // Kiểm tra xem user đã có programs chưa
         if (data.user.programs && data.user.programs.length > 0) {
+<<<<<<< HEAD
           console.log('✅ User has programs, redirecting to program...');
+=======
+>>>>>>> d7d3174 (new push)
           const activeProgram = data.user.programs.find(p => p.isActive);
           if (activeProgram) {
             navigate(`/program/${activeProgram.programId}`);
           } else {
+<<<<<<< HEAD
             navigate('/');
           }
         } else {
           console.log('✅ No programs, redirecting to program selection...');
           navigate('/home');
+=======
+            navigate('/');  
+          }
+        } else {
+          navigate('/program-selection');
+>>>>>>> d7d3174 (new push)
         }
       } else {
         console.error('❌ Backend returned error:', data.message);
@@ -108,7 +134,10 @@ const Login = () => {
       setError(errorMessage);
     } finally {
       setLoading(false);
+<<<<<<< HEAD
       console.log('🔵 Login process finished');
+=======
+>>>>>>> d7d3174 (new push)
     }
   };
 
@@ -117,10 +146,21 @@ const Login = () => {
     setError('');
     setLoading(true);
 
+<<<<<<< HEAD
     try {
       await login(formData.email, formData.password);
       navigate('/');
     } catch (err) {
+=======
+    console.log('🔵 Login attempt:', { email: formData.email });
+
+    try {
+      const result = await login(formData.email, formData.password);
+      console.log('✅ Login successful:', result);
+      navigate('/program-selection');
+    } catch (err) {
+      console.error('❌ Login error:', err);
+>>>>>>> d7d3174 (new push)
       setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
     } finally {
       setLoading(false);

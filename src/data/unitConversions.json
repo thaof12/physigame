@@ -1,0 +1,193 @@
+{
+  "length": {
+    "name": "Độ dài",
+    "baseUnit": "m",
+    "units": {
+      "km": { "name": "Kilômét", "toBase": 1000 },
+      "m": { "name": "Mét", "toBase": 1 },
+      "dm": { "name": "Decimét", "toBase": 0.1 },
+      "cm": { "name": "Xentimét", "toBase": 0.01 },
+      "mm": { "name": "Milimét", "toBase": 0.001 },
+      "μm": { "name": "Micrômét", "toBase": 1e-6 },
+      "nm": { "name": "Nanômét", "toBase": 1e-9 },
+      "Å": { "name": "Angstrom", "toBase": 1e-10 },
+      "mile": { "name": "Dặm", "toBase": 1609.344 },
+      "yard": { "name": "Thước Anh", "toBase": 0.9144 },
+      "ft": { "name": "Feet (bộ)", "toBase": 0.3048 },
+      "in": { "name": "Inch (tấc)", "toBase": 0.0254 }
+    }
+  },
+  "mass": {
+    "name": "Khối lượng",
+    "baseUnit": "kg",
+    "units": {
+      "t": { "name": "Tấn", "toBase": 1000 },
+      "kg": { "name": "Kilôgam", "toBase": 1 },
+      "hg": { "name": "Hectôgam", "toBase": 0.1 },
+      "dag": { "name": "Đềcagam", "toBase": 0.01 },
+      "g": { "name": "Gam", "toBase": 0.001 },
+      "mg": { "name": "Miligam", "toBase": 1e-6 },
+      "μg": { "name": "Micrôgam", "toBase": 1e-9 },
+      "lb": { "name": "Pao (pound)", "toBase": 0.453592 },
+      "oz": { "name": "Ounce", "toBase": 0.0283495 }
+    }
+  },
+  "time": {
+    "name": "Thời gian",
+    "baseUnit": "s",
+    "units": {
+      "year": { "name": "Năm", "toBase": 31536000 },
+      "day": { "name": "Ngày", "toBase": 86400 },
+      "h": { "name": "Giờ", "toBase": 3600 },
+      "min": { "name": "Phút", "toBase": 60 },
+      "s": { "name": "Giây", "toBase": 1 },
+      "ms": { "name": "Miligiây", "toBase": 0.001 },
+      "μs": { "name": "Micrôgiây", "toBase": 1e-6 },
+      "ns": { "name": "Nanôgiây", "toBase": 1e-9 }
+    }
+  },
+  "area": {
+    "name": "Diện tích",
+    "baseUnit": "m²",
+    "units": {
+      "km²": { "name": "Kilômét vuông", "toBase": 1000000 },
+      "ha": { "name": "Hecta", "toBase": 10000 },
+      "m²": { "name": "Mét vuông", "toBase": 1 },
+      "dm²": { "name": "Decimét vuông", "toBase": 0.01 },
+      "cm²": { "name": "Xentimét vuông", "toBase": 0.0001 },
+      "mm²": { "name": "Milimét vuông", "toBase": 1e-6 }
+    }
+  },
+  "volume": {
+    "name": "Thể tích",
+    "baseUnit": "m³",
+    "units": {
+      "m³": { "name": "Mét khối", "toBase": 1 },
+      "dm³": { "name": "Decimét khối", "toBase": 0.001 },
+      "cm³": { "name": "Xentimét khối", "toBase": 1e-6 },
+      "mm³": { "name": "Milimét khối", "toBase": 1e-9 },
+      "L": { "name": "Lít", "toBase": 0.001 },
+      "mL": { "name": "Mililít", "toBase": 1e-6 }
+    }
+  },
+  "velocity": {
+    "name": "Vận tốc",
+    "baseUnit": "m/s",
+    "units": {
+      "km/h": { "name": "Kilômét/giờ", "toBase": 0.277778 },
+      "m/s": { "name": "Mét/giây", "toBase": 1 },
+      "cm/s": { "name": "Xentimét/giây", "toBase": 0.01 },
+      "mph": { "name": "Dặm/giờ", "toBase": 0.44704 },
+      "knot": { "name": "Hải lý/giờ", "toBase": 0.514444 }
+    }
+  },
+  "force": {
+    "name": "Lực",
+    "baseUnit": "N",
+    "units": {
+      "kN": { "name": "Kilônewton", "toBase": 1000 },
+      "N": { "name": "Newton", "toBase": 1 },
+      "dyne": { "name": "Dyne", "toBase": 1e-5 },
+      "kgf": { "name": "Kilôgam lực", "toBase": 9.80665 }
+    }
+  },
+  "pressure": {
+    "name": "Áp suất",
+    "baseUnit": "Pa",
+    "units": {
+      "GPa": { "name": "Gigapascal", "toBase": 1e9 },
+      "MPa": { "name": "Megapascal", "toBase": 1e6 },
+      "kPa": { "name": "Kilopascal", "toBase": 1000 },
+      "Pa": { "name": "Pascal", "toBase": 1 },
+      "bar": { "name": "Bar", "toBase": 100000 },
+      "atm": { "name": "Khí quyển", "toBase": 101325 },
+      "mmHg": { "name": "Milimét thủy ngân", "toBase": 133.322 },
+      "cmH2O": { "name": "Xentimét nước", "toBase": 98.0665 }
+    }
+  },
+  "energy": {
+    "name": "Năng lượng",
+    "baseUnit": "J",
+    "units": {
+      "GJ": { "name": "Gigajun", "toBase": 1e9 },
+      "MJ": { "name": "Megajun", "toBase": 1e6 },
+      "kJ": { "name": "Kilôjun", "toBase": 1000 },
+      "J": { "name": "Jun", "toBase": 1 },
+      "kWh": { "name": "Kilôoat giờ", "toBase": 3600000 },
+      "eV": { "name": "Electronvolt", "toBase": 1.602176634e-19 },
+      "cal": { "name": "Calo", "toBase": 4.184 },
+      "kcal": { "name": "Kilôcalo", "toBase": 4184 }
+    }
+  },
+  "power": {
+    "name": "Công suất",
+    "baseUnit": "W",
+    "units": {
+      "GW": { "name": "Gigaoat", "toBase": 1e9 },
+      "MW": { "name": "Megaoat", "toBase": 1e6 },
+      "kW": { "name": "Kilôoat", "toBase": 1000 },
+      "W": { "name": "Oat", "toBase": 1 },
+      "mW": { "name": "Milioat", "toBase": 0.001 },
+      "hp": { "name": "Mã lực", "toBase": 745.7 }
+    }
+  },
+  "temperature": {
+    "name": "Nhiệt độ",
+    "baseUnit": "K",
+    "special": true,
+    "conversions": {
+      "K_to_C": { "formula": "K - 273.15" },
+      "C_to_K": { "formula": "C + 273.15" },
+      "C_to_F": { "formula": "C * 9/5 + 32" },
+      "F_to_C": { "formula": "(F - 32) * 5/9" },
+      "K_to_F": { "formula": "(K - 273.15) * 9/5 + 32" },
+      "F_to_K": { "formula": "(F - 32) * 5/9 + 273.15" }
+    },
+    "units": {
+      "K": { "name": "Kenvin" },
+      "°C": { "name": "Độ C" },
+      "°F": { "name": "Độ F" }
+    }
+  },
+  "electricCurrent": {
+    "name": "Dòng điện",
+    "baseUnit": "A",
+    "units": {
+      "kA": { "name": "Kilôampe", "toBase": 1000 },
+      "A": { "name": "Ampe", "toBase": 1 },
+      "mA": { "name": "Miliampe", "toBase": 0.001 },
+      "μA": { "name": "Micrôampe", "toBase": 1e-6 }
+    }
+  },
+  "voltage": {
+    "name": "Điện áp",
+    "baseUnit": "V",
+    "units": {
+      "MV": { "name": "Megavolt", "toBase": 1e6 },
+      "kV": { "name": "Kilôvôn", "toBase": 1000 },
+      "V": { "name": "Vôn", "toBase": 1 },
+      "mV": { "name": "Milivôn", "toBase": 0.001 },
+      "μV": { "name": "Micrôvôn", "toBase": 1e-6 }
+    }
+  },
+  "resistance": {
+    "name": "Điện trở",
+    "baseUnit": "Ω",
+    "units": {
+      "MΩ": { "name": "Megaôm", "toBase": 1e6 },
+      "kΩ": { "name": "Kilôôm", "toBase": 1000 },
+      "Ω": { "name": "Ôm", "toBase": 1 },
+      "mΩ": { "name": "Miliôm", "toBase": 0.001 }
+    }
+  },
+  "frequency": {
+    "name": "Tần số",
+    "baseUnit": "Hz",
+    "units": {
+      "GHz": { "name": "Gigahéc", "toBase": 1e9 },
+      "MHz": { "name": "Megahéc", "toBase": 1e6 },
+      "kHz": { "name": "Kilôhéc", "toBase": 1000 },
+      "Hz": { "name": "Héc", "toBase": 1 }
+    }
+  }
+}

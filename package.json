@@ -23,8 +23,14 @@
     "firebase": "^12.4.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.547.0",
+<<<<<<< HEAD
     "mongodb": "^6.20.0",
     "mongoose": "^8.19.4",
+=======
+    "mogoose": "^0.0.1-security",
+    "mongodb": "^6.21.0",
+    "mongoose": "^8.20.2",
+>>>>>>> d7d3174 (new push)
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-draggable": "^4.5.0",

@@ -246,12 +246,18 @@ const PlacementTest = () => {
 
     try {
       if (!user || !user.email) {
+<<<<<<< HEAD
         console.error('User object:', user);
         throw new Error('Bạn cần đăng nhập để hoàn thành bài kiểm tra');
       }
 
       console.log('Submitting placement test for user:', user.email);
 
+=======
+        throw new Error('Bạn cần đăng nhập để hoàn thành bài kiểm tra');
+      }
+
+>>>>>>> d7d3174 (new push)
       // Lấy programId từ URL params
       const programNames = {
         chemistry: 'Hóa học',
@@ -262,6 +268,7 @@ const PlacementTest = () => {
 
       const selectedProgramName = programNames[programId] || 'Chương trình học';
 
+<<<<<<< HEAD
       console.log('Calling API with:', {
         userId: user.email,
         programId,
@@ -271,6 +278,8 @@ const PlacementTest = () => {
         placementTestTotal: totalQuestions
       });
 
+=======
+>>>>>>> d7d3174 (new push)
       // Gọi API để lưu kết quả và đăng ký chương trình
       const response = await fetch(`${API_BASE_URL}/users/enroll-program`, {
         method: 'POST',
@@ -289,6 +298,7 @@ const PlacementTest = () => {
 
       const data = await response.json();
 
+<<<<<<< HEAD
       console.log('API Response:', { status: response.status, data });
 
       if (!response.ok) {
@@ -298,11 +308,20 @@ const PlacementTest = () => {
 
       console.log('✅ Placement test submitted successfully');
 
+=======
+      if (!response.ok) {
+        throw new Error(data.message || 'Không thể lưu kết quả kiểm tra');
+      }
+
+>>>>>>> d7d3174 (new push)
       // Cập nhật user trong context với data từ server
       if (data.user) {
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
+<<<<<<< HEAD
         console.log('✅ User data updated from server');
+=======
+>>>>>>> d7d3174 (new push)
       }
 
       // Hiển thị kết quả
@@ -316,7 +335,10 @@ const PlacementTest = () => {
       navigate(`/program/${programId}`);
 
     } catch (error) {
+<<<<<<< HEAD
       console.error("Error submitting placement test:", error);
+=======
+>>>>>>> d7d3174 (new push)
       alert(`❌ Có lỗi xảy ra: ${error.message}\n\nVui lòng thử lại sau.`);
     } finally {
       setLoading(false);
