@@ -75,11 +75,7 @@ const Register = () => {
         
         // Redirect đến program selection
         console.log('✅ Redirecting to program selection...');
-<<<<<<< HEAD
-        navigate('/home');
-=======
         navigate('/program-selection');
->>>>>>> d7d3174 (new push)
       } else {
         console.error('❌ Backend returned error:', data.message);
         setError(data.message || 'Đăng ký thất bại');
@@ -136,11 +132,7 @@ const Register = () => {
 
     try {
       await register(formData.username, formData.email, formData.password);
-<<<<<<< HEAD
-      navigate('/');
-=======
       navigate('/program-selection');
->>>>>>> d7d3174 (new push)
     } catch (err) {
       setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
     } finally {

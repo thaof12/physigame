@@ -97,8 +97,6 @@ const userSchema = new mongoose.Schema({
     }
   }],
   
-<<<<<<< HEAD
-=======
   // Physics Games Progress - Tiến độ hành trình game Vật lý theo lớp
   physicsGameProgress: {
     type: Map,
@@ -112,7 +110,6 @@ const userSchema = new mongoose.Schema({
     default: new Map() // Key: grade (6, 7, 8, 9, 10, 11, 12), Value: { completed, current }
   },
   
->>>>>>> d7d3174 (new push)
   createdAt: {
     type: Date,
     default: Date.now
@@ -139,143 +136,10 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Methods - XP & Level
-userSchema.methods.addXP = function(amount) {
-  this.xp += amount;
-  const newLevel = Math.floor(this.xp / 100) + 1;
-  const leveledUp = newLevel > this.level;
-  this.level = newLevel;
-  
-  return { xp: this.xp, level: this.level, leveledUp };
-};
-
-// Methods - Program
-userSchema.methods.enrollProgram = function(programId, programName, currentClass = null) {
-  const existing = this.programs.find(p => p.programId === programId);
-  if (existing) return existing;
-
-    const newProgram = {
-    programId,
-    programName,
-    currentClass: currentClass, // Lớp được chọn khi đăng ký
-    enrolledAt: new Date(),
-    progress: {
-      completedLessons: [],
-      totalScore: 0,
-      lastStudyDate: null
-    }
-  };
-
-  this.programs.push(newProgram);
-  return newProgram;
-};
-
-userSchema.methods.updateProgramProgress = function(programId, classId, lessonId, score) {
-  let program = this.programs.find(p => p.programId === programId);
-  
-  // Nếu chưa có program, tự động tạo mới
-  if (!program) {
-    const programNames = {
-      chemistry: 'Hóa học',
-      physics: 'Vật lý',
-      biology: 'Sinh học',
-      math: 'Toán học'
-    };
-    
-    const newProgram = {
-      programId: programId,
-      programName: programNames[programId] || programId,
-      currentClass: parseInt(classId),
-      isActive: true,
-      placementTestCompleted: false,
-      enrolledAt: new Date(),
-      progress: {
-        completedLessons: [],
-        totalScore: 0,
-        lastStudyDate: null
-      }
-    };
-    
-    this.programs.push(newProgram);
-    // Lấy lại reference từ array sau khi push
-    program = this.programs[this.programs.length - 1];
-    console.log('✅ Auto-created program:', programId, 'with lesson:', lessonId);
-  }
-
-  // Cập nhật lớp và bài hiện tại
-  program.currentClass = parseInt(classId);
-  
-  console.log('📝 Updating program:', {
-    programId,
-    currentClass: program.currentClass
-  });
-  
-  // Tạo unique ID cho bài học: classId * 1000 + lessonId
-  // Ví dụ: Lớp 8, Bài 1 -> 8001, Lớp 9, Bài 1 -> 9001
-  const uniqueLessonId = parseInt(classId) * 1000 + parseInt(lessonId);
-  
-  // Thêm bài đã hoàn thành (kiểm tra trùng)
-  if (!program.progress.completedLessons) {
-    program.progress.completedLessons = [];
-  }
-  
-  if (lessonId && !program.progress.completedLessons.includes(uniqueLessonId)) {
-    program.progress.completedLessons.push(uniqueLessonId);
-    console.log('✅ Added completed lesson:', uniqueLessonId);
-  }
-  
-  // Cập nhật điểm
-  if (score) {
-    program.progress.totalScore = (program.progress.totalScore || 0) + score;
-  }
-  
-  program.progress.lastStudyDate = new Date();
-  
-  // Đánh dấu programs array đã thay đổi để Mongoose lưu đúng
-  this.markModified('programs');
-  
-  return program;
-};
-
-// Update lesson stars based on score percentage
-userSchema.methods.updateLessonStars = function(programId, classId, lessonId, percentage) {
-  const program = this.programs.find(p => p.programId === programId);
-  if (!program) return null;
-
-  const uniqueLessonId = parseInt(classId) * 1000 + parseInt(lessonId);
-  
-  // Initialize lessonStars Map if not exists
-  if (!program.progress.lessonStars) {
-    program.progress.lessonStars = new Map();
-  }
-
-  // Calculate stars: >=50%: 1 star, >=80%: 2 stars, 100%: 3 stars
-  let stars = 0;
-  if (percentage >= 100) {
-    stars = 3;
-  } else if (percentage >= 80) {
-    stars = 2;
-  } else if (percentage >= 50) {
-    stars = 1;
-  }
-
-  // Only update if new stars are better than existing
-  const currentStars = program.progress.lessonStars.get(uniqueLessonId.toString()) || 0;
-  if (stars > currentStars) {
-    program.progress.lessonStars.set(uniqueLessonId.toString(), stars);
-    console.log(`⭐ Updated lesson ${uniqueLessonId} stars: ${currentStars} → ${stars}`);
-  }
-
-  this.markModified('programs');
-  return stars;
-};
-
 userSchema.methods.getProgram = function(programId) {
   return this.programs.find(p => p.programId === programId);
 };
 
-<<<<<<< HEAD
-=======
 // Methods - Physics Games Progress
 userSchema.methods.savePhysicsGameProgress = function(grade, completed, current) {
   if (!this.physicsGameProgress) {
@@ -314,5 +178,4 @@ userSchema.methods.getAllPhysicsGameProgress = function() {
   return result;
 };
 
->>>>>>> d7d3174 (new push)
 module.exports = mongoose.model('User', userSchema);

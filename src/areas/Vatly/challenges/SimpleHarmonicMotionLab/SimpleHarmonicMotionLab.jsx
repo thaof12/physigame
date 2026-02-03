@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-<<<<<<< HEAD
-import { Home, Play, RotateCw, Trophy, Activity, Settings } from 'lucide-react';
-=======
 import { useNavigate } from 'react-router-dom';
 import { Home, Play, RotateCw, Trophy, Activity, Settings, ArrowLeft } from 'lucide-react';
 import { useGameCompletion } from '../../../../hooks/useGameCompletion';
 import GameCompletionModal from '../../../../components/GameCompletionModal/GameCompletionModal';
->>>>>>> d7d3174 (new push)
 import './SimpleHarmonicMotionLab.css';
 
 /**
@@ -15,9 +11,6 @@ import './SimpleHarmonicMotionLab.css';
  * Physics: x = A*cos(ωt + φ), v = -Aω*sin(ωt + φ), a = -Aω²*cos(ωt + φ)
  */
 
-<<<<<<< HEAD
-const SimpleHarmonicMotionLab = () => {
-=======
 const GAME_ID = 'lop11-c1-1';
 const GRADE = 11;
 const CHAPTER = 1;
@@ -25,15 +18,10 @@ const GAME_TITLE = 'Simple Harmonic Motion Lab';
 
 const SimpleHarmonicMotionLab = () => {
   const navigate = useNavigate();
->>>>>>> d7d3174 (new push)
   const canvasRef = useRef(null);
   const graphRef = useRef(null);
   const animationRef = useRef(null);
 
-<<<<<<< HEAD
-  const [gameState, setGameState] = useState('menu'); // menu, playing, paused, result
-  const [mode, setMode] = useState('spring'); // spring, pendulum
-=======
   // Game completion hook
   const {
     isCompleted: alreadyCompleted,
@@ -53,7 +41,6 @@ const SimpleHarmonicMotionLab = () => {
   const [gameState, setGameState] = useState('menu'); // menu, playing, paused, result
   const [mode, setMode] = useState('spring'); // spring, pendulum
   const [completionResult, setCompletionResult] = useState(null);
->>>>>>> d7d3174 (new push)
   
   // Spring parameters
   const [mass, setMass] = useState(0.5); // kg
@@ -457,11 +444,7 @@ const SimpleHarmonicMotionLab = () => {
   };
 
   // Check prediction
-<<<<<<< HEAD
-  const checkPrediction = () => {
-=======
   const checkPrediction = async () => {
->>>>>>> d7d3174 (new push)
     if (!targetValues) return;
     
     const periodError = Math.abs(parseFloat(userPrediction.period) - targetValues.period) / targetValues.period;
@@ -471,21 +454,6 @@ const SimpleHarmonicMotionLab = () => {
     const avgError = (periodError + frequencyError + velocityError) / 3;
     const isPerfect = avgError < 0.05;
     
-<<<<<<< HEAD
-=======
-    // Calculate score (0-100)
-    const score = Math.max(0, Math.round((1 - avgError) * 100));
-    
->>>>>>> d7d3174 (new push)
-    setStats(prev => ({
-      experimentsRun: prev.experimentsRun + 1,
-      perfectPredictions: prev.perfectPredictions + (isPerfect ? 1 : 0),
-      averageError: (prev.averageError * prev.experimentsRun + avgError * 100) / (prev.experimentsRun + 1)
-    }));
-    
-    setShowResult(true);
-<<<<<<< HEAD
-=======
 
     // Complete game if score >= 50
     if (score >= 50) {
@@ -502,7 +470,6 @@ const SimpleHarmonicMotionLab = () => {
       });
       setCompletionResult(result);
     }
->>>>>>> d7d3174 (new push)
   };
 
   // Return to menu
@@ -512,10 +479,6 @@ const SimpleHarmonicMotionLab = () => {
     resetSimulation();
   };
 
-<<<<<<< HEAD
-  return (
-    <div className="shm-lab-container">
-=======
   // Return to game journey
   const goBack = () => {
     navigate('/game-journey');
@@ -541,26 +504,10 @@ const SimpleHarmonicMotionLab = () => {
         gameTitle={GAME_TITLE}
       />
 
->>>>>>> d7d3174 (new push)
       {/* Menu */}
       {gameState === 'menu' && (
         <div className="shm-menu">
           <div className="shm-menu-content">
-<<<<<<< HEAD
-=======
-            <button className="shm-back-btn" onClick={goBack}>
-              <ArrowLeft size={20} />
-              Quay lại
-            </button>
-            
->>>>>>> d7d3174 (new push)
-            <div className="shm-title">
-              <Activity className="shm-title-icon" />
-              <h1>Simple Harmonic Motion Lab</h1>
-            </div>
-            
-<<<<<<< HEAD
-=======
             {alreadyCompleted && (
               <div className="shm-completed-badge">
                 <Trophy size={20} />
@@ -568,7 +515,6 @@ const SimpleHarmonicMotionLab = () => {
               </div>
             )}
             
->>>>>>> d7d3174 (new push)
             <p className="shm-description">
               Khám phá dao động điều hòa qua thí nghiệm với lò xo và con lắc đơn.
               Quan sát đồ thị chuyển động và dự đoán các đại lượng vật lý.

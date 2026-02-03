@@ -28,11 +28,6 @@ router.get('/user/:userId', async (req, res) => {
     // Get all challenges
     const challenges = await Challenge.find().sort({ id: 1 });
     
-<<<<<<< HEAD
-    // Find chemistry program progress
-    const chemistryProgram = user.programs.find(p => p.programId === 'chemistry');
-    const completedLessons = chemistryProgram?.progress?.completedLessons || [];
-=======
     // Get all completed lessons from all programs
     const completedLessons = user.programs.reduce((acc, program) => {
       if (program.progress && program.progress.completedLessons) {
@@ -40,7 +35,6 @@ router.get('/user/:userId', async (req, res) => {
       }
       return acc;
     }, []);
->>>>>>> d7d3174 (new push)
     
     // Debug log
     console.log('🔍 Checking unlock status for user:', userId);

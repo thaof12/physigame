@@ -2,13 +2,9 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-<<<<<<< HEAD
-const User = require('../models/User.cjs');
-=======
 const mongoose = require('mongoose');
 const User = require('../models/User.cjs');
 const PhysicsGameProgress = require('../models/PhysicsGameProgress.cjs');
->>>>>>> d7d3174 (new push)
 
 // Register route
 router.post('/register', async (req, res) => {
@@ -18,12 +14,8 @@ router.post('/register', async (req, res) => {
       email: req.body.email 
     });
     
-<<<<<<< HEAD
-    const { username, email, password, isGoogleAuth } = req.body;
-=======
     const { username, password, isGoogleAuth } = req.body;
     const email = req.body.email?.toLowerCase().trim();
->>>>>>> d7d3174 (new push)
 
     // Validation
     if (!username || !email || (!password && !isGoogleAuth)) {
@@ -33,18 +25,6 @@ router.post('/register', async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
-    // Check if user exists in MongoDB
-    const existingUser = await User.findOne({ 
-      $or: [{ email }, { username }] 
-    });
-    
-    if (existingUser) {
-      console.log('❌ User already exists:', email);
-      const field = existingUser.email === email ? 'Email' : 'Tên người dùng';
-      return res.status(400).json({ 
-        message: `${field} đã được sử dụng` 
-=======
     // Check MongoDB connection
     if (mongoose.connection.readyState !== 1) {
       console.log('❌ MongoDB not connected');
@@ -71,7 +51,6 @@ router.post('/register', async (req, res) => {
       console.log('❌ User already exists:', email);
       return res.status(400).json({ 
         message: 'Email đã được sử dụng' 
->>>>>>> d7d3174 (new push)
       });
     }
 
@@ -85,32 +64,12 @@ router.post('/register', async (req, res) => {
     const newUser = new User({
       username,
       email,
-<<<<<<< HEAD
-      hashedPassword,
-      displayName: username,
-      xp: 0,
-      level: 1,
-      progress: {
-        completedLessons: [],
-        currentStreak: 0,
-        totalPoints: 0,
-        totalStudyTime: 0
-      },
-      learningPrograms: [],
-      achievements: [],
-      settings: {
-        notifications: true,
-        soundEffects: true,
-        dailyGoal: 30
-      }
-=======
       password: hashedPassword,
       displayName: username,
       xp: 0,
       level: 1,
       programs: [],
       profile: {}
->>>>>>> d7d3174 (new push)
     });
 
     await newUser.save();
@@ -137,11 +96,7 @@ router.post('/register', async (req, res) => {
         displayName: newUser.displayName,
         xp: newUser.xp,
         level: newUser.level,
-<<<<<<< HEAD
-        learningPrograms: newUser.learningPrograms
-=======
         programs: newUser.programs || []
->>>>>>> d7d3174 (new push)
       }
     });
   } catch (error) {
@@ -163,17 +118,11 @@ router.post('/register', async (req, res) => {
 // Login route
 router.post('/login', async (req, res) => {
   try {
-<<<<<<< HEAD
-    console.log('📝 Login request received:', { email: req.body.email });
-    
-    const { email, password } = req.body;
-=======
     console.log("LOGIN ACTIVE");
     console.log('📝 Login request received:', { email: req.body.email });
     
     const { password } = req.body;
     const email = req.body.email?.toLowerCase().trim();
->>>>>>> d7d3174 (new push)
 
     // Validation
     if (!email || !password) {
@@ -183,10 +132,6 @@ router.post('/login', async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
-    // Find user in MongoDB
-    const user = await User.findOne({ email });
-=======
     // Check MongoDB connection
     if (mongoose.connection.readyState !== 1) {
       console.log('❌ MongoDB not connected');
@@ -206,42 +151,27 @@ router.post('/login', async (req, res) => {
       });
     }
     
->>>>>>> d7d3174 (new push)
     if (!user) {
       console.log('❌ User not found:', email);
       return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
     }
 
     // Check password
-<<<<<<< HEAD
-    if (!user.hashedPassword) {
-=======
     if (!user.password) {
->>>>>>> d7d3174 (new push)
       console.log('❌ User has no password (might be OAuth user):', email);
       return res.status(400).json({ 
         message: 'Vui lòng đăng nhập bằng Google' 
       });
     }
 
-<<<<<<< HEAD
-    const isMatch = await bcrypt.compare(password, user.hashedPassword);
-=======
     const isMatch = await bcrypt.compare(password, user.password);
->>>>>>> d7d3174 (new push)
     if (!isMatch) {
       console.log('❌ Password mismatch for:', email);
       return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
     }
 
-<<<<<<< HEAD
-    // Update last active date
-    user.progress.lastActiveDate = new Date();
-    await user.save();
-=======
     // updatedAt sẽ tự động cập nhật qua middleware
     // Không cần update manually
->>>>>>> d7d3174 (new push)
 
     // Generate token
     const token = jwt.sign(
@@ -262,11 +192,7 @@ router.post('/login', async (req, res) => {
         displayName: user.displayName,
         xp: user.xp,
         level: user.level,
-<<<<<<< HEAD
-        learningPrograms: user.learningPrograms
-=======
         programs: user.programs || []
->>>>>>> d7d3174 (new push)
       }
     });
   } catch (error) {
@@ -292,24 +218,8 @@ router.post('/auth/google', async (req, res) => {
         firebaseUid: googleId,
         xp: 0,
         level: 1,
-<<<<<<< HEAD
-        progress: {
-          completedLessons: [],
-          currentStreak: 0,
-          totalPoints: 0,
-          totalStudyTime: 0
-        },
-        learningPrograms: [],
-        achievements: [],
-        settings: {
-          notifications: true,
-          soundEffects: true,
-          dailyGoal: 30
-        }
-=======
         programs: [],
         profile: {}
->>>>>>> d7d3174 (new push)
       });
       
       await user.save();
@@ -335,11 +245,7 @@ router.post('/auth/google', async (req, res) => {
         displayName: user.displayName,
         xp: user.xp,
         level: user.level,
-<<<<<<< HEAD
-        learningPrograms: user.learningPrograms
-=======
         programs: user.programs || []
->>>>>>> d7d3174 (new push)
       }
     });
   } catch (error) {
@@ -696,13 +602,8 @@ router.post('/submit-physics-lesson', async (req, res) => {
       user.programs.push(program);
     }
 
-<<<<<<< HEAD
-    // Create lesson key
-    const lessonKey = `${classId}-${chapterId}-${lessonId}`;
-=======
     // Create lesson key. It should be a number to be consistent with challenges logic.
     const lessonKey = classId * 1000 + lessonId;
->>>>>>> d7d3174 (new push)
     
     // Update progress
     if (!program.progress) {
@@ -757,10 +658,6 @@ router.post('/submit-physics-lesson', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-module.exports = router;
-
-=======
 // Save physics game progress (Hành trình game Vật lý)
 router.post('/physics-game-progress/:userId', async (req, res) => {
   try {
@@ -898,4 +795,3 @@ router.get('/physics-game-progress/:userId', async (req, res) => {
 });
 
 module.exports = router;
->>>>>>> d7d3174 (new push)

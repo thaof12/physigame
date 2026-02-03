@@ -1,12 +1,8 @@
 const express = require('express');
 const Lesson = require('../models/Lesson.cjs');
 const router = express.Router();
-<<<<<<< HEAD
-
-=======
 const authMiddleware = require('../middleware/auth.js');
 const path = require('path');
->>>>>>> d7d3174 (new push)
 // Get all lessons
 router.get('/', async (req, res) => {
   try {
@@ -92,57 +88,13 @@ router.get('/class/:classId/chapter/:chapterId', async (req, res) => {
       classId: parseInt(req.params.classId),
       chapterId: parseInt(req.params.chapterId)
     }).sort({ order: 1 });
-<<<<<<< HEAD
-
-=======
     
->>>>>>> d7d3174 (new push)
     res.json(lessons);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-<<<<<<< HEAD
-// Get specific lesson by classId, chapterId, lessonId
-router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, res) => {
-  try {
-    const { classId, chapterId, lessonId } = req.params;
-    const subject = req.query.subject || 'chemistry'; // Default to chemistry for backward compatibility
-    
-    // Try to find lesson in MongoDB
-    const lesson = await Lesson.findOne({ 
-      classId: parseInt(classId),
-      chapterId: parseInt(chapterId),
-      lessonId: parseInt(lessonId)
-    });
-    
-    if (lesson) {
-      return res.json(lesson);
-    }
-    
-    // If not found in MongoDB, try to load from file system
-    console.log(`📂 Attempting to load lesson from file: ${subject}/class${classId}/lesson${lessonId}`);
-    
-    try {
-      let lessonData;
-      if (subject === 'physics') {
-        lessonData = require(`../areas/Vatly/class${classId}/lesson${lessonId}.cjs`);
-      } else {
-        lessonData = require(`../areas/Hoahoc/class${classId}/lesson${lessonId}.cjs`);
-      }
-      
-      if (lessonData) {
-        console.log('✅ Loaded lesson from file system');
-        return res.json(lessonData);
-      }
-    } catch (fileError) {
-      console.log('⚠️ Could not load from file system:', fileError.message);
-    }
-    
-    // If still not found, return 404
-    return res.status(404).json({ message: 'Lesson not found' });
-=======
 // Get specific lesson by classId, chapterId, lessonId (per-chapter)
 router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, res) => {
   try {
@@ -181,7 +133,6 @@ router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, re
       // For now, we just return an error as the user is focused on file-based data.
       return res.status(500).json({ message: `Could not load lesson data for class ${classId}.` });
     }
->>>>>>> d7d3174 (new push)
   } catch (error) {
     console.error('❌ Error fetching lesson:', error);
     res.status(500).json({ message: error.message });

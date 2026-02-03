@@ -32,61 +32,12 @@ const ProgramSelection = () => {
       highlights: ['Mô phỏng vật lý', 'Game tương tác', 'Thí nghiệm ảo']
     },
     {
-<<<<<<< HEAD
-=======
-      id: 'interactive-lectures',
-      name: 'Thư Viện Bài Giảng',
-      icon: '📚',
-      description: 'Xem video bài giảng, đọc tài liệu chi tiết và trả lời câu hỏi pop-up để kiểm tra mức độ hiểu bài ngay lập tức.',
-      gradient: 'from-orange-500 to-red-600',
-      hoverGradient: 'from-orange-600 to-red-700',
-      available: true,
-      grades: [6, 7, 8, 9, 10, 11, 12],
-      totalLessons: 85,
-      highlights: ['Video HD', 'Tài liệu chi tiết', 'Câu hỏi pop-up']
-    },
-    {
->>>>>>> d7d3174 (new push)
-      id: 'biology',
-      name: 'Sinh học',
-      icon: '🧬',
-      description: 'Khám phá sự sống từ tế bào đến sinh thái, hiểu về cơ thể người, di truyền học và đa dạng sinh học.',
-      gradient: 'from-emerald-500 to-green-600',
-      hoverGradient: 'from-emerald-600 to-green-700',
-      available: false,
-      grades: [8, 9, 10, 11, 12],
-      totalLessons: 130,
-      highlights: ['Hình ảnh 3D', 'Video sinh học', 'Thực hành quan sát']
-    },
-    {
-      id: 'math',
-      name: 'Toán học',
-      icon: '📐',
-      description: 'Phát triển tư duy logic và giải quyết vấn đề qua đại số, hình học, giải tích và xác suất thống kê.',
-      gradient: 'from-purple-500 to-pink-600',
-      hoverGradient: 'from-purple-600 to-pink-700',
-      available: false,
-      grades: [8, 9, 10, 11, 12],
-      totalLessons: 160,
-      highlights: ['Công cụ vẽ đồ thị', 'Bài tập tự luyện', 'Lời giải chi tiết']
-    }
-  ];
-
-  const handleProgramSelect = (program) => {
-    if (!program.available) {
-      alert(`Chương trình ${program.name} sắp ra mắt!`);
-      return;
-    }
-
-<<<<<<< HEAD
-=======
     // Interactive Lectures - không cần đăng nhập (hoặc có thể điều chỉnh sau)
     if (program.id === 'interactive-lectures') {
       navigate('/interactive-lectures');
       return;
     }
 
->>>>>>> d7d3174 (new push)
     if (!user) {
       // Chưa đăng nhập -> chuyển đến trang login
       // Nếu là vật lý thì chuyển đến trang vật lý, còn không thì đến placement test

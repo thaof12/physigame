@@ -1,57 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-<<<<<<< HEAD
-=======
-import axios from 'axios';
-import { API_BASE_URL } from '../../../config/api';
->>>>>>> d7d3174 (new push)
-import { ArrowLeft, BookOpen, Trophy, Lock } from 'lucide-react';
-import { physicsLessons, getLessonStats } from '../data/physicsLessons';
-
-const PhysicsClassDashboard = () => {
-  const { classId } = useParams();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [userProgress, setUserProgress] = useState({});
-
-  useEffect(() => {
-<<<<<<< HEAD
-    // Simulate loading và lấy progress từ localStorage hoặc backend
-    const loadProgress = async () => {
-      // Load from localStorage first
-      const savedProgress = localStorage.getItem(`physics-progress-${classId}`);
-      if (savedProgress) {
-        setUserProgress(JSON.parse(savedProgress));
-      }
-      
-      // Then try to load from backend
-      try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user?.email || user?.uid) {
-          const userId = user.email || user.uid;
-          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/users/profile/${userId}`);
-          
-          if (response.ok) {
-            const userData = await response.json();
-            const physicsProgram = userData.programs?.find(p => p.programId === 'physics');
-            
-            if (physicsProgram?.progress?.completedLessons) {
-              // Convert completed lessons array to progress object
-              const progressObj = {};
-              physicsProgram.progress.completedLessons.forEach(lessonKey => {
-                progressObj[lessonKey] = 'completed';
-              });
-              setUserProgress(progressObj);
-              localStorage.setItem(`physics-progress-${classId}`, JSON.stringify(progressObj));
-            }
-          }
-        }
-      } catch (error) {
-        console.log('Could not load progress from backend:', error);
-      }
-      
-      setTimeout(() => setLoading(false), 500);
-=======
     const loadProgress = async () => {
       try {
         const user = JSON.parse(localStorage.getItem('user'));
@@ -79,7 +27,6 @@ const PhysicsClassDashboard = () => {
       } finally {
         setLoading(false);
       }
->>>>>>> d7d3174 (new push)
     };
     
     loadProgress();

@@ -1,9 +1,5 @@
 // Vật lý Lớp 8
 module.exports = [
-<<<<<<< HEAD
-  require('./lesson1.cjs')
-];
-=======
   require('./lesson1.cjs'),
   require('./lesson2.cjs'),
   require('./lesson3.cjs'),
@@ -24,4 +20,3 @@ module.exports = [
   require('./lesson18.cjs'),
   require('./lesson19.cjs')
 ];
->>>>>>> d7d3174 (new push)

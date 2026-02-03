@@ -17,22 +17,11 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       const savedUser = localStorage.getItem('user');
       
-<<<<<<< HEAD
-      console.log('🔍 Checking auth on mount:', { 
-        hasToken: !!token, 
-        hasSavedUser: !!savedUser 
-      });
-      
-=======
->>>>>>> d7d3174 (new push)
       if (token && savedUser) {
         try {
           const userData = JSON.parse(savedUser);
           setUser(userData);
-<<<<<<< HEAD
           console.log('✅ User restored from localStorage:', userData.email);
-=======
->>>>>>> d7d3174 (new push)
           
           // Optionally verify token is still valid by fetching fresh user data
           // This ensures data is up-to-date after reload
@@ -43,22 +32,6 @@ export const AuthProvider = ({ children }) => {
               if (response.data) {
                 localStorage.setItem('user', JSON.stringify(response.data));
                 setUser(response.data);
-<<<<<<< HEAD
-                console.log('✅ User data refreshed from server');
-              }
-            }
-          } catch (refreshError) {
-            console.warn('⚠️ Could not refresh user data, using cached data:', refreshError.message);
-            // Keep using cached data if refresh fails (e.g., offline)
-          }
-        } catch (error) {
-          console.error('❌ Error parsing user data:', error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-        }
-      } else {
-        console.log('ℹ️ No saved session found');
-=======
               }
             }
           } catch (refreshError) {
@@ -68,7 +41,6 @@ export const AuthProvider = ({ children }) => {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
         }
->>>>>>> d7d3174 (new push)
       }
       setLoading(false);
     };
@@ -77,33 +49,23 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-<<<<<<< HEAD
-    try {
-      const response = await api.post('/users/login', { email, password });
-=======
     console.log('🔵 AuthContext login called:', { email });
     try {
       console.log('🔵 Sending login request to API...');
       const response = await api.post('/users/login', { email, password });
       console.log('✅ API response:', response.data);
       
->>>>>>> d7d3174 (new push)
       const { token, user: userData } = response.data;
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
-<<<<<<< HEAD
-      return userData;
-    } catch (error) {
-=======
       console.log('✅ Login completed, user set:', userData);
       return userData;
     } catch (error) {
       console.error('❌ Login error in AuthContext:', error);
       console.error('❌ Error response:', error.response?.data);
->>>>>>> d7d3174 (new push)
       throw new Error(error.response?.data?.message || 'Đăng nhập thất bại');
     }
   };
@@ -130,15 +92,12 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-<<<<<<< HEAD
-=======
     
     // Xóa tất cả game progress keys để reset khi đăng nhập user mới
     for (let i = 6; i <= 12; i++) {
       localStorage.removeItem(`physics-games-progress-grade-${i}`);
     }
     
->>>>>>> d7d3174 (new push)
     setUser(null);
   };
 

@@ -1,26 +1,3 @@
-<<<<<<< HEAD
-const jwt = require('jsonwebtoken');
-
-const authMiddleware = (req, res, next) => {
-  try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-
-    if (!token) {
-      return res.status(401).json({ message: 'No authentication token' });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    req.userId = decoded.userId;
-    req.email = decoded.email;
-    
-    next();
-  } catch (error) {
-    res.status(401).json({ message: 'Invalid token' });
-  }
-};
-
-module.exports = authMiddleware;
-=======
 // File: middleware/auth.js (Phiên bản đã sửa lỗi ES Module)
 import jwt from 'jsonwebtoken'; // ⬅️ Dùng import thay cho require
 import mongoose from 'mongoose'; // ⬅️ Dùng import thay cho require
@@ -71,4 +48,3 @@ const authMiddleware = async (req, res, next) => {
 };
 
 export default authMiddleware; // ⬅️ Dùng export default thay cho module.exports
->>>>>>> d7d3174 (new push)
