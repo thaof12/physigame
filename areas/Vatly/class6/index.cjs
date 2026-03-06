@@ -2,5 +2,13 @@
 module.exports = [
   require('./lesson1.cjs'),
   require('./lesson2.cjs'),
+<<<<<<< HEAD
   require('./lesson3.cjs')
 ];
+=======
+  require('./lesson3.cjs'),
+  require('./lesson4.cjs'),
+  require('./lesson5.cjs'),
+  require('./lesson6.cjs')
+];
+>>>>>>> d7d3174 (new push)

@@ -1,7 +1,12 @@
 const express = require('express');
 const Lesson = require('../models/Lesson.cjs');
 const router = express.Router();
+<<<<<<< HEAD
 
+=======
+const authMiddleware = require('../middleware/auth.js');
+const path = require('path');
+>>>>>>> d7d3174 (new push)
 // Get all lessons
 router.get('/', async (req, res) => {
   try {
@@ -87,13 +92,18 @@ router.get('/class/:classId/chapter/:chapterId', async (req, res) => {
       classId: parseInt(req.params.classId),
       chapterId: parseInt(req.params.chapterId)
     }).sort({ order: 1 });
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> d7d3174 (new push)
     res.json(lessons);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
+<<<<<<< HEAD
 // Get specific lesson by classId, chapterId, lessonId
 router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, res) => {
   try {
@@ -132,6 +142,46 @@ router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, re
     
     // If still not found, return 404
     return res.status(404).json({ message: 'Lesson not found' });
+=======
+// Get specific lesson by classId, chapterId, lessonId (per-chapter)
+router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, res) => {
+  try {
+    const { classId, chapterId, lessonId } = req.params;
+    const subject = req.query.subject || 'physics'; // Default to physics
+
+    console.log(`📂 Attempting to load lesson: subject=${subject}, class=${classId}, chapter=${chapterId}, lesson=${lessonId} (in-chapter index)`);
+
+    try {
+      // Sử dụng path.resolve để đảm bảo đường dẫn chính xác từ root của project
+      const basePath = subject === 'physics' ? 'Vatly' : 'Hoahoc';
+      const lessonFilePath = path.resolve(__dirname, '..', 'areas', basePath, `class${classId}`, 'index.cjs');
+      
+      console.log(`📁 Loading from: ${lessonFilePath}`);
+      
+      // Xóa cache để đảm bảo load file mới nhất
+      delete require.cache[require.resolve(lessonFilePath)];
+      
+      const allLessonsForClass = require(lessonFilePath);
+
+      const lessonsInChapter = allLessonsForClass.filter(lesson => lesson.chapterId == chapterId);
+
+      // lessonId from URL is 1-based, array is 0-based.
+      const lessonData = lessonsInChapter[parseInt(lessonId, 10) - 1];
+
+      if (lessonData) {
+        console.log('✅ Loaded lesson from file system using chapter-based index');
+        return res.json(lessonData);
+      } else {
+        console.log(`⚠️ Lesson not found for in-chapter index: ${lessonId}`);
+        return res.status(404).json({ message: 'Lesson not found' });
+      }
+    } catch (fileError) {
+      console.log(`⚠️ Could not load lessons for class ${classId} from file system:`, fileError.message);
+      // Fallback to DB if file system fails for the whole class
+      // For now, we just return an error as the user is focused on file-based data.
+      return res.status(500).json({ message: `Could not load lesson data for class ${classId}.` });
+    }
+>>>>>>> d7d3174 (new push)
   } catch (error) {
     console.error('❌ Error fetching lesson:', error);
     res.status(500).json({ message: error.message });

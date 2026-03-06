@@ -45,6 +45,7 @@ export class GameEngine {
     // Tìm đường đi từ cực âm (-) của pin
     let path = this.findPath(pin, 'node_neg', components, wires);
     
+<<<<<<< HEAD
     console.log('🔍 Kiểm tra mạch:', {
       components: components.length,
       wires: wires.length,
@@ -52,6 +53,8 @@ export class GameEngine {
       hasLoad: path.hasLoad
     });
     
+=======
+>>>>>>> d7d3174 (new push)
     let isLit = false;
     let isShort = false;
 
@@ -60,6 +63,7 @@ export class GameEngine {
       if (path.hasLoad) {
         // Có đi qua tải (bóng đèn) -> Mạch đúng!
         isLit = true;
+<<<<<<< HEAD
         console.log('✅ ĐÈN SÁNG! Mạch khép kín có tải');
       } else {
         // Không đi qua tải -> NGẮN MẠCH!
@@ -68,6 +72,12 @@ export class GameEngine {
       }
     } else {
       console.log('❌ Mạch chưa khép kín');
+=======
+      } else {
+        // Không đi qua tải -> NGẮN MẠCH!
+        isShort = true;
+      }
+>>>>>>> d7d3174 (new push)
     }
 
     // Cập nhật trạng thái và tính điểm (chỉ khi thay đổi)

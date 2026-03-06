@@ -32,7 +32,10 @@ const ProjectileMotion = () => {
 
   useEffect(() => {
     if (!canvasRef.current) return;
+<<<<<<< HEAD
     console.log('🎨 Redrawing - angle:', angle.toFixed(1) + '°, force:', force.toFixed(1) + ' m/s');
+=======
+>>>>>>> d7d3174 (new push)
     drawGame();
   }, [angle, force, trajectory, gameState, puzzle]);
 

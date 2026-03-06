@@ -97,6 +97,22 @@ const userSchema = new mongoose.Schema({
     }
   }],
   
+<<<<<<< HEAD
+=======
+  // Physics Games Progress - Tiến độ hành trình game Vật lý theo lớp
+  physicsGameProgress: {
+    type: Map,
+    of: {
+      type: Object,
+      default: () => ({
+        completed: [],  // Danh sách ID game đã hoàn thành
+        current: null   // Game đang chơi
+      })
+    },
+    default: new Map() // Key: grade (6, 7, 8, 9, 10, 11, 12), Value: { completed, current }
+  },
+  
+>>>>>>> d7d3174 (new push)
   createdAt: {
     type: Date,
     default: Date.now
@@ -258,4 +274,45 @@ userSchema.methods.getProgram = function(programId) {
   return this.programs.find(p => p.programId === programId);
 };
 
+<<<<<<< HEAD
+=======
+// Methods - Physics Games Progress
+userSchema.methods.savePhysicsGameProgress = function(grade, completed, current) {
+  if (!this.physicsGameProgress) {
+    this.physicsGameProgress = new Map();
+  }
+  
+  const gradeStr = grade.toString();
+  this.physicsGameProgress.set(gradeStr, {
+    completed: completed || [],
+    current: current || null,
+    lastUpdated: new Date()
+  });
+  
+  this.markModified('physicsGameProgress');
+  return this.physicsGameProgress.get(gradeStr);
+};
+
+userSchema.methods.getPhysicsGameProgress = function(grade) {
+  if (!this.physicsGameProgress) {
+    return { completed: [], current: null };
+  }
+  
+  const gradeStr = grade.toString();
+  return this.physicsGameProgress.get(gradeStr) || { completed: [], current: null };
+};
+
+userSchema.methods.getAllPhysicsGameProgress = function() {
+  if (!this.physicsGameProgress) {
+    return {};
+  }
+  
+  const result = {};
+  this.physicsGameProgress.forEach((value, key) => {
+    result[key] = value;
+  });
+  return result;
+};
+
+>>>>>>> d7d3174 (new push)
 module.exports = mongoose.model('User', userSchema);
