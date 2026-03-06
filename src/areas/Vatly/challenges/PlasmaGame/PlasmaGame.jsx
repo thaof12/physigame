@@ -39,7 +39,6 @@ function PlasmaGame() {
 
   // Lấy dữ liệu màn chơi hiện tại
   const currentLevelData = PLASMA_GAME_DATA.find(lvl => lvl.id === level) || PLASMA_GAME_DATA[0];
-<<<<<<< HEAD
   
   // Debug
   useEffect(() => {
@@ -47,13 +46,10 @@ function PlasmaGame() {
     console.log('PLASMA_GAME_DATA:', PLASMA_GAME_DATA);
     console.log('currentLevelData:', currentLevelData);
   }, []);
-=======
->>>>>>> d7d3174 (new push)
 
   // Khởi chạy Game Engine (Vòng lặp Game) khi component mount
   useEffect(() => {
     const canvas = canvasRef.current;
-<<<<<<< HEAD
     if (!canvas) {
       console.error('Canvas not found!');
       return;
@@ -64,12 +60,6 @@ function PlasmaGame() {
       console.error('Cannot get 2D context!');
       return;
     }
-=======
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
->>>>>>> d7d3174 (new push)
     
     // Khởi tạo engine và truyền vào các hàm 'setter' của React
     gameEngineRef.current = new GameEngine(ctx, (newScore) => {
@@ -77,11 +67,8 @@ function PlasmaGame() {
       setScore(prevScore => prevScore + newScore);
     });
 
-<<<<<<< HEAD
     console.log('Game Engine initialized');
 
-=======
->>>>>>> d7d3174 (new push)
     // Bắt đầu vòng lặp game, liên tục vẽ lại
     let isRunning = true;
     const runGameLoop = () => {
@@ -139,7 +126,6 @@ function PlasmaGame() {
   };
 
   const handleMouseDown = (e) => {
-<<<<<<< HEAD
     console.log('🖱️ Mouse Down!', e);
     if (!gameEngineRef.current) {
       console.error('❌ GameEngine chưa khởi tạo!');
@@ -148,19 +134,11 @@ function PlasmaGame() {
     const pos = getMousePos(e);
     console.log('📍 Mouse position:', pos);
     console.log('📦 Components:', components.length);
-=======
-    if (!gameEngineRef.current) return;
-    
-    const pos = getMousePos(e);
->>>>>>> d7d3174 (new push)
     
     // 1. Kiểm tra xem có click trúng 1 node để BẮT ĐẦU nối dây không
     const nodeClicked = gameEngineRef.current.getNodeAt(pos, components);
     if (nodeClicked) {
-<<<<<<< HEAD
       console.log('🔌 Node clicked:', nodeClicked);
-=======
->>>>>>> d7d3174 (new push)
       setIsWiring(true);
       setWireStartNode(nodeClicked);
       return;
@@ -169,20 +147,14 @@ function PlasmaGame() {
     // 2. KIỂM TRA MỚI: Click trúng công tắc để BẬT/TẮT?
     const itemClicked = gameEngineRef.current.getComponentAt(pos, components);
     if (itemClicked && itemClicked.type === 'switch') {
-<<<<<<< HEAD
       console.log('🔘 Toggle switch:', itemClicked.id);
-=======
->>>>>>> d7d3174 (new push)
       toggleSwitch(itemClicked.id);
       return; // Không kéo, chỉ bật/tắt
     }
 
     // 3. Kiểm tra xem có click trúng 1 linh kiện để KÉO
     if (itemClicked) {
-<<<<<<< HEAD
       console.log('📦 Component clicked:', itemClicked);
-=======
->>>>>>> d7d3174 (new push)
       setDraggingItem({
         id: itemClicked.id,
         type: itemClicked.type,
@@ -191,10 +163,7 @@ function PlasmaGame() {
       });
       return;
     }
-<<<<<<< HEAD
     console.log('❌ Không click trúng gì');
-=======
->>>>>>> d7d3174 (new push)
   };
 
   const handleMouseMove = (e) => {
@@ -239,10 +208,7 @@ function PlasmaGame() {
 
   // --- HÀM MỚI: Bật/Tắt Công tắc ---
   const toggleSwitch = (componentId) => {
-<<<<<<< HEAD
     console.log('🔘 Toggle switch:', componentId);
-=======
->>>>>>> d7d3174 (new push)
     setComponents(prev =>
       prev.map(c =>
         c.id === componentId && c.type === 'switch'
@@ -253,10 +219,7 @@ function PlasmaGame() {
   };
 
   const addComponent = (type) => {
-<<<<<<< HEAD
     console.log('➕ Thêm component:', type);
-=======
->>>>>>> d7d3174 (new push)
     const newComponent = {
       id: nextComponentId++,
       type: type, // 'pin', 'bulb', 'switch'
@@ -265,16 +228,12 @@ function PlasmaGame() {
       // QUAN TRỌNG: Thêm thuộc tính isClosed cho switch
       ...(type === 'switch' && { isClosed: false }), // Trạng thái ban đầu là MỞ
     };
-<<<<<<< HEAD
     console.log('✅ Component mới:', newComponent);
     setComponents(prev => {
       const updated = [...prev, newComponent];
       console.log('📦 Tổng components:', updated.length);
       return updated;
     });
-=======
-    setComponents(prev => [...prev, newComponent]);
->>>>>>> d7d3174 (new push)
   };
 
   const resetCircuit = () => {

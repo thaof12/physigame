@@ -11,15 +11,9 @@ const Header = () => {
   const [showQuestModal, setShowQuestModal] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-<<<<<<< HEAD
   const handleLogout = async () => {
     try {
       await logout();
-=======
-  const handleLogout = () => {
-    try {
-      logout();
->>>>>>> d7d3174 (new push)
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);

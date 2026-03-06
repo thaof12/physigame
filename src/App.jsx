@@ -1,6 +1,23 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { GameProgressProvider } from './contexts/GameProgressContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Home from './pages/Home';
+import GameJourney from './pages/GameJourney';
+import ThemeSwitcher from './ui/ThemeSwitcher';
+import "./index.css";
+
+// Physics Tools Hub
+import PhysicsToolsHub from './pages/PhysicsToolsHub';
+import PhysicsCalculator from './components/PhysicsTools/PhysicsCalculator';
+import ConstantsReference from './components/PhysicsTools/ConstantsReference';
+import UnitConverter from './components/PhysicsTools/UnitConverter';
+
+// Interactive Lecture Hub
+import InteractiveLectureHub from './pages/InteractiveLectureHub';
+import LectureGradeSelector from './pages/LectureGradeSelector';
+import LectureViewer from './components/LectureViewer';
+import LectureClassSelector from './components/LectureClassSelector';
 import ProgramSelection from './pages/ProgramSelection';
 import Profile from './pages/Profile';
 import PlacementTest from './pages/PlacementTest';
@@ -177,9 +194,6 @@ import PKMatchmaking from './pages/PKBattle/PKMatchmaking';
 import PKBattleRoom from './pages/PKBattle/PKBattleRoom';
 import PKResult from './pages/PKBattle/PKResult';
 
-// Physics Calculator Tool
-import { PhysicsCalculatorPage } from './areas/Vatly/PhysicsCalculator';
-
 // Virtual Lab (Phòng thí nghiệm ảo)
 import VirtualLabHome from './areas/Vatly/VirtualLab/pages/VirtualLabHome';
 import PendulumLab from './areas/Vatly/VirtualLab/experiments/PendulumLab';
@@ -203,6 +217,7 @@ const AppContent = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<ProgramSelection />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/game-journey" element={<GameJourney />} />
         <Route path="/program/chemistry" element={<ChemistryHome />} />
         <Route path="/advanced-challenge" element={<AdvancedChallenge />} />
         <Route path="/advanced-challenge/ghep-nguyen-tu" element={<GhepNguyenTu />} />
@@ -256,8 +271,20 @@ const AppContent = () => {
         <Route path="/physics-class/:classId" element={<PhysicsClassDashboard />} />
         <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<PhysicsLesson />} />
         
-        {/* Physics Calculator Tool */}
-        <Route path="/physics-calculator" element={<PhysicsCalculatorPage />} />
+        {/* Physics Tools Hub - thay thế Physics Calculator */}
+        <Route path="/physics-tools" element={<PhysicsToolsHub />} />
+        <Route path="/physics-tools/calculator" element={<PhysicsCalculator />} />
+        <Route path="/physics-tools/constants" element={<ConstantsReference />} />
+        <Route path="/physics-tools/converter" element={<UnitConverter />} />
+        
+        {/* Interactive Lecture Hub Routes */}
+        <Route path="/interactive-lectures" element={<InteractiveLectureHub />} />
+        <Route path="/interactive-lectures/:subject" element={<LectureGradeSelector />} />
+        <Route path="/interactive-lectures/:subject/:grade" element={<LectureClassSelector />} />
+        <Route path="/interactive-lectures/:subject/:grade/:lectureId" element={<LectureViewer />} />
+        
+        {/* Legacy Physics Calculator - redirect to new hub */}
+        <Route path="/physics-calculator" element={<PhysicsToolsHub />} />
         
         {/* Virtual Lab - Phòng thí nghiệm ảo */}
         <Route path="/vatly/virtual-lab" element={<VirtualLabHome />} />
@@ -426,7 +453,15 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppContent />
+        <ThemeProvider>
+          <GameProgressProvider>
+            {/* Theme Switcher */}
+            <div className="fixed top-4 right-4 z-50">
+              <ThemeSwitcher />
+            </div>
+            <AppContent />
+          </GameProgressProvider>
+        </ThemeProvider>
       </AuthProvider>
     </Router>
   );

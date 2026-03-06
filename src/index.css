@@ -2,21 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-<<<<<<< HEAD
-@layer base {
-  body {
-    @apply bg-gray-50 text-gray-900 font-sans;
-=======
 /* CSS Variables - Default Theme (Light) */
-:root {
-  --bg: #ffffff;
-  --text: #1f2937;
+:root,
+[data-theme="light"] {
+  --bg: #f8fafc;
   --card: #ffffff;
-  --border: #e5e7eb;
+  --text: #0f172a;
+  --muted: #6b7280;
+  --primary: #6366f1;
+  --accent: #7c3aed;
+  --glass-bg: rgba(255,255,255,0.6);
+  --glass-border: rgba(15,23,42,0.06);
+  --shadow: 0 8px 30px rgba(2,6,23,0.08);
   --input-bg: #ffffff;
   --input-text: #1f2937;
   --input-border: #d1d5db;
   --input-placeholder: #9ca3af;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --bg: #0b1220;
+  --card: rgba(255,255,255,0.04);
+  --text: #e6eef8;
+  --muted: #9aa6bf;
+  --primary: #7c3aed;
+  --accent: #06b6d4;
+  --glass-bg: rgba(255,255,255,0.04);
+  --glass-border: rgba(255,255,255,0.06);
+  --shadow: 0 10px 40px rgba(2,6,23,0.5);
+  --input-bg: #1a2332;
+  --input-text: #e6eef8;
+  --input-border: #3b4963;
+  --input-placeholder: #6b7280;
+}
+
+/* Neon Theme */
+[data-theme="neon"] {
+  --bg: linear-gradient(180deg,#071129 0%, #011826 100%);
+  --card: rgba(255,255,255,0.03);
+  --text: #e6f7ff;
+  --muted: #9fbfdc;
+  --primary: #00f7ff;
+  --accent: #ff52e5;
+  --glass-bg: rgba(255,255,255,0.03);
+  --glass-border: rgba(0,255,255,0.08);
+  --shadow: 0 8px 30px rgba(0, 255, 255, 0.06);
+  --input-bg: rgba(0,20,40,0.8);
+  --input-text: #e6f7ff;
+  --input-border: rgba(0,255,255,0.3);
+  --input-placeholder: #6b8fa0;
 }
 
 /* Apply globally */
@@ -26,27 +61,20 @@ html, body, #root {
   transition: background 0.25s ease, color 0.25s ease;
 }
 
-.card {
-  background: var(--card);
-  backdrop-filter: blur(10px);
-}
-
-/* ============================
-   Tailwind + UI Components
-   ============================ */
 @layer base {
   body {
     @apply font-sans;
   }
-  
-  /* Ensure inputs have visible text by default */
+
+  /* Ensure inputs have visible text */
   input, textarea, select {
-    color: #1f2937;
+    background: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
   }
-  
+
   input::placeholder, textarea::placeholder {
-    color: #9ca3af;
->>>>>>> d7d3174 (new push)
+    color: var(--input-placeholder);
   }
 }
 
@@ -54,7 +82,6 @@ html, body, #root {
   .btn {
     @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
-<<<<<<< HEAD
   
   .btn-primary {
     @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
@@ -73,29 +100,20 @@ html, body, #root {
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg;
-  }
-  
-  .input-field {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all;
-=======
-
-  .card {
     @apply rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg;
     background: var(--card);
     color: var(--text);
   }
-
+  
   .input-field {
-    @apply w-full px-4 py-2 border rounded-lg transition-all;
-    background: var(--card);
-    color: var(--text);
->>>>>>> d7d3174 (new push)
+    @apply w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all;
+    background: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
   }
 }
 
 @layer utilities {
-<<<<<<< HEAD
   /* Enhanced floating particle animations */
   .animate-float-slow {
     animation: float-slow 10s ease-in-out infinite;
@@ -276,29 +294,13 @@ html, body, #root {
 }
 
 /* Smooth scroll behavior */
-=======
-  /* animation utilities ... giữ nguyên */
-}
-
-/* keyframes ... giữ nguyên */
-
-/* Smooth scroll */
->>>>>>> d7d3174 (new push)
 html {
   scroll-behavior: smooth;
 }
 
-<<<<<<< HEAD
 /* Enhanced transitions for all interactive elements */
 * {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
-=======
-/* Global transition - exclude color to prevent input text issues */
-* {
-  transition-property: background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-  transition-duration: 150ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
->>>>>>> d7d3174 (new push)
 }

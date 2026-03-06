@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../../components/ui/Button';
 import { useEffect, useState } from 'react';
-import { BookOpen, Trophy, Target, Clock, Star, Flame, Zap, Award, TrendingUp, Play, LogOut, ChevronDown, Swords, Calculator, FlaskConical } from 'lucide-react';
+import { BookOpen, Trophy, Target, Clock, Star, Flame, Zap, Award, TrendingUp, Play, LogOut, ChevronDown, Swords, Calculator, FlaskConical, Map, GraduationCap, Wrench } from 'lucide-react';
 import api from '../../../config/api';
 import QuestModal from '../../../components/Quest/QuestModal';
 import Leaderboard from '../../../components/Leaderboard/Leaderboard';
@@ -343,20 +343,27 @@ const PhysicsHome = () => {
               <p className="text-green-100 text-sm">Tiếp tục hành trình của bạn</p>
             </button>
 
+            {/* Game Journey Button */}
             <button
-              onClick={() => navigate('/advanced-physics-challenge')}
-              className="group bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+              onClick={() => navigate('/game-journey')}
+              className="group bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-3 bg-white/20 rounded-xl">
-                  <Target className="w-6 h-6" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <div className="relative">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <Map className="w-6 h-6" />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">MỚI</span>
+                    <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 </div>
-                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <h3 className="text-xl font-bold mb-2">🗺️ Hành trình Game</h3>
+                <p className="text-amber-100 text-sm">Chơi game theo thứ tự từng lớp</p>
               </div>
-              <h3 className="text-xl font-bold mb-2">Thử thách</h3>
-              <p className="text-orange-100 text-sm">Game vật lý tương tác</p>
             </button>
 
             {/* PK Battle Button */}
@@ -406,18 +413,21 @@ const PhysicsHome = () => {
           {/* Physics Tools - Calculator */}
           <div className="grid md:grid-cols-2 gap-4 mb-6">
             <button
-              onClick={() => navigate('/physics-calculator')}
+              onClick={() => navigate('/physics-tools')}
               className="group bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600 hover:from-cyan-600 hover:via-blue-600 hover:to-indigo-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
             >
               {/* Animated background effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               <div className="relative flex items-center gap-4">
                 <div className="p-4 bg-white/20 rounded-2xl">
-                  <Calculator className="w-8 h-8" />
+                  <Wrench className="w-8 h-8" />
                 </div>
                 <div className="flex-1 text-left">
-                  <h3 className="text-xl font-bold mb-1">🧮 Máy tính Vật lý</h3>
-                  <p className="text-cyan-100 text-sm">Công cụ giải bài tập thông minh với 80+ công thức từ lớp 6-12</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-xl font-bold">🛠️ Công cụ Vật lý</h3>
+                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">MỚI</span>
+                  </div>
+                  <p className="text-cyan-100 text-sm">Máy tính, Hằng số vật lý, Chuyển đổi đơn vị</p>
                 </div>
                 <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -425,12 +435,28 @@ const PhysicsHome = () => {
               </div>
             </button>
 
-            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border-2 border-dashed border-gray-300 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <span className="text-3xl mb-2 block">🔧</span>
-                <p className="font-medium">Thêm công cụ sắp ra mắt...</p>
+            {/* Interactive Lectures */}
+            <button
+              onClick={() => navigate('/interactive-lectures')}
+              className="group bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <div className="relative flex items-center gap-4">
+                <div className="p-4 bg-white/20 rounded-2xl">
+                  <GraduationCap className="w-8 h-8" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-xl font-bold">📖 Bài giảng tương tác</h3>
+                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">MỚI</span>
+                  </div>
+                  <p className="text-violet-100 text-sm">Học lý thuyết qua video và mô phỏng sinh động</p>
+                </div>
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Virtual Lab Button - Full Width */}
