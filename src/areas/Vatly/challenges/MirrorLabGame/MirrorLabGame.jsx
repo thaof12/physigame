@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Award, RotateCcw, Eye, Target } from 'lucide-react';
+import { ArrowLeft, Award, RotateCcw, Eye, Target, Play, Home, CheckCircle, Zap, Star, Sparkles, Settings, RefreshCw, X, Lightbulb } from 'lucide-react';
 import './MirrorLabGame.css';
 
 const MirrorLabGame = () => {
@@ -19,6 +19,8 @@ const MirrorLabGame = () => {
   const [currentChallenge, setCurrentChallenge] = useState(null);
   const [attempts, setAttempts] = useState(3);
   const [completedChallenges, setCompletedChallenges] = useState(0);
+  const [showHint, setShowHint] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const challenges = [
     {
@@ -452,7 +454,9 @@ const MirrorLabGame = () => {
     const points = 200 + (attempts * 50);
     setScore(score + points);
     setCompletedChallenges(completedChallenges + 1);
+    setShowSuccess(true);
     setTimeout(() => {
+      setShowSuccess(false);
       if (level < challenges.length) {
         setLevel(level + 1);
         loadChallenge(level + 1);
@@ -478,190 +482,264 @@ const MirrorLabGame = () => {
   };
 
   return (
-    <div className="mirror-lab-game">
-      <div className="game-header">
-        <button onClick={() => navigate('/physics-games/grade/7')} className="back-button">
+    <div className="ml-game">
+      {/* Header */}
+      <div className="ml-header">
+        <button onClick={() => navigate('/physics-games/grade/7')} className="ml-back-btn">
           <ArrowLeft size={20} />
           <span>Quay lại</span>
         </button>
-        <div className="game-title">
-          <Eye className="title-icon" />
+        <div className="ml-title">
+          <div className="ml-title-icon">
+            <Eye size={28} />
+          </div>
           <h1>Phòng Thí Nghiệm Gương</h1>
         </div>
-        <div className="game-stats">
-          <div className="stat-item">
-            <Award className="stat-icon" />
-            <span>{score} điểm</span>
+        <div className="ml-stats">
+          <div className="ml-stat">
+            <Star className="ml-stat-icon gold" size={20} />
+            <span>{score}</span>
           </div>
           {challengeMode && (
-            <div className="stat-item">
-              <Target className="stat-icon" />
-              <span>Cấp {level}/{challenges.length}</span>
+            <div className="ml-stat">
+              <Target className="ml-stat-icon blue" size={20} />
+              <span>{level}/{challenges.length}</span>
             </div>
           )}
         </div>
       </div>
 
+      {/* Tutorial Screen */}
       {gameState === 'tutorial' && (
-        <div className="tutorial-overlay">
-          <div className="tutorial-content">
-            <h2>🔬 Chào mừng đến phòng thí nghiệm!</h2>
-            <div className="tutorial-info">
-              <p>Khám phá 3 loại gương:</p>
-              <ul>
-                <li>🪞 <strong>Gương phẳng:</strong> Tạo ảnh ảo, cùng kích thước</li>
-                <li>⚫ <strong>Gương cầu lồi:</strong> Tạo ảnh ảo nhỏ hơn, trường nhìn rộng</li>
-                <li>⚪ <strong>Gương cầu lõm:</strong> Có thể tạo ảnh thật hoặc ảnh ảo</li>
-              </ul>
+        <div className="ml-tutorial-overlay">
+          <div className="ml-tutorial-card">
+            <div className="ml-tutorial-icon">
+              <Eye size={48} />
             </div>
-            <div className="mode-selection">
-              <button onClick={startFreeMode} className="mode-button">
-                🔬 Thực Hành Tự Do
+            <h2>Phòng Thí Nghiệm Gương</h2>
+            <p className="ml-tutorial-subtitle">Khám phá thế giới quang học kỳ diệu</p>
+            
+            <div className="ml-tutorial-mirrors">
+              <div className="ml-mirror-item">
+                <span className="mirror-icon">🪞</span>
+                <div className="mirror-info">
+                  <strong>Gương phẳng</strong>
+                  <span>Ảnh ảo, cùng kích thước</span>
+                </div>
+              </div>
+              <div className="ml-mirror-item">
+                <span className="mirror-icon">⚫</span>
+                <div className="mirror-info">
+                  <strong>Gương cầu lồi</strong>
+                  <span>Ảnh ảo nhỏ hơn, góc nhìn rộng</span>
+                </div>
+              </div>
+              <div className="ml-mirror-item">
+                <span className="mirror-icon">⚪</span>
+                <div className="mirror-info">
+                  <strong>Gương cầu lõm</strong>
+                  <span>Ảnh thật hoặc ảo tùy vị trí</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="ml-mode-buttons">
+              <button onClick={startFreeMode} className="ml-mode-btn free">
+                <Settings size={22} />
+                <span>Thực Hành Tự Do</span>
               </button>
-              <button onClick={startChallengeMode} className="mode-button challenge-btn">
-                🎯 Chế Độ Thử Thách
+              <button onClick={startChallengeMode} className="ml-mode-btn challenge">
+                <Target size={22} />
+                <span>Chế Độ Thử Thách</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Game Playing State */}
       {gameState === 'playing' && (
-        <div className="game-content">
+        <div className="ml-game-content">
+          {/* Challenge Info */}
           {challengeMode && currentChallenge && (
-            <div className="challenge-info">
-              <h3>{currentChallenge.name}</h3>
-              <p>{currentChallenge.description}</p>
-              <div className="attempts-indicator">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`attempt-dot ${i < attempts ? 'active' : 'used'}`}
-                  />
-                ))}
+            <div className="ml-challenge-card">
+              <div className="ml-challenge-header">
+                <div className="ml-challenge-level">
+                  <span className="level-badge">Thử thách {level}</span>
+                  <span className="level-total">/ {challenges.length}</span>
+                </div>
+                <div className="ml-attempts">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`ml-attempt-dot ${i < attempts ? 'active' : 'used'}`}
+                    >
+                      {i < attempts ? <CheckCircle size={16} /> : <X size={16} />}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <p className="hint-text">💡 {currentChallenge.hint}</p>
+              <h3 className="ml-challenge-title">{currentChallenge.name}</h3>
+              <p className="ml-challenge-desc">{currentChallenge.description}</p>
+              
+              <button 
+                onClick={() => setShowHint(!showHint)} 
+                className={`ml-hint-toggle ${showHint ? 'active' : ''}`}
+              >
+                <Lightbulb size={18} />
+                <span>{showHint ? 'Ẩn gợi ý' : 'Xem gợi ý'}</span>
+              </button>
+              
+              {showHint && (
+                <div className="ml-hint-box">
+                  <Lightbulb size={20} className="hint-icon" />
+                  <p>{currentChallenge.hint}</p>
+                </div>
+              )}
             </div>
           )}
 
-          <div className="lab-container">
+          {/* Canvas Container */}
+          <div className="ml-canvas-wrapper">
             <canvas
               ref={canvasRef}
               width={800}
               height={400}
-              className="lab-canvas"
+              className="ml-canvas"
             />
           </div>
 
-          <div className="controls-panel">
+          {/* Controls Panel */}
+          <div className="ml-controls-panel">
+            {/* Mirror Type Selector */}
             {!challengeMode && (
-              <div className="mirror-type-selector">
-                <button
-                  onClick={() => setMirrorType('plane')}
-                  className={`mirror-type-btn ${mirrorType === 'plane' ? 'active' : ''}`}
-                >
-                  Gương Phẳng
-                </button>
-                <button
-                  onClick={() => setMirrorType('convex')}
-                  className={`mirror-type-btn ${mirrorType === 'convex' ? 'active' : ''}`}
-                >
-                  Gương Lồi
-                </button>
-                <button
-                  onClick={() => setMirrorType('concave')}
-                  className={`mirror-type-btn ${mirrorType === 'concave' ? 'active' : ''}`}
-                >
-                  Gương Lõm
-                </button>
+              <div className="ml-mirror-selector">
+                <span className="ml-selector-label">Loại gương:</span>
+                <div className="ml-mirror-buttons">
+                  <button
+                    onClick={() => setMirrorType('plane')}
+                    className={`ml-mirror-btn ${mirrorType === 'plane' ? 'active' : ''}`}
+                  >
+                    🪞 Gương Phẳng
+                  </button>
+                  <button
+                    onClick={() => setMirrorType('convex')}
+                    className={`ml-mirror-btn ${mirrorType === 'convex' ? 'active' : ''}`}
+                  >
+                    ⚫ Gương Lồi
+                  </button>
+                  <button
+                    onClick={() => setMirrorType('concave')}
+                    className={`ml-mirror-btn ${mirrorType === 'concave' ? 'active' : ''}`}
+                  >
+                    ⚪ Gương Lõm
+                  </button>
+                </div>
               </div>
             )}
 
-            <div className="control-group">
-              <label>Vị trí vật: {objectPosition}cm</label>
-              <input
-                type="range"
-                min={challengeMode && currentChallenge ? currentChallenge.allowedObjectRange.min : 50}
-                max={challengeMode && currentChallenge ? currentChallenge.allowedObjectRange.max : 350}
-                value={objectPosition}
-                onChange={(e) => setObjectPosition(parseInt(e.target.value))}
-                className="control-slider"
-              />
-            </div>
-
-            {mirrorType !== 'plane' && (
-              <div className="control-group">
-                <label>Tiêu cự: {focalLength}cm</label>
+            {/* Sliders */}
+            <div className="ml-sliders">
+              <div className="ml-slider-group">
+                <div className="ml-slider-header">
+                  <span className="ml-slider-label">Vị trí vật</span>
+                  <span className="ml-slider-value">{objectPosition} cm</span>
+                </div>
                 <input
                   type="range"
-                  min={challengeMode && currentChallenge?.allowedFocalRange ? currentChallenge.allowedFocalRange.min : 50}
-                  max={challengeMode && currentChallenge?.allowedFocalRange ? currentChallenge.allowedFocalRange.max : 150}
-                  value={focalLength}
-                  onChange={(e) => setFocalLength(parseInt(e.target.value))}
-                  className="control-slider"
+                  min={challengeMode && currentChallenge ? currentChallenge.allowedObjectRange.min : 50}
+                  max={challengeMode && currentChallenge ? currentChallenge.allowedObjectRange.max : 350}
+                  value={objectPosition}
+                  onChange={(e) => setObjectPosition(parseInt(e.target.value))}
+                  className="ml-slider"
                 />
               </div>
-            )}
 
-            <div className="control-group">
-              <label className="checkbox-label">
+              {mirrorType !== 'plane' && (
+                <div className="ml-slider-group">
+                  <div className="ml-slider-header">
+                    <span className="ml-slider-label">Tiêu cự</span>
+                    <span className="ml-slider-value">{focalLength} cm</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={challengeMode && currentChallenge?.allowedFocalRange ? currentChallenge.allowedFocalRange.min : 50}
+                    max={challengeMode && currentChallenge?.allowedFocalRange ? currentChallenge.allowedFocalRange.max : 150}
+                    value={focalLength}
+                    onChange={(e) => setFocalLength(parseInt(e.target.value))}
+                    className="ml-slider"
+                  />
+                </div>
+              )}
+
+              <label className="ml-checkbox">
                 <input
                   type="checkbox"
                   checked={showRays}
                   onChange={(e) => setShowRays(e.target.checked)}
                 />
+                <span className="ml-checkbox-custom"></span>
                 <span>Hiển thị tia sáng và ảnh</span>
               </label>
             </div>
           </div>
 
+          {/* Image Properties */}
           {imageProperties && (
-            <div className="image-properties-panel">
-              <h3>📊 Tính chất của ảnh</h3>
-              <div className="properties-grid">
-                <div className="property-item">
-                  <span className="property-label">Loại ảnh:</span>
-                  <span className="property-value">{imageProperties.type}</span>
+            <div className="ml-properties-panel">
+              <h3>
+                <Sparkles size={20} />
+                <span>Tính chất của ảnh</span>
+              </h3>
+              <div className="ml-properties-grid">
+                <div className="ml-property">
+                  <span className="property-label">Loại ảnh</span>
+                  <span className={`property-value ${imageProperties.type === 'Ảnh thật' ? 'real' : 'virtual'}`}>
+                    {imageProperties.type}
+                  </span>
                 </div>
-                <div className="property-item">
-                  <span className="property-label">Vị trí:</span>
+                <div className="ml-property">
+                  <span className="property-label">Vị trí</span>
                   <span className="property-value">{imageProperties.position}</span>
                 </div>
-                <div className="property-item">
-                  <span className="property-label">Kích thước:</span>
+                <div className="ml-property">
+                  <span className="property-label">Kích thước</span>
                   <span className="property-value">{imageProperties.size}</span>
                 </div>
-                <div className="property-item">
-                  <span className="property-label">Chiều:</span>
+                <div className="ml-property">
+                  <span className="property-label">Chiều</span>
                   <span className="property-value">{imageProperties.orientation}</span>
                 </div>
-                <div className="property-item">
-                  <span className="property-label">Độ phóng đại:</span>
-                  <span className="property-value">{imageProperties.magnification.toFixed(2)}</span>
+                <div className="ml-property highlight">
+                  <span className="property-label">Độ phóng đại</span>
+                  <span className="property-value">{imageProperties.magnification.toFixed(2)}x</span>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="action-buttons">
+          {/* Action Buttons */}
+          <div className="ml-action-buttons">
             {challengeMode ? (
               <>
-                <button onClick={checkChallenge} className="check-button">
-                  <Target size={20} />
-                  Kiểm Tra
+                <button onClick={checkChallenge} className="ml-check-btn">
+                  <CheckCircle size={22} />
+                  <span>Kiểm Tra</span>
                 </button>
-                <button onClick={() => loadChallenge(level)} className="reset-button">
-                  <RotateCcw size={20} />
-                  Đặt Lại
+                <button onClick={() => loadChallenge(level)} className="ml-reset-btn">
+                  <RefreshCw size={20} />
+                  <span>Đặt Lại</span>
                 </button>
               </>
             ) : (
               <>
-                <button onClick={() => setGameState('tutorial')} className="back-to-menu-button">
-                  Về Menu
+                <button onClick={() => setGameState('tutorial')} className="ml-menu-btn">
+                  <Home size={20} />
+                  <span>Về Menu</span>
                 </button>
-                <button onClick={startChallengeMode} className="challenge-mode-button">
-                  🎯 Chế Độ Thử Thách
+                <button onClick={startChallengeMode} className="ml-challenge-btn">
+                  <Target size={20} />
+                  <span>Chế Độ Thử Thách</span>
                 </button>
               </>
             )}
@@ -669,47 +747,81 @@ const MirrorLabGame = () => {
         </div>
       )}
 
+      {/* Victory Screen */}
       {gameState === 'victory' && (
-        <div className="game-over-overlay victory">
-          <div className="game-over-content">
-            <h2>🎉 Hoàn Thành Xuất Sắc!</h2>
-            <p className="final-score">{score} điểm</p>
-            <p className="completion-text">
-              Hoàn thành {completedChallenges}/{challenges.length} thử thách!
-            </p>
-            <div className="achievement-stars">
-              {['⭐', '⭐', '⭐'].map((star, i) => (
-                <span key={i} className="star">{star}</span>
+        <div className="ml-overlay">
+          <div className="ml-result-card success">
+            <div className="ml-result-icon success">
+              <Award size={52} />
+            </div>
+            <h2>Hoàn Thành Xuất Sắc!</h2>
+            <p className="ml-result-score">{score}</p>
+            <div className="ml-result-stats">
+              <div className="ml-result-stat">
+                <CheckCircle size={18} className="stat-icon" />
+                <span>{completedChallenges}/{challenges.length} thử thách</span>
+              </div>
+            </div>
+            <div className="ml-stars">
+              {[1, 2, 3].map((i) => (
+                <Star key={i} size={36} fill="#fbbf24" color="#fbbf24" className="star-icon" />
               ))}
             </div>
-            <div className="victory-buttons">
-              <button onClick={resetGame} className="retry-button">
-                <RotateCcw size={20} />
-                Chơi Lại
+            <div className="ml-result-buttons">
+              <button onClick={resetGame} className="ml-btn primary">
+                <RefreshCw size={20} />
+                <span>Chơi Lại</span>
               </button>
-              <button onClick={() => navigate('/physics-games/grade/7')} className="home-button">
-                Về Trang Chủ
+              <button onClick={() => navigate('/physics-games/grade/7')} className="ml-btn secondary">
+                <Home size={20} />
+                <span>Về Trang Chủ</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Game Over Screen */}
       {gameState === 'gameover' && (
-        <div className="game-over-overlay">
-          <div className="game-over-content">
-            <h2>💪 Thử Lại Nhé!</h2>
-            <p className="final-score">{score} điểm</p>
-            <p>Hoàn thành: {completedChallenges}/{challenges.length} thử thách</p>
-            <div className="gameover-buttons">
-              <button onClick={resetGame} className="retry-button">
-                <RotateCcw size={20} />
-                Thử Lại
+        <div className="ml-overlay">
+          <div className="ml-result-card">
+            <div className="ml-result-icon">
+              <Zap size={52} />
+            </div>
+            <h2>Thử Lại Nhé!</h2>
+            <p className="ml-result-score">{score}</p>
+            <div className="ml-result-stats">
+              <div className="ml-result-stat">
+                <CheckCircle size={18} className="stat-icon" />
+                <span>{completedChallenges}/{challenges.length} thử thách</span>
+              </div>
+            </div>
+            <div className="ml-result-message">
+              <Lightbulb size={20} />
+              <p>Hãy thử điều chỉnh vị trí vật và tiêu cự để đạt độ phóng đại mong muốn!</p>
+            </div>
+            <div className="ml-result-buttons">
+              <button onClick={resetGame} className="ml-btn primary">
+                <RefreshCw size={20} />
+                <span>Thử Lại</span>
               </button>
-              <button onClick={() => navigate('/physics-games/grade/7')} className="home-button">
-                Về Trang Chủ
+              <button onClick={() => navigate('/physics-games/grade/7')} className="ml-btn secondary">
+                <Home size={20} />
+                <span>Về Trang Chủ</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Animation Popup */}
+      {showSuccess && (
+        <div className="ml-success-popup">
+          <div className="ml-success-content">
+            <div className="ml-success-icon">
+              <CheckCircle size={48} />
+            </div>
+            <span>Chính xác!</span>
           </div>
         </div>
       )}

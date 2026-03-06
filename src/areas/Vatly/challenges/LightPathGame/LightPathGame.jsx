@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Award, RotateCcw, Zap, Target, Play, Pause } from 'lucide-react';
+import { ArrowLeft, Award, RotateCcw, Zap, Target, Play, Pause, Star, Home, CheckCircle, Timer, Settings, Lightbulb, RefreshCw, X } from 'lucide-react';
 import './LightPathGame.css';
 
 const LightPathGame = () => {
@@ -17,6 +17,7 @@ const LightPathGame = () => {
   const [animationProgress, setAnimationProgress] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
   const [completedLevels, setCompletedLevels] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const levels = [
     {
@@ -483,8 +484,10 @@ const LightPathGame = () => {
     
     setScore(score + totalPoints);
     setCompletedLevels(completedLevels + 1);
+    setShowSuccess(true);
 
     setTimeout(() => {
+      setShowSuccess(false);
       if (level < levels.length) {
         setLevel(level + 1);
         setGameState('playing');
@@ -506,77 +509,117 @@ const LightPathGame = () => {
   };
 
   return (
-    <div className="light-path-game">
-      <div className="game-header">
-        <button onClick={() => navigate('/physics-games/grade/7')} className="back-button">
+    <div className="lp-game">
+      {/* Header */}
+      <div className="lp-header">
+        <button onClick={() => navigate('/physics-games/grade/7')} className="lp-back-btn">
           <ArrowLeft size={20} />
           <span>Quay lại</span>
         </button>
-        <div className="game-title">
-          <Zap className="title-icon" />
+        <div className="lp-title">
+          <div className="lp-title-icon">
+            <Zap size={28} />
+          </div>
           <h1>Đường Đi Của Ánh Sáng</h1>
         </div>
-        <div className="game-stats">
-          <div className="stat-item">
-            <Award className="stat-icon" />
+        <div className="lp-stats">
+          <div className="lp-stat">
+            <Star className="lp-stat-icon gold" size={20} />
             <span>{score}</span>
           </div>
-          <div className="stat-item">
-            <Target className="stat-icon" />
-            <span>Cấp {level}/{levels.length}</span>
+          <div className="lp-stat">
+            <Target className="lp-stat-icon blue" size={20} />
+            <span>{level}/{levels.length}</span>
           </div>
-          <div className="stat-item timer">
-            ⏱️ <span>{timeLeft}s</span>
+          <div className={`lp-stat timer ${timeLeft <= 10 ? 'warning' : ''}`}>
+            <Timer size={20} />
+            <span>{timeLeft}s</span>
           </div>
         </div>
       </div>
 
+      {/* Tutorial Screen */}
       {gameState === 'tutorial' && (
-        <div className="tutorial-overlay">
-          <div className="tutorial-content">
-            <h2>🔦 Điều Khiển Ánh Sáng</h2>
-            <div className="tutorial-steps">
-              <div className="tutorial-step">
-                <span className="step-number">1</span>
-                <p>Nhấp vào vị trí gương để kích hoạt/tắt gương</p>
+        <div className="lp-tutorial-overlay">
+          <div className="lp-tutorial-card">
+            <div className="lp-tutorial-icon">
+              <Zap size={48} />
+            </div>
+            <h2>Điều Khiển Ánh Sáng</h2>
+            <p className="lp-tutorial-subtitle">Dẫn ánh sáng qua mê cung bằng gương phản xạ</p>
+            
+            <div className="lp-tutorial-steps">
+              <div className="lp-tutorial-step">
+                <div className="lp-step-icon">
+                  <Settings size={18} />
+                </div>
+                <div className="lp-step-content">
+                  <strong>Kích hoạt gương</strong>
+                  <span>Nhấp vào vị trí để bật/tắt gương</span>
+                </div>
               </div>
-              <div className="tutorial-step">
-                <span className="step-number">2</span>
-                <p>Sử dụng các nút ⟲ ⟳ để điều chỉnh góc gương</p>
+              <div className="lp-tutorial-step">
+                <div className="lp-step-icon">
+                  <RotateCcw size={18} />
+                </div>
+                <div className="lp-step-content">
+                  <strong>Điều chỉnh góc</strong>
+                  <span>Dùng nút xoay để thay đổi hướng</span>
+                </div>
               </div>
-              <div className="tutorial-step">
-                <span className="step-number">3</span>
-                <p>Nhấn "Bắn Tia Sáng" để kiểm tra đường đi</p>
+              <div className="lp-tutorial-step">
+                <div className="lp-step-icon">
+                  <Zap size={18} />
+                </div>
+                <div className="lp-step-content">
+                  <strong>Bắn tia sáng</strong>
+                  <span>Kiểm tra đường đi ánh sáng</span>
+                </div>
               </div>
-              <div className="tutorial-step">
-                <span className="step-number">4</span>
-                <p>Dẫn ánh sáng đến mục tiêu xanh để qua cấp</p>
+              <div className="lp-tutorial-step">
+                <div className="lp-step-icon">
+                  <Target size={18} />
+                </div>
+                <div className="lp-step-content">
+                  <strong>Đến mục tiêu</strong>
+                  <span>Dẫn ánh sáng tới điểm xanh</span>
+                </div>
               </div>
             </div>
-            <button onClick={() => setGameState('playing')} className="start-button">
-              Bắt Đầu Thử Thách
+
+            <button onClick={() => setGameState('playing')} className="lp-start-btn">
+              <Play size={22} />
+              <span>Bắt Đầu Thử Thách</span>
             </button>
           </div>
         </div>
       )}
 
+      {/* Game Playing State */}
       {gameState === 'playing' && (
-        <div className="game-content">
-          <div className="level-info">
-            <h3>{currentLevel.name}</h3>
-            <p>{currentLevel.description}</p>
-            <div className="level-requirements">
-              <span>Gương tối đa: {currentLevel.maxMirrors}</span>
-              <span>Thời gian: {currentLevel.timeLimit}s</span>
+        <div className="lp-game-content">
+          {/* Level Info Card */}
+          <div className="lp-level-card">
+            <div className="lp-level-header">
+              <div className="lp-level-badge">
+                <span className="level-num">Cấp {level}</span>
+                <span className="level-name">{currentLevel.name}</span>
+              </div>
+              <div className="lp-level-meta">
+                <span>🪞 {currentLevel.maxMirrors} gương</span>
+                <span>⏱️ {currentLevel.timeLimit}s</span>
+              </div>
             </div>
+            <p className="lp-level-desc">{currentLevel.description}</p>
           </div>
 
-          <div className="canvas-container">
+          {/* Canvas Container */}
+          <div className="lp-canvas-wrapper">
             <canvas
               ref={canvasRef}
               width={800}
               height={600}
-              className="game-canvas"
+              className="lp-canvas"
               onClick={(e) => {
                 const rect = e.target.getBoundingClientRect();
                 const x = e.clientX - rect.left;
@@ -594,32 +637,38 @@ const LightPathGame = () => {
             />
           </div>
 
-          <div className="mirror-controls">
-            <h4>🪞 Điều Khiển Gương</h4>
-            <div className="mirror-list">
+          {/* Mirror Controls Panel */}
+          <div className="lp-controls-panel">
+            <h4 className="lp-controls-title">
+              <Settings size={20} />
+              <span>Điều Khiển Gương</span>
+            </h4>
+            <div className="lp-mirror-list">
               {mirrors.map((mirror, index) => (
                 <div 
                   key={index} 
-                  className={`mirror-control-item ${mirror.active ? 'active' : ''} ${selectedMirror === index ? 'selected' : ''}`}
+                  className={`lp-mirror-item ${mirror.active ? 'active' : ''} ${selectedMirror === index ? 'selected' : ''}`}
                   onClick={() => setSelectedMirror(index)}
                 >
-                  <span className="mirror-number">#{index + 1}</span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); adjustMirrorAngle(index, -15); }}
-                    className="angle-btn"
-                  >
-                    ⟲
-                  </button>
-                  <span className="angle-display">{mirror.angle}°</span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); adjustMirrorAngle(index, 15); }}
-                    className="angle-btn"
-                  >
-                    ⟳
-                  </button>
+                  <span className="mirror-num">#{index + 1}</span>
+                  <div className="mirror-angle-controls">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); adjustMirrorAngle(index, -15); }}
+                      className="angle-btn"
+                    >
+                      ⟲
+                    </button>
+                    <span className="angle-value">{mirror.angle}°</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); adjustMirrorAngle(index, 15); }}
+                      className="angle-btn"
+                    >
+                      ⟳
+                    </button>
+                  </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleMirror(index); }}
-                    className={`toggle-btn ${mirror.active ? 'active' : ''}`}
+                    className={`toggle-btn ${mirror.active ? 'on' : 'off'}`}
                   >
                     {mirror.active ? 'BẬT' : 'TẮT'}
                   </button>
@@ -628,64 +677,99 @@ const LightPathGame = () => {
             </div>
           </div>
 
-          <div className="action-panel">
+          {/* Action Buttons */}
+          <div className="lp-action-buttons">
             <button 
               onClick={shootLight} 
-              className="shoot-button"
+              className="lp-shoot-btn"
               disabled={isAnimating || mirrors.every(m => !m.active)}
             >
-              <Zap size={20} />
-              Bắn Tia Sáng
+              <Zap size={22} />
+              <span>Bắn Tia Sáng</span>
             </button>
-            <button onClick={initializeLevel} className="reset-button">
-              <RotateCcw size={20} />
-              Đặt Lại
+            <button onClick={initializeLevel} className="lp-reset-btn">
+              <RefreshCw size={20} />
+              <span>Đặt Lại</span>
             </button>
           </div>
         </div>
       )}
 
+      {/* Victory Screen */}
       {gameState === 'victory' && (
-        <div className="game-over-overlay victory">
-          <div className="game-over-content">
-            <h2>🎉 Hoàn Thành Xuất Sắc!</h2>
-            <p className="final-score">{score} điểm</p>
-            <p className="completion-text">
-              Bạn đã hoàn thành {completedLevels}/{levels.length} cấp độ!
-            </p>
-            <div className="achievement-stars">
-              {['⭐', '⭐', '⭐'].map((star, i) => (
-                <span key={i} className="star">{star}</span>
+        <div className="lp-overlay">
+          <div className="lp-result-card success">
+            <div className="lp-result-icon success">
+              <Award size={52} />
+            </div>
+            <h2>Hoàn Thành Xuất Sắc!</h2>
+            <p className="lp-result-score">{score}</p>
+            <div className="lp-result-stats">
+              <div className="lp-result-stat">
+                <CheckCircle size={18} className="stat-icon" />
+                <span>{completedLevels}/{levels.length} cấp độ</span>
+              </div>
+            </div>
+            <div className="lp-stars">
+              {[1, 2, 3].map((i) => (
+                <Star key={i} size={36} fill="#fbbf24" color="#fbbf24" className="star-icon" />
               ))}
             </div>
-            <div className="victory-buttons">
-              <button onClick={resetGame} className="retry-button">
-                <RotateCcw size={20} />
-                Chơi Lại
+            <div className="lp-result-buttons">
+              <button onClick={resetGame} className="lp-btn primary">
+                <RefreshCw size={20} />
+                <span>Chơi Lại</span>
               </button>
-              <button onClick={() => navigate('/physics/grade/7')} className="home-button">
-                Về Trang Chủ
+              <button onClick={() => navigate('/physics-games/grade/7')} className="lp-btn secondary">
+                <Home size={20} />
+                <span>Về Trang Chủ</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Game Over Screen */}
       {gameState === 'gameover' && (
-        <div className="game-over-overlay">
-          <div className="game-over-content">
-            <h2>⏰ Hết Giờ!</h2>
-            <p className="final-score">{score} điểm</p>
-            <p>Hoàn thành: {completedLevels}/{levels.length} cấp độ</p>
-            <div className="gameover-buttons">
-              <button onClick={resetGame} className="retry-button">
-                <RotateCcw size={20} />
-                Thử Lại
+        <div className="lp-overlay">
+          <div className="lp-result-card">
+            <div className="lp-result-icon">
+              <Timer size={52} />
+            </div>
+            <h2>Hết Giờ!</h2>
+            <p className="lp-result-score">{score}</p>
+            <div className="lp-result-stats">
+              <div className="lp-result-stat">
+                <CheckCircle size={18} className="stat-icon" />
+                <span>{completedLevels}/{levels.length} cấp độ</span>
+              </div>
+            </div>
+            <div className="lp-result-message">
+              <Lightbulb size={20} />
+              <p>Hãy tập trung điều chỉnh góc gương và bắn nhanh hơn!</p>
+            </div>
+            <div className="lp-result-buttons">
+              <button onClick={resetGame} className="lp-btn primary">
+                <RefreshCw size={20} />
+                <span>Thử Lại</span>
               </button>
-              <button onClick={() => navigate('/physics-games/grade/7')} className="home-button">
-                Về Trang Chủ
+              <button onClick={() => navigate('/physics-games/grade/7')} className="lp-btn secondary">
+                <Home size={20} />
+                <span>Về Trang Chủ</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Animation Popup */}
+      {showSuccess && (
+        <div className="lp-success-popup">
+          <div className="lp-success-content">
+            <div className="lp-success-icon">
+              <CheckCircle size={48} />
+            </div>
+            <span>Tuyệt vời!</span>
           </div>
         </div>
       )}

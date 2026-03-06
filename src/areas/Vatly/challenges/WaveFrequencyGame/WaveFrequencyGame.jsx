@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Volume2, Music, Trophy } from 'lucide-react';
+import { ArrowLeft, Volume2, Music, Trophy, Play, Star, RotateCcw, Home, CheckCircle, Lightbulb, Target, Award } from 'lucide-react';
 import './WaveFrequencyGame.css';
 
 const WaveFrequencyGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }) => {
@@ -273,29 +273,51 @@ const WaveFrequencyGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }
 
   if (gameState === 'tutorial') {
     return (
-      <div className="wave-frequency-game">
-        <div className="tutorial-overlay">
-          <div className="tutorial-content">
-            <Music size={60} className="tutorial-icon" />
-            <h2>Trò Chơi Tần Số Sóng Âm</h2>
-            <div className="tutorial-text">
-              <p><strong>Mục tiêu:</strong> Điều chỉnh tần số và biên độ để tạo ra các nốt nhạc chính xác</p>
-              <h3>Hướng dẫn:</h3>
-              <ul>
-                <li>🎵 Kéo thanh trượt <strong>Tần số</strong> để thay đổi cao độ âm thanh</li>
-                <li>📊 Kéo thanh trượt <strong>Biên độ</strong> để thay đổi độ to</li>
-                <li>🔊 Nhấn nút <strong>Nghe Thử</strong> để nghe âm thanh</li>
-                <li>✅ Nhấn <strong>Kiểm Tra</strong> khi đã điều chỉnh xong</li>
-                <li>⭐ Mỗi cấp độ có 3 lượt thử</li>
-              </ul>
-              <div className="physics-note">
-                <p><strong>Kiến thức vật lý:</strong></p>
-                <p>• Tần số (Hz) = số dao động trong 1 giây → quyết định cao độ</p>
-                <p>• Biên độ → quyết định cường độ âm (độ to)</p>
+      <div className="wf-game">
+        <div className="wf-tutorial-overlay">
+          <div className="wf-tutorial-card">
+            <div className="wf-tutorial-icon">
+              <Music size={44} />
+            </div>
+            <h2>Tần Số Sóng Âm</h2>
+            <p className="wf-tutorial-subtitle">Làm chủ các thông số của sóng âm</p>
+            
+            <div className="wf-tutorial-steps">
+              <div className="wf-tutorial-step">
+                <div className="wf-step-icon"><Volume2 size={18} /></div>
+                <div className="wf-step-content">
+                  <strong>Điều chỉnh Tần Số</strong>
+                  <span>Kéo thanh trượt để thay đổi cao độ âm thanh</span>
+                </div>
+              </div>
+              <div className="wf-tutorial-step">
+                <div className="wf-step-icon"><Target size={18} /></div>
+                <div className="wf-step-content">
+                  <strong>Điều chỉnh Biên Độ</strong>
+                  <span>Thay đổi độ to của âm thanh</span>
+                </div>
+              </div>
+              <div className="wf-tutorial-step">
+                <div className="wf-step-icon"><CheckCircle size={18} /></div>
+                <div className="wf-step-content">
+                  <strong>Kiểm Tra Kết Quả</strong>
+                  <span>Nhấn Kiểm Tra khi đã điều chỉnh xong</span>
+                </div>
               </div>
             </div>
-            <button onClick={startGame} className="start-button">
-              Bắt Đầu
+
+            <div className="wf-physics-note">
+              <Lightbulb size={20} className="note-icon" />
+              <div>
+                <p><strong>Kiến thức vật lý:</strong></p>
+                <p>• Tần số (Hz) quyết định cao độ của âm thanh</p>
+                <p>• Biên độ quyết định cường độ (độ to) của âm</p>
+              </div>
+            </div>
+
+            <button onClick={startGame} className="wf-start-btn">
+              <Play size={22} />
+              Bắt Đầu Chơi
             </button>
           </div>
         </div>
@@ -305,20 +327,26 @@ const WaveFrequencyGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }
 
   if (gameState === 'victory') {
     return (
-      <div className="wave-frequency-game">
-        <div className="game-over-overlay">
-          <div className="game-over-content victory">
-            <Trophy size={80} />
-            <h2>Xuất Sắc!</h2>
-            <div className="final-score">
-              {score} điểm
+      <div className="wf-game">
+        <div className="wf-result-overlay">
+          <div className="wf-result-card victory">
+            <div className="wf-result-icon victory">
+              <Trophy size={50} />
             </div>
-            <p>Bạn đã làm chủ các sóng âm!</p>
-            <div className="game-over-buttons">
-              <button onClick={startGame} className="retry-button">
+            <h2>Xuất Sắc!</h2>
+            <p className="wf-result-subtitle">Bạn đã làm chủ các sóng âm!</p>
+            <div className="wf-final-score">
+              <Star size={28} className="score-star" />
+              <span>{score}</span>
+              <small>điểm</small>
+            </div>
+            <div className="wf-result-buttons">
+              <button onClick={startGame} className="wf-btn primary">
+                <RotateCcw size={20} />
                 Chơi Lại
               </button>
-              <button onClick={() => navigate('/physics-games/grade/7')} className="menu-button">
+              <button onClick={() => navigate('/physics-games/grade/7')} className="wf-btn secondary">
+                <Home size={20} />
                 Menu
               </button>
             </div>
@@ -330,19 +358,26 @@ const WaveFrequencyGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }
 
   if (gameState === 'gameover') {
     return (
-      <div className="wave-frequency-game">
-        <div className="game-over-overlay">
-          <div className="game-over-content">
-            <h2>Hết Lượt Thử</h2>
-            <div className="final-score">
-              {score} điểm
+      <div className="wf-game">
+        <div className="wf-result-overlay">
+          <div className="wf-result-card gameover">
+            <div className="wf-result-icon gameover">
+              <Award size={50} />
             </div>
-            <p>Đạt được cấp độ {currentLevel}</p>
-            <div className="game-over-buttons">
-              <button onClick={startGame} className="retry-button">
+            <h2>Hết Lượt Thử</h2>
+            <p className="wf-result-subtitle">Đạt được cấp độ {currentLevel}/{levels.length}</p>
+            <div className="wf-final-score">
+              <Star size={28} className="score-star" />
+              <span>{score}</span>
+              <small>điểm</small>
+            </div>
+            <div className="wf-result-buttons">
+              <button onClick={startGame} className="wf-btn primary">
+                <RotateCcw size={20} />
                 Thử Lại
               </button>
-              <button onClick={() => navigate('/physics-games/grade/7')} className="menu-button">
+              <button onClick={() => navigate('/physics-games/grade/7')} className="wf-btn secondary">
+                <Home size={20} />
                 Menu
               </button>
             </div>
@@ -355,44 +390,67 @@ const WaveFrequencyGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }
   const level = levels[currentLevel - 1];
 
   return (
-    <div className="wave-frequency-game">
+    <div className="wf-game">
       {!isPKMode && (
-        <div className="game-header">
-          <button onClick={() => navigate('/physics-games/grade/7')} className="back-button">
+        <header className="wf-header">
+          <button onClick={() => navigate('/physics-games/grade/7')} className="wf-back-btn">
             <ArrowLeft size={20} />
             Quay lại
           </button>
-          <div className="game-info">
-            <span className="level-badge">Cấp {currentLevel}/{levels.length}</span>
-            <span className="score-display">⭐ {score}</span>
+          <div className="wf-title">
+            <div className="wf-title-icon">
+              <Music size={26} />
+            </div>
+            <h1>Tần Số Sóng Âm</h1>
           </div>
-        </div>
+          <div className="wf-stats">
+            <div className="wf-stat">
+              <Target size={18} />
+              <span>Cấp {currentLevel}/{levels.length}</span>
+            </div>
+            <div className="wf-stat">
+              <Star size={18} className="wf-stat-icon gold" />
+              <span>{score}</span>
+            </div>
+          </div>
+        </header>
       )}
 
-      <div className="game-content">
-        <div className="level-info">
-          <h2>{level.name}</h2>
-          <p className="level-description">{level.description}</p>
-          <div className="attempts-display">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className={`attempt-dot ${i < attempts ? 'active' : 'used'}`} />
-            ))}
+      <div className="wf-game-content">
+        {/* Level Info Card */}
+        <div className="wf-level-card">
+          <div className="wf-level-header">
+            <h2>{level.name}</h2>
+            <p className="wf-level-desc">{level.description}</p>
+          </div>
+          <div className="wf-attempts">
+            <span className="wf-attempts-label">Lượt thử:</span>
+            <div className="wf-attempts-dots">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className={`wf-attempt-dot ${i < attempts ? 'active' : 'used'}`} />
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="canvas-container">
+        {/* Canvas Area */}
+        <div className="wf-canvas-wrapper">
           <canvas 
             ref={canvasRef} 
             width={800} 
             height={300}
-            className="wave-canvas"
+            className="wf-canvas"
           />
         </div>
 
-        <div className="controls-panel">
-          <div className="control-group">
-            <label>
-              Tần số: {frequency} Hz
+        {/* Controls Panel */}
+        <div className="wf-controls-panel">
+          <div className="wf-sliders">
+            <div className="wf-slider-group">
+              <div className="wf-slider-header">
+                <label>Tần số</label>
+                <span className="wf-slider-value">{frequency} Hz</span>
+              </div>
               <input
                 type="range"
                 min="100"
@@ -400,14 +458,19 @@ const WaveFrequencyGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }
                 step="5"
                 value={frequency}
                 onChange={(e) => setFrequency(Number(e.target.value))}
-                className="frequency-slider"
+                className="wf-slider frequency"
               />
-            </label>
-          </div>
+              <div className="wf-slider-labels">
+                <span>100 Hz (Trầm)</span>
+                <span>1000 Hz (Cao)</span>
+              </div>
+            </div>
 
-          <div className="control-group">
-            <label>
-              Biên độ: {amplitude}%
+            <div className="wf-slider-group">
+              <div className="wf-slider-header">
+                <label>Biên độ</label>
+                <span className="wf-slider-value">{amplitude}%</span>
+              </div>
               <input
                 type="range"
                 min="10"
@@ -415,32 +478,39 @@ const WaveFrequencyGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }
                 step="5"
                 value={amplitude}
                 onChange={(e) => setAmplitude(Number(e.target.value))}
-                className="amplitude-slider"
+                className="wf-slider amplitude"
               />
-            </label>
+              <div className="wf-slider-labels">
+                <span>10% (Nhỏ)</span>
+                <span>100% (To)</span>
+              </div>
+            </div>
           </div>
 
-          <div className="action-buttons">
-            <button onClick={playSound} className="sound-button">
+          <div className="wf-action-buttons">
+            <button onClick={playSound} className="wf-action-btn sound">
               <Volume2 size={20} />
               Nghe Thử
             </button>
-            <button onClick={resetLevel} className="reset-button">
+            <button onClick={resetLevel} className="wf-action-btn reset">
+              <RotateCcw size={20} />
               Đặt Lại
             </button>
-            <button onClick={checkAnswer} className="check-button">
+            <button onClick={checkAnswer} className="wf-action-btn check">
+              <CheckCircle size={20} />
               Kiểm Tra
             </button>
           </div>
 
           {message && (
-            <div className={`message ${message.includes('❌') ? 'error' : 'success'}`}>
+            <div className={`wf-message ${message.includes('❌') ? 'error' : 'success'}`}>
               {message}
             </div>
           )}
 
-          <div className="hint-box">
-            <strong>💡 Gợi ý:</strong> {level.hint}
+          <div className="wf-hint-box">
+            <Lightbulb size={18} className="hint-icon" />
+            <span>{level.hint}</span>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, Battery, Lightbulb, ToggleLeft, ToggleRight, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Zap, Battery, Lightbulb, ToggleLeft, ToggleRight, Plus, Minus, Play, RotateCcw, Info, CircuitBoard, Cable } from 'lucide-react';
 import './CircuitBuilderGame.css';
 
 const components = {
@@ -313,87 +313,151 @@ const CircuitBuilderGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit 
   };
 
   const renderTutorial = () => (
-    <div className="cb-tutorial-overlay">
-      <div className="cb-tutorial-content">
-        <Zap size={60} className="cb-tutorial-icon" />
-        <h2>Xây Dựng Mạch Điện</h2>
-        <div className="cb-tutorial-text">
-          <p><strong>Mục tiêu:</strong> Lắp ráp các mạch điện đơn giản và xem chúng hoạt động.</p>
-          <h3>Hướng dẫn:</h3>
-          <ul>
-            <li>1. Chọn một linh kiện (dây dẫn, pin, đèn...) từ thanh công cụ.</li>
-            <li>2. Nhấp vào một điểm trên lưới để bắt đầu.</li>
-            <li>3. Nhấp vào điểm khác để kết thúc và đặt linh kiện.</li>
-            <li>4. Tạo một mạch kín với nguồn điện để đèn sáng.</li>
-            <li>5. Nhấp vào công tắc để đóng/mở mạch.</li>
-          </ul>
+    <div className="cb-game">
+      <div className="cb-tutorial-overlay">
+        <div className="cb-tutorial-card">
+          <div className="cb-tutorial-icon">
+            <CircuitBoard size={44} />
+          </div>
+          <h2>Xây Dựng Mạch Điện</h2>
+          <p className="cb-tutorial-subtitle">Lắp ráp mạch điện và quan sát hoạt động</p>
+          
+          <div className="cb-tutorial-steps">
+            <div className="cb-tutorial-step">
+              <div className="cb-step-icon"><Zap size={18} /></div>
+              <div className="cb-step-content">
+                <strong>Chọn Linh Kiện</strong>
+                <span>Chọn dây dẫn, pin, đèn từ thanh công cụ</span>
+              </div>
+            </div>
+            <div className="cb-tutorial-step">
+              <div className="cb-step-icon"><Cable size={18} /></div>
+              <div className="cb-step-content">
+                <strong>Kết Nối Điểm</strong>
+                <span>Nhấp 2 điểm liên tiếp để đặt linh kiện</span>
+              </div>
+            </div>
+            <div className="cb-tutorial-step">
+              <div className="cb-step-icon"><Lightbulb size={18} /></div>
+              <div className="cb-step-content">
+                <strong>Tạo Mạch Kín</strong>
+                <span>Nối thành mạch kín để đèn sáng</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="cb-physics-note">
+            <Info size={20} className="note-icon" />
+            <div>
+              <p><strong>Quy tắc mạch điện:</strong></p>
+              <p>Mạch kín + Nguồn điện = Dòng điện chạy qua</p>
+            </div>
+          </div>
+
+          <button onClick={() => setGameState('playing')} className="cb-start-btn">
+            <Play size={22} />
+            Bắt Đầu Xây Dựng
+          </button>
         </div>
-        <button onClick={() => setGameState('playing')} className="cb-start-button">Bắt đầu</button>
       </div>
     </div>
   );
 
   return (
-    <div className="circuit-builder-game">
+    <div className="cb-game">
       {gameState === 'tutorial' && !isPKMode && renderTutorial()}
       
       {/* Header - conditional for PK mode */}
       {!isPKMode ? (
-        <div className="cb-header">
-          <button onClick={handleExit} className="cb-back-button">
-            <ArrowLeft size={20} /> Quay lại
+        <header className="cb-header">
+          <button onClick={handleExit} className="cb-back-btn">
+            <ArrowLeft size={20} />
+            Quay lại
           </button>
-          <h1>Xây Dựng Mạch Điện</h1>
-          <button onClick={resetCircuit} className="cb-reset-button">
+          <div className="cb-title">
+            <div className="cb-title-icon">
+              <CircuitBoard size={26} />
+            </div>
+            <h1>Xây Dựng Mạch Điện</h1>
+          </div>
+          <button onClick={resetCircuit} className="cb-reset-btn">
+            <RotateCcw size={18} />
             Làm Mới
           </button>
-        </div>
+        </header>
       ) : (
-        <div className="cb-header pk-mode">
+        <header className="cb-header pk-mode">
           <div className="pk-timer" style={{ color: pkTimeLeft < 15 ? '#ef4444' : 'white' }}>
             ⏱️ {pkTimeLeft}s
           </div>
           <h1>Xây Dựng Mạch Điện</h1>
           <div className="pk-score">⭐ {score}</div>
-        </div>
+        </header>
       )}
-      <div className="cb-main-layout">
+      
+      <div className="cb-game-content">
         <div className="cb-toolbar">
-          <h3>Linh Kiện</h3>
-          {Object.values(components).map(c => (
-            <button 
-              key={c.type} 
-              className={`cb-tool-btn ${selectedComponent === c.type ? 'selected' : ''}`}
-              onClick={() => setSelectedComponent(c.type)}
-            >
-              {c.type === 'battery' && <Battery />}
-              {c.type === 'wire' && <Minus />}
-              {c.type === 'resistor' && <svg width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" strokeWidth="2" d="M2 12h4l2-8l4 16l4-16l2 8h4"/></svg>}
-              {c.type === 'lightbulb' && <Lightbulb />}
-              {c.type === 'switch' && <ToggleLeft />}
-              {c.label}
-            </button>
-          ))}
+          <h3 className="cb-toolbar-title">
+            <Zap size={18} />
+            Linh Kiện
+          </h3>
+          <div className="cb-tool-list">
+            {Object.values(components).map(c => (
+              <button 
+                key={c.type} 
+                className={`cb-tool-btn ${selectedComponent === c.type ? 'selected' : ''}`}
+                onClick={() => setSelectedComponent(c.type)}
+              >
+                <div className="tool-icon">
+                  {c.type === 'battery' && <Battery size={20} />}
+                  {c.type === 'wire' && <Minus size={20} />}
+                  {c.type === 'resistor' && <svg width="20" height="20" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" strokeWidth="2" d="M2 12h4l2-8l4 16l4-16l2 8h4"/></svg>}
+                  {c.type === 'lightbulb' && <Lightbulb size={20} />}
+                  {c.type === 'switch' && <ToggleLeft size={20} />}
+                </div>
+                <span>{c.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="cb-canvas-container">
-          <canvas ref={canvasRef} width={800} height={600} onClick={handleCanvasClick} />
+
+        <div className="cb-canvas-wrapper">
+          <canvas ref={canvasRef} width={800} height={600} className="cb-canvas" onClick={handleCanvasClick} />
         </div>
+
         <div className="cb-info-panel">
-          <h3>Thông Tin Mạch</h3>
+          <h3 className="cb-info-title">
+            <Info size={18} />
+            Thông Tin Mạch
+          </h3>
           {circuitInfo ? (
-            <div>
-              <p>Tổng điện áp: {circuitInfo.totalVoltage.toFixed(2)} V</p>
-              <p>Tổng trở: {isFinite(circuitInfo.totalResistance) ? `${circuitInfo.totalResistance.toFixed(2)} Ω` : 'Mạch hở'}</p>
-              <p>Dòng điện chính: {circuitInfo.totalCurrent.toFixed(3)} A</p>
+            <div className="cb-info-content">
+              <div className="cb-info-item">
+                <span className="info-label">Điện áp</span>
+                <span className="info-value">{circuitInfo.totalVoltage.toFixed(2)} V</span>
+              </div>
+              <div className="cb-info-item">
+                <span className="info-label">Tổng trở</span>
+                <span className="info-value">
+                  {isFinite(circuitInfo.totalResistance) ? `${circuitInfo.totalResistance.toFixed(2)} Ω` : 'Mạch hở'}
+                </span>
+              </div>
+              <div className="cb-info-item">
+                <span className="info-label">Dòng điện</span>
+                <span className="info-value">{circuitInfo.totalCurrent.toFixed(3)} A</span>
+              </div>
               {elements.find(e => e.type === 'lightbulb') && (
-                <div className="cb-bulb-status">
-                  <Lightbulb color={circuitInfo.totalCurrent > 0 ? 'yellow' : 'grey'} />
-                  <span>{circuitInfo.totalCurrent > 0 ? 'Đèn sáng' : 'Đèn tắt'}</span>
+                <div className={`cb-bulb-status ${circuitInfo.totalCurrent > 0 ? 'on' : 'off'}`}>
+                  <Lightbulb size={24} />
+                  <span>{circuitInfo.totalCurrent > 0 ? 'Đèn sáng!' : 'Đèn tắt'}</span>
                 </div>
               )}
             </div>
           ) : (
-            <p>Chưa có thông tin. Hãy lắp một mạch điện hoàn chỉnh.</p>
+            <div className="cb-no-info">
+              <CircuitBoard size={40} />
+              <p>Hãy lắp một mạch điện hoàn chỉnh để xem thông tin.</p>
+            </div>
           )}
         </div>
       </div>

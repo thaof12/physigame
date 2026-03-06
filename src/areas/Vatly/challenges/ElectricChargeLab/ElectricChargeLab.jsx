@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, TestTube, Lightbulb, Magnet, Thermometer } from 'lucide-react';
+import { ArrowLeft, Zap, Play, RotateCcw, Lightbulb, Sparkles, CircleDot, Move } from 'lucide-react';
 import './ElectricChargeLab.css';
 
 const ElectricChargeLab = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }) => {
@@ -224,53 +224,112 @@ const ElectricChargeLab = ({ isPKMode = false, pkTimeLimit, onComplete, onExit }
   };
 
   const renderTutorial = () => (
-    <div className="ec-tutorial-overlay">
-      <div className="ec-tutorial-content">
-        <Zap size={60} className="ec-tutorial-icon" />
-        <h2>Phòng Thí Nghiệm Tĩnh Điện</h2>
-        <div className="ec-tutorial-text">
-          <p><strong>Mục tiêu:</strong> Tìm hiểu về sự nhiễm điện do cọ xát và tương tác giữa các điện tích.</p>
-          <h3>Hướng dẫn:</h3>
-          <ul>
-            <li>1. Kéo quả bóng bay hoặc thanh nhựa vào chiếc áo len để cọ xát.</li>
-            <li>2. Quan sát các điện tích âm (-) và dương (+) xuất hiện.</li>
-            <li>3. Di chuyển vật đã nhiễm điện lại gần các vật khác (áo len, bức tường, vật còn lại).</li>
-            <li>4. Xem chúng hút hay đẩy nhau.</li>
-            <li>5. Nhấn "Thí nghiệm lại" để bắt đầu lại.</li>
-          </ul>
+    <div className="ecl-game">
+      <div className="ecl-tutorial-overlay">
+        <div className="ecl-tutorial-card">
+          <div className="ecl-tutorial-icon">
+            <Zap size={44} />
+          </div>
+          <h2>Phòng Thí Nghiệm Tĩnh Điện</h2>
+          <p className="ecl-tutorial-subtitle">Khám phá sự nhiễm điện do cọ xát</p>
+          
+          <div className="ecl-tutorial-steps">
+            <div className="ecl-tutorial-step">
+              <div className="ecl-step-icon"><Move size={18} /></div>
+              <div className="ecl-step-content">
+                <strong>Kéo và Cọ Xát</strong>
+                <span>Kéo quả bóng bay hoặc thanh nhựa vào áo len</span>
+              </div>
+            </div>
+            <div className="ecl-tutorial-step">
+              <div className="ecl-step-icon"><Sparkles size={18} /></div>
+              <div className="ecl-step-content">
+                <strong>Quan Sát Điện Tích</strong>
+                <span>Xem các điện tích âm (-) và dương (+) xuất hiện</span>
+              </div>
+            </div>
+            <div className="ecl-tutorial-step">
+              <div className="ecl-step-icon"><CircleDot size={18} /></div>
+              <div className="ecl-step-content">
+                <strong>Tương Tác</strong>
+                <span>Di chuyển vật nhiễm điện để xem hút hay đẩy</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="ecl-physics-note">
+            <Lightbulb size={20} className="note-icon" />
+            <div>
+              <p><strong>Quy tắc tương tác:</strong></p>
+              <p>• Cùng dấu → Đẩy nhau | Khác dấu → Hút nhau</p>
+            </div>
+          </div>
+
+          <button onClick={() => setGameState('playing')} className="ecl-start-btn">
+            <Play size={22} />
+            Bắt Đầu Thí Nghiệm
+          </button>
         </div>
-        <button onClick={() => setGameState('playing')} className="ec-start-button">Bắt đầu</button>
       </div>
     </div>
   );
 
   return (
-    <div className="electric-charge-lab" onMouseUp={handleMouseUp}>
+    <div className="ecl-game" onMouseUp={handleMouseUp}>
       {gameState === 'tutorial' && renderTutorial()}
-      <div className="ec-header">
-        <button onClick={() => navigate('/physics-games/grade/7')} className="ec-back-button">
-          <ArrowLeft size={20} /> Quay lại
+      
+      <header className="ecl-header">
+        <button onClick={() => navigate('/physics-games/grade/7')} className="ecl-back-btn">
+          <ArrowLeft size={20} />
+          Quay lại
         </button>
-        <h1>Phòng Thí Nghiệm Tĩnh Điện</h1>
-        <button onClick={setupInitialObjects} className="ec-reset-button">
+        <div className="ecl-title">
+          <div className="ecl-title-icon">
+            <Zap size={26} />
+          </div>
+          <h1>Phòng Thí Nghiệm Tĩnh Điện</h1>
+        </div>
+        <button onClick={setupInitialObjects} className="ecl-reset-btn">
+          <RotateCcw size={18} />
           Thí nghiệm lại
         </button>
-      </div>
-      <div className="ec-main-content">
-        <canvas
-          ref={canvasRef}
-          width={900}
-          height={500}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-        />
-        <div className="ec-message-bar">{message}</div>
-      </div>
-      <div className="ec-legend">
-        <div><span className="charge-positive">+</span> Điện tích dương</div>
-        <div><span className="charge-negative">-</span> Điện tích âm</div>
-        <div><strong>Áo len:</strong> Trung hòa</div>
-        <div><strong>Tường:</strong> Trung hòa</div>
+      </header>
+
+      <div className="ecl-game-content">
+        <div className="ecl-canvas-wrapper">
+          <canvas
+            ref={canvasRef}
+            width={900}
+            height={500}
+            className="ecl-canvas"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+          />
+        </div>
+        
+        <div className="ecl-message-bar">
+          <Lightbulb size={20} className="message-icon" />
+          <span>{message}</span>
+        </div>
+        
+        <div className="ecl-legend">
+          <div className="ecl-legend-item">
+            <span className="charge-badge positive">+</span>
+            <span>Điện tích dương</span>
+          </div>
+          <div className="ecl-legend-item">
+            <span className="charge-badge negative">−</span>
+            <span>Điện tích âm</span>
+          </div>
+          <div className="ecl-legend-item">
+            <div className="object-indicator sweater"></div>
+            <span>Áo len</span>
+          </div>
+          <div className="ecl-legend-item">
+            <div className="object-indicator wall"></div>
+            <span>Tường</span>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, Thermometer, Lightbulb, Magnet, TestTube, Check } from 'lucide-react';
+import { ArrowLeft, Zap, Thermometer, Lightbulb, Magnet, TestTube, Check, Play, ToggleRight } from 'lucide-react';
 import './ElectricEffectsGame.css';
 
 const stations = {
@@ -245,36 +245,83 @@ const ElectricEffectsGame = () => {
   };
 
   const renderTutorial = () => (
-    <div className="eeff-tutorial-overlay">
-      <div className="eeff-tutorial-content">
-        <Zap size={60} className="eeff-tutorial-icon" />
-        <h2>Các Tác Dụng Của Dòng Điện</h2>
-        <div className="eeff-tutorial-text">
-          <p><strong>Mục tiêu:</strong> Khám phá 4 tác dụng chính của dòng điện.</p>
-          <h3>Hướng dẫn:</h3>
-          <ul>
-            <li>1. Chọn một "trạm" thí nghiệm (Nhiệt, Sáng, Từ, Hóa học).</li>
-            <li>2. Mạch điện đã được lắp sẵn cho bạn.</li>
-            <li>3. Nhấn vào <strong>Công Tắc</strong> để đóng mạch.</li>
-            <li>4. Quan sát hiện tượng xảy ra.</li>
-            <li>5. Hoàn thành cả 4 trạm để kết thúc!</li>
-          </ul>
+    <div className="ee-game">
+      <div className="ee-tutorial-overlay">
+        <div className="ee-tutorial-card">
+          <div className="ee-tutorial-icon">
+            <Zap size={44} />
+          </div>
+          <h2>Các Tác Dụng Của Dòng Điện</h2>
+          <p>Khám phá 4 hiệu ứng vật lý quan trọng của dòng điện</p>
+          
+          <div className="ee-tutorial-steps">
+            <h3><ToggleRight size={18} /> Hướng dẫn thí nghiệm</h3>
+            <ul>
+              <li>
+                <div className="ee-step-icon"><Thermometer size={16} /></div>
+                <span>Chọn một trạm thí nghiệm (Nhiệt, Sáng, Từ, Hóa học)</span>
+              </li>
+              <li>
+                <div className="ee-step-icon"><Zap size={16} /></div>
+                <span>Nhấn vào mạch điện để đóng/mở công tắc</span>
+              </li>
+              <li>
+                <div className="ee-step-icon"><Lightbulb size={16} /></div>
+                <span>Quan sát hiện tượng và hiệu ứng xảy ra</span>
+              </li>
+              <li>
+                <div className="ee-step-icon"><Check size={16} /></div>
+                <span>Hoàn thành cả 4 trạm để kết thúc thí nghiệm</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="ee-physics-note">
+            <p><strong>💡 Kiến thức:</strong> Dòng điện có 4 tác dụng chính: <strong>tác dụng nhiệt</strong> (làm nóng dây dẫn), <strong>tác dụng phát sáng</strong> (làm đèn sáng), <strong>tác dụng từ</strong> (tạo nam châm điện), và <strong>tác dụng hóa học</strong> (điện phân).</p>
+          </div>
+          
+          <button onClick={() => setGameState('playing')} className="ee-start-btn">
+            <Play size={20} />
+            Bắt Đầu Thí Nghiệm
+          </button>
         </div>
-        <button onClick={() => setGameState('playing')} className="eeff-start-button">Bắt đầu</button>
       </div>
     </div>
   );
   
   const renderGameFinished = () => (
-    <div className="eeff-tutorial-overlay">
-        <div className="eeff-tutorial-content">
-            <h2>Thí Nghiệm Hoàn Tất!</h2>
-            <p>Bạn đã khám phá thành công các tác dụng của dòng điện.</p>
-            <div className="eeff-game-over-buttons">
-                <button onClick={() => { setGameState('playing'); setCompletedStations([]); changeStation('thermal'); }} className="eeff-retry-button">Làm Lại</button>
-                <button onClick={() => navigate('/physics-games/grade/7')} className="eeff-menu-button">Về Menu</button>
-            </div>
+    <div className="ee-game">
+      <div className="ee-tutorial-overlay">
+        <div className="ee-tutorial-card">
+          <div className="ee-tutorial-icon success">
+            <Check size={44} />
+          </div>
+          <h2>Thí Nghiệm Hoàn Tất!</h2>
+          <p>Bạn đã khám phá thành công các tác dụng của dòng điện.</p>
+          
+          <div className="ee-completed-list">
+            {Object.keys(stations).map(key => {
+              const StationIcon = stations[key].icon;
+              return (
+                <div key={key} className="ee-completed-item">
+                  <StationIcon size={20} />
+                  <span>{stations[key].name}</span>
+                  <Check size={16} />
+                </div>
+              );
+            })}
+          </div>
+          
+          <div className="ee-game-over-buttons">
+            <button onClick={() => { setGameState('playing'); setCompletedStations([]); changeStation('thermal'); }} className="ee-retry-btn">
+              Làm Lại
+            </button>
+            <button onClick={() => navigate('/physics-games/grade/7')} className="ee-menu-btn">
+              Về Menu
+            </button>
+          </div>
         </div>
+      </div>
     </div>
   );
 
@@ -282,34 +329,62 @@ const ElectricEffectsGame = () => {
   if (completedStations.length === Object.keys(stations).length) return renderGameFinished();
 
   return (
-    <div className="electric-effects-game">
-      <div className="eeff-header">
-        <button onClick={() => navigate('/physics-games/grade/7')} className="eeff-back-button">
-          <ArrowLeft size={20} /> Quay lại
+    <div className="ee-game">
+      <header className="ee-header">
+        <button onClick={() => navigate('/physics-games/grade/7')} className="ee-back-btn">
+          <ArrowLeft size={20} />
+          Quay lại
         </button>
-        <h1>{stations[currentStation].name}</h1>
-      </div>
-      <div className="eeff-main-layout">
-        <div className="eeff-station-selector">
-          {Object.keys(stations).map(key => {
-            const StationIcon = stations[key].icon;
-            const isCompleted = completedStations.includes(key);
-            return (
-              <button 
-                key={key} 
-                className={`eeff-station-btn ${currentStation === key ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
-                onClick={() => changeStation(key)}
-              >
-                <StationIcon />
-                <span>{stations[key].name}</span>
-                {isCompleted && <Check size={16} className="completion-check" />}
-              </button>
-            );
-          })}
+        <div className="ee-title">
+          <div className="ee-title-icon">
+            <Zap size={26} />
+          </div>
+          <h1>{stations[currentStation].name}</h1>
         </div>
-        <div className="eeff-canvas-container" onClick={handleSwitchToggle}>
-          <canvas ref={canvasRef} width={700} height={500} />
-          <div className="eeff-instruction">{stations[currentStation].description}</div>
+        <div className="ee-progress">
+          <span>{completedStations.length}/{Object.keys(stations).length}</span>
+          <Check size={18} />
+        </div>
+      </header>
+      
+      <div className="ee-game-content">
+        <div className="ee-station-selector">
+          <h3 className="ee-selector-title">
+            <Zap size={18} />
+            Trạm Thí Nghiệm
+          </h3>
+          <div className="ee-station-list">
+            {Object.keys(stations).map(key => {
+              const StationIcon = stations[key].icon;
+              const isCompleted = completedStations.includes(key);
+              return (
+                <button 
+                  key={key} 
+                  className={`ee-station-btn ${currentStation === key ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                  onClick={() => changeStation(key)}
+                >
+                  <div className="station-icon">
+                    <StationIcon size={20} />
+                  </div>
+                  <span>{stations[key].name}</span>
+                  {isCompleted && <Check size={16} className="completion-check" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        
+        <div className="ee-canvas-wrapper">
+          <div className="ee-canvas-container" onClick={handleSwitchToggle}>
+            <canvas ref={canvasRef} width={700} height={500} className="ee-canvas" />
+          </div>
+          <div className="ee-instruction">
+            <Lightbulb size={16} />
+            <span>{stations[currentStation].description}</span>
+          </div>
+          <div className="ee-switch-hint">
+            Click vào mạch để {isSwitchClosed ? 'mở' : 'đóng'} công tắc
+          </div>
         </div>
       </div>
     </div>

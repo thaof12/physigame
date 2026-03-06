@@ -1,161 +1,416 @@
-.electric-charge-lab {
+﻿/* ElectricChargeLab - Modern Professional UI */
+
+/* Base Layout */
+.ecl-game {
   min-height: 100vh;
-  background: #34495e;
-  color: white;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 25%, #b45309 50%, #92400e 100%);
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: 'Arial', sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.ec-header {
-  width: 100%;
-  max-width: 1000px;
+/* Animations */
+@keyframes eclFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes eclSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes eclGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.5); }
+  50% { box-shadow: 0 0 40px rgba(245, 158, 11, 0.8); }
+}
+
+@keyframes eclFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes eclSpark {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* Header */
+.ecl-header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.ec-header h1 {
-  font-size: 1.8rem;
-  color: #f1c40f;
-}
-
-.ec-back-button, .ec-reset-button {
+.ecl-back-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.ec-back-button:hover, .ec-reset-button:hover {
+  padding: 12px 20px;
   background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 14px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-.ec-main-content {
+.ecl-back-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-3px);
+}
+
+.ecl-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: white;
+}
+
+.ecl-title-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: eclFloat 3s ease-in-out infinite;
+}
+
+.ecl-title h1 {
+  font-size: 24px;
+  margin: 0;
+  font-weight: 800;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.ecl-reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 14px;
+  color: #92400e;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ecl-reset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Tutorial Overlay */
+.ecl-tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: eclFadeIn 0.3s ease;
+  padding: 20px;
+  backdrop-filter: blur(8px);
+}
+
+.ecl-tutorial-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+  border-radius: 28px;
+  padding: 40px;
+  max-width: 480px;
   width: 100%;
-  max-width: 900px;
+  text-align: center;
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(245, 158, 11, 0.3);
+  animation: eclSlideUp 0.5s ease;
+}
+
+.ecl-tutorial-icon {
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  color: white;
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+  animation: eclGlow 2s ease-in-out infinite;
+}
+
+.ecl-tutorial-card h2 {
+  font-size: 28px;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+  font-weight: 800;
+  background: linear-gradient(135deg, #d97706, #b45309);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ecl-tutorial-subtitle {
+  color: #64748b;
+  margin: 0 0 28px 0;
+  font-size: 15px;
+}
+
+.ecl-tutorial-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.ecl-tutorial-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 14px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  transition: all 0.3s;
+}
+
+.ecl-tutorial-step:hover {
+  background: rgba(245, 158, 11, 0.15);
+  transform: translateX(6px);
+}
+
+.ecl-step-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ecl-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ecl-step-content strong {
+  color: #1e293b;
+  font-size: 15px;
+}
+
+.ecl-step-content span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.ecl-physics-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  text-align: left;
+  border: 1px solid #fcd34d;
+}
+
+.ecl-physics-note .note-icon {
+  color: #f59e0b;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ecl-physics-note p {
+  margin: 0 0 4px 0;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ecl-start-btn {
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ecl-start-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.5);
+}
+
+/* Game Content */
+.ecl-game-content {
+  max-width: 1000px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Canvas */
+.ecl-canvas-wrapper {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   cursor: grab;
 }
 
-.ec-main-content:active {
+.ecl-canvas-wrapper:active {
   cursor: grabbing;
 }
 
-.ec-main-content canvas {
-  background: #2c3e50;
-  border-radius: 15px;
-  border: 2px solid #f1c40f;
+.ecl-canvas {
   width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
 }
 
-.ec-message-bar {
-  width: 100%;
-  padding: 15px;
-  margin-top: 15px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  text-align: center;
-  font-size: 1.1rem;
-  color: #ecf0f1;
-}
-
-.ec-legend {
+/* Message Bar */
+.ecl-message-bar {
   display: flex;
-  gap: 30px;
-  margin-top: 20px;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 15px 25px;
-  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.ec-legend div {
+.ecl-message-bar .message-icon {
+  color: #f59e0b;
+}
+
+.ecl-message-bar span {
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Legend */
+.ecl-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ecl-legend-item {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.charge-positive, .charge-negative {
-  font-weight: bold;
-  font-size: 1.5rem;
-}
-.charge-positive { color: #e74c3c; }
-.charge-negative { color: #3498db; }
-
-/* Tutorial Overlay */
-.ec-tutorial-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+.ecl-legend-item span {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.ec-tutorial-content {
-  background: #34495e;
-  padding: 40px;
-  border-radius: 15px;
-  max-width: 600px;
-  text-align: center;
-  border: 2px solid #f1c40f;
-}
-
-.ec-tutorial-icon {
-  color: #f1c40f;
-  margin-bottom: 20px;
-}
-
-.ec-tutorial-content h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-.ec-tutorial-text {
-  text-align: left;
-  margin-bottom: 30px;
-}
-
-.ec-tutorial-text h3 {
-  color: #f1c40f;
-  margin-bottom: 10px;
-}
-
-.ec-tutorial-text ul {
-  list-style: none;
-  padding: 0;
-}
-
-.ec-tutorial-text li {
-  padding: 8px 0;
-  border-bottom: 1px solid #2c3e50;
-}
-
-.ec-start-button {
-  padding: 15px 30px;
-  background: #27ae60;
-  color: white;
-  border: none;
+.charge-badge {
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: white;
 }
 
-.ec-start-button:hover {
-  background: #2ecc71;
+.charge-badge.positive {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.charge-badge.negative {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.object-indicator {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.object-indicator.sweater {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.object-indicator.wall {
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ecl-game {
+    padding: 12px;
+  }
+
+  .ecl-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ecl-title h1 {
+    font-size: 18px;
+  }
+
+  .ecl-legend {
+    gap: 12px;
+  }
+
+  .ecl-legend-item {
+    flex: 1 1 40%;
+    justify-content: center;
+  }
+
+  .ecl-tutorial-card {
+    padding: 28px;
+  }
+
+  .ecl-tutorial-card h2 {
+    font-size: 22px;
+  }
 }

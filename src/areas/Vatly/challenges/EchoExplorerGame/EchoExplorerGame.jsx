@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mountain, Building, Trees, Volume2, Timer, Check } from 'lucide-react';
+import { ArrowLeft, Mountain, Building, Trees, Volume2, Timer, Check, Play, Star, RotateCcw, Home, Lightbulb, Waves, Target, ChevronRight } from 'lucide-react';
 import './EchoExplorerGame.css';
 
 const EchoExplorerGame = () => {
@@ -222,91 +222,185 @@ const EchoExplorerGame = () => {
   }
 
   const renderTutorial = () => (
-    <div className="ee-tutorial-overlay">
-      <div className="ee-tutorial-content">
-        <Mountain size={60} className="ee-tutorial-icon" />
-        <h2>Khám Phá Tiếng Vang</h2>
-        <div className="ee-tutorial-text">
-          <p><strong>Mục tiêu:</strong> Dùng tiếng vang để đo khoảng cách.</p>
-          <h3>Hướng dẫn:</h3>
-          <ul>
-            <li>1. Nhấn <strong>"Hét Lên"</strong> để tạo ra âm thanh.</li>
-            <li>2. Đồng hồ sẽ bắt đầu chạy.</li>
-            <li>3. Khi sóng âm dội lại (màu cam), nhấn <strong>"Dừng Đồng Hồ"</strong>.</li>
-            <li>4. Dùng công thức: <strong>Khoảng cách = (343 * Thời gian) / 2</strong> để tính.</li>
-            <li>5. Nhập kết quả và nhấn <strong>"Kiểm Tra"</strong>.</li>
-          </ul>
+    <div className="ee-game">
+      <div className="ee-tutorial-overlay">
+        <div className="ee-tutorial-card">
+          <div className="ee-tutorial-icon">
+            <Mountain size={44} />
+          </div>
+          <h2>Khám Phá Tiếng Vang</h2>
+          <p className="ee-tutorial-subtitle">Dùng tiếng vang để đo khoảng cách</p>
+          
+          <div className="ee-tutorial-steps">
+            <div className="ee-tutorial-step">
+              <div className="ee-step-icon"><Volume2 size={18} /></div>
+              <div className="ee-step-content">
+                <strong>Bước 1: Hét Lên</strong>
+                <span>Nhấn nút để tạo ra âm thanh</span>
+              </div>
+            </div>
+            <div className="ee-tutorial-step">
+              <div className="ee-step-icon"><Timer size={18} /></div>
+              <div className="ee-step-content">
+                <strong>Bước 2: Dừng Đồng Hồ</strong>
+                <span>Khi thấy sóng âm dội lại (màu cam)</span>
+              </div>
+            </div>
+            <div className="ee-tutorial-step">
+              <div className="ee-step-icon"><Target size={18} /></div>
+              <div className="ee-step-content">
+                <strong>Bước 3: Tính Khoảng Cách</strong>
+                <span>d = (343 × t) / 2</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="ee-physics-note">
+            <Lightbulb size={20} className="note-icon" />
+            <div>
+              <p><strong>Công thức tiếng vang:</strong></p>
+              <p>Khoảng cách = (Vận tốc âm × Thời gian) / 2</p>
+            </div>
+          </div>
+
+          <button onClick={startGame} className="ee-start-btn">
+            <Play size={22} />
+            Bắt Đầu Chơi
+          </button>
         </div>
-        <button onClick={startGame} className="ee-start-button">Bắt đầu</button>
       </div>
     </div>
   );
   
   const renderGameFinished = () => (
-    <div className="ee-tutorial-overlay">
-        <div className="ee-tutorial-content">
-            <h2>Hoàn Thành!</h2>
-            <p className="ee-final-score">Tổng điểm: {score}</p>
-            <div className="ee-game-over-buttons">
-                <button onClick={startGame} className="ee-retry-button">Chơi Lại</button>
-                <button onClick={() => navigate('/physics-games/grade/7')} className="ee-menu-button">Về Menu</button>
-            </div>
+    <div className="ee-game">
+      <div className="ee-result-overlay">
+        <div className="ee-result-card">
+          <div className="ee-result-icon">
+            <Waves size={50} />
+          </div>
+          <h2>Hoàn Thành!</h2>
+          <p className="ee-result-subtitle">Bạn đã khám phá xong tiếng vang</p>
+          <div className="ee-final-score">
+            <Star size={28} className="score-star" />
+            <span>{score}</span>
+            <small>điểm</small>
+          </div>
+          <div className="ee-result-buttons">
+            <button onClick={startGame} className="ee-btn primary">
+              <RotateCcw size={20} />
+              Chơi Lại
+            </button>
+            <button onClick={() => navigate('/physics-games/grade/7')} className="ee-btn secondary">
+              <Home size={20} />
+              Menu
+            </button>
+          </div>
         </div>
+      </div>
     </div>
   );
 
   if (gameState === 'tutorial') return renderTutorial();
   if (gameState === 'finished') return renderGameFinished();
 
+  const LevelIcon = level.icon;
+
   return (
-    <div className="echo-explorer-game">
-      <div className="ee-header">
-        <button onClick={() => navigate('/physics-games/grade/7')} className="ee-back-button">
-          <ArrowLeft size={20} /> Quay lại
+    <div className="ee-game">
+      <header className="ee-header">
+        <button onClick={() => navigate('/physics-games/grade/7')} className="ee-back-btn">
+          <ArrowLeft size={20} />
+          Quay lại
         </button>
-        <div className="ee-score">Điểm: {score}</div>
-      </div>
-      <div className="ee-main">
-        <div className="ee-level-info">
-          <h2>Cấp {currentLevel + 1}: {level.name}</h2>
-          <p>{level.description}</p>
+        <div className="ee-title">
+          <div className="ee-title-icon">
+            <Mountain size={26} />
+          </div>
+          <h1>Khám Phá Tiếng Vang</h1>
         </div>
-        <div className="ee-simulation">
-          <canvas ref={canvasRef} width="800" height="300" />
+        <div className="ee-stats">
+          <div className="ee-stat">
+            <Target size={18} />
+            <span>Cấp {currentLevel + 1}/{levels.length}</span>
+          </div>
+          <div className="ee-stat">
+            <Star size={18} className="ee-stat-icon gold" />
+            <span>{score}</span>
+          </div>
+        </div>
+      </header>
+
+      <div className="ee-game-content">
+        {/* Level Info */}
+        <div className="ee-level-card">
+          <div className="ee-level-icon">
+            <LevelIcon size={28} />
+          </div>
+          <div className="ee-level-info">
+            <h2>{level.name}</h2>
+            <p>{level.description}</p>
+          </div>
+        </div>
+
+        {/* Simulation Canvas */}
+        <div className="ee-canvas-wrapper">
+          <canvas ref={canvasRef} width="800" height="300" className="ee-canvas" />
           <div className="ee-timer-display">
-            <Timer size={24} />
+            <Timer size={22} />
             <span>{timer.toFixed(2)}s</span>
           </div>
         </div>
-        <div className="ee-controls">
-          <button onClick={startShout} disabled={animationState !== 'idle'} className="ee-shout-button">
-            <Volume2 /> Hét Lên
-          </button>
-          <button onClick={stopTimer} disabled={!timerRunning} className="ee-stop-button">
-            <Timer /> Dừng Đồng Hồ
-          </button>
-        </div>
-        <div className="ee-calculation">
-          <p className="ee-formula">Khoảng cách = (343 m/s × {timer.toFixed(2)}s) / 2 = <strong>{((speedOfSound * timer) / 2).toFixed(1)} m</strong></p>
-          <div className="ee-answer-box">
-            <input 
-              type="number"
-              value={playerDistance}
-              onChange={e => setPlayerDistance(e.target.value)}
-              placeholder="Nhập khoảng cách bạn tính được"
-              disabled={timerRunning}
-            />
-            <button onClick={checkAnswer} disabled={timerRunning || animationState === 'shouting'}>
-              <Check /> Kiểm Tra
+
+        {/* Controls */}
+        <div className="ee-controls-panel">
+          <div className="ee-action-buttons">
+            <button onClick={startShout} disabled={animationState !== 'idle'} className="ee-action-btn shout">
+              <Volume2 size={20} />
+              Hét Lên
+            </button>
+            <button onClick={stopTimer} disabled={!timerRunning} className="ee-action-btn stop">
+              <Timer size={20} />
+              Dừng Đồng Hồ
             </button>
           </div>
+
+          <div className="ee-calculation-card">
+            <div className="ee-formula">
+              <span className="formula-label">Công thức:</span>
+              <span className="formula-text">d = (343 m/s × {timer.toFixed(2)}s) / 2</span>
+              <span className="formula-result">= {((speedOfSound * timer) / 2).toFixed(1)} m</span>
+            </div>
+            
+            <div className="ee-answer-section">
+              <input 
+                type="number"
+                value={playerDistance}
+                onChange={e => setPlayerDistance(e.target.value)}
+                placeholder="Nhập khoảng cách (m)"
+                disabled={timerRunning}
+                className="ee-input"
+              />
+              <button onClick={checkAnswer} disabled={timerRunning || animationState === 'shouting'} className="ee-check-btn">
+                <Check size={20} />
+                Kiểm Tra
+              </button>
+            </div>
+          </div>
+
+          {resultMessage && (
+            <div className={`ee-message ${resultMessage.includes('🎉') ? 'success' : 'info'}`}>
+              {resultMessage}
+            </div>
+          )}
+
+          {(animationState === 'idle' && resultMessage) && (
+            <button onClick={nextLevel} className="ee-next-btn">
+              {currentLevel < levels.length - 1 ? 'Cấp Tiếp Theo' : 'Hoàn Thành'}
+              <ChevronRight size={20} />
+            </button>
+          )}
         </div>
-        {resultMessage && <div className="ee-result-message">{resultMessage}</div>}
-        {(animationState === 'idle' && resultMessage) && (
-          <button onClick={nextLevel} className="ee-next-level-button">
-            {currentLevel < levels.length - 1 ? 'Cấp Tiếp Theo' : 'Hoàn Thành'}
-          </button>
-        )}
       </div>
     </div>
   );
