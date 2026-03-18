@@ -4,7 +4,6 @@ import { GameProgressProvider } from './contexts/GameProgressContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Home from './pages/Home';
 import GameJourney from './pages/GameJourney';
-import ThemeSwitcher from './ui/ThemeSwitcher';
 import "./index.css";
 
 // Physics Tools Hub
@@ -520,10 +519,6 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <GameProgressProvider>
-            {/* Theme Switcher */}
-            <div className="fixed top-4 right-4 z-50">
-              <ThemeSwitcher />
-            </div>
             <AppContent />
           </GameProgressProvider>
         </ThemeProvider>
