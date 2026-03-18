@@ -295,7 +295,7 @@ const PhysicsHome = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid md:grid-cols-4 gap-4 mb-6">
+          <div className="grid md:grid-cols-5 gap-4 mb-6">
             <button
               onClick={() => navigate('/program/physics/dashboard')}
               className="group bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
@@ -313,6 +313,68 @@ const PhysicsHome = () => {
             </button>
 
             <button
+              onClick={() => navigate('/program/physics/dashboard')}
+              className="group bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Lộ trình học</h3>
+              <p className="text-blue-100 text-sm">Xem các bài học theo lớp</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/advanced-physics-challenge')}
+              className="group bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <Trophy className="w-6 h-6" />
+                </div>
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Thử thách</h3>
+              <p className="text-orange-100 text-sm">Làm game và nhận sao thưởng</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/physics-tools')}
+              className="group bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <Zap className="w-6 h-6" />
+                </div>
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Công Cụ Vật Lý</h3>
+              <p className="text-cyan-100 text-sm">Máy tính & tra cứu</p>
+            </button>
+
+            <button
+              onClick={() => navigate('/profile')}
+              className="group bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <Target className="w-6 h-6" />
+                </div>
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Mục tiêu cá nhân</h3>
+              <p className="text-purple-100 text-sm">Theo dõi tiến độ của bạn</p>
+            </button>
           </div>
 
         </div>

@@ -54,7 +54,6 @@ const Login = () => {
       const data = await response.json();
       
       if (data.success) {
-        
         // Cập nhật user trong context và localStorage
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
@@ -67,11 +66,6 @@ const Login = () => {
             navigate(`/program/${activeProgram.programId}`);
           } else {
             navigate('/');
-          }
-        } else {
-          console.log('✅ No programs, redirecting to program selection...');
-          navigate('/home');
-            navigate('/');  
           }
         } else {
           navigate('/program-selection');
@@ -109,12 +103,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await login(formData.email, formData.password);
-      navigate('/');
-    } catch (err) {
-    console.log('🔵 Login attempt:', { email: formData.email });
-
-    try {
+      console.log('🔵 Login attempt:', { email: formData.email });
       const result = await login(formData.email, formData.password);
       console.log('✅ Login successful:', result);
       navigate('/program-selection');

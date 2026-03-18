@@ -1,5 +1,17 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { ArrowLeft, BookOpen, Trophy, Lock } from 'lucide-react';
+import { API_BASE_URL } from '../../../config/api';
+import { physicsLessons, getLessonStats } from '../data/physicsLessons';
+
+const PhysicsClassDashboard = () => {
+  const { classId } = useParams();
+  const navigate = useNavigate();
+  const [userProgress, setUserProgress] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
     const loadProgress = async () => {
       try {
         const user = JSON.parse(localStorage.getItem('user'));
@@ -10,7 +22,7 @@ import { useState, useEffect } from 'react';
               userId: userEmail
             }
           });
-          
+
           if (response.data) {
             const progressObj = {};
             response.data.forEach(completion => {
@@ -28,7 +40,7 @@ import { useState, useEffect } from 'react';
         setLoading(false);
       }
     };
-    
+
     loadProgress();
   }, [classId]);
 

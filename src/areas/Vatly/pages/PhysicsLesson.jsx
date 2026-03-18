@@ -87,6 +87,67 @@ const PhysicsLesson = () => {
     fetchLesson();
   }, [classId, chapterId, lessonId]);
 
+  const exercises = Array.isArray(lessonData?.content?.exercises)
+    ? lessonData.content.exercises
+    : [];
+  const currentExercise = exercises[currentQuizIndex];
+
+  const getCorrectAnswerIndex = (exercise) => {
+    if (!exercise || typeof exercise.correctAnswer !== 'number') {
+      return -1;
+    }
+
+    // Backend lesson files are stored as 1-based answers.
+    return exercise.correctAnswer > 0
+      ? exercise.correctAnswer - 1
+      : exercise.correctAnswer;
+  };
+
+  const handleAnswerSelect = (answerIndex) => {
+    if (showResult || isCompleted) {
+      return;
+    }
+
+    setSelectedAnswer(answerIndex);
+  };
+
+  const handleCheckAnswer = () => {
+    if (selectedAnswer === null || !currentExercise) {
+      return;
+    }
+
+    const correctAnswerIndex = getCorrectAnswerIndex(currentExercise);
+    if (selectedAnswer === correctAnswerIndex) {
+      setScore((prev) => prev + 1);
+    }
+
+    setShowResult(true);
+  };
+
+  const handleNextQuestion = () => {
+    if (!currentExercise) {
+      return;
+    }
+
+    setQuizAnswers((prev) => [
+      ...prev,
+      {
+        questionIndex: currentQuizIndex,
+        selectedAnswer,
+        correctAnswer: getCorrectAnswerIndex(currentExercise)
+      }
+    ]);
+
+    if (currentQuizIndex < exercises.length - 1) {
+      setCurrentQuizIndex((prev) => prev + 1);
+      setSelectedAnswer(null);
+      setShowResult(false);
+      return;
+    }
+
+    setIsCompleted(true);
+  };
+
   const handleFinish = () => {
     navigate(`/physics-class/${classId}`);
   };
@@ -244,7 +305,7 @@ const PhysicsLesson = () => {
                             disabled={showResult}
                             className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                               showResult
-                                ? index === currentExercise.correctAnswer
+                                ? index === getCorrectAnswerIndex(currentExercise)
                                   ? 'border-green-500 bg-green-50'
                                   : index === selectedAnswer
                                   ? 'border-red-500 bg-red-50'
@@ -257,7 +318,7 @@ const PhysicsLesson = () => {
                             <div className="flex items-center gap-3">
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
                                 showResult
-                                  ? index === currentExercise.correctAnswer
+                                  ? index === getCorrectAnswerIndex(currentExercise)
                                     ? 'bg-green-500 text-white'
                                     : index === selectedAnswer
                                     ? 'bg-red-500 text-white'
@@ -269,10 +330,10 @@ const PhysicsLesson = () => {
                                 {String.fromCharCode(65 + index)}
                               </div>
                               <span className="flex-1">{option}</span>
-                              {showResult && index === currentExercise.correctAnswer && (
+                              {showResult && index === getCorrectAnswerIndex(currentExercise) && (
                                 <CheckCircle className="w-6 h-6 text-green-500" />
                               )}
-                              {showResult && index === selectedAnswer && index !== currentExercise.correctAnswer && (
+                              {showResult && index === selectedAnswer && index !== getCorrectAnswerIndex(currentExercise) && (
                                 <XCircle className="w-6 h-6 text-red-500" />
                               )}
                             </div>
@@ -283,12 +344,12 @@ const PhysicsLesson = () => {
 
                     {showResult && (
                       <div className={`rounded-xl p-6 mb-6 ${
-                        selectedAnswer === currentExercise.correctAnswer
+                        selectedAnswer === getCorrectAnswerIndex(currentExercise)
                           ? 'bg-green-50 border-2 border-green-200'
                           : 'bg-red-50 border-2 border-red-200'
                       }`}>
                         <div className="flex items-center gap-3 mb-2">
-                          {selectedAnswer === currentExercise.correctAnswer ? (
+                          {selectedAnswer === getCorrectAnswerIndex(currentExercise) ? (
                             <>
                               <CheckCircle className="w-6 h-6 text-green-600" />
                               <span className="font-bold text-green-600">Chính xác!</span>
@@ -360,7 +421,7 @@ const PhysicsLesson = () => {
                               <div
                                 key={optionIndex}
                                 className={`w-full text-left p-4 rounded-lg border-2 ${
-                                  optionIndex === exercise.correctAnswer
+                                  optionIndex === (exercise.correctAnswer > 0 ? exercise.correctAnswer - 1 : exercise.correctAnswer)
                                     ? 'border-green-500 bg-green-50'
                                     : optionIndex === selected
                                     ? 'border-red-500 bg-red-50'
@@ -369,7 +430,7 @@ const PhysicsLesson = () => {
                               >
                                 <div className="flex items-center gap-3">
                                   <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                                    optionIndex === exercise.correctAnswer
+                                    optionIndex === (exercise.correctAnswer > 0 ? exercise.correctAnswer - 1 : exercise.correctAnswer)
                                       ? 'bg-green-500 text-white'
                                       : optionIndex === selected
                                       ? 'bg-red-500 text-white'
@@ -378,10 +439,10 @@ const PhysicsLesson = () => {
                                     {String.fromCharCode(65 + optionIndex)}
                                   </div>
                                   <span className="flex-1">{option}</span>
-                                  {optionIndex === exercise.correctAnswer && (
+                                  {optionIndex === (exercise.correctAnswer > 0 ? exercise.correctAnswer - 1 : exercise.correctAnswer) && (
                                     <CheckCircle className="w-6 h-6 text-green-500" />
                                   )}
-                                  {optionIndex === selected && optionIndex !== exercise.correctAnswer && (
+                                  {optionIndex === selected && optionIndex !== (exercise.correctAnswer > 0 ? exercise.correctAnswer - 1 : exercise.correctAnswer) && (
                                     <XCircle className="w-6 h-6 text-red-500" />
                                   )}
                                 </div>

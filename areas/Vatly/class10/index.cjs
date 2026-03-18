@@ -1,9 +1,5 @@
 // Vật lý Lớp 10
 module.exports = [
-<<<<<<< HEAD
-  require('./lesson1.cjs')
-];
-=======
   require('./lesson1.cjs'),
   require('./lesson2.cjs'),
   require('./lesson3.cjs'),
@@ -27,4 +23,3 @@ module.exports = [
   require('./lesson21.cjs'),
   require('./lesson22.cjs')
 ];
->>>>>>> d7d3174 (new push)

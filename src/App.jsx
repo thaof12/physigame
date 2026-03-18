@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { GameProgressProvider } from './contexts/GameProgressContext';
+import { GameScoreProvider } from './contexts/GameScoreContext';
 import GameJourney from './pages/GameJourney';
 import ThemeSwitcher from './ui/ThemeSwitcher';
 import "./index.css";
@@ -28,6 +29,10 @@ import PhysicsHome from './areas/Vatly/pages/PhysicsHome';
 import PhysicsDashboard from './areas/Vatly/pages/PhysicsDashboard';
 import PhysicsClassDashboard from './areas/Vatly/pages/PhysicsClassDashboard';
 import PhysicsLesson from './areas/Vatly/pages/PhysicsLesson';
+import AdvancedPhysicsChallenge from './areas/Vatly/gamelist/AdvancedPhysicsChallenge';
+import PhysicsGradeSelector from './areas/Vatly/gamelist/PhysicsGradeSelector';
+import PhysicsGradeGames from './areas/Vatly/gamelist/PhysicsGradeGames';
+import PhysicsChallengeRouter from './areas/Vatly/gamelist/PhysicsChallengeRouter';
 
 // Auth pages
 import Login from './pages/Login';
@@ -36,6 +41,12 @@ import ProgramSelection from './pages/ProgramSelection';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import PlacementTest from './pages/PlacementTest';
+
+// Physics Tools
+import PhysicsToolsHub from './pages/PhysicsToolsHub';
+import PhysicsCalculator from './components/PhysicsTools/PhysicsCalculator';
+import ConstantsReference from './components/PhysicsTools/ConstantsReference';
+import UnitConverter from './components/PhysicsTools/UnitConverter';
 
 const AppContent = () => {
   return (
@@ -69,6 +80,19 @@ const AppContent = () => {
       <Route path="/program/physics/dashboard" element={<PhysicsDashboard />} />
       <Route path="/physics-class/:classId" element={<PhysicsClassDashboard />} />
       <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<PhysicsLesson />} />
+      
+      {/* Physics Tools Routes */}
+      <Route path="/physics-tools" element={<PhysicsToolsHub />} />
+      <Route path="/physics-tools/calculator" element={<PhysicsCalculator />} />
+      <Route path="/physics-tools/constants" element={<ConstantsReference />} />
+      <Route path="/physics-tools/converter" element={<UnitConverter />} />
+      
+      {/* Physics Games Routes */}
+      <Route path="/advanced-physics-challenge" element={<AdvancedPhysicsChallenge />} />
+      <Route path="/advanced-physics-challenge/:slug" element={<PhysicsChallengeRouter />} />
+      <Route path="/physics-games/grades" element={<PhysicsGradeSelector />} />
+      <Route path="/physics-games/grade/:gradeId" element={<PhysicsGradeGames />} />
+      <Route path="/physics-games/grade/:gradeId/:gameSlug" element={<PhysicsChallengeRouter />} />
     </Routes>
   );
 };
@@ -78,10 +102,12 @@ export default function App() {
     <Router>
       <AuthProvider>
         <GameProgressProvider>
-          <header style={{ padding: "10px" }}>
-            <ThemeSwitcher />
-          </header>
-          <AppContent />
+          <GameScoreProvider>
+            <header style={{ padding: "10px" }}>
+              <ThemeSwitcher />
+            </header>
+            <AppContent />
+          </GameScoreProvider>
         </GameProgressProvider>
       </AuthProvider>
     </Router>

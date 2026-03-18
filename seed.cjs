@@ -232,14 +232,10 @@ const challenges = [
 
 async function seedDatabase() {
   try {
-<<<<<<< HEAD
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://2200002540_db_user:Luan123@dan-1211.epxn7qi.mongodb.net/chemlearn?retryWrites=true&w=majority');
-=======
     await mongoose.connect(
       process.env.MONGODB_URI ||
         "mongodb+srv://trancongviet0710_db_user:TIpYFg6BN3mzqsRk@cluster0.aixbbzb.mongodb.net/?appName=Cluster0"
     );
->>>>>>> d7d3174 (new push)
     console.log('✓ Đã kết nối MongoDB');
 
     // Xóa dữ liệu cũ

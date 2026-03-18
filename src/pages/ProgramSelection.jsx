@@ -32,6 +32,20 @@ const ProgramSelection = () => {
       highlights: ['Mô phỏng vật lý', 'Game tương tác', 'Thí nghiệm ảo']
     },
     {
+      id: 'interactive-lectures',
+      name: 'Bài giảng tương tác',
+      icon: '🎓',
+      description: 'Truy cập nhanh các bài giảng tương tác theo môn và lớp, phù hợp để ôn tập kiến thức mà không cần làm bài kiểm tra đầu vào.',
+      gradient: 'from-amber-500 to-orange-600',
+      hoverGradient: 'from-amber-600 to-orange-700',
+      available: true,
+      grades: [6, 7, 8, 9, 10, 11, 12],
+      totalLessons: 120,
+      highlights: ['Học nhanh theo chủ đề', 'Không cần placement test', 'Điều hướng theo lớp']
+    }
+  ];
+
+  const handleProgramSelect = (program) => {
     // Interactive Lectures - không cần đăng nhập (hoặc có thể điều chỉnh sau)
     if (program.id === 'interactive-lectures') {
       navigate('/interactive-lectures');

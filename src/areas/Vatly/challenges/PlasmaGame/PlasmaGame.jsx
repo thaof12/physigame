@@ -53,10 +53,6 @@ function PlasmaGame() {
       console.error('Cannot get 2D context!');
       return;
     }
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
     
     // Khởi tạo engine và truyền vào các hàm 'setter' của React
     gameEngineRef.current = new GameEngine(ctx, (newScore) => {
@@ -130,8 +126,6 @@ function PlasmaGame() {
     console.log('📍 Mouse position:', pos);
     console.log('📦 Components:', components.length);
     if (!gameEngineRef.current) return;
-    
-    const pos = getMousePos(e);
     
     // 1. Kiểm tra xem có click trúng 1 node để BẮT ĐẦU nối dây không
     const nodeClicked = gameEngineRef.current.getNodeAt(pos, components);
