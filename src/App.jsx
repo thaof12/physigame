@@ -206,6 +206,30 @@ import InclinedPlaneLab from './areas/Vatly/VirtualLab/experiments/InclinedPlane
 import ResistorCircuitLab from './areas/Vatly/VirtualLab/experiments/ResistorCircuitLab';
 import LightInterferenceLab from './areas/Vatly/VirtualLab/experiments/LightInterferenceLab';
 
+// Admin Panel
+import { AdminAuthProvider } from './areas/Admin/contexts/AdminAuthContext';
+import AdminLayout from './areas/Admin/layouts/AdminLayout';
+import AdminLogin from './areas/Admin/pages/AdminLogin';
+import AdminDashboard from './areas/Admin/pages/AdminDashboard';
+import AdminUsers from './areas/Admin/pages/AdminUsers';
+import AdminLessons from './areas/Admin/pages/AdminLessons';
+import AdminExercises from './areas/Admin/pages/AdminExercises';
+import AdminStatistics from './areas/Admin/pages/AdminStatistics';
+import AdminSettings from './areas/Admin/pages/AdminSettings';
+
+// Teacher Panel
+import { TeacherAuthProvider } from './areas/Teacher/contexts/TeacherAuthContext';
+import TeacherLayout from './areas/Teacher/layouts/TeacherLayout';
+import TeacherDashboard from './areas/Teacher/pages/TeacherDashboard';
+import PendingApproval from './areas/Teacher/pages/PendingApproval';
+import MyLessons from './areas/Teacher/pages/MyLessons';
+import MyExercises from './areas/Teacher/pages/MyExercises';
+import MyExperiments from './areas/Teacher/pages/MyExperiments';
+import BrowseContent from './areas/Teacher/pages/BrowseContent';
+import StudentStats from './areas/Teacher/pages/StudentStats';
+import ClassManagement from './areas/Teacher/pages/ClassManagement';
+import TeacherProfile from './areas/Teacher/pages/TeacherProfile';
+
 
 const AppContent = () => {
   const location = useLocation();
@@ -444,6 +468,47 @@ const AppContent = () => {
         {/* Grade 12 Physics Games - Chapter 4: Nuclear Physics (Vật lý hạt nhân) */}
         <Route path="/physics-games/grade/12/nuclear-reaction-chamber" element={<NuclearReactionChamber />} />
         <Route path="/physics-games/grade/12/radioactive-decay-simulator" element={<RadioactiveDecaySimulator />} />
+
+        {/* Admin Panel Routes */}
+        <Route path="/admin/login" element={
+          <AdminAuthProvider>
+            <AdminLogin />
+          </AdminAuthProvider>
+        } />
+        <Route path="/admin" element={
+          <AdminAuthProvider>
+            <AdminLayout />
+          </AdminAuthProvider>
+        }>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="lessons" element={<AdminLessons />} />
+          <Route path="exercises" element={<AdminExercises />} />
+          <Route path="statistics" element={<AdminStatistics />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
+
+        {/* Teacher Panel Routes */}
+        <Route path="/teacher/pending" element={
+          <TeacherAuthProvider>
+            <PendingApproval />
+          </TeacherAuthProvider>
+        } />
+        <Route path="/teacher" element={
+          <TeacherAuthProvider>
+            <TeacherLayout />
+          </TeacherAuthProvider>
+        }>
+          <Route path="dashboard" element={<TeacherDashboard />} />
+          <Route path="my-lessons" element={<MyLessons />} />
+          <Route path="my-exercises" element={<MyExercises />} />
+          <Route path="my-experiments" element={<MyExperiments />} />
+          <Route path="browse" element={<BrowseContent />} />
+          <Route path="students" element={<StudentStats />} />
+          <Route path="classes" element={<ClassManagement />} />
+          <Route path="profile" element={<TeacherProfile />} />
+          <Route path="create" element={<TeacherDashboard />} />
+        </Route>
       </Routes>
     </div>
   )

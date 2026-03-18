@@ -6,6 +6,7 @@ import Card from '../components/ui/Card';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 import { API_BASE_URL } from '../config/api';
+import { GraduationCap, BookOpen } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Login = () => {
     email: '',
     password: ''
   });
+  const [selectedRole, setSelectedRole] = useState('student'); // 'student' or 'teacher'
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +28,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = async () => {
-    console.log('🔵 Google login button clicked');
+    console.log('🔵 Google login button clicked, role:', selectedRole);
     setLoading(true);
     setError('');
     
@@ -55,7 +57,8 @@ const Login = () => {
           email: user.email,
           displayName: user.displayName,
           avatar: user.photoURL,
-          selectedProgram: 'chemistry' // Mặc định là Hóa học
+          selectedProgram: 'chemistry',
+          role: selectedRole // Gửi role đã chọn
         })
       });
 
@@ -65,24 +68,40 @@ const Login = () => {
       
       if (data.success) {
         console.log('✅ Login successful, saving user data...');
-        
+
         // Cập nhật user trong context và localStorage
         setUser(data.user);
         localStorage.setItem('user', JSON.stringify(data.user));
         localStorage.setItem('token', data.token || '');
-        
-        // Kiểm tra xem user đã có programs chưa
-        if (data.user.programs && data.user.programs.length > 0) {
-          console.log('✅ User has programs, redirecting to program...');
-          const activeProgram = data.user.programs.find(p => p.isActive);
-          if (activeProgram) {
-            navigate(`/program/${activeProgram.programId}`);
+
+        // Kiểm tra role và redirect phù hợp
+        if (data.user.role === 'teacher') {
+          // Giáo viên
+          if (data.user.teacherStatus === 'pending') {
+            // Chờ duyệt
+            window.alert('Tai khoan giao vien dang cho xet duyet. Vui long doi admin phe duyet truoc khi truy cap.');
+            navigate('/teacher/pending');
+          } else if (data.user.teacherStatus === 'verified') {
+            // Đã được duyệt -> vào Teacher Dashboard
+            navigate('/teacher/dashboard');
           } else {
-            navigate('/');
+            // Bị từ chối hoặc trạng thái khác
+            navigate('/teacher/pending');
           }
         } else {
-          console.log('✅ No programs, redirecting to program selection...');
-          navigate('/home');
+          // Học sinh - flow cũ
+          if (data.user.programs && data.user.programs.length > 0) {
+            console.log('✅ User has programs, redirecting to program...');
+            const activeProgram = data.user.programs.find(p => p.isActive);
+            if (activeProgram) {
+              navigate(`/program/${activeProgram.programId}`);
+            } else {
+              navigate('/');
+            }
+          } else {
+            console.log('✅ No programs, redirecting to program selection...');
+            navigate('/home');
+          }
         }
       } else {
         console.error('❌ Backend returned error:', data.message);
@@ -133,6 +152,37 @@ const Login = () => {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Đăng Nhập</h1>
           <p className="text-gray-600">Chào mừng bạn trở lại!</p>
+        </div>
+
+        {/* Role Selection */}
+        <div className="mb-6">
+          <p className="text-sm font-medium text-gray-700 mb-3 text-center">Bạn là:</p>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setSelectedRole('student')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
+                selectedRole === 'student'
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-200 hover:border-gray-300 text-gray-600'
+              }`}
+            >
+              <BookOpen className="w-5 h-5" />
+              <span className="font-medium">Học sinh</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedRole('teacher')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
+                selectedRole === 'teacher'
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                  : 'border-gray-200 hover:border-gray-300 text-gray-600'
+              }`}
+            >
+              <GraduationCap className="w-5 h-5" />
+              <span className="font-medium">Giáo viên</span>
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

@@ -39,6 +39,48 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+
+  // Vai trò người dùng
+  role: {
+    type: String,
+    enum: ['student', 'teacher'],
+    default: 'student'
+  },
+
+  // Trạng thái xác minh giáo viên (chỉ áp dụng cho role = 'teacher')
+  teacherStatus: {
+    type: String,
+    enum: ['pending', 'verified', 'rejected'],
+    default: null
+  },
+
+  // Thông tin giáo viên
+  teacherProfile: {
+    school: {
+      type: String,
+      default: ''
+    },
+    subject: {
+      type: String,
+      default: ''
+    },
+    teachingGrades: {
+      type: [Number],
+      default: []
+    },
+    bio: {
+      type: String,
+      default: ''
+    },
+    appliedAt: Date,
+    verifiedAt: Date,
+    verifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    rejectedAt: Date,
+    rejectionReason: String
+  },
   
   // Profile information
   profile: {
@@ -301,12 +343,58 @@ userSchema.methods.getAllPhysicsGameProgress = function() {
   if (!this.physicsGameProgress) {
     return {};
   }
-  
+
   const result = {};
   this.physicsGameProgress.forEach((value, key) => {
     result[key] = value;
   });
   return result;
+};
+
+// Methods - Teacher
+userSchema.methods.isTeacher = function() {
+  return this.role === 'teacher';
+};
+
+userSchema.methods.isVerifiedTeacher = function() {
+  return this.role === 'teacher' && this.teacherStatus === 'verified';
+};
+
+userSchema.methods.isPendingTeacher = function() {
+  return this.role === 'teacher' && this.teacherStatus === 'pending';
+};
+
+userSchema.methods.applyAsTeacher = function(teacherInfo) {
+  this.role = 'teacher';
+  this.teacherStatus = 'pending';
+  this.teacherProfile = {
+    school: teacherInfo.school || '',
+    subject: teacherInfo.subject || '',
+    teachingGrades: teacherInfo.teachingGrades || [],
+    bio: teacherInfo.bio || '',
+    appliedAt: new Date()
+  };
+  return this;
+};
+
+userSchema.methods.verifyTeacher = function(adminId) {
+  if (this.teacherStatus !== 'pending') {
+    throw new Error('Chỉ có thể duyệt giáo viên đang chờ');
+  }
+  this.teacherStatus = 'verified';
+  this.teacherProfile.verifiedAt = new Date();
+  this.teacherProfile.verifiedBy = adminId;
+  return this;
+};
+
+userSchema.methods.rejectTeacher = function(reason) {
+  if (this.teacherStatus !== 'pending') {
+    throw new Error('Chỉ có thể từ chối giáo viên đang chờ');
+  }
+  this.teacherStatus = 'rejected';
+  this.teacherProfile.rejectedAt = new Date();
+  this.teacherProfile.rejectionReason = reason || '';
+  return this;
 };
 
 module.exports = mongoose.model('User', userSchema);

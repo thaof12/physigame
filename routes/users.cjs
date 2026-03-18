@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/User.cjs');
 
 // Register route
@@ -167,7 +168,10 @@ router.post('/login', async (req, res) => {
         xp: user.xp,
         level: user.level,
         learningPrograms: user.learningPrograms,
-        firebaseUid: user.firebaseUid || user._id.toString()
+        firebaseUid: user.firebaseUid || user._id.toString(),
+        role: user.role,
+        teacherStatus: user.teacherStatus,
+        teacherProfile: user.teacherProfile
       }
     });
   } catch (error) {
@@ -510,7 +514,10 @@ router.get('/firebase/:firebaseUid', async (req, res) => {
       level: user.level,
       programs: user.programs,
       profile: user.profile,
-      firebaseUid: user.firebaseUid || user._id.toString()
+      firebaseUid: user.firebaseUid || user._id.toString(),
+      role: user.role,
+      teacherStatus: user.teacherStatus,
+      teacherProfile: user.teacherProfile
     });
   } catch (error) {
     console.error('❌ Error fetching user by firebaseUid:', error);
@@ -537,6 +544,9 @@ router.get('/profile/:userId', async (req, res) => {
       programs: user.programs,
       profile: user.profile,
       firebaseUid: user.firebaseUid,
+      role: user.role,
+      teacherStatus: user.teacherStatus,
+      teacherProfile: user.teacherProfile,
       createdAt: user.createdAt,
       progress: user.progress,
       pkStats: user.pkStats || { wins: 0, losses: 0, rating: 1000 },
@@ -597,35 +607,35 @@ router.put('/profile/:userId', async (req, res) => {
 router.post('/submit-physics-lesson', async (req, res) => {
   try {
     console.log('📤 Physics lesson submission received:', req.body);
-    
+
     const { userId, programId, classId, chapterId, lessonId, score, totalQuestions, completed } = req.body;
 
     if (!userId) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Missing userId' 
+        message: 'Missing userId'
       });
     }
 
     // Find user
     let user;
     try {
-      user = await User.findOne({ 
+      user = await User.findOne({
         $or: [
           { email: userId },
           { firebaseUid: userId },
           { _id: userId }
-        ] 
+        ]
       });
     } catch (error) {
       console.log('⚠️ Error finding user:', error.message);
     }
-    
+
     if (!user) {
       console.log('❌ User not found:', userId);
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'User not found' 
+        message: 'User not found'
       });
     }
 
@@ -633,7 +643,7 @@ router.post('/submit-physics-lesson', async (req, res) => {
 
     // Find or create physics program
     let program = user.programs.find(p => p.programId === programId);
-    
+
     if (!program) {
       // Create new physics program
       program = {
@@ -654,7 +664,7 @@ router.post('/submit-physics-lesson', async (req, res) => {
 
     // Create lesson key
     const lessonKey = `${classId}-${chapterId}-${lessonId}`;
-    
+
     // Update progress
     if (!program.progress) {
       program.progress = {
@@ -683,9 +693,9 @@ router.post('/submit-physics-lesson', async (req, res) => {
     user.xp = (user.xp || 0) + xpGained;
 
     await user.save();
-    
-    console.log('✅ Physics lesson progress saved:', { 
-      user: user.email, 
+
+    console.log('✅ Physics lesson progress saved:', {
+      user: user.email,
       lesson: lessonKey,
       score,
       xpGained
@@ -700,10 +710,227 @@ router.post('/submit-physics-lesson', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Submit physics lesson error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: 'Server error', 
-      error: error.message 
+      message: 'Server error',
+      error: error.message
+    });
+  }
+});
+
+// ============ TEACHER MANAGEMENT APIs ============
+
+// Get all pending teachers (for Admin)
+router.get('/pending-teachers', async (req, res) => {
+  try {
+    const pendingTeachers = await User.find({
+      role: 'teacher',
+      teacherStatus: 'pending'
+    }).select('_id username email displayName avatar teacherProfile createdAt');
+
+    res.json({
+      success: true,
+      count: pendingTeachers.length,
+      teachers: pendingTeachers
+    });
+  } catch (error) {
+    console.error('❌ Get pending teachers error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+});
+
+// Get all teachers (for Admin)
+router.get('/teachers', async (req, res) => {
+  try {
+    const { status } = req.query; // optional filter by status
+
+    const query = { role: 'teacher' };
+    if (status) {
+      query.teacherStatus = status;
+    }
+
+    const teachers = await User.find(query)
+      .select('_id username email displayName avatar teacherProfile teacherStatus createdAt')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: teachers.length,
+      teachers
+    });
+  } catch (error) {
+    console.error('❌ Get teachers error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+});
+
+// Verify a teacher (Admin only)
+router.post('/verify-teacher/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { adminId } = req.body; // ID of admin who verifies
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (user.role !== 'teacher') {
+      return res.status(400).json({
+        success: false,
+        message: 'User is not a teacher'
+      });
+    }
+
+    if (user.teacherStatus !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'Teacher is not in pending status'
+      });
+    }
+
+    // Verify the teacher
+    user.teacherStatus = 'verified';
+    user.teacherProfile.verifiedAt = new Date();
+    user.teacherProfile.verifiedBy = adminId && mongoose.Types.ObjectId.isValid(adminId)
+      ? adminId
+      : null;
+
+    await user.save();
+
+    console.log('✅ Teacher verified:', user.email);
+
+    res.json({
+      success: true,
+      message: 'Giáo viên đã được duyệt thành công',
+      teacher: {
+        id: user._id,
+        email: user.email,
+        displayName: user.displayName,
+        teacherStatus: user.teacherStatus,
+        teacherProfile: user.teacherProfile
+      }
+    });
+  } catch (error) {
+    console.error('❌ Verify teacher error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+});
+
+// Reject a teacher (Admin only)
+router.post('/reject-teacher/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (user.role !== 'teacher') {
+      return res.status(400).json({
+        success: false,
+        message: 'User is not a teacher'
+      });
+    }
+
+    if (user.teacherStatus !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'Teacher is not in pending status'
+      });
+    }
+
+    // Reject the teacher
+    user.teacherStatus = 'rejected';
+    user.teacherProfile.rejectedAt = new Date();
+    user.teacherProfile.rejectionReason = reason || 'Không đáp ứng yêu cầu';
+
+    await user.save();
+
+    console.log('❌ Teacher rejected:', user.email);
+
+    res.json({
+      success: true,
+      message: 'Đã từ chối đăng ký giáo viên',
+      teacher: {
+        id: user._id,
+        email: user.email,
+        teacherStatus: user.teacherStatus
+      }
+    });
+  } catch (error) {
+    console.error('❌ Reject teacher error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+});
+
+// Get teacher stats (for teacher dashboard)
+router.get('/teacher-stats/:teacherId', async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+
+    const teacher = await User.findById(teacherId);
+
+    if (!teacher || teacher.role !== 'teacher') {
+      return res.status(404).json({
+        success: false,
+        message: 'Teacher not found'
+      });
+    }
+
+    // TODO: Calculate actual stats from lessons, exercises created by this teacher
+    // For now return placeholder data
+    const stats = {
+      lessonsCreated: 0,
+      exercisesCreated: 0,
+      experimentsCreated: 0,
+      totalStudents: 0,
+      totalViews: 0,
+      averageCompletion: 0
+    };
+
+    res.json({
+      success: true,
+      stats,
+      teacher: {
+        id: teacher._id,
+        displayName: teacher.displayName,
+        teacherStatus: teacher.teacherStatus,
+        teacherProfile: teacher.teacherProfile
+      }
+    });
+  } catch (error) {
+    console.error('❌ Get teacher stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
     });
   }
 });

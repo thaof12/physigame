@@ -2,7 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../../components/ui/Button';
 import { useEffect, useState } from 'react';
-import { BookOpen, Trophy, Target, Clock, Star, Flame, Zap, Award, TrendingUp, Play, LogOut, ChevronDown, Swords, Calculator, FlaskConical, Map, GraduationCap, Wrench } from 'lucide-react';
+import {
+  BookOpen, Trophy, Target, Clock, Star, Flame, Zap, Award, TrendingUp, Play, LogOut,
+  ChevronDown, Swords, FlaskConical, Map, GraduationCap, Wrench,
+  Atom, Beaker, Dna, Compass, Telescope, Lightbulb, Settings, Cpu, Rocket, Sparkles, User, Crown,
+  ArrowRight, Activity, Timer, Medal, Gamepad2, Microscope, Brain, CircuitBoard, Waves, Route
+} from 'lucide-react';
 import api from '../../../config/api';
 import QuestModal from '../../../components/Quest/QuestModal';
 import Leaderboard from '../../../components/Leaderboard/Leaderboard';
@@ -28,10 +33,10 @@ const PhysicsHome = () => {
   };
 
   const availablePrograms = [
-    { id: 'chemistry', name: 'Hóa học', icon: '🧪', path: '/program/chemistry', available: true },
-    { id: 'physics', name: 'Vật lý', icon: '⚛️', path: '/program/physics', available: true },
-    { id: 'biology', name: 'Sinh học', icon: '🧬', path: '/program/biology', available: false },
-    { id: 'math', name: 'Toán học', icon: '📐', path: '/program/math', available: false }
+    { id: 'chemistry', name: 'Hóa học', icon: Beaker, path: '/program/chemistry', available: true },
+    { id: 'physics', name: 'Vật lý', icon: Atom, path: '/program/physics', available: true },
+    { id: 'biology', name: 'Sinh học', icon: Dna, path: '/program/biology', available: false },
+    { id: 'math', name: 'Toán học', icon: Compass, path: '/program/math', available: false }
   ];
 
   const handleProgramChange = (program) => {
@@ -52,23 +57,28 @@ const PhysicsHome = () => {
   const topicMapping = {
     6: {
       topics: ['Đại cương vật lý', 'Đo lường', 'Chuyển động', 'Lực'],
-      icon: '🔭'
+      icon: Telescope,
+      color: 'from-blue-500 to-cyan-500'
     },
     7: {
       topics: ['Ánh sáng', 'Âm thanh', 'Nhiệt học cơ bản', 'Quang học'],
-      icon: '🌟'
+      icon: Lightbulb,
+      color: 'from-emerald-500 to-teal-500'
     },
     8: {
       topics: ['Cơ học', 'Áp suất', 'Điện học cơ bản', 'Công suất'],
-      icon: '⚙️'
+      icon: Settings,
+      color: 'from-amber-500 to-orange-500'
     },
     9: {
       topics: ['Điện từ trường', 'Sóng điện từ', 'Quang học nâng cao', 'Dao động'],
-      icon: '🔌'
+      icon: Cpu,
+      color: 'from-violet-500 to-purple-500'
     },
     10: {
       topics: ['Động học', 'Nhiệt động học', 'Dao động sóng', 'Điện xoay chiều'],
-      icon: '🚀'
+      icon: Rocket,
+      color: 'from-rose-500 to-pink-500'
     }
   };
 
@@ -128,10 +138,16 @@ const PhysicsHome = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-teal-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-bounce">⚛️</div>
-          <h2 className="text-2xl font-bold text-gray-700">Đang tải dữ liệu...</h2>
+          <div className="relative">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+              <Atom className="w-10 h-10 text-white animate-spin" style={{ animationDuration: '3s' }} />
+            </div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl blur opacity-30 animate-pulse"></div>
+          </div>
+          <h2 className="text-2xl font-bold text-white">Đang tải dữ liệu...</h2>
+          <p className="text-slate-400 mt-2">Vui lòng đợi trong giây lát</p>
         </div>
       </div>
     );
@@ -148,70 +164,78 @@ const PhysicsHome = () => {
   const progressPercentage = (stats.completedLessons / stats.totalLessons) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-teal-50 relative overflow-hidden">
-      {/* Animated background blobs */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+      {/* Animated background effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-20 left-10 w-96 h-96 bg-cyan-500/10 rounded-full filter blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-10 w-96 h-96 bg-purple-500/10 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute -bottom-20 left-1/3 w-96 h-96 bg-blue-500/10 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-900 opacity-60"></div>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative py-8 px-4">
+      {/* Hero Section - Compact */}
+      <section className="relative py-6 px-4">
         <div className="container mx-auto max-w-7xl">
-          {/* Navigation Bar */}
-          <div className="flex items-center justify-between mb-6">
-            {/* Program Selector Dropdown */}
+          {/* Navigation Bar - Compact */}
+          <div className="flex items-center justify-between mb-5">
+            {/* Program Selector Dropdown - Compact */}
             <div className="relative">
               <button
                 onClick={() => setShowProgramDropdown(!showProgramDropdown)}
-                className="flex items-center gap-3 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-medium transition-all shadow-md hover:shadow-lg border border-gray-200"
+                className="flex items-center gap-2 px-3 py-2 bg-slate-800/60 backdrop-blur hover:bg-slate-700/60 text-white rounded-xl font-medium transition-all border border-slate-700/40 hover:border-cyan-500/40"
               >
-                <span className="text-2xl">⚛️</span>
-                <span>Vật lý</span>
-                <ChevronDown className={`w-5 h-5 transition-transform ${showProgramDropdown ? 'rotate-180' : ''}`} />
+                <div className="p-1.5 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+                  <Atom className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-semibold text-sm">Vật lý</span>
+                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showProgramDropdown ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Dropdown Menu */}
               {showProgramDropdown && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-40" 
+                  <div
+                    className="fixed inset-0 z-40"
                     onClick={() => setShowProgramDropdown(false)}
                   ></div>
-                  
-                  <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50">
-                    <div className="p-3">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 py-2">
+
+                  <div className="absolute top-full left-0 mt-2 w-80 bg-slate-800/95 backdrop-blur-xl rounded-2xl border border-slate-700/50 overflow-hidden z-50 shadow-2xl shadow-black/50">
+                    <div className="p-4">
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 py-2">
                         Chọn chương trình học
                       </p>
                       {availablePrograms.map((program) => {
                         const isActive = program.id === 'physics';
                         const isEnrolled = user.programs?.some(p => p.programId === program.id && p.isActive);
-                        
+                        const IconComponent = program.icon;
+
                         return (
                           <button
                             key={program.id}
                             onClick={() => handleProgramChange(program)}
                             disabled={!program.available && !isEnrolled}
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
-                              isActive 
-                                ? 'bg-green-50 text-green-700 border-2 border-green-200' 
+                              isActive
+                                ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                                 : program.available
-                                ? 'hover:bg-gray-50 text-gray-700'
-                                : 'opacity-50 cursor-not-allowed text-gray-400'
+                                ? 'hover:bg-slate-700/50 text-slate-300'
+                                : 'opacity-40 cursor-not-allowed text-slate-500'
                             }`}
                           >
-                            <span className="text-2xl">{program.icon}</span>
+                            <div className={`p-2 rounded-xl ${isActive ? 'bg-cyan-500/30' : 'bg-slate-700/50'}`}>
+                              <IconComponent className="w-5 h-5" />
+                            </div>
                             <div className="flex-1 text-left">
                               <p className="font-semibold">{program.name}</p>
                               {isActive && (
-                                <p className="text-xs text-green-600">Đang học</p>
+                                <p className="text-xs text-cyan-400">Đang học</p>
                               )}
                               {!program.available && !isActive && (
-                                <p className="text-xs text-gray-400">Sắp ra mắt</p>
+                                <p className="text-xs text-slate-500">Sắp ra mắt</p>
                               )}
                             </div>
+                            {isActive && <Sparkles className="w-4 h-4 text-cyan-400" />}
                           </button>
                         );
                       })}
@@ -221,406 +245,362 @@ const PhysicsHome = () => {
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3">
+            {/* Action Buttons - Compact */}
+            <div className="flex items-center gap-2">
               {/* Quest Button */}
               <button
                 onClick={() => setShowQuestModal(true)}
-                className="relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-xl font-medium transition-all shadow-md hover:shadow-lg hover:scale-105"
+                className="relative flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-orange-500/20 hover:shadow-orange-500/30"
                 title="Nhiệm vụ"
               >
-                <Target className="w-5 h-5" />
+                <Target className="w-4 h-4" />
                 <span className="hidden sm:inline">Nhiệm vụ</span>
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
               </button>
 
               {/* Leaderboard Button */}
               <button
                 onClick={() => setShowLeaderboard(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium transition-all shadow-md hover:shadow-lg hover:scale-105"
+                className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-purple-500/20 hover:shadow-purple-500/30"
                 title="Bảng xếp hạng"
               >
-                <Trophy className="w-5 h-5" />
+                <Crown className="w-4 h-4" />
                 <span className="hidden sm:inline">Xếp hạng</span>
               </button>
 
               {/* Logout Button */}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-red-50 text-gray-700 hover:text-red-600 rounded-xl font-medium transition-all shadow-md hover:shadow-lg border border-gray-200"
+                className="flex items-center gap-1.5 px-3 py-2 bg-slate-800/60 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-xl text-sm font-medium transition-all border border-slate-700/40 hover:border-red-500/40"
               >
-                <LogOut className="w-5 h-5" />
-                <span className="hidden sm:inline">Đăng xuất</span>
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Thoát</span>
               </button>
             </div>
           </div>
 
-          {/* Welcome Banner */}
-          <div className="bg-gradient-to-r from-green-500 via-teal-500 to-cyan-500 rounded-3xl p-8 mb-8 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold text-white mb-2">
-                  Xin chào, {user?.username || user?.email?.split('@')[0]}! 👋
+          {/* Welcome Banner - Compact */}
+          <div className="relative bg-slate-800/50 backdrop-blur-xl rounded-2xl p-5 mb-6 border border-slate-700/40 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 opacity-80"></div>
+            <div className="relative flex items-center gap-4">
+              <div className="relative shrink-0">
+                <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                  <span className="text-2xl font-bold text-white">{(user?.username || user?.email)?.[0]?.toUpperCase() || 'U'}</span>
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-800"></div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl font-bold text-white truncate">
+                  {user?.username || user?.email?.split('@')[0]}
                 </h1>
-                <p className="text-green-50 text-lg">
-                  Chào mừng đến với hành trình khám phá Vật lý
-                </p>
+                <p className="text-slate-400 text-sm">Tiếp tục hành trình Vật lý</p>
               </div>
-              <div className="text-8xl opacity-90">⚛️</div>
+              <div className="hidden sm:flex items-center gap-2">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                  <Star className="w-4 h-4 text-amber-400" />
+                  <span className="text-amber-400 font-semibold text-sm">{stats.totalStars}</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                  <Flame className="w-4 h-4 text-orange-400" />
+                  <span className="text-orange-400 font-semibold text-sm">{stats.currentStreak}</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
-                  <BookOpen className="w-6 h-6 text-white" />
+          {/* Stats Cards - Compact */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            {/* Lessons Completed */}
+            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-emerald-500/30 transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg">
+                  <Activity className="w-4 h-4 text-white" />
                 </div>
-                <Trophy className="w-5 h-5 text-yellow-500" />
+                <span className="text-xs text-slate-400 font-medium">Bài học</span>
               </div>
-              <p className="text-3xl font-bold text-gray-800 mb-1">
-                {stats.completedLessons}/{stats.totalLessons}
+              <p className="text-2xl font-bold text-white">
+                {stats.completedLessons}<span className="text-slate-500 text-sm font-normal">/{stats.totalLessons}</span>
               </p>
-              <p className="text-sm text-gray-600">Bài học hoàn thành</p>
+              <div className="mt-2 h-1 bg-slate-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full"
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-3 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-lg">
-                  <Star className="w-6 h-6 text-white" />
+            {/* Stars Earned */}
+            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-amber-500/30 transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-lg">
+                  <Medal className="w-4 h-4 text-white" />
                 </div>
-                <Award className="w-5 h-5 text-purple-500" />
+                <span className="text-xs text-slate-400 font-medium">Sao</span>
               </div>
-              <p className="text-3xl font-bold text-gray-800 mb-1">
-                {stats.totalStars}
-              </p>
-              <p className="text-sm text-gray-600">Sao đạt được</p>
+              <p className="text-2xl font-bold text-white">{stats.totalStars}</p>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
-                  <Flame className="w-6 h-6 text-white" />
+            {/* Streak */}
+            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-orange-500/30 transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg">
+                  <Zap className="w-4 h-4 text-white" />
                 </div>
-                <TrendingUp className="w-5 h-5 text-red-500" />
+                <span className="text-xs text-slate-400 font-medium">Streak</span>
               </div>
-              <p className="text-3xl font-bold text-gray-800 mb-1">
-                {stats.currentStreak}
-              </p>
-              <p className="text-sm text-gray-600">Ngày liên tiếp</p>
+              <p className="text-2xl font-bold text-white">{stats.currentStreak}<span className="text-slate-500 text-sm font-normal ml-1">ngày</span></p>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-3 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl shadow-lg">
-                  <Clock className="w-6 h-6 text-white" />
+            {/* Time Spent */}
+            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+                  <Timer className="w-4 h-4 text-white" />
                 </div>
-                <Zap className="w-5 h-5 text-yellow-500" />
+                <span className="text-xs text-slate-400 font-medium">Thời gian</span>
               </div>
-              <p className="text-3xl font-bold text-gray-800 mb-1">
-                {Math.floor(stats.totalTimeSpent / 60)}
-              </p>
-              <p className="text-sm text-gray-600">Phút học tập</p>
+              <p className="text-2xl font-bold text-white">{Math.floor(stats.totalTimeSpent / 60)}<span className="text-slate-500 text-sm font-normal ml-1">phút</span></p>
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid md:grid-cols-4 gap-4 mb-6">
+          {/* Quick Actions - Compact & Modern */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            {/* Start Learning */}
             <button
               onClick={() => navigate('/program/physics/dashboard')}
-              className="group bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+              className="group relative bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl p-4 shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all hover:-translate-y-0.5 overflow-hidden"
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-3 bg-white/20 rounded-xl">
-                  <Play className="w-6 h-6" />
+              <div className="relative flex flex-col items-start">
+                <div className="p-2 bg-white/20 rounded-lg mb-3">
+                  <Brain className="w-5 h-5" />
                 </div>
-                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <span className="font-bold text-sm">Học ngay</span>
+                <span className="text-emerald-100 text-xs mt-0.5">Tiếp tục</span>
               </div>
-              <h3 className="text-xl font-bold mb-2">Bắt đầu học</h3>
-              <p className="text-green-100 text-sm">Tiếp tục hành trình của bạn</p>
+              <ArrowRight className="absolute bottom-4 right-4 w-4 h-4 opacity-60 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            {/* Game Journey Button */}
+            {/* Game Journey */}
             <button
               onClick={() => navigate('/game-journey')}
-              className="group bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+              className="group relative bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl p-4 shadow-md shadow-amber-500/20 hover:shadow-amber-500/30 transition-all hover:-translate-y-0.5 overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <div className="relative">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <Map className="w-6 h-6" />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">MỚI</span>
-                    <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
+              <div className="relative flex flex-col items-start">
+                <div className="p-2 bg-white/20 rounded-lg mb-3">
+                  <Route className="w-5 h-5" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">🗺️ Hành trình Game</h3>
-                <p className="text-amber-100 text-sm">Chơi game theo thứ tự từng lớp</p>
+                <span className="font-bold text-sm">Hành trình</span>
+                <span className="text-amber-100 text-xs mt-0.5">Khám phá</span>
               </div>
+              <ArrowRight className="absolute bottom-4 right-4 w-4 h-4 opacity-60 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            {/* PK Battle Button */}
+            {/* PK Battle */}
             <button
               onClick={() => navigate('/pk-battle')}
-              className="group bg-gradient-to-br from-red-500 via-pink-500 to-purple-600 hover:from-red-600 hover:via-pink-600 hover:to-purple-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+              className="group relative bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-xl p-4 shadow-md shadow-rose-500/20 hover:shadow-rose-500/30 transition-all hover:-translate-y-0.5 overflow-hidden"
             >
-              {/* Animated background effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <div className="relative">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <Swords className="w-6 h-6" />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="relative flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                    </span>
-                    <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold mb-2">⚔️ Thi đấu PK</h3>
-                <p className="text-pink-100 text-sm">Đấu trí với người chơi khác</p>
+              <div className="absolute top-3 right-3">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+                </span>
               </div>
+              <div className="relative flex flex-col items-start">
+                <div className="p-2 bg-white/20 rounded-lg mb-3">
+                  <Gamepad2 className="w-5 h-5" />
+                </div>
+                <span className="font-bold text-sm">Thi đấu</span>
+                <span className="text-rose-100 text-xs mt-0.5">PK Battle</span>
+              </div>
+              <ArrowRight className="absolute bottom-4 right-4 w-4 h-4 opacity-60 group-hover:translate-x-1 transition-transform" />
             </button>
 
+            {/* Profile */}
             <button
               onClick={() => navigate('/profile')}
-              className="group bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+              className="group relative bg-gradient-to-br from-violet-500 to-purple-600 text-white rounded-xl p-4 shadow-md shadow-violet-500/20 hover:shadow-violet-500/30 transition-all hover:-translate-y-0.5 overflow-hidden"
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-3 bg-white/20 rounded-xl">
-                  <Award className="w-6 h-6" />
+              <div className="relative flex flex-col items-start">
+                <div className="p-2 bg-white/20 rounded-lg mb-3">
+                  <Trophy className="w-5 h-5" />
                 </div>
-                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <span className="font-bold text-sm">Hồ sơ</span>
+                <span className="text-violet-100 text-xs mt-0.5">Thành tích</span>
               </div>
-              <h3 className="text-xl font-bold mb-2">Hồ sơ</h3>
-              <p className="text-purple-100 text-sm">Xem thành tích của bạn</p>
+              <ArrowRight className="absolute bottom-4 right-4 w-4 h-4 opacity-60 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
 
-          {/* Physics Tools - Calculator */}
-          <div className="grid md:grid-cols-2 gap-4 mb-6">
+          {/* Tools Row - Compact */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            {/* Physics Tools */}
             <button
               onClick={() => navigate('/physics-tools')}
-              className="group bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600 hover:from-cyan-600 hover:via-blue-600 hover:to-indigo-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+              className="group bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-cyan-500/40 transition-all hover:-translate-y-0.5"
             >
-              {/* Animated background effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <div className="relative flex items-center gap-4">
-                <div className="p-4 bg-white/20 rounded-2xl">
-                  <Wrench className="w-8 h-8" />
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg shadow-md shadow-cyan-500/20">
+                  <CircuitBoard className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-xl font-bold">🛠️ Công cụ Vật lý</h3>
-                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">MỚI</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-white text-sm">Công cụ Vật lý</span>
+                    <span className="px-1.5 py-0.5 bg-cyan-500/20 text-cyan-400 rounded text-[10px] font-semibold">NEW</span>
                   </div>
-                  <p className="text-cyan-100 text-sm">Máy tính, Hằng số vật lý, Chuyển đổi đơn vị</p>
+                  <span className="text-slate-400 text-xs">Máy tính, Hằng số</span>
                 </div>
-                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
               </div>
             </button>
 
             {/* Interactive Lectures */}
             <button
               onClick={() => navigate('/interactive-lectures')}
-              className="group bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+              className="group bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-violet-500/40 transition-all hover:-translate-y-0.5"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <div className="relative flex items-center gap-4">
-                <div className="p-4 bg-white/20 rounded-2xl">
-                  <GraduationCap className="w-8 h-8" />
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg shadow-md shadow-violet-500/20">
+                  <Waves className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-xl font-bold">📖 Bài giảng tương tác</h3>
-                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">MỚI</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-white text-sm">Bài giảng</span>
+                    <span className="px-1.5 py-0.5 bg-violet-500/20 text-violet-400 rounded text-[10px] font-semibold">NEW</span>
                   </div>
-                  <p className="text-violet-100 text-sm">Học lý thuyết qua video và mô phỏng sinh động</p>
+                  <span className="text-slate-400 text-xs">Video & Mô phỏng</span>
                 </div>
-                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-violet-400 group-hover:translate-x-0.5 transition-all" />
               </div>
             </button>
-          </div>
 
-          {/* Virtual Lab Button - Full Width */}
-          <div className="mt-4">
+            {/* Virtual Lab */}
             <button
               onClick={() => navigate('/vatly/virtual-lab')}
-              className="w-full group bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-700 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden"
+              className="group bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-emerald-500/40 transition-all hover:-translate-y-0.5"
             >
-              {/* Animated background effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              <div className="relative flex items-center gap-4">
-                <div className="p-4 bg-white/20 rounded-2xl">
-                  <FlaskConical className="w-8 h-8" />
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-md shadow-emerald-500/20">
+                  <Microscope className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-xl font-bold">🔬 Phòng Thí Nghiệm Ảo</h3>
-                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">MỚI</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-white text-sm">Thí nghiệm ảo</span>
+                    <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[10px] font-semibold">NEW</span>
                   </div>
-                  <p className="text-emerald-100 text-sm">Thực hành thí nghiệm Vật lý trực tuyến - Thu thập số liệu và phân tích kết quả</p>
+                  <span className="text-slate-400 text-xs">Phòng lab trực tuyến</span>
                 </div>
-                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all" />
               </div>
             </button>
           </div>
         </div>
       </section>
 
-      {/* Learning Path */}
+      {/* Learning Path - Compact */}
       <section className="py-8 px-4">
         <div className="container mx-auto max-w-7xl">
           <div className="mb-6">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-              <span className="text-4xl">🎯</span>
-              Lộ trình học tập
-            </h2>
-            <p className="text-gray-600">Chương trình Vật lý từ lớp 6 đến lớp 10</p>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="p-1.5 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+                <Target className="w-4 h-4 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white">Lộ trình học tập</h2>
+            </div>
+            <p className="text-slate-400 text-sm ml-8">Vật lý lớp 6 - 10</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {grades.map((grade, index) => {
               const gradeTopics = topicMapping[grade.grade];
-              const progress = grade.totalLessons > 0 
-                ? (grade.completedLessons / grade.totalLessons) * 100 
+              const progress = grade.totalLessons > 0
+                ? (grade.completedLessons / grade.totalLessons) * 100
                 : 0;
+              const IconComponent = gradeTopics?.icon || Atom;
 
               return (
                 <div
                   key={grade.grade}
-                  className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer"
+                  className="group bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-cyan-500/40 transition-all hover:-translate-y-0.5 cursor-pointer"
                   onClick={() => navigate('/program/physics/dashboard')}
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`text-5xl p-3 bg-gradient-to-br ${grade.color} rounded-2xl shadow-lg`}>
-                      <span className="filter drop-shadow-lg">{gradeTopics?.icon || '⚛️'}</span>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`p-2 bg-gradient-to-br ${gradeTopics?.color || 'from-cyan-500 to-blue-600'} rounded-lg`}>
+                      <IconComponent className="w-5 h-5 text-white" />
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">Tiến độ</p>
-                      <p className="text-2xl font-bold text-gray-800">{Math.round(progress)}%</p>
-                    </div>
+                    <span className="text-lg font-bold text-white">{Math.round(progress)}%</span>
                   </div>
 
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                    Lớp {grade.grade}
-                  </h3>
+                  <h3 className="text-sm font-bold text-white mb-2">Lớp {grade.grade}</h3>
 
-                  <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                  <div className="w-full bg-slate-700/50 rounded-full h-1.5 mb-2 overflow-hidden">
                     <div
-                      className={`h-2 rounded-full bg-gradient-to-r ${grade.color}`}
+                      className={`h-full rounded-full bg-gradient-to-r ${gradeTopics?.color || 'from-cyan-500 to-blue-600'}`}
                       style={{ width: `${progress}%` }}
                     ></div>
                   </div>
 
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600">
-                      📚 {grade.completedLessons}/{grade.totalLessons} bài học
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {gradeTopics?.topics.slice(0, 3).map((topic, idx) => (
-                        <span
-                          key={idx}
-                          className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full"
-                        >
-                          {topic}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  <span className="text-xs text-slate-400">{grade.completedLessons}/{grade.totalLessons} bài</span>
                 </div>
               );
             })}
 
-            {/* Challenge Card */}
+            {/* Challenge Card - Compact */}
             <div
-              className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer text-white"
+              className="group bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-4 shadow-md shadow-orange-500/20 hover:shadow-orange-500/30 transition-all hover:-translate-y-0.5 cursor-pointer text-white"
               onClick={() => navigate('/advanced-physics-challenge')}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-5xl p-3 bg-white/20 rounded-2xl">
-                  🏆
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Trophy className="w-5 h-5" />
                 </div>
-                <Target className="w-8 h-8" />
+                <Sparkles className="w-4 h-4 text-amber-200" />
               </div>
 
-              <h3 className="text-2xl font-bold mb-2">
-                Thử thách Vật lý
-              </h3>
-
-              <p className="text-orange-100 mb-4">
-                9 game tương tác để thử thách kiến thức của bạn
-              </p>
-
-              <div className="flex items-center gap-2 text-sm">
-                <Play className="w-4 h-4" />
-                <span>Bắt đầu ngay →</span>
-              </div>
+              <h3 className="text-sm font-bold mb-1">Thử thách</h3>
+              <p className="text-amber-100 text-xs">9 game tương tác</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-12 px-4 bg-gradient-to-b from-transparent to-green-50/50">
+      {/* Features Section - Compact */}
+      <section className="py-8 px-4">
         <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-3">
-              Tại sao chọn chương trình Vật lý của chúng tôi?
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Phương pháp học hiện đại, hiệu quả cao
-            </p>
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-bold text-white mb-1">Tại sao chọn chúng tôi?</h2>
+            <p className="text-slate-400 text-sm">Phương pháp học hiện đại</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center text-3xl mb-4 shadow-lg">
-                🎮
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-5 border border-slate-700/30 hover:border-cyan-500/30 transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2.5 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+                  <Gamepad2 className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-bold text-white">Game tương tác</h3>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">Game tương tác</h3>
-              <p className="text-gray-600">
-                Học Vật lý qua các game mô phỏng và thí nghiệm ảo thú vị
-              </p>
+              <p className="text-slate-400 text-sm">Học qua game mô phỏng và thí nghiệm ảo</p>
             </div>
 
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center text-3xl mb-4 shadow-lg">
-                🔬
+            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-5 border border-slate-700/30 hover:border-amber-500/30 transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2.5 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg">
+                  <Microscope className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-bold text-white">Mô phỏng thực tế</h3>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">Mô phỏng thực tế</h3>
-              <p className="text-gray-600">
-                Trải nghiệm các hiện tượng vật lý qua mô phỏng chân thực
-              </p>
+              <p className="text-slate-400 text-sm">Trải nghiệm hiện tượng vật lý chân thực</p>
             </div>
 
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl mb-4 shadow-lg">
-                📊
+            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-5 border border-slate-700/30 hover:border-violet-500/30 transition-all">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2.5 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-bold text-white">Theo dõi tiến độ</h3>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">Theo dõi tiến độ</h3>
-              <p className="text-gray-600">
-                Hệ thống đánh giá chi tiết giúp bạn nắm rõ quá trình học
-              </p>
+              <p className="text-slate-400 text-sm">Hệ thống đánh giá chi tiết</p>
             </div>
           </div>
         </div>

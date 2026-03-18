@@ -7,9 +7,9 @@ const User = require('../models/User.cjs');
 // Đăng ký với email/password
 router.post('/register', async (req, res) => {
   try {
-    const { username, email, firebaseUid, selectedProgram } = req.body;
+    const { username, email, firebaseUid, selectedProgram, role, teacherInfo } = req.body;
 
-    console.log('📝 Register request:', { username, email, firebaseUid, selectedProgram });
+    console.log('📝 Register request:', { username, email, firebaseUid, selectedProgram, role });
 
     // Kiểm tra email đã tồn tại
     const existingUser = await User.findOne({ email });
@@ -37,12 +37,21 @@ router.post('/register', async (req, res) => {
       displayName: username,
       xp: 0,
       level: 1,
-      programs: [], // Không tự động enroll, chờ làm placement test
-      profile: {}
+      programs: [],
+      profile: {},
+      role: role || 'student',
+      teacherStatus: role === 'teacher' ? 'pending' : null,
+      teacherProfile: role === 'teacher' ? {
+        school: teacherInfo?.school || '',
+        subject: teacherInfo?.subject || '',
+        teachingGrades: teacherInfo?.teachingGrades || [],
+        bio: teacherInfo?.bio || '',
+        appliedAt: new Date()
+      } : undefined
     });
 
     await newUser.save();
-    console.log('✅ User registered successfully:', newUser.email);
+    console.log('✅ User registered successfully:', newUser.email, 'role:', newUser.role);
 
     // Generate JWT token
     const token = jwt.sign(
@@ -57,7 +66,7 @@ router.post('/register', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Đăng ký thành công',
+      message: newUser.role === 'teacher' ? 'Đăng ký thành công. Tài khoản giáo viên đang chờ duyệt.' : 'Đăng ký thành công',
       token: token,
       user: {
         id: newUser._id,
@@ -65,11 +74,14 @@ router.post('/register', async (req, res) => {
         email: newUser.email,
         displayName: newUser.displayName,
         firebaseUid: newUser.firebaseUid,
-        uid: newUser.firebaseUid, // Add uid alias for compatibility
+        uid: newUser.firebaseUid,
         xp: newUser.xp,
         level: newUser.level,
         programs: newUser.programs,
-        profile: newUser.profile
+        profile: newUser.profile,
+        role: newUser.role,
+        teacherStatus: newUser.teacherStatus,
+        teacherProfile: newUser.teacherProfile
       }
     });
   } catch (error) {
@@ -84,17 +96,19 @@ router.post('/register', async (req, res) => {
 // Đăng nhập với Google
 router.post('/google-login', async (req, res) => {
   try {
-    const { firebaseUid, email, displayName, avatar, selectedProgram } = req.body;
+    const { firebaseUid, email, displayName, avatar, selectedProgram, role, teacherInfo } = req.body;
 
-    console.log('📝 Google login request:', { firebaseUid, email });
+    console.log('📝 Google login request:', { firebaseUid, email, role });
 
     // Tìm user theo firebaseUid hoặc email
     let user = await User.findOne({ $or: [{ firebaseUid }, { email }] });
+    let isNewUser = false;
 
     if (!user) {
       // Tạo user mới nếu chưa tồn tại
+      isNewUser = true;
       const username = email.split('@')[0] + '_' + Math.random().toString(36).substr(2, 5);
-      
+
       user = new User({
         username,
         email,
@@ -103,19 +117,28 @@ router.post('/google-login', async (req, res) => {
         avatar: avatar || '',
         xp: 0,
         level: 1,
-        programs: [], // Không tự động enroll, chờ làm placement test
-        profile: {}
+        programs: [],
+        profile: {},
+        role: role || 'student',
+        teacherStatus: role === 'teacher' ? 'pending' : null,
+        teacherProfile: role === 'teacher' ? {
+          school: teacherInfo?.school || '',
+          subject: teacherInfo?.subject || '',
+          teachingGrades: teacherInfo?.teachingGrades || [],
+          bio: teacherInfo?.bio || '',
+          appliedAt: new Date()
+        } : undefined
       });
 
       await user.save();
-      console.log('✅ New user created:', user.email);
+      console.log('✅ New user created:', user.email, 'role:', user.role);
     } else {
       // Cập nhật firebaseUid nếu user đã tồn tại nhưng chưa có firebaseUid
       if (!user.firebaseUid) {
         user.firebaseUid = firebaseUid;
         await user.save();
       }
-      console.log('✅ Existing user logged in:', user.email);
+      console.log('✅ Existing user logged in:', user.email, 'role:', user.role);
     }
 
     // Generate JWT token
@@ -129,9 +152,17 @@ router.post('/google-login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    const isTeacherPending = user.role === 'teacher' && user.teacherStatus === 'pending';
+
     res.json({
       success: true,
-      message: 'Đăng nhập thành công',
+      message: isTeacherPending
+        ? 'Tài khoản giáo viên đang chờ xét duyệt. Vui lòng đợi admin phê duyệt trước khi truy cập.'
+        : (isNewUser && user.role === 'teacher'
+          ? 'Đăng ký thành công. Tài khoản giáo viên đang chờ duyệt.'
+          : 'Đăng nhập thành công'),
+      isNewUser,
+      requiresApproval: isTeacherPending,
       token: token,
       user: {
         id: user._id,
@@ -139,12 +170,15 @@ router.post('/google-login', async (req, res) => {
         email: user.email,
         displayName: user.displayName,
         firebaseUid: user.firebaseUid,
-        uid: user.firebaseUid, // Add uid alias for compatibility
+        uid: user.firebaseUid,
         xp: user.xp,
         level: user.level,
         programs: user.programs,
         profile: user.profile,
-        avatar: user.avatar
+        avatar: user.avatar,
+        role: user.role,
+        teacherStatus: user.teacherStatus,
+        teacherProfile: user.teacherProfile
       }
     });
   } catch (error) {
