@@ -1,65 +1,337 @@
 /**
- * ResistorCircuitLab.jsx - Thí nghiệm Mạch điện trở nối tiếp và song song
+ * ResistorCircuitLab.jsx - Thí nghiệm Mạch điện trở nối tiếp/song song (ENHANCED R3F 3D)
  * 
- * Mục tiêu:
- * - Khảo sát điện trở tương đương trong mạch nối tiếp: R_tđ = R₁ + R₂ + ...
- * - Khảo sát điện trở tương đương trong mạch song song: 1/R_tđ = 1/R₁ + 1/R₂ + ...
- * - Đo và so sánh với giá trị lý thuyết
+ * Nâng cấp:
+ * - React Three Fiber 3D scene
+ * - 3D breadboard, resistors with color bands
+ * - Animated electron flow with different paths for series vs parallel
+ * - Camera transition when switching circuit type
+ * - Sound effects
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  RotateCcw, 
-  Save,
-  HelpCircle,
-  ChevronRight,
-  ChevronLeft,
-  BookOpen,
-  Zap,
-  Plus,
-  Minus,
-  ToggleLeft,
-  ToggleRight
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Environment, Text } from '@react-three/drei';
+import * as THREE from 'three';
+import {
+  ArrowLeft, RotateCcw, Save, HelpCircle, ChevronRight, ChevronLeft,
+  BookOpen, Zap, Volume2, VolumeX
 } from 'lucide-react';
 import { OhmLaw, PhysicsUtils } from '../../core/PhysicsEngine';
 import { ExperimentDataCollector } from '../../core/DataCollector';
 import { Voltmeter, Ammeter, Ohmmeter } from '../../instruments/DigitalMeter';
+import labSoundEngine from '../../core/LabSoundEngine';
 import DataTable from '../../charts/DataTable';
 import './ResistorCircuitLab.css';
 
+// ═══════════════ 3D COMPONENTS ═══════════════
+
+function LabTable() {
+  return (
+    <group>
+      <mesh position={[0, -0.08, 0]} receiveShadow>
+        <boxGeometry args={[8, 0.12, 4.5]} />
+        <meshStandardMaterial color="#2a1f14" roughness={0.7} metalness={0.1} />
+      </mesh>
+      {[[-3.5, -1.1, -1.8], [3.5, -1.1, -1.8], [-3.5, -1.1, 1.8], [3.5, -1.1, 1.8]].map((pos, i) => (
+        <mesh key={i} position={pos}>
+          <cylinderGeometry args={[0.06, 0.06, 1.9, 8]} />
+          <meshStandardMaterial color="#444" metalness={0.7} roughness={0.3} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function Battery3D({ voltage, position }) {
+  return (
+    <group position={position}>
+      <mesh castShadow>
+        <cylinderGeometry args={[0.25, 0.25, 0.7, 16]} />
+        <meshStandardMaterial color="#1a2744" roughness={0.5} metalness={0.6} />
+      </mesh>
+      <mesh position={[0, 0.38, 0]}>
+        <cylinderGeometry args={[0.07, 0.07, 0.1, 8]} />
+        <meshStandardMaterial color="#ef4444" emissive="#ff0000" emissiveIntensity={0.3} metalness={0.9} roughness={0.1} />
+      </mesh>
+      <mesh position={[0, -0.38, 0]}>
+        <cylinderGeometry args={[0.10, 0.10, 0.05, 8]} />
+        <meshStandardMaterial color="#3b82f6" metalness={0.9} roughness={0.1} />
+      </mesh>
+      <mesh position={[0, 0.12, 0]}>
+        <cylinderGeometry args={[0.255, 0.255, 0.12, 16]} />
+        <meshStandardMaterial color="#ef4444" roughness={0.6} />
+      </mesh>
+      <Text position={[0.28, 0, 0]} rotation={[0, 0, -Math.PI / 2]} fontSize={0.1} color="#fbbf24" anchorX="center">
+        {voltage}V
+      </Text>
+    </group>
+  );
+}
+
+function Resistor3D({ value, position, rotation, isOn, label }) {
+  const glow = isOn ? 0.12 : 0;
+  const colors = ['#8b4513', '#000', '#ff0000', '#ffd700'];
+  return (
+    <group position={position} rotation={rotation || [0, 0, 0]}>
+      <mesh castShadow>
+        <cylinderGeometry args={[0.12, 0.12, 0.5, 16]} />
+        <meshStandardMaterial color="#c4a882" roughness={0.8} metalness={0.1}
+          emissive="#ffaa00" emissiveIntensity={glow} />
+      </mesh>
+      {[-0.12, -0.04, 0.04, 0.14].map((z, i) => (
+        <mesh key={i} position={[0, z, 0]}>
+          <cylinderGeometry args={[0.125, 0.125, 0.03, 16]} />
+          <meshStandardMaterial color={colors[i]} roughness={0.4} metalness={0.2} />
+        </mesh>
+      ))}
+      <mesh position={[0, 0.38, 0]}>
+        <cylinderGeometry args={[0.015, 0.015, 0.25, 8]} />
+        <meshStandardMaterial color="#aaa" metalness={0.9} roughness={0.2} />
+      </mesh>
+      <mesh position={[0, -0.38, 0]}>
+        <cylinderGeometry args={[0.015, 0.015, 0.25, 8]} />
+        <meshStandardMaterial color="#aaa" metalness={0.9} roughness={0.2} />
+      </mesh>
+      <Text position={[0.18, 0, 0]} fontSize={0.09} color="#22c55e" anchorX="left">
+        {label || `${value}Ω`}
+      </Text>
+    </group>
+  );
+}
+
+function Gauge3D({ type, position }) {
+  const color = type === 'A' ? '#3b82f6' : type === 'V' ? '#f59e0b' : '#22c55e';
+  const bg = type === 'A' ? '#0f2647' : type === 'V' ? '#3d2a0a' : '#0a3d1a';
+  return (
+    <group position={position}>
+      <mesh castShadow>
+        <cylinderGeometry args={[0.28, 0.28, 0.15, 24]} />
+        <meshStandardMaterial color={bg} roughness={0.3} metalness={0.5} />
+      </mesh>
+      <mesh position={[0, 0.08, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.26, 24]} />
+        <meshStandardMaterial color="#f0f0e8" roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 0.085, 0]}>
+        <torusGeometry args={[0.27, 0.015, 8, 24]} />
+        <meshStandardMaterial color={color} metalness={0.8} roughness={0.2} emissive={color} emissiveIntensity={0.2} />
+      </mesh>
+      <Text position={[0, 0.09, 0]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.15} color={color} anchorX="center" anchorY="middle">
+        {type}
+      </Text>
+    </group>
+  );
+}
+
+function Wire({ points, isOn, current }) {
+  const curve = useMemo(() => {
+    return new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)));
+  }, [points]);
+  const glow = isOn ? Math.min(0.35, (current || 0) * 0.25) : 0;
+  return (
+    <mesh>
+      <tubeGeometry args={[curve, 16, 0.02, 8, false]} />
+      <meshStandardMaterial color={isOn ? '#fbbf24' : '#6b7280'} metalness={0.7} roughness={0.3}
+        emissive={isOn ? '#ff8800' : '#000'} emissiveIntensity={glow} />
+    </mesh>
+  );
+}
+
+function ElectronFlow({ isOn, current, pathPoints }) {
+  const particlesRef = useRef();
+  const count = 15;
+  const progressRef = useRef(new Float32Array(count).fill(0).map((_, i) => i / count));
+
+  const path = useMemo(() => {
+    if (!pathPoints || pathPoints.length < 2) return null;
+    return new THREE.CatmullRomCurve3(pathPoints.map(p => new THREE.Vector3(...p)), false);
+  }, [pathPoints]);
+
+  useFrame((_, delta) => {
+    if (!particlesRef.current || !isOn || !path) return;
+    const positions = particlesRef.current.geometry.attributes.position;
+    const speed = Math.min(0.5, (current || 0.1) * 0.12);
+    for (let i = 0; i < count; i++) {
+      progressRef.current[i] = (progressRef.current[i] + speed * delta) % 1;
+      const pt = path.getPoint(progressRef.current[i]);
+      positions.setXYZ(i, pt.x, pt.y, pt.z);
+    }
+    positions.needsUpdate = true;
+  });
+
+  if (!isOn || !path) return null;
+
+  const init = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    const pt = path.getPoint(i / count);
+    init[i * 3] = pt.x; init[i * 3 + 1] = pt.y; init[i * 3 + 2] = pt.z;
+  }
+
+  return (
+    <points ref={particlesRef}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" count={count} array={init} itemSize={3} />
+      </bufferGeometry>
+      <pointsMaterial color="#60a5fa" size={0.06} transparent opacity={0.9} sizeAttenuation depthWrite={false} />
+    </points>
+  );
+}
+
+// ═══════════════ CIRCUIT SCENES ═══════════════
+function SeriesCircuit({ resistors, isOn, current, voltage }) {
+  const spacing = 1.6;
+  const n = resistors.length;
+  const startX = -(n - 1) * spacing / 2;
+
+  return (
+    <group>
+      {/* Battery on left */}
+      <Battery3D voltage={voltage} position={[-n * spacing / 2 - 1, 0.4, 0]} />
+      
+      {/* Resistors in series */}
+      {resistors.map((r, i) => (
+        <Resistor3D key={i} value={r} position={[startX + i * spacing, 0.6, 0.8]}
+          isOn={isOn} label={`R${i + 1}=${r}Ω`} />
+      ))}
+      
+      {/* Ammeter on right */}
+      <Gauge3D type="A" position={[n * spacing / 2, 0.12, -0.6]} />
+
+      {/* Top wire: battery → R1 → R2 → ... */}
+      <Wire points={[
+        [-n * spacing / 2 - 1, 0.75, 0],
+        [-n * spacing / 2 - 0.5, 0.3, 0.5],
+        [startX - 0.3, 0.3, 0.8],
+        ...resistors.map((_, i) => [startX + i * spacing, 0.6, 0.8]).flat().reduce((acc, _, j, arr) => {
+          if (j % 3 === 0) acc.push([arr[j], arr[j + 1], arr[j + 2]]);
+          return acc;
+        }, []),
+        [startX + (n - 1) * spacing + 0.5, 0.3, 0.5],
+        [n * spacing / 2, 0.3, 0],
+      ].filter(Boolean)} isOn={isOn} current={current} />
+
+      {/* Bottom return wire */}
+      <Wire points={[
+        [n * spacing / 2, 0.12, -0.6],
+        [n * spacing / 2 - 0.3, 0.1, -0.8],
+        [0, 0.08, -0.8],
+        [-n * spacing / 2, 0.1, -0.8],
+        [-n * spacing / 2 - 1, 0.05, 0],
+      ]} isOn={isOn} current={current} />
+
+      {/* Electron flow along main path */}
+      <ElectronFlow isOn={isOn} current={current} pathPoints={[
+        [-n * spacing / 2 - 1, 0.75, 0],
+        [-n * spacing / 2 - 0.5, 0.3, 0.5],
+        ...resistors.map((_, i) => [startX + i * spacing, 0.6, 0.8]),
+        [n * spacing / 2, 0.3, 0],
+        [n * spacing / 2, 0.12, -0.6],
+        [0, 0.08, -0.8],
+        [-n * spacing / 2 - 1, 0.05, 0],
+      ]} />
+
+      {/* Info labels */}
+      <Text position={[0, 2.0, 0]} fontSize={0.15} color="#e2e8f0" anchorX="center">Mạch Nối Tiếp</Text>
+    </group>
+  );
+}
+
+function ParallelCircuit({ resistors, isOn, current, currents, voltage }) {
+  const spacing = 1.4;
+  const n = resistors.length;
+
+  return (
+    <group>
+      {/* Battery on left */}
+      <Battery3D voltage={voltage} position={[-2.8, 0.4, 0]} />
+      
+      {/* Resistors in parallel branches */}
+      {resistors.map((r, i) => {
+        const z = (i - (n - 1) / 2) * spacing;
+        return (
+          <group key={i}>
+            <Resistor3D value={r} position={[0, 0.6, z]} isOn={isOn} label={`R${i + 1}=${r}Ω`} />
+            {/* Branch wires */}
+            <Wire points={[[-1.5, 0.3, z], [-0.3, 0.35, z], [0, 0.6, z]]} isOn={isOn} current={currents[i]} />
+            <Wire points={[[0, 0.6, z], [0.3, 0.35, z], [1.5, 0.3, z]]} isOn={isOn} current={currents[i]} />
+            {/* Branch electron flow */}
+            <ElectronFlow isOn={isOn} current={currents[i]} pathPoints={[
+              [-1.5, 0.3, z], [0, 0.6, z], [1.5, 0.3, z],
+            ]} />
+            {/* Current label per branch */}
+            {isOn && (
+              <Text position={[0, 1.1, z]} fontSize={0.09} color="#f472b6" anchorX="center">
+                I{i + 1}={PhysicsUtils.round(currents[i], 3)}A
+              </Text>
+            )}
+          </group>
+        );
+      })}
+
+      {/* Top bus wire */}
+      <Wire points={[[-2.8, 0.75, 0], [-2, 0.3, 0], [-1.5, 0.3, 0]]} isOn={isOn} current={current} />
+      {/* Bottom bus wire */}
+      <Wire points={[[1.5, 0.3, 0], [2, 0.3, 0], [2.5, 0.12, -0.5]]} isOn={isOn} current={current} />
+      {/* Return wire */}
+      <Wire points={[[2.5, 0.12, -0.5], [1, 0.08, -1.2], [-1, 0.08, -1.2], [-2.8, 0.05, 0]]}
+        isOn={isOn} current={current} />
+      
+      {/* Ammeter */}
+      <Gauge3D type="A" position={[2.5, 0.12, -0.5]} />
+
+      <Text position={[0, 2.0, 0]} fontSize={0.15} color="#e2e8f0" anchorX="center">Mạch Song Song</Text>
+    </group>
+  );
+}
+
+// ═══════════════ MAIN 3D SCENE ═══════════════
+function CircuitScene({ circuitType, resistors, voltage, isOn, current, currents }) {
+  return (
+    <>
+      <ambientLight intensity={0.35} />
+      <directionalLight position={[4, 6, 3]} intensity={1.0} castShadow />
+      <pointLight position={[-2, 3, 2]} intensity={0.4} color="#ffe4b5" />
+      <Environment preset="studio" />
+
+      <OrbitControls enablePan={false} minDistance={3} maxDistance={14}
+        minPolarAngle={0.2} maxPolarAngle={Math.PI / 2 + 0.1} target={[0, 0.3, 0]} />
+
+      <LabTable />
+
+      {circuitType === 'series' ? (
+        <SeriesCircuit resistors={resistors} isOn={isOn} current={current} voltage={voltage} />
+      ) : (
+        <ParallelCircuit resistors={resistors} isOn={isOn} current={current} currents={currents} voltage={voltage} />
+      )}
+    </>
+  );
+}
+
+// ═══════════════ MAIN COMPONENT ═══════════════
 const ResistorCircuitLab = () => {
   const navigate = useNavigate();
-  const canvasRef = useRef(null);
   const dataCollectorRef = useRef(null);
 
-  // Trạng thái thí nghiệm
   const [showGuide, setShowGuide] = useState(true);
   const [guideStep, setGuideStep] = useState(0);
   const [showTheory, setShowTheory] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [circuitOn, setCircuitOn] = useState(false);
+  const [circuitType, setCircuitType] = useState('series');
+  const [voltage, setVoltage] = useState(12);
+  const [r1, setR1] = useState(10);
+  const [r2, setR2] = useState(20);
+  const [r3, setR3] = useState(30);
+  const [numResistors, setNumResistors] = useState(2);
 
-  // Loại mạch
-  const [circuitType, setCircuitType] = useState('series'); // series | parallel
-
-  // Tham số mạch
-  const [voltage, setVoltage] = useState(12); // Hiệu điện thế nguồn (V)
-  const [r1, setR1] = useState(10); // Điện trở 1 (Ω)
-  const [r2, setR2] = useState(20); // Điện trở 2 (Ω)
-  const [r3, setR3] = useState(30); // Điện trở 3 (Ω)
-  const [numResistors, setNumResistors] = useState(2); // Số điện trở (2 hoặc 3)
-
-  // Kết quả tính toán
   const [totalResistance, setTotalResistance] = useState(0);
   const [current, setCurrent] = useState(0);
-  const [voltages, setVoltages] = useState([0, 0, 0]); // Điện áp qua từng điện trở
-  const [currents, setCurrents] = useState([0, 0, 0]); // Dòng qua từng điện trở
-
-  // Dữ liệu thu thập
+  const [voltages, setVoltages] = useState([0, 0, 0]);
+  const [currents, setCurrents] = useState([0, 0, 0]);
   const [collectedData, setCollectedData] = useState([]);
 
-  // Khởi tạo DataCollector
   useEffect(() => {
     dataCollectorRef.current = new ExperimentDataCollector('Mạch điện trở', [
       { name: 'trial', label: 'Lần đo', type: 'number' },
@@ -70,615 +342,166 @@ const ResistorCircuitLab = () => {
       { name: 'Rtd', label: 'R_tđ (Ω)', type: 'number', unit: 'Ω' },
       { name: 'I', label: 'I (A)', type: 'number', unit: 'A' }
     ]);
+    return () => { labSoundEngine.stopAll(); };
   }, []);
 
-  // Hướng dẫn
   const guideSteps = [
-    {
-      title: 'Thí nghiệm Mạch điện trở',
-      content: 'Trong thí nghiệm này, bạn sẽ khảo sát điện trở tương đương của mạch nối tiếp và song song.'
-    },
-    {
-      title: 'Bước 1: Chọn loại mạch',
-      content: 'Chọn mạch nối tiếp hoặc song song. Điều chỉnh giá trị các điện trở R₁, R₂, R₃.'
-    },
-    {
-      title: 'Bước 2: Đóng mạch',
-      content: 'Nhấn công tắc để đóng mạch. Quan sát giá trị dòng điện và điện áp.'
-    },
-    {
-      title: 'Bước 3: Quan sát',
-      content: 'Mạch nối tiếp: I chung, U chia theo R. Mạch song song: U chung, I chia theo R.'
-    },
-    {
-      title: 'Bước 4: Xác minh',
-      content: 'So sánh R_tđ đo được với công thức lý thuyết. Ghi số liệu để phân tích.'
-    }
+    { title: 'Thí nghiệm Mạch điện trở', content: 'Khảo sát R_tđ nối tiếp/song song. Xoay 3D để xem mạch!' },
+    { title: 'Bước 1: Chọn mạch', content: 'Chọn nối tiếp hoặc song song, điều chỉnh R₁, R₂, R₃.' },
+    { title: 'Bước 2: Đóng mạch', content: 'Nhấn công tắc, quan sát electron chạy qua các nhánh.' },
+    { title: 'Bước 3: Quan sát', content: 'Nối tiếp: I chung, U chia. Song song: U chung, I chia.' },
+    { title: 'Bước 4: Xác minh', content: 'So sánh R_tđ đo được với lý thuyết. Ghi số liệu phân tích.' }
   ];
 
-  // Tính toán mạch
+  const resistors = useMemo(() => numResistors === 3 ? [r1, r2, r3] : [r1, r2], [r1, r2, r3, numResistors]);
+
+  // Calculate circuit values
   useEffect(() => {
-    const resistors = numResistors === 3 ? [r1, r2, r3] : [r1, r2];
-    
     let Rtd, I, Us, Is;
-    
     if (circuitType === 'series') {
-      // Mạch nối tiếp: R_tđ = R₁ + R₂ + R₃
-      Rtd = resistors.reduce((sum, r) => sum + r, 0);
+      Rtd = resistors.reduce((s, r) => s + r, 0);
       I = circuitOn ? voltage / Rtd : 0;
-      
-      // Điện áp qua từng điện trở: U = I × R
       Us = resistors.map(r => I * r);
-      // Dòng qua từng điện trở bằng nhau
       Is = resistors.map(() => I);
     } else {
-      // Mạch song song: 1/R_tđ = 1/R₁ + 1/R₂ + 1/R₃
-      const invRtd = resistors.reduce((sum, r) => sum + 1/r, 0);
+      const invRtd = resistors.reduce((s, r) => s + 1 / r, 0);
       Rtd = 1 / invRtd;
       I = circuitOn ? voltage / Rtd : 0;
-      
-      // Điện áp qua từng điện trở bằng nhau = U nguồn
       Us = resistors.map(() => circuitOn ? voltage : 0);
-      // Dòng qua từng điện trở: I = U/R
       Is = resistors.map(r => circuitOn ? voltage / r : 0);
     }
-    
     setTotalResistance(Rtd);
     setCurrent(I);
     setVoltages(Us);
     setCurrents(Is);
-  }, [circuitType, voltage, r1, r2, r3, numResistors, circuitOn]);
+  }, [circuitType, voltage, resistors, circuitOn]);
 
-  // Vẽ mạch điện
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const toggleCircuit = () => { labSoundEngine.init(); labSoundEngine.playClick(); setCircuitOn(!circuitOn); };
+  const resetExperiment = () => { setCircuitOn(false); setCircuitType('series'); setVoltage(12); setR1(10); setR2(20); setR3(30); setNumResistors(2); };
+  const toggleSound = () => { labSoundEngine.init(); setSoundEnabled(labSoundEngine.toggle()); };
 
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
-
-    // Clear
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, width, height);
-
-    // Grid
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < width; x += 30) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
-    }
-    for (let y = 0; y < height; y += 30) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const resistors = numResistors === 3 ? [r1, r2, r3] : [r1, r2];
-
-    // Màu dây
-    const wireColor = circuitOn ? '#fbbf24' : '#6b7280';
-    ctx.strokeStyle = wireColor;
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-
-    if (circuitType === 'series') {
-      // --- MẠCH NỐI TIẾP ---
-      const startX = 80;
-      const endX = width - 80;
-      const wireY = centerY;
-      const resistorWidth = 60;
-      const totalWidth = endX - startX - 120;
-      const spacing = totalWidth / (numResistors + 1);
-
-      // Dây từ nguồn đến điện trở đầu tiên
-      ctx.beginPath();
-      ctx.moveTo(startX + 60, wireY);
-      ctx.lineTo(startX + spacing - resistorWidth/2, wireY);
-      ctx.stroke();
-
-      // Vẽ các điện trở nối tiếp
-      for (let i = 0; i < numResistors; i++) {
-        const rx = startX + spacing * (i + 1);
-        
-        // Vẽ điện trở (zigzag)
-        drawResistor(ctx, rx, wireY, resistorWidth, resistors[i], circuitOn);
-        
-        // Hiển thị điện áp và dòng
-        if (circuitOn) {
-          ctx.fillStyle = '#60a5fa';
-          ctx.font = '11px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(`U${i+1}=${PhysicsUtils.round(voltages[i], 2)}V`, rx, wireY - 35);
-        }
-
-        // Dây nối giữa các điện trở
-        if (i < numResistors - 1) {
-          ctx.strokeStyle = wireColor;
-          ctx.beginPath();
-          ctx.moveTo(rx + resistorWidth/2, wireY);
-          ctx.lineTo(startX + spacing * (i + 2) - resistorWidth/2, wireY);
-          ctx.stroke();
-        }
-      }
-
-      // Dây từ điện trở cuối về nguồn (qua đường dưới)
-      const lastRx = startX + spacing * numResistors;
-      ctx.strokeStyle = wireColor;
-      ctx.beginPath();
-      ctx.moveTo(lastRx + resistorWidth/2, wireY);
-      ctx.lineTo(endX - 40, wireY);
-      ctx.lineTo(endX - 40, wireY + 80);
-      ctx.lineTo(startX + 40, wireY + 80);
-      ctx.lineTo(startX + 40, wireY);
-      ctx.stroke();
-
-      // Nguồn điện
-      drawBattery(ctx, startX, wireY, voltage);
-
-      // Ampe kế trên đường chính
-      drawAmmeter(ctx, endX - 40, wireY + 40, current);
-
-    } else {
-      // --- MẠCH SONG SONG ---
-      const topY = centerY - 80;
-      const bottomY = centerY + 80;
-      const leftX = 120;
-      const rightX = width - 120;
-      const branchSpacing = (rightX - leftX - 100) / (numResistors + 1);
-
-      // Dây chính phía trên
-      ctx.strokeStyle = wireColor;
-      ctx.beginPath();
-      ctx.moveTo(leftX + 60, topY);
-      ctx.lineTo(rightX - 30, topY);
-      ctx.stroke();
-
-      // Dây chính phía dưới
-      ctx.beginPath();
-      ctx.moveTo(leftX + 60, bottomY);
-      ctx.lineTo(rightX - 30, bottomY);
-      ctx.stroke();
-
-      // Vẽ các nhánh song song
-      for (let i = 0; i < numResistors; i++) {
-        const branchX = leftX + 100 + branchSpacing * (i + 0.5);
-        
-        // Dây nối từ đường trên xuống điện trở
-        ctx.strokeStyle = wireColor;
-        ctx.beginPath();
-        ctx.moveTo(branchX, topY);
-        ctx.lineTo(branchX, centerY - 25);
-        ctx.stroke();
-        
-        // Vẽ điện trở
-        drawResistorVertical(ctx, branchX, centerY, 50, resistors[i], circuitOn);
-        
-        // Dây nối từ điện trở xuống đường dưới
-        ctx.strokeStyle = wireColor;
-        ctx.beginPath();
-        ctx.moveTo(branchX, centerY + 25);
-        ctx.lineTo(branchX, bottomY);
-        ctx.stroke();
-
-        // Hiển thị dòng qua từng nhánh
-        if (circuitOn) {
-          ctx.fillStyle = '#f472b6';
-          ctx.font = '11px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(`I${i+1}=${PhysicsUtils.round(currents[i], 3)}A`, branchX, bottomY + 20);
-        }
-      }
-
-      // Nguồn điện (bên trái)
-      drawBattery(ctx, leftX, (topY + bottomY) / 2, voltage);
-
-      // Dây nối nguồn
-      ctx.strokeStyle = wireColor;
-      ctx.beginPath();
-      ctx.moveTo(leftX, topY + 30);
-      ctx.lineTo(leftX, topY);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(leftX, bottomY - 30);
-      ctx.lineTo(leftX, bottomY);
-      ctx.stroke();
-
-      // Ampe kế chính (bên phải)
-      drawAmmeter(ctx, rightX, (topY + bottomY) / 2, current);
-
-      // Dây nối ampe kế
-      ctx.strokeStyle = wireColor;
-      ctx.beginPath();
-      ctx.moveTo(rightX, topY);
-      ctx.lineTo(rightX, topY + 35);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(rightX, bottomY - 35);
-      ctx.lineTo(rightX, bottomY);
-      ctx.stroke();
-    }
-
-    // Thông tin
-    ctx.fillStyle = '#e2e8f0';
-    ctx.font = '14px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(`Loại mạch: ${circuitType === 'series' ? 'Nối tiếp' : 'Song song'}`, 20, 25);
-    ctx.fillText(`R_tđ = ${PhysicsUtils.round(totalResistance, 2)} Ω`, 20, 45);
-    
-    if (circuitOn) {
-      ctx.fillStyle = '#22c55e';
-      ctx.fillText(`I = ${PhysicsUtils.round(current, 4)} A`, 20, 65);
-    }
-
-  }, [circuitType, voltage, r1, r2, r3, numResistors, circuitOn, current, voltages, currents, totalResistance]);
-
-  // Hàm vẽ điện trở ngang
-  const drawResistor = (ctx, x, y, width, value, isOn) => {
-    ctx.strokeStyle = isOn ? '#22c55e' : '#6b7280';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(x - width/2, y);
-    
-    const segments = 6;
-    const segWidth = width / segments;
-    const zigzagHeight = 12;
-    
-    for (let i = 0; i < segments; i++) {
-      const sx = x - width/2 + (i + 0.5) * segWidth;
-      const sy = y + (i % 2 === 0 ? -zigzagHeight : zigzagHeight);
-      ctx.lineTo(sx, sy);
-    }
-    ctx.lineTo(x + width/2, y);
-    ctx.stroke();
-
-    // Nhãn
-    ctx.fillStyle = '#22c55e';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`${value}Ω`, x, y + 28);
-  };
-
-  // Hàm vẽ điện trở dọc
-  const drawResistorVertical = (ctx, x, y, height, value, isOn) => {
-    ctx.strokeStyle = isOn ? '#22c55e' : '#6b7280';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(x, y - height/2);
-    
-    const segments = 6;
-    const segHeight = height / segments;
-    const zigzagWidth = 10;
-    
-    for (let i = 0; i < segments; i++) {
-      const sy = y - height/2 + (i + 0.5) * segHeight;
-      const sx = x + (i % 2 === 0 ? -zigzagWidth : zigzagWidth);
-      ctx.lineTo(sx, sy);
-    }
-    ctx.lineTo(x, y + height/2);
-    ctx.stroke();
-
-    // Nhãn
-    ctx.fillStyle = '#22c55e';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(`${value}Ω`, x + 20, y + 4);
-  };
-
-  // Hàm vẽ nguồn điện
-  const drawBattery = (ctx, x, y, voltage) => {
-    // Cực dương
-    ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(x, y - 20);
-    ctx.lineTo(x, y + 20);
-    ctx.stroke();
-
-    // Cực âm
-    ctx.strokeStyle = '#3b82f6';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(x + 15, y - 12);
-    ctx.lineTo(x + 15, y + 12);
-    ctx.stroke();
-
-    // Nhãn
-    ctx.fillStyle = '#fbbf24';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`${voltage}V`, x + 7, y - 30);
-  };
-
-  // Hàm vẽ ampe kế
-  const drawAmmeter = (ctx, x, y, current) => {
-    ctx.beginPath();
-    ctx.arc(x, y, 22, 0, Math.PI * 2);
-    ctx.fillStyle = '#1e3a5f';
-    ctx.fill();
-    ctx.strokeStyle = '#3b82f6';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.fillStyle = '#60a5fa';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('A', x, y + 5);
-  };
-
-  // Vẽ lại
-  useEffect(() => {
-    draw();
-  }, [draw]);
-
-  // Toggle mạch
-  const toggleCircuit = () => {
-    setCircuitOn(!circuitOn);
-  };
-
-  // Reset
-  const resetExperiment = () => {
-    setCircuitOn(false);
-    setCircuitType('series');
-    setVoltage(12);
-    setR1(10);
-    setR2(20);
-    setR3(30);
-    setNumResistors(2);
-  };
-
-  // Ghi số liệu
   const recordData = () => {
-    if (!circuitOn) {
-      alert('Hãy đóng mạch trước!');
-      return;
-    }
-
+    if (!circuitOn) { alert('Hãy đóng mạch trước!'); return; }
+    labSoundEngine.playSuccess();
     const record = {
       trial: collectedData.length + 1,
       type: circuitType === 'series' ? 'Nối tiếp' : 'Song song',
-      R1: r1,
-      R2: r2,
-      R3: numResistors === 3 ? r3 : '-',
+      R1: r1, R2: r2, R3: numResistors === 3 ? r3 : '-',
       Rtd: PhysicsUtils.round(totalResistance, 2),
       I: PhysicsUtils.round(current, 4)
     };
-
-    if (dataCollectorRef.current) {
-      dataCollectorRef.current.addRecord(record);
-    }
-
+    if (dataCollectorRef.current) dataCollectorRef.current.addRecord(record);
     setCollectedData(prev => [...prev, record]);
   };
 
-  // Xóa dữ liệu
-  const clearData = () => {
-    setCollectedData([]);
-    if (dataCollectorRef.current) {
-      dataCollectorRef.current.clearData();
-    }
-  };
+  const clearData = () => { setCollectedData([]); if (dataCollectorRef.current) dataCollectorRef.current.clearData(); };
 
-  // Tính R_tđ lý thuyết để hiển thị
   const getTheoreticalFormula = () => {
-    const resistors = numResistors === 3 ? [r1, r2, r3] : [r1, r2];
     if (circuitType === 'series') {
       return `${resistors.join(' + ')} = ${resistors.reduce((a, b) => a + b, 0)} Ω`;
     } else {
-      const invSum = resistors.reduce((sum, r) => sum + 1/r, 0);
-      return `1/(${resistors.map(r => `1/${r}`).join(' + ')}) = ${PhysicsUtils.round(1/invSum, 2)} Ω`;
+      const invSum = resistors.reduce((s, r) => s + 1 / r, 0);
+      return `1/(${resistors.map(r => `1/${r}`).join(' + ')}) = ${PhysicsUtils.round(1 / invSum, 2)} Ω`;
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+      <header className="resistor-header">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/vatly/virtual-lab')}
-              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <ArrowLeft size={24} />
-            </button>
+            <button onClick={() => navigate('/vatly/virtual-lab')} className="p-2 hover:bg-white/10 rounded-lg transition-all"><ArrowLeft size={24} /></button>
             <div>
-              <h1 className="text-xl font-bold">🔌 Thí nghiệm: Mạch điện trở</h1>
-              <p className="text-gray-400 text-sm">Nối tiếp và song song</p>
+              <h1 className="text-xl font-bold flex items-center gap-2"><span className="header-emoji">🔌</span> Thí nghiệm: Mạch điện trở</h1>
+              <p className="text-gray-400 text-sm">Nối tiếp & Song song • 3D Interactive</p>
             </div>
           </div>
-
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowTheory(!showTheory)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                showTheory ? 'bg-purple-600' : 'bg-gray-700 hover:bg-gray-600'
-              }`}
-            >
-              <BookOpen size={18} />
-              <span className="hidden sm:inline">Lý thuyết</span>
+            <button onClick={toggleSound} className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 transition-all">
+              {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
             </button>
-            <button
-              onClick={() => setShowGuide(true)}
-              className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
-            >
-              <HelpCircle size={18} />
+            <button onClick={() => setShowTheory(!showTheory)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${showTheory ? 'bg-purple-600' : 'bg-gray-700/50 hover:bg-gray-600/50'}`}>
+              <BookOpen size={18} /><span className="hidden sm:inline">Lý thuyết</span>
             </button>
+            <button onClick={() => setShowGuide(true)} className="p-2 bg-gray-700/50 hover:bg-gray-600/50 rounded-lg transition-all"><HelpCircle size={18} /></button>
           </div>
         </div>
       </header>
 
       <div className="flex flex-col lg:flex-row max-w-7xl mx-auto p-4 gap-4">
-        {/* Main Canvas */}
         <div className="flex-1">
-          <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-            <div className="relative">
-              <canvas
-                ref={canvasRef}
-                className="w-full"
-                style={{ height: '350px' }}
-              />
+          <div className="resistor-canvas-container">
+            <div className="relative" style={{ height: '400px' }}>
+              <Canvas camera={{ position: [0, 5, 7], fov: 38 }} shadows>
+                <CircuitScene circuitType={circuitType} resistors={resistors} voltage={voltage}
+                  isOn={circuitOn} current={current} currents={currents} />
+              </Canvas>
 
-              {/* Meters overlay */}
-              <div className="absolute top-4 right-4 flex flex-col gap-2">
+              <div className="absolute top-3 left-3 badge-3d">🎮 3D • Kéo chuột để xoay</div>
+
+              <div className="absolute top-3 right-3 flex flex-col gap-2">
                 <Voltmeter value={circuitOn ? voltage : 0} precision={1} size="small" />
                 <Ammeter value={current} precision={4} size="small" />
                 <Ohmmeter value={totalResistance} precision={2} size="small" />
               </div>
 
-              {/* Controls overlay */}
               <div className="absolute bottom-4 left-4 flex gap-2">
-                <button
-                  onClick={toggleCircuit}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-colors shadow-lg ${
-                    circuitOn 
-                      ? 'bg-red-600 hover:bg-red-500' 
-                      : 'bg-green-600 hover:bg-green-500'
-                  }`}
-                >
-                  <Zap size={18} />
-                  {circuitOn ? 'Ngắt mạch' : 'Đóng mạch'}
+                <button onClick={toggleCircuit}
+                  className={`resistor-toggle-btn ${circuitOn ? 'resistor-toggle-on' : 'resistor-toggle-off'}`}>
+                  <Zap size={18} /> {circuitOn ? 'Ngắt mạch' : 'Đóng mạch'}
                 </button>
-
                 {circuitOn && (
-                  <button
-                    onClick={recordData}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition-colors"
-                  >
-                    <Save size={18} />
-                    Ghi số liệu
-                  </button>
+                  <button onClick={recordData} className="resistor-record-btn"><Save size={18} /> Ghi số liệu</button>
                 )}
-
-                <button
-                  onClick={resetExperiment}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg font-medium transition-colors"
-                >
-                  <RotateCcw size={18} />
-                </button>
+                <button onClick={resetExperiment} className="resistor-reset-btn"><RotateCcw size={18} /></button>
               </div>
             </div>
 
-            {/* Parameters */}
-            <div className="p-4 border-t border-gray-700 bg-gray-800/50">
-              {/* Circuit type toggle */}
+            <div className="p-4 border-t border-gray-700/50 bg-gray-800/30 backdrop-blur-sm">
               <div className="flex items-center justify-center gap-4 mb-4">
-                <button
-                  onClick={() => setCircuitType('series')}
-                  disabled={circuitOn}
-                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                    circuitType === 'series'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  } disabled:opacity-50`}
-                >
+                <button onClick={() => { setCircuitType('series'); setCircuitOn(false); }} disabled={circuitOn}
+                  className={`px-6 py-2 rounded-lg font-medium transition-all ${circuitType === 'series' ? 'bg-blue-600 shadow-lg shadow-blue-600/30' : 'bg-gray-700 hover:bg-gray-600'} disabled:opacity-50`}>
                   🔗 Nối tiếp
                 </button>
-                <button
-                  onClick={() => setCircuitType('parallel')}
-                  disabled={circuitOn}
-                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                    circuitType === 'parallel'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  } disabled:opacity-50`}
-                >
+                <button onClick={() => { setCircuitType('parallel'); setCircuitOn(false); }} disabled={circuitOn}
+                  className={`px-6 py-2 rounded-lg font-medium transition-all ${circuitType === 'parallel' ? 'bg-green-600 shadow-lg shadow-green-600/30' : 'bg-gray-700 hover:bg-gray-600'} disabled:opacity-50`}>
                   ⚡ Song song
                 </button>
                 <div className="flex items-center gap-2 ml-4">
-                  <span className="text-gray-400 text-sm">Số điện trở:</span>
-                  <button
-                    onClick={() => setNumResistors(2)}
-                    disabled={circuitOn}
-                    className={`px-3 py-1 rounded ${numResistors === 2 ? 'bg-yellow-600' : 'bg-gray-700'} disabled:opacity-50`}
-                  >
-                    2
-                  </button>
-                  <button
-                    onClick={() => setNumResistors(3)}
-                    disabled={circuitOn}
-                    className={`px-3 py-1 rounded ${numResistors === 3 ? 'bg-yellow-600' : 'bg-gray-700'} disabled:opacity-50`}
-                  >
-                    3
-                  </button>
+                  <span className="text-gray-400 text-sm">Số R:</span>
+                  {[2, 3].map(n => (
+                    <button key={n} onClick={() => { setNumResistors(n); setCircuitOn(false); }} disabled={circuitOn}
+                      className={`px-3 py-1 rounded transition-all ${numResistors === n ? 'bg-yellow-600 shadow-lg shadow-yellow-600/30' : 'bg-gray-700'} disabled:opacity-50`}>{n}</button>
+                  ))}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Voltage */}
                 <div>
-                  <label className="block text-sm text-gray-300 mb-2">Nguồn U (V)</label>
-                  <input
-                    type="range"
-                    min="3"
-                    max="24"
-                    step="1"
-                    value={voltage}
-                    onChange={(e) => setVoltage(parseInt(e.target.value))}
-                    disabled={circuitOn}
-                    className="w-full accent-yellow-500"
-                  />
-                  <div className="text-center text-lg font-mono text-yellow-400">{voltage} V</div>
+                  <label className="block text-sm text-gray-300 mb-1">U (V)</label>
+                  <input type="range" min="3" max="24" step="1" value={voltage}
+                    onChange={(e) => setVoltage(parseInt(e.target.value))} disabled={circuitOn} className="w-full accent-yellow-500" />
+                  <div className="text-center text-lg font-mono text-yellow-400 param-value">{voltage} V</div>
                 </div>
-
-                {/* R1 */}
                 <div>
-                  <label className="block text-sm text-gray-300 mb-2">R₁ (Ω)</label>
-                  <input
-                    type="range"
-                    min="5"
-                    max="100"
-                    step="5"
-                    value={r1}
-                    onChange={(e) => setR1(parseInt(e.target.value))}
-                    disabled={circuitOn}
-                    className="w-full accent-green-500"
-                  />
-                  <div className="text-center text-lg font-mono text-green-400">{r1} Ω</div>
+                  <label className="block text-sm text-gray-300 mb-1">R₁ (Ω)</label>
+                  <input type="range" min="5" max="100" step="5" value={r1}
+                    onChange={(e) => setR1(parseInt(e.target.value))} disabled={circuitOn} className="w-full accent-green-500" />
+                  <div className="text-center text-lg font-mono text-green-400 param-value">{r1} Ω</div>
                 </div>
-
-                {/* R2 */}
                 <div>
-                  <label className="block text-sm text-gray-300 mb-2">R₂ (Ω)</label>
-                  <input
-                    type="range"
-                    min="5"
-                    max="100"
-                    step="5"
-                    value={r2}
-                    onChange={(e) => setR2(parseInt(e.target.value))}
-                    disabled={circuitOn}
-                    className="w-full accent-blue-500"
-                  />
-                  <div className="text-center text-lg font-mono text-blue-400">{r2} Ω</div>
+                  <label className="block text-sm text-gray-300 mb-1">R₂ (Ω)</label>
+                  <input type="range" min="5" max="100" step="5" value={r2}
+                    onChange={(e) => setR2(parseInt(e.target.value))} disabled={circuitOn} className="w-full accent-blue-500" />
+                  <div className="text-center text-lg font-mono text-blue-400 param-value">{r2} Ω</div>
                 </div>
-
-                {/* R3 */}
                 {numResistors === 3 && (
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">R₃ (Ω)</label>
-                    <input
-                      type="range"
-                      min="5"
-                      max="100"
-                      step="5"
-                      value={r3}
-                      onChange={(e) => setR3(parseInt(e.target.value))}
-                      disabled={circuitOn}
-                      className="w-full accent-purple-500"
-                    />
-                    <div className="text-center text-lg font-mono text-purple-400">{r3} Ω</div>
+                    <label className="block text-sm text-gray-300 mb-1">R₃ (Ω)</label>
+                    <input type="range" min="5" max="100" step="5" value={r3}
+                      onChange={(e) => setR3(parseInt(e.target.value))} disabled={circuitOn} className="w-full accent-purple-500" />
+                    <div className="text-center text-lg font-mono text-purple-400 param-value">{r3} Ω</div>
                   </div>
                 )}
               </div>
@@ -686,57 +509,37 @@ const ResistorCircuitLab = () => {
           </div>
         </div>
 
-        {/* Right Panel */}
         <div className="lg:w-96 space-y-4">
-          {/* Results */}
-          <div className="bg-gradient-to-br from-yellow-900/50 to-orange-900/50 rounded-xl p-4 border border-yellow-700/50">
+          <div className="resistor-results-card">
             <h3 className="text-lg font-bold text-white mb-3">📊 Kết quả</h3>
-            
             <div className="grid grid-cols-2 gap-3 mb-3">
-              <div className="bg-black/30 rounded-lg p-3 text-center">
-                <div className="text-2xl font-mono text-yellow-400">
-                  {PhysicsUtils.round(totalResistance, 2)}
-                </div>
+              <div className="result-value-box">
+                <div className="text-2xl font-mono text-yellow-400">{PhysicsUtils.round(totalResistance, 2)}</div>
                 <div className="text-xs text-gray-400">R_tđ (Ω)</div>
               </div>
-              <div className="bg-black/30 rounded-lg p-3 text-center">
-                <div className="text-2xl font-mono text-blue-400">
-                  {PhysicsUtils.round(current, 4)}
-                </div>
+              <div className="result-value-box">
+                <div className="text-2xl font-mono text-blue-400">{PhysicsUtils.round(current, 4)}</div>
                 <div className="text-xs text-gray-400">I (A)</div>
               </div>
             </div>
-
-            {/* Formula verification */}
-            <div className="bg-black/30 rounded-lg p-3">
+            <div className="result-value-box">
               <p className="text-sm text-gray-400 mb-1">Công thức:</p>
-              <p className="text-sm font-mono text-green-400">
-                R_tđ = {getTheoreticalFormula()}
-              </p>
+              <p className="text-sm font-mono text-green-400">R_tđ = {getTheoreticalFormula()}</p>
             </div>
           </div>
 
-          {/* Data Table */}
-          <DataTable
-            columns={[
-              { name: 'trial', label: '#', type: 'number' },
-              { name: 'type', label: 'Loại', type: 'string' },
-              { name: 'Rtd', label: 'R_tđ', type: 'number' },
-              { name: 'I', label: 'I', type: 'number', precision: 3 }
-            ]}
-            data={collectedData}
-            onClearAll={clearData}
+          <DataTable columns={[
+            { name: 'trial', label: '#', type: 'number' },
+            { name: 'type', label: 'Loại', type: 'string' },
+            { name: 'Rtd', label: 'R_tđ', type: 'number' },
+            { name: 'I', label: 'I', type: 'number', precision: 3 }
+          ]} data={collectedData} onClearAll={clearData}
             onExport={() => dataCollectorRef.current?.downloadCSV()}
-            onDeleteRecord={(id) => {
-              setCollectedData(prev => prev.filter(d => d.trial !== id));
-            }}
-            maxHeight={150}
-          />
+            onDeleteRecord={(id) => setCollectedData(prev => prev.filter(d => d.trial !== id))} maxHeight={150} />
 
-          {/* Formula */}
-          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+          <div className="resistor-formula-card">
             <h3 className="text-sm font-medium text-gray-400 mb-2">📐 Công thức</h3>
-            <div className="bg-gray-900 rounded-lg p-3 space-y-3">
+            <div className="resistor-formula-display space-y-3">
               <div>
                 <p className="text-xs text-blue-400 mb-1">Nối tiếp:</p>
                 <p className="text-lg font-mono text-blue-300">R_tđ = R₁ + R₂ + R₃</p>
@@ -754,49 +557,27 @@ const ResistorCircuitLab = () => {
 
       {/* Guide Modal */}
       {showGuide && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-2xl max-w-lg w-full p-6 border border-gray-700">
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="text-center mb-6">
-              <div className="text-4xl mb-3">🔌</div>
+              <div className="text-5xl mb-3 modal-emoji">🔌</div>
               <h2 className="text-xl font-bold">{guideSteps[guideStep].title}</h2>
             </div>
-
-            <p className="text-gray-300 text-center mb-6">
-              {guideSteps[guideStep].content}
-            </p>
-
+            <p className="text-gray-300 text-center mb-6">{guideSteps[guideStep].content}</p>
             <div className="flex justify-center gap-2 mb-6">
               {guideSteps.map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-2 h-2 rounded-full ${i === guideStep ? 'bg-yellow-500' : 'bg-gray-600'}`}
-                />
+                <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all ${i === guideStep ? 'bg-yellow-500 scale-125' : 'bg-gray-600'}`} />
               ))}
             </div>
-
             <div className="flex justify-between">
-              <button
-                onClick={() => setGuideStep(Math.max(0, guideStep - 1))}
-                disabled={guideStep === 0}
-                className="flex items-center gap-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded-lg"
-              >
+              <button onClick={() => setGuideStep(Math.max(0, guideStep - 1))} disabled={guideStep === 0}
+                className="flex items-center gap-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded-lg">
                 <ChevronLeft size={18} /> Trước
               </button>
-
               {guideStep === guideSteps.length - 1 ? (
-                <button
-                  onClick={() => setShowGuide(false)}
-                  className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg"
-                >
-                  Bắt đầu
-                </button>
+                <button onClick={() => setShowGuide(false)} className="px-5 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg shadow-lg shadow-yellow-600/30">Bắt đầu</button>
               ) : (
-                <button
-                  onClick={() => setGuideStep(guideStep + 1)}
-                  className="flex items-center gap-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg"
-                >
-                  Tiếp <ChevronRight size={18} />
-                </button>
+                <button onClick={() => setGuideStep(guideStep + 1)} className="flex items-center gap-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg">Tiếp <ChevronRight size={18} /></button>
               )}
             </div>
           </div>
@@ -805,64 +586,26 @@ const ResistorCircuitLab = () => {
 
       {/* Theory Modal */}
       {showTheory && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 border border-gray-700">
+        <div className="modal-overlay">
+          <div className="modal-content max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold">📚 Mạch điện trở</h2>
               <button onClick={() => setShowTheory(false)} className="p-2 hover:bg-gray-700 rounded-lg">✕</button>
             </div>
-
             <div className="space-y-4 text-gray-300">
               <div>
-                <h3 className="text-lg font-semibold text-white mb-2">1. Mạch nối tiếp</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>Các điện trở mắc liên tiếp nhau</li>
-                  <li>Cường độ dòng điện bằng nhau: I = I₁ = I₂ = I₃</li>
-                  <li>Hiệu điện thế: U = U₁ + U₂ + U₃</li>
-                  <li>Điện trở tương đương: R_tđ = R₁ + R₂ + R₃</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">2. Mạch song song</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li>Các điện trở mắc chung hai đầu</li>
-                  <li>Hiệu điện thế bằng nhau: U = U₁ = U₂ = U₃</li>
-                  <li>Cường độ dòng điện: I = I₁ + I₂ + I₃</li>
-                  <li>Điện trở tương đương: 1/R_tđ = 1/R₁ + 1/R₂ + 1/R₃</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">3. So sánh</h3>
-                <div className="bg-gray-900 p-4 rounded-lg">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-gray-400">
-                        <th className="text-left py-1">Đặc điểm</th>
-                        <th className="text-center py-1">Nối tiếp</th>
-                        <th className="text-center py-1">Song song</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="py-1">Dòng điện</td>
-                        <td className="text-center text-blue-400">I chung</td>
-                        <td className="text-center text-green-400">I chia</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1">Hiệu điện thế</td>
-                        <td className="text-center text-blue-400">U chia</td>
-                        <td className="text-center text-green-400">U chung</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1">R_tđ so với R</td>
-                        <td className="text-center text-blue-400">R_tđ &gt; R</td>
-                        <td className="text-center text-green-400">R_tđ &lt; R</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <h3 className="text-lg font-semibold text-white mb-2">Nối tiếp</h3>
+                <div className="bg-gray-900/80 p-3 rounded-lg text-center border border-gray-700/50">
+                  <p className="text-lg font-mono text-blue-400">R_tđ = R₁ + R₂ + ... + Rₙ</p>
                 </div>
+                <p className="text-sm mt-1">I chung, U tổng = tổng U các điện trở</p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">Song song</h3>
+                <div className="bg-gray-900/80 p-3 rounded-lg text-center border border-gray-700/50">
+                  <p className="text-lg font-mono text-green-400">1/R_tđ = 1/R₁ + 1/R₂ + ... + 1/Rₙ</p>
+                </div>
+                <p className="text-sm mt-1">U chung, I tổng = tổng I các nhánh</p>
               </div>
             </div>
           </div>

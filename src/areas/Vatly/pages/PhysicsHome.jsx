@@ -11,6 +11,9 @@ import {
 import api from '../../../config/api';
 import QuestModal from '../../../components/Quest/QuestModal';
 import Leaderboard from '../../../components/Leaderboard/Leaderboard';
+import PhysicsHeaderBackground from '../../../components/animations/PhysicsHeaderBackground';
+import SolarSystemBackground from '../../../components/animations/SolarSystemBackground';
+import AuthorSignature from '../../../components/ui/AuthorSignature';
 
 const PhysicsHome = () => {
   const { user, logout } = useAuth();
@@ -164,18 +167,20 @@ const PhysicsHome = () => {
   const progressPercentage = (stats.completedLessons / stats.totalLessons) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden font-sans">
+      <SolarSystemBackground />
+      <AuthorSignature />
       {/* Animated background effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-cyan-500/10 rounded-full filter blur-3xl animate-pulse"></div>
-        <div className="absolute top-40 right-10 w-96 h-96 bg-purple-500/10 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute -bottom-20 left-1/3 w-96 h-96 bg-blue-500/10 rounded-full filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-20 left-10 w-96 h-96 bg-cyan-500/10 rounded-full filter blur-[100px] animate-pulse"></div>
+        <div className="absolute top-40 right-10 w-96 h-96 bg-purple-500/10 rounded-full filter blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute -bottom-20 left-1/3 w-96 h-96 bg-blue-500/10 rounded-full filter blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
         {/* Subtle grid overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-900 opacity-60"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/80 to-slate-950 opacity-90"></div>
       </div>
 
       {/* Hero Section - Compact */}
-      <section className="relative py-6 px-4">
+      <section className="relative py-6 px-4 z-10">
         <div className="container mx-auto max-w-7xl">
           {/* Navigation Bar - Compact */}
           <div className="flex items-center justify-between mb-5">
@@ -279,10 +284,13 @@ const PhysicsHome = () => {
             </div>
           </div>
 
-          {/* Welcome Banner - Compact */}
-          <div className="relative bg-slate-800/50 backdrop-blur-xl rounded-2xl p-5 mb-6 border border-slate-700/40 overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 opacity-80"></div>
-            <div className="relative flex items-center gap-4">
+          {/* Welcome Banner - Modern Neon */}
+          <div className="relative bg-black/60 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/10 overflow-hidden shadow-[0_0_30px_rgba(34,211,238,0.15)] group">
+            <PhysicsHeaderBackground />
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 opacity-100 shadow-[0_0_10px_rgba(34,211,238,0.8)] z-10"></div>
+            
+            {/* Banner Content with z-10 to stay above Phaser background */}
+            <div className="relative flex items-center gap-5 z-10 pointer-events-none">
               <div className="relative shrink-0">
                 <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
                   <span className="text-2xl font-bold text-white">{(user?.username || user?.email)?.[0]?.toUpperCase() || 'U'}</span>
@@ -295,14 +303,14 @@ const PhysicsHome = () => {
                 </h1>
                 <p className="text-slate-400 text-sm">Tiếp tục hành trình Vật lý</p>
               </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                  <Star className="w-4 h-4 text-amber-400" />
-                  <span className="text-amber-400 font-semibold text-sm">{stats.totalStars}</span>
+              <div className="hidden sm:flex items-center gap-3 pointer-events-auto">
+                <div className="flex items-center gap-1.5 px-4 py-2 bg-black/40 backdrop-blur border border-amber-500/30 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                  <Star className="w-5 h-5 text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]" />
+                  <span className="text-amber-400 font-bold text-base">{stats.totalStars}</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 rounded-lg border border-orange-500/20">
-                  <Flame className="w-4 h-4 text-orange-400" />
-                  <span className="text-orange-400 font-semibold text-sm">{stats.currentStreak}</span>
+                <div className="flex items-center gap-1.5 px-4 py-2 bg-black/40 backdrop-blur border border-orange-500/30 rounded-xl shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+                  <Flame className="w-5 h-5 text-orange-400 drop-shadow-[0_0_5px_rgba(249,115,22,0.8)]" />
+                  <span className="text-orange-400 font-bold text-base">{stats.currentStreak}</span>
                 </div>
               </div>
             </div>
@@ -311,55 +319,55 @@ const PhysicsHome = () => {
           {/* Stats Cards - Compact */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             {/* Lessons Completed */}
-            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-emerald-500/30 transition-all">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg">
-                  <Activity className="w-4 h-4 text-white" />
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 border border-white/5 hover:border-emerald-500/50 shadow-[0_0_0_rgba(16,185,129,0)] hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 bg-emerald-500/20 border border-emerald-500/30 rounded-xl shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+                  <Activity className="w-5 h-5 text-emerald-400" />
                 </div>
-                <span className="text-xs text-slate-400 font-medium">Bài học</span>
+                <span className="text-sm text-slate-300 tracking-wide font-semibold">BÀI HỌC</span>
               </div>
-              <p className="text-2xl font-bold text-white">
-                {stats.completedLessons}<span className="text-slate-500 text-sm font-normal">/{stats.totalLessons}</span>
+              <p className="text-3xl font-extrabold text-white tracking-tight">
+                {stats.completedLessons}<span className="text-slate-500 text-lg font-medium ml-1">/{stats.totalLessons}</span>
               </p>
-              <div className="mt-2 h-1 bg-slate-700 rounded-full overflow-hidden">
+              <div className="mt-3 h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
                 <div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full"
+                  className="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full shadow-[0_0_10px_rgba(16,185,129,1)]"
                   style={{ width: `${progressPercentage}%` }}
                 ></div>
               </div>
             </div>
 
             {/* Stars Earned */}
-            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-amber-500/30 transition-all">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-lg">
-                  <Medal className="w-4 h-4 text-white" />
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 border border-white/5 hover:border-amber-500/50 shadow-[0_0_0_rgba(245,158,11,0)] hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 bg-amber-500/20 border border-amber-500/30 rounded-xl shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+                  <Medal className="w-5 h-5 text-amber-400" />
                 </div>
-                <span className="text-xs text-slate-400 font-medium">Sao</span>
+                <span className="text-sm text-slate-300 tracking-wide font-semibold">SAO TÍCH LŨY</span>
               </div>
-              <p className="text-2xl font-bold text-white">{stats.totalStars}</p>
+              <p className="text-3xl font-extrabold text-white tracking-tight">{stats.totalStars}</p>
             </div>
 
             {/* Streak */}
-            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-orange-500/30 transition-all">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg">
-                  <Zap className="w-4 h-4 text-white" />
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 border border-white/5 hover:border-orange-500/50 shadow-[0_0_0_rgba(249,115,22,0)] hover:shadow-[0_0_20px_rgba(249,115,22,0.2)] transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 bg-orange-500/20 border border-orange-500/30 rounded-xl shadow-[0_0_10px_rgba(249,115,22,0.3)]">
+                  <Zap className="w-5 h-5 text-orange-400" />
                 </div>
-                <span className="text-xs text-slate-400 font-medium">Streak</span>
+                <span className="text-sm text-slate-300 tracking-wide font-semibold">STREAK</span>
               </div>
-              <p className="text-2xl font-bold text-white">{stats.currentStreak}<span className="text-slate-500 text-sm font-normal ml-1">ngày</span></p>
+              <p className="text-3xl font-extrabold text-white tracking-tight">{stats.currentStreak}<span className="text-slate-500 text-lg font-medium ml-2">ngày</span></p>
             </div>
 
             {/* Time Spent */}
-            <div className="bg-slate-800/40 backdrop-blur rounded-xl p-4 border border-slate-700/30 hover:border-cyan-500/30 transition-all">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
-                  <Timer className="w-4 h-4 text-white" />
+            <div className="bg-black/40 backdrop-blur-md rounded-2xl p-5 border border-white/5 hover:border-cyan-500/50 shadow-[0_0_0_rgba(34,211,238,0)] hover:shadow-[0_0_20px_rgba(34,211,238,0.2)] transition-all duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2.5 bg-cyan-500/20 border border-cyan-500/30 rounded-xl shadow-[0_0_10px_rgba(34,211,238,0.3)]">
+                  <Timer className="w-5 h-5 text-cyan-400" />
                 </div>
-                <span className="text-xs text-slate-400 font-medium">Thời gian</span>
+                <span className="text-sm text-slate-300 tracking-wide font-semibold">THỜI GIAN</span>
               </div>
-              <p className="text-2xl font-bold text-white">{Math.floor(stats.totalTimeSpent / 60)}<span className="text-slate-500 text-sm font-normal ml-1">phút</span></p>
+              <p className="text-3xl font-extrabold text-white tracking-tight">{Math.floor(stats.totalTimeSpent / 60)}<span className="text-slate-500 text-lg font-medium ml-2">phút</span></p>
             </div>
           </div>
 
@@ -497,8 +505,33 @@ const PhysicsHome = () => {
         </div>
       </section>
 
+      {/* Featured Video */}
+      <section className="px-4 pb-2 relative z-10">
+        <div className="container mx-auto max-w-7xl">
+          <div className="bg-slate-900/45 backdrop-blur rounded-2xl border border-slate-700/40 overflow-hidden shadow-xl shadow-cyan-900/20">
+            <div className="px-4 md:px-6 pt-4 md:pt-5 pb-3 border-b border-slate-700/30">
+              <h3 className="text-base md:text-lg font-bold text-white">Video bài giảng nổi bật</h3>
+              <p className="text-slate-400 text-xs md:text-sm mt-1">Xem nhanh trước khi bắt đầu lộ trình học tập</p>
+            </div>
+
+            <div className="p-3 md:p-4">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black ring-1 ring-slate-700/40">
+                <video
+                  className="w-full h-full object-cover"
+                  controls
+                  preload="metadata"
+                  src="/video/final.mp4"
+                >
+                  Trình duyệt của bạn không hỗ trợ phát video.
+                </video>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Learning Path - Compact */}
-      <section className="py-8 px-4">
+      <section className="py-8 px-4 relative z-10">
         <div className="container mx-auto max-w-7xl">
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-1">
@@ -565,7 +598,7 @@ const PhysicsHome = () => {
       </section>
 
       {/* Features Section - Compact */}
-      <section className="py-8 px-4">
+      <section className="py-8 px-4 relative z-10">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-6">
             <h2 className="text-xl font-bold text-white mb-1">Tại sao chọn chúng tôi?</h2>

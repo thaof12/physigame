@@ -7,6 +7,8 @@
 
 import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import LabBackground from '../../../../components/animations/LabBackground';
+import AuthorSignature from '../../../../components/ui/AuthorSignature';
 import { 
   ArrowLeft, 
   FlaskConical, 
@@ -360,11 +362,11 @@ const VirtualLabHome = () => {
     return (
       <div
         className={`
-          relative rounded-xl border overflow-hidden
-          transition-all duration-300
+          relative rounded-2xl border overflow-hidden
+          transition-all duration-500 transform hover:-translate-y-1
           ${exp.available 
-            ? 'bg-gray-800 border-gray-700 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/20 cursor-pointer' 
-            : 'bg-gray-800/50 border-gray-700/50 opacity-60'
+            ? 'bg-black/40 backdrop-blur-md border-white/10 hover:border-emerald-400/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:bg-black/60 cursor-pointer' 
+            : 'bg-black/20 backdrop-blur-sm border-white/5 opacity-60 grayscale'
           }
         `}
         onClick={() => exp.available && navigate(exp.path)}
@@ -425,9 +427,12 @@ const VirtualLabHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen relative overflow-hidden bg-slate-950 font-sans text-white">
+      <LabBackground />
+      <AuthorSignature />
+      <div className="relative z-10 pb-20">
       {/* Header */}
-      <div className="bg-gray-900/80 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-10">
+      <div className="bg-black/60 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <button
@@ -453,11 +458,12 @@ const VirtualLabHome = () => {
       </div>
 
       {/* Intro Section */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="bg-gradient-to-r from-emerald-900/50 to-teal-900/50 rounded-2xl p-6 border border-emerald-700/50 mb-8">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-emerald-500/20 rounded-xl">
-              <Timer className="text-emerald-400" size={32} />
+      <div className="max-w-6xl mx-auto px-4 py-8 relative">
+        <div className="bg-black/50 backdrop-blur-md rounded-3xl p-8 border border-white/10 mb-8 shadow-[0_0_40px_rgba(16,185,129,0.1)] relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px] group-hover:bg-emerald-500/30 transition-all duration-700 pointer-events-none"></div>
+          <div className="flex items-start gap-6 relative z-10">
+            <div className="p-4 bg-emerald-500/20 rounded-2xl border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+              <Timer className="text-emerald-400 w-10 h-10" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white mb-2">
@@ -487,7 +493,7 @@ const VirtualLabHome = () => {
         </div>
 
         {/* Filter & Search Section */}
-        <div className="bg-gray-800/50 rounded-2xl p-4 mb-8 border border-gray-700">
+        <div className="bg-black/40 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
           {/* Search Bar */}
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
             {/* Search Input */}
@@ -681,12 +687,13 @@ const VirtualLabHome = () => {
         )}
 
         {/* Coming Soon */}
-        <div className="mt-12 text-center py-8 border-t border-gray-700">
-          <p className="text-gray-400">
-            🔬 Thêm nhiều thí nghiệm đang được phát triển...
+        <div className="mt-12 text-center py-8 border-t border-white/10 bg-black/20 backdrop-blur-sm rounded-2xl">
+          <p className="text-emerald-300/80 font-medium tracking-wide">
+            🔬 Các thí nghiệm mới đang được thiết kế dành riêng cho bạn...
           </p>
         </div>
       </div>
+      </div> {/* End wrapper z-10 */}
     </div>
   );
 };

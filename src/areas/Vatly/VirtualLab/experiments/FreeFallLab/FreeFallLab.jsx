@@ -1,54 +1,59 @@
 /**
- * FreeFallLab.jsx - Thí nghiệm Đo gia tốc rơi tự do
+ * FreeFallLab.jsx - Thí nghiệm Đo gia tốc rơi tự do (ENHANCED 3D)
  * 
- * Mục tiêu:
- * - Thả vật rơi tự do từ độ cao h
- * - Đo thời gian rơi t
- * - Xác định gia tốc trọng trường g = 2h/t²
+ * Nâng cấp:
+ * - Canvas 3D perspective rendering (bầu trời, tháp 3D, mặt đất 3D)
+ * - Particle effects khi chạm đất
+ * - Motion blur trail cho quả bóng
+ * - Dynamic shadows & lighting
+ * - Web Audio API sound effects
+ * - Ambient atmosphere
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
-  Play, 
   RotateCcw, 
   Save,
-  Download,
   HelpCircle,
   ChevronRight,
   ChevronLeft,
-  Settings,
   BookOpen,
-  Target
+  Target,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { FreeFall, PHYSICS_CONSTANTS, PhysicsUtils } from '../../core/PhysicsEngine';
 import { ExperimentDataCollector } from '../../core/DataCollector';
+import labSoundEngine from '../../core/LabSoundEngine';
 import DataTable from '../../charts/DataTable';
 import RealTimeChart from '../../charts/RealTimeChart';
+import FreeFallPhaser from './FreeFallPhaser';
 import './FreeFallLab.css';
 
 const FreeFallLabExperiment = () => {
   const navigate = useNavigate();
-  const canvasRef = useRef(null);
-  const animationRef = useRef(null);
+  const phaserRef = useRef(null);
   const dataCollectorRef = useRef(null);
+  const whooshRef = useRef(null);
 
   // Trạng thái thí nghiệm
-  const [experimentState, setExperimentState] = useState('setup'); // setup, dropping, landed
+  const [experimentState, setExperimentState] = useState('setup');
   const [showGuide, setShowGuide] = useState(true);
   const [guideStep, setGuideStep] = useState(0);
   const [showTheory, setShowTheory] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Tham số thí nghiệm
-  const [dropHeight, setDropHeight] = useState(1.5); // Độ cao thả (m)
-  const [ballMass, setBallMass] = useState(0.1); // Khối lượng (kg)
-  const [airResistance, setAirResistance] = useState(false); // Có cản không khí
+  const [dropHeight, setDropHeight] = useState(1.5);
+  const [ballMass, setBallMass] = useState(0.1);
+  const [airResistance, setAirResistance] = useState(false);
 
   // Trạng thái mô phỏng
-  const [ballY, setBallY] = useState(0); // Vị trí hiện tại
-  const [velocity, setVelocity] = useState(0); // Vận tốc
-  const [dropTime, setDropTime] = useState(0); // Thời gian rơi
+  const [ballY, setBallY] = useState(0);
+  const [velocity, setVelocity] = useState(0);
+  const [dropTime, setDropTime] = useState(0);
   const [isDropping, setIsDropping] = useState(false);
   const [hasLanded, setHasLanded] = useState(false);
 
@@ -65,6 +70,9 @@ const FreeFallLabExperiment = () => {
       { name: 'time', label: 'Thời gian t (s)', type: 'number', unit: 's' },
       { name: 'g', label: 'Gia tốc g (m/s²)', type: 'number', unit: 'm/s²' }
     ]);
+    return () => {
+      labSoundEngine.stopAll();
+    };
   }, []);
 
   // Hướng dẫn thí nghiệm
@@ -95,259 +103,56 @@ const FreeFallLabExperiment = () => {
   const theoreticalTime = FreeFall.calculateTime(dropHeight);
   const theoreticalVelocity = FreeFall.calculateFinalVelocity(dropHeight);
 
-  // Vẽ canvas
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
-
-    // Clear
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, width, height);
-
-    // Scale: 150px = 1m
-    const scale = 150;
-    const groundY = height - 60;
-    const maxVisibleHeight = (groundY - 100) / scale;
-
-    // Grid
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-    ctx.lineWidth = 1;
-    for (let y = groundY; y > 50; y -= scale * 0.5) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    // Tháp thả
-    const towerX = width / 2;
-    const towerWidth = 60;
-    const towerHeight = Math.min(dropHeight * scale + 50, groundY - 80);
-
-    // Vẽ tháp
-    ctx.fillStyle = '#374151';
-    ctx.fillRect(towerX - towerWidth / 2, groundY - towerHeight, towerWidth, towerHeight);
-
-    // Các tầng tháp
-    ctx.strokeStyle = '#4b5563';
-    ctx.lineWidth = 2;
-    for (let y = groundY; y > groundY - towerHeight; y -= 30) {
-      ctx.beginPath();
-      ctx.moveTo(towerX - towerWidth / 2, y);
-      ctx.lineTo(towerX + towerWidth / 2, y);
-      ctx.stroke();
-    }
-
-    // Platform thả
-    const platformY = groundY - dropHeight * scale;
-    ctx.fillStyle = '#ef4444';
-    ctx.fillRect(towerX - 40, platformY - 5, 80, 10);
-
-    // Thước đo bên trái
-    const rulerX = towerX - towerWidth / 2 - 40;
+  // Callback from Phaser when updating
+  const handlePhaserUpdate = (time, v, hFallen) => {
+    setDropTime(time);
+    setVelocity(v);
+    setBallY(hFallen);
+    setChartData(prev => [...prev, { time, height: Math.max(0, dropHeight - hFallen) }]);
     
-    // Đường thước
-    ctx.strokeStyle = '#fbbf24';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(rulerX, groundY);
-    ctx.lineTo(rulerX, platformY);
-    ctx.stroke();
-
-    // Mũi tên
-    ctx.beginPath();
-    ctx.moveTo(rulerX - 8, platformY + 15);
-    ctx.lineTo(rulerX, platformY);
-    ctx.lineTo(rulerX + 8, platformY + 15);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(rulerX - 8, groundY - 15);
-    ctx.lineTo(rulerX, groundY);
-    ctx.lineTo(rulerX + 8, groundY - 15);
-    ctx.stroke();
-
-    // Nhãn độ cao
-    ctx.fillStyle = '#fbbf24';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.save();
-    ctx.translate(rulerX - 20, (groundY + platformY) / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText(`h = ${dropHeight.toFixed(2)} m`, 0, 0);
-    ctx.restore();
-
-    // Mặt đất
-    ctx.fillStyle = '#15803d';
-    ctx.fillRect(0, groundY, width, height - groundY);
-
-    // Vẽ cỏ
-    ctx.strokeStyle = '#22c55e';
-    ctx.lineWidth = 1;
-    for (let x = 10; x < width; x += 15) {
-      const grassHeight = 5 + Math.random() * 10;
-      ctx.beginPath();
-      ctx.moveTo(x, groundY);
-      ctx.lineTo(x + 3, groundY - grassHeight);
-      ctx.stroke();
+    // Update whoosh
+    if (whooshRef.current) {
+      whooshRef.current.update(Math.min(1, v / 8));
     }
+  };
 
-    // Cảm biến mặt đất
-    ctx.fillStyle = '#3b82f6';
-    ctx.fillRect(towerX - 50, groundY - 5, 100, 8);
-    ctx.fillStyle = '#60a5fa';
-    ctx.font = '10px sans-serif';
-    ctx.fillText('SENSOR', towerX, groundY + 15);
-
-    // Vẽ quả bóng
-    const currentBallY = experimentState === 'setup' 
-      ? platformY - 20 
-      : groundY - ballY * scale - 15;
-
-    const ballRadius = 12 + ballMass * 20;
-
-    // Shadow
-    if (currentBallY < groundY - 20) {
-      const shadowSize = Math.max(5, ballRadius * (1 - (groundY - currentBallY) / 300));
-      ctx.beginPath();
-      ctx.ellipse(towerX, groundY - 2, shadowSize, shadowSize * 0.3, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-      ctx.fill();
+  // Callback from Phaser when landing
+  const handlePhaserLand = (finalTime) => {
+    setExperimentState('landed');
+    setHasLanded(true);
+    // Impact sound
+    labSoundEngine.playImpact(0.8 + ballMass * 2);
+    // Stop whoosh
+    if (whooshRef.current) {
+      whooshRef.current.stop();
+      whooshRef.current = null;
     }
-
-    // Ball
-    const gradient = ctx.createRadialGradient(
-      towerX - ballRadius * 0.3,
-      currentBallY - ballRadius * 0.3,
-      0,
-      towerX,
-      currentBallY,
-      ballRadius
-    );
-    gradient.addColorStop(0, '#f87171');
-    gradient.addColorStop(0.7, '#ef4444');
-    gradient.addColorStop(1, '#b91c1c');
-
-    ctx.beginPath();
-    ctx.arc(towerX, currentBallY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = gradient;
-    ctx.fill();
-
-    // Highlight
-    ctx.beginPath();
-    ctx.arc(towerX - ballRadius * 0.3, currentBallY - ballRadius * 0.3, ballRadius * 0.25, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.fill();
-
-    // Thông tin real-time
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.textAlign = 'left';
-    
-    if (experimentState === 'dropping' || experimentState === 'landed') {
-      ctx.fillText(`⏱️ Thời gian: ${dropTime.toFixed(3)} s`, 20, 30);
-      ctx.fillText(`📏 Độ cao còn lại: ${(dropHeight - (dropHeight - ballY)).toFixed(2)} m`, 20, 55);
-      ctx.fillText(`🚀 Vận tốc: ${velocity.toFixed(2)} m/s`, 20, 80);
-    }
-
-    // Giá trị lý thuyết
-    ctx.fillStyle = '#a855f7';
-    ctx.font = '14px sans-serif';
-    ctx.fillText(`t (lý thuyết) = ${theoreticalTime.toFixed(3)} s`, 20, height - 40);
-    ctx.fillText(`v (lý thuyết) = ${theoreticalVelocity.toFixed(2)} m/s`, 20, height - 20);
-
-    // Thông báo chạm đất
-    if (experimentState === 'landed') {
-      ctx.fillStyle = 'rgba(34, 197, 94, 0.9)';
-      ctx.font = 'bold 24px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('✓ CHẠM ĐẤT!', width / 2, 100);
-
-      const calculatedG = FreeFall.calculateG(dropHeight, dropTime);
-      ctx.font = '18px sans-serif';
-      ctx.fillText(`g = 2h/t² = ${calculatedG.toFixed(3)} m/s²`, width / 2, 130);
-    }
-
-  }, [ballY, dropHeight, ballMass, experimentState, dropTime, velocity, theoreticalTime, theoreticalVelocity]);
-
-  // Animation loop
-  useEffect(() => {
-    if (experimentState === 'dropping') {
-      const dt = 0.016; // ~60fps
-      const g = PHYSICS_CONSTANTS.g;
-      
-      const animate = () => {
-        setDropTime(prev => prev + dt);
-        
-        setVelocity(prev => {
-          const newVel = prev + g * dt;
-          // Cản không khí đơn giản
-          if (airResistance) {
-            const drag = 0.1 * newVel * newVel;
-            return newVel - drag * dt;
-          }
-          return newVel;
-        });
-
-        setBallY(prev => {
-          const newY = prev + velocity * dt + 0.5 * g * dt * dt;
-          
-          // Kiểm tra chạm đất
-          if (newY >= dropHeight) {
-            setExperimentState('landed');
-            setHasLanded(true);
-            return dropHeight;
-          }
-          
-          return newY;
-        });
-
-        // Cập nhật biểu đồ
-        setChartData(prev => [...prev, { time: dropTime + dt, height: dropHeight - ballY }]);
-
-        if (experimentState === 'dropping') {
-          animationRef.current = requestAnimationFrame(animate);
-        }
-      };
-
-      animationRef.current = requestAnimationFrame(animate);
-    }
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [experimentState, velocity, dropHeight, ballY, dropTime, airResistance]);
-
-  // Vẽ lại
-  useEffect(() => {
-    draw();
-  }, [draw]);
+  };
 
   // Thả vật
   const dropBall = () => {
+    labSoundEngine.init();
+    labSoundEngine.playDrop();
+    
     setBallY(0);
     setVelocity(0);
     setDropTime(0);
     setChartData([]);
     setHasLanded(false);
     setExperimentState('dropping');
+    
+    if (phaserRef.current) {
+      phaserRef.current.dropBall();
+    }
+    
+    whooshRef.current = labSoundEngine.startWhoosh(0.1);
   };
 
   // Reset
   const resetExperiment = () => {
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
+    if (whooshRef.current) {
+      whooshRef.current.stop();
+      whooshRef.current = null;
     }
     setBallY(0);
     setVelocity(0);
@@ -355,6 +160,10 @@ const FreeFallLabExperiment = () => {
     setChartData([]);
     setHasLanded(false);
     setExperimentState('setup');
+    
+    if (phaserRef.current) {
+      phaserRef.current.resetExperiment();
+    }
   };
 
   // Ghi số liệu
@@ -363,6 +172,8 @@ const FreeFallLabExperiment = () => {
       alert('Vật chưa chạm đất!');
       return;
     }
+
+    labSoundEngine.playSuccess();
 
     const calculatedG = FreeFall.calculateG(dropHeight, dropTime);
     const newTrial = trialCount + 1;
@@ -381,7 +192,6 @@ const FreeFallLabExperiment = () => {
     setCollectedData(prev => [...prev, record]);
     setTrialCount(newTrial);
     
-    // Auto reset for next trial
     resetExperiment();
   };
 
@@ -399,6 +209,13 @@ const FreeFallLabExperiment = () => {
     if (dataCollectorRef.current) {
       dataCollectorRef.current.downloadCSV();
     }
+  };
+
+  // Toggle sound
+  const toggleSound = () => {
+    labSoundEngine.init();
+    const enabled = labSoundEngine.toggle();
+    setSoundEnabled(enabled);
   };
 
   // Thống kê
@@ -422,26 +239,36 @@ const FreeFallLabExperiment = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+      <header className="freefall-header">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/vatly/virtual-lab')}
-              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-white/10 rounded-lg transition-all duration-200"
             >
               <ArrowLeft size={24} />
             </button>
             <div>
-              <h1 className="text-xl font-bold">🍎 Thí nghiệm: Đo gia tốc rơi tự do</h1>
+              <h1 className="text-xl font-bold flex items-center gap-2">
+                <span className="header-emoji">🍎</span>
+                Thí nghiệm: Đo gia tốc rơi tự do
+              </h1>
               <p className="text-gray-400 text-sm">Xác định gia tốc trọng trường g</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
+              onClick={toggleSound}
+              className="p-2 rounded-lg transition-all duration-200 bg-gray-700/50 hover:bg-gray-600/50"
+              title={soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
+            >
+              {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            </button>
+            <button
               onClick={() => setShowTheory(!showTheory)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                showTheory ? 'bg-purple-600' : 'bg-gray-700 hover:bg-gray-600'
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                showTheory ? 'bg-purple-600 shadow-lg shadow-purple-600/30' : 'bg-gray-700/50 hover:bg-gray-600/50'
               }`}
             >
               <BookOpen size={18} />
@@ -449,7 +276,7 @@ const FreeFallLabExperiment = () => {
             </button>
             <button
               onClick={() => setShowGuide(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-700/50 hover:bg-gray-600/50 rounded-lg transition-all duration-200"
             >
               <HelpCircle size={18} />
             </button>
@@ -460,12 +287,16 @@ const FreeFallLabExperiment = () => {
       <div className="flex flex-col lg:flex-row max-w-7xl mx-auto p-4 gap-4">
         {/* Main Canvas */}
         <div className="flex-1">
-          <div className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-            <div className="relative">
-              <canvas
-                ref={canvasRef}
-                className="w-full"
-                style={{ height: '450px' }}
+          <div className="canvas-container">
+            <div className="relative" style={{ height: '450px' }}>
+              <FreeFallPhaser 
+                ref={phaserRef}
+                dropHeight={dropHeight}
+                ballMass={ballMass}
+                airResistance={airResistance}
+                experimentState={experimentState}
+                onUpdate={handlePhaserUpdate}
+                onLand={handlePhaserLand}
               />
 
               {/* Controls overlay */}
@@ -474,7 +305,7 @@ const FreeFallLabExperiment = () => {
                   {experimentState === 'setup' && (
                     <button
                       onClick={dropBall}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 rounded-lg font-medium transition-colors shadow-lg"
+                      className="drop-button"
                     >
                       <Target size={18} />
                       Thả vật
@@ -485,14 +316,14 @@ const FreeFallLabExperiment = () => {
                     <>
                       <button
                         onClick={recordData}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition-colors"
+                        className="record-button"
                       >
                         <Save size={18} />
                         Ghi số liệu
                       </button>
                       <button
                         onClick={resetExperiment}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg font-medium transition-colors"
+                        className="reset-button"
                       >
                         <RotateCcw size={18} />
                         Thử lại
@@ -503,8 +334,8 @@ const FreeFallLabExperiment = () => {
 
                 {/* Timer display */}
                 {experimentState !== 'setup' && (
-                  <div className="bg-black/80 backdrop-blur-sm rounded-lg px-4 py-2">
-                    <div className="text-3xl font-mono text-green-400 font-bold">
+                  <div className="timer-display">
+                    <div className={`timer-value ${experimentState === 'dropping' ? 'timer-active' : ''}`}>
                       {dropTime.toFixed(3)} s
                     </div>
                   </div>
@@ -513,7 +344,7 @@ const FreeFallLabExperiment = () => {
             </div>
 
             {/* Parameters */}
-            <div className="p-4 border-t border-gray-700 bg-gray-800/50">
+            <div className="p-4 border-t border-gray-700/50 bg-gray-800/30 backdrop-blur-sm">
               <h3 className="text-sm font-medium text-gray-400 mb-3">Thông số thí nghiệm</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -530,7 +361,7 @@ const FreeFallLabExperiment = () => {
                     disabled={experimentState !== 'setup'}
                     className="w-full accent-yellow-500"
                   />
-                  <div className="text-center text-lg font-mono text-yellow-400">
+                  <div className="text-center text-lg font-mono text-yellow-400 param-value">
                     {dropHeight.toFixed(1)} m
                   </div>
                 </div>
@@ -549,7 +380,7 @@ const FreeFallLabExperiment = () => {
                     disabled={experimentState !== 'setup'}
                     className="w-full accent-red-500"
                   />
-                  <div className="text-center text-lg font-mono text-red-400">
+                  <div className="text-center text-lg font-mono text-red-400 param-value">
                     {(ballMass * 1000).toFixed(0)} g
                   </div>
                 </div>
@@ -582,7 +413,7 @@ const FreeFallLabExperiment = () => {
         <div className="lg:w-96 space-y-4">
           {/* Statistics */}
           {stats && (
-            <div className="bg-gradient-to-br from-blue-900/50 to-indigo-900/50 rounded-xl p-4 border border-blue-700/50">
+            <div className="stats-card">
               <h3 className="text-lg font-bold text-white mb-3">📊 Kết quả phân tích</h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
@@ -624,9 +455,9 @@ const FreeFallLabExperiment = () => {
           />
 
           {/* Formula card */}
-          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+          <div className="formula-card">
             <h3 className="text-sm font-medium text-gray-400 mb-2">📐 Công thức</h3>
-            <div className="bg-gray-900 rounded-lg p-3 text-center">
+            <div className="formula-display">
               <p className="text-xl font-mono text-green-400">g = 2h / t²</p>
             </div>
             <p className="text-xs text-gray-500 mt-2">
@@ -638,10 +469,10 @@ const FreeFallLabExperiment = () => {
 
       {/* Guide Modal */}
       {showGuide && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-2xl max-w-lg w-full p-6 border border-gray-700">
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="text-center mb-6">
-              <div className="text-4xl mb-3">🍎</div>
+              <div className="text-5xl mb-3 modal-emoji">🍎</div>
               <h2 className="text-xl font-bold">{guideSteps[guideStep].title}</h2>
             </div>
 
@@ -653,8 +484,8 @@ const FreeFallLabExperiment = () => {
               {guideSteps.map((_, i) => (
                 <div
                   key={i}
-                  className={`w-2 h-2 rounded-full ${
-                    i === guideStep ? 'bg-blue-500' : 'bg-gray-600'
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                    i === guideStep ? 'bg-blue-500 scale-125' : 'bg-gray-600'
                   }`}
                 />
               ))}
@@ -664,7 +495,7 @@ const FreeFallLabExperiment = () => {
               <button
                 onClick={() => setGuideStep(Math.max(0, guideStep - 1))}
                 disabled={guideStep === 0}
-                className="flex items-center gap-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded-lg"
+                className="flex items-center gap-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded-lg transition-all"
               >
                 <ChevronLeft size={18} /> Trước
               </button>
@@ -672,14 +503,14 @@ const FreeFallLabExperiment = () => {
               {guideStep === guideSteps.length - 1 ? (
                 <button
                   onClick={() => setShowGuide(false)}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg"
+                  className="px-5 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition-all shadow-lg shadow-green-600/30"
                 >
                   Bắt đầu
                 </button>
               ) : (
                 <button
                   onClick={() => setGuideStep(guideStep + 1)}
-                  className="flex items-center gap-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg"
+                  className="flex items-center gap-1 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-all"
                 >
                   Tiếp <ChevronRight size={18} />
                 </button>
@@ -691,11 +522,11 @@ const FreeFallLabExperiment = () => {
 
       {/* Theory Modal */}
       {showTheory && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 border border-gray-700">
+        <div className="modal-overlay">
+          <div className="modal-content max-w-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold">📚 Lý thuyết rơi tự do</h2>
-              <button onClick={() => setShowTheory(false)} className="p-2 hover:bg-gray-700 rounded-lg">✕</button>
+              <button onClick={() => setShowTheory(false)} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">✕</button>
             </div>
 
             <div className="space-y-4 text-gray-300">
@@ -706,7 +537,7 @@ const FreeFallLabExperiment = () => {
 
               <div>
                 <h3 className="text-lg font-semibold text-white mb-2">2. Các công thức</h3>
-                <div className="bg-gray-900 p-4 rounded-lg space-y-2">
+                <div className="bg-gray-900/80 p-4 rounded-lg space-y-2 border border-gray-700/50">
                   <p className="font-mono text-blue-400">Thời gian: t = √(2h/g)</p>
                   <p className="font-mono text-green-400">Vận tốc: v = gt = √(2gh)</p>
                   <p className="font-mono text-yellow-400">Quãng đường: h = ½gt²</p>

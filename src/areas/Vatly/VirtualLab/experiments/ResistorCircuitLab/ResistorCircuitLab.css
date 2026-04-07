@@ -1,147 +1,202 @@
-/* ResistorCircuitLab.css */
+/**
+ * ResistorCircuitLab.css - Enhanced 3D Styling
+ */
 
-.resistor-circuit-lab {
-  --circuit-on-color: #fbbf24;
-  --circuit-off-color: #6b7280;
+.resistor-header {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border-bottom: 1px solid rgba(100, 140, 200, 0.15);
+  padding: 12px 16px;
+  backdrop-filter: blur(12px);
+  position: relative;
 }
 
-/* Circuit toggle animation */
-@keyframes electric-pulse {
-  0%, 100% {
-    filter: drop-shadow(0 0 3px var(--circuit-on-color));
-  }
-  50% {
-    filter: drop-shadow(0 0 10px var(--circuit-on-color));
-  }
+.resistor-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.4), rgba(59, 130, 246, 0.3), transparent);
 }
 
-.circuit-on {
-  animation: electric-pulse 1s ease-in-out infinite;
+.header-emoji {
+  display: inline-block;
+  animation: emoji-pulse 2s ease-in-out infinite;
 }
 
-/* Slider styling */
+@keyframes emoji-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.resistor-canvas-container {
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(100, 140, 200, 0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 40px rgba(15, 23, 42, 0.5);
+}
+
+.badge-3d {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: #94a3b8;
+  border: 1px solid rgba(100, 140, 200, 0.15);
+}
+
+.resistor-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.resistor-toggle-off {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.resistor-toggle-on {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.resistor-toggle-btn:hover { transform: translateY(-2px) scale(1.02); }
+
+.resistor-record-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.resistor-record-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4); }
+
+.resistor-reset-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #4b5563, #374151);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.resistor-reset-btn:hover { background: linear-gradient(135deg, #6b7280, #4b5563); transform: translateY(-1px); }
+
+.resistor-results-card {
+  background: linear-gradient(135deg, rgba(120, 79, 15, 0.35), rgba(146, 64, 14, 0.25));
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+.result-value-box {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid rgba(100, 140, 200, 0.08);
+}
+
+.resistor-formula-card {
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(100, 140, 200, 0.12);
+}
+
+.resistor-formula-display {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid rgba(34, 197, 94, 0.15);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.resistor-formula-display p { text-shadow: 0 0 10px currentColor; }
+.param-value { text-shadow: 0 0 8px currentColor; }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+  animation: modal-fade-in 0.3s ease;
+}
+
+@keyframes modal-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-content {
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  padding: 28px;
+  border: 1px solid rgba(100, 140, 200, 0.15);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  animation: modal-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modal-slide-up {
+  from { transform: translateY(20px) scale(0.97); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-emoji { display: inline-block; animation: emoji-pulse 2s ease-in-out infinite; }
+
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
+  width: 100%;
   height: 6px;
   border-radius: 3px;
-  background: #374151;
+  background: linear-gradient(90deg, #1e293b, #334155);
+  outline: none;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
+  background: currentColor;
   cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-}
-
-input[type="range"]:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-input[type="range"]:disabled::-webkit-slider-thumb {
-  cursor: not-allowed;
-}
-
-/* Current flow animation */
-@keyframes current-flow-h {
-  0% { background-position: 0% 0; }
-  100% { background-position: 100% 0; }
-}
-
-@keyframes current-flow-v {
-  0% { background-position: 0 0%; }
-  100% { background-position: 0 100%; }
-}
-
-.current-flow-h {
-  background: repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 5px,
-    #fbbf24 5px,
-    #fbbf24 10px
-  );
-  animation: current-flow-h 0.5s linear infinite;
-}
-
-.current-flow-v {
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 5px,
-    #fbbf24 5px,
-    #fbbf24 10px
-  );
-  animation: current-flow-v 0.5s linear infinite;
-}
-
-/* Button hover effects */
-.circuit-btn {
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 12px currentColor;
   transition: all 0.2s ease;
 }
 
-.circuit-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.circuit-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-/* Meter pulse */
-@keyframes meter-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.meter-reading {
-  animation: meter-pulse 2s ease-in-out infinite;
-}
-
-/* Toggle switch animation */
-.toggle-switch {
-  transition: all 0.3s ease;
-}
-
-.toggle-switch.on {
-  background-color: #22c55e;
-}
-
-.toggle-switch.off {
-  background-color: #6b7280;
-}
-
-/* Resistor highlight */
-@keyframes resistor-glow {
-  0%, 100% { filter: drop-shadow(0 0 2px #22c55e); }
-  50% { filter: drop-shadow(0 0 8px #22c55e); }
-}
-
-.resistor-active {
-  animation: resistor-glow 1.5s ease-in-out infinite;
-}
-
-/* Formula highlight */
-.formula-box {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-/* Data table enhancements */
-.data-row-series {
-  background-color: rgba(59, 130, 246, 0.1);
-}
-
-.data-row-parallel {
-  background-color: rgba(34, 197, 94, 0.1);
-}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+input[type="range"]:disabled { opacity: 0.4; cursor: not-allowed; }
