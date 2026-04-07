@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { GameProgressProvider } from './contexts/GameProgressContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -17,11 +17,11 @@ import InteractiveLectureHub from './pages/InteractiveLectureHub';
 import LectureGradeSelector from './pages/LectureGradeSelector';
 import LectureViewer from './components/LectureViewer';
 import LectureClassSelector from './components/LectureClassSelector';
-import ProgramSelection from './pages/ProgramSelection';
 import Profile from './pages/Profile';
 import PlacementTest from './pages/PlacementTest';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import MainLayout from './components/layout/MainLayout';
 
 // Hóa học area
 import ChemistryHome from './areas/Hoahoc/pages/ChemistryHome';
@@ -44,7 +44,6 @@ import TinhOxiHoa from './areas/Hoahoc/challenges/TinhOxiHoa';
 
 // Physics area
 import PhysicsHome from './areas/Vatly/pages/PhysicsHome';
-import PhysicsDashboard from './areas/Vatly/pages/PhysicsDashboard';
 import PhysicsClassDashboard from './areas/Vatly/pages/PhysicsClassDashboard';
 import PhysicsLesson from './areas/Vatly/pages/PhysicsLesson';
 import AdvancedPhysicsChallenge from './areas/Vatly/gamelist/AdvancedPhysicsChallenge';
@@ -238,8 +237,17 @@ const AppContent = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<ProgramSelection />} />
-        <Route path="/home" element={<Home />} />
+        
+        {/* Core Pages with Global Layout */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<PhysicsHome />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/placement-test/:programId?" element={<PlacementTest />} />
+          <Route path="/program/physics" element={<PhysicsHome />} />
+          <Route path="/program/physics/dashboard" element={<Navigate to="/program/physics" replace />} />
+        </Route>
+
         <Route path="/game-journey" element={<GameJourney />} />
         <Route path="/program/chemistry" element={<ChemistryHome />} />
         <Route path="/advanced-challenge" element={<AdvancedChallenge />} />
@@ -271,16 +279,7 @@ const AppContent = () => {
          path="/gameplay/:classId/:chapterId/:lessonId/:level?" 
          element={<GamePlay />}
        />
-        <Route 
-          path="/profile" 
-          element={
-              <Profile />
-          } 
-        />
-        <Route 
-          path="/placement-test/:programId?" 
-          element={<PlacementTest />}
-        />
+
 
         {/* PK Battle Routes */}
         <Route path="/pk-battle" element={<PKLobby />} />
@@ -289,8 +288,6 @@ const AppContent = () => {
         <Route path="/pk-battle/result" element={<PKResult />} />
 
         {/* Physics Routes */}
-        <Route path="/program/physics" element={<PhysicsHome />} />
-        <Route path="/program/physics/dashboard" element={<PhysicsDashboard />} />
         <Route path="/physics-class/:classId" element={<PhysicsClassDashboard />} />
         <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<PhysicsLesson />} />
         
