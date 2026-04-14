@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 import { API_BASE_URL } from '../config/api';
-import { GraduationCap, BookOpen, Atom, Mail, Lock, CheckCircle2, ChevronLeft, Rocket, User } from 'lucide-react';
+import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, User, Navigation } from 'lucide-react';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ const Register = () => {
           email: user.email,
           displayName: user.displayName,
           avatar: user.photoURL,
-          selectedProgram: 'chemistry',
+          selectedProgram: 'physics',
           role: selectedRole,
           isRegistration: true
         })
@@ -118,52 +118,54 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex font-sans bg-slate-950 items-center justify-center p-4 sm:p-0">
+    <div className="min-h-screen flex font-sans bg-[#FDFCF8] items-center justify-center p-4 sm:p-8 relative overflow-hidden">
       
-      {/* Container simulating a split screen */}
-      <div className="w-full max-w-6xl sm:rounded-3xl sm:border border-slate-800/60 overflow-hidden flex flex-col md:flex-row shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      {/* Background Decor */}
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#B87333]/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#0E7490]/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute inset-0 graph-grid pointer-events-none z-0 opacity-40"></div>
+
+      {/* Container */}
+      <div className="w-full max-w-6xl rounded-[2rem] bg-white border border-[#E5E7EB] overflow-hidden flex flex-col md:flex-row shadow-[0_20px_50px_-15px_rgba(184,115,51,0.12)] relative z-10 transition-all duration-500">
         
         {/* LEFT SIDE: Visuals & Value Proposition */}
-        <div className="hidden md:flex flex-col md:w-5/12 lg:w-1/2 relative bg-slate-900 border-r border-slate-800/80 overflow-hidden pt-12 p-10 lg:p-14">
+        <div className="hidden md:flex flex-col md:w-5/12 lg:w-1/2 relative bg-[#F8F4EF] border-r border-[#E5E7EB] overflow-hidden p-10 lg:p-14">
           
-          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/20 blur-[100px] rounded-full mix-blend-screen animate-pulse pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-600/20 blur-[100px] rounded-full mix-blend-screen pointer-events-none"></div>
-          
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-slate-900/50 to-slate-900 pointer-events-none z-0"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent to-[#B87333]/5 pointer-events-none"></div>
 
           <Link to="/" className="relative z-10 flex items-center gap-2 mb-10 group w-fit">
-            <ChevronLeft className="w-5 h-5 text-slate-400 group-hover:text-purple-400 transition-colors -ml-1" />
-            <span className="text-slate-400 font-medium group-hover:text-purple-400 transition-colors">Quay lại trang chủ</span>
+            <ChevronLeft className="w-5 h-5 text-slate-400 group-hover:text-[#B87333] transition-colors -ml-1" />
+            <span className="text-slate-500 font-semibold group-hover:text-[#B87333] transition-colors">Trở về</span>
           </Link>
 
           <div className="relative z-10 flex flex-col h-full justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_25px_rgba(168,85,247,0.4)]">
-              <Rocket className="w-10 h-10 text-white animate-bounce-slow" />
+            <div className="w-16 h-16 bg-gradient-to-br from-[#B87333] to-[#8C5523] rounded-2xl flex items-center justify-center mb-6 shadow-[0_8px_20px_rgba(184,115,51,0.3)]">
+              <Navigation className="w-8 h-8 text-white animate-pulse-soft" />
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-black text-white mb-4 leading-tight tracking-tight">
-              Gia nhập trạm <br/>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-500">
-                PhysiGame Space
+            <h1 className="text-4xl lg:text-5xl font-black text-[#1E293B] mb-4 leading-tight tracking-tight">
+              Bắt Đầu <br/>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#B87333] via-[#8C5523] to-[#4A3728]">
+                Hành Trình Học Thuật
               </span>
             </h1>
-            <p className="text-slate-300 text-lg mb-8 max-w-sm leading-relaxed">
-              Tạo tài khoản và bắt đầu hành trình trở thành những nhà vật lý hàng đầu vũ trụ ngay hôm nay.
+            <p className="text-slate-500 text-lg mb-8 max-w-sm leading-relaxed">
+              Tạo tài khoản và tham gia cùng hàng ngàn học viên, giáo viên trong nền tảng học tập tiên tiến nhất.
             </p>
 
             <ul className="space-y-4">
               {[
-                { title: 'Tùy chỉnh vai trò', desc: 'Chọn giao diện học sinh hay giáo viên.' },
-                { title: 'Theo dõi tiến độ', desc: 'Báo cáo cực kỳ chi tiết chuẩn tương lai.' },
-                { title: 'Dữ liệu được mã hóa', desc: 'Mọi thông tin được bảo mật cực điểm.' }
+                { title: 'Hệ thống báo cáo chuẩn xác', desc: 'Đánh giá năng lực liên tục, chi tiết.' },
+                { title: 'Kho học liệu khổng lồ', desc: 'Thư viện bài giảng, bài tập phong phú.' },
+                { title: 'Cộng đồng ưu tú', desc: 'Kết nối và trao đổi cùng chuyên gia.' }
               ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-3 p-3 rounded-2xl hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-700/50">
-                  <div className="mt-1 bg-purple-500/20 p-1 rounded-full border border-purple-500/30 shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                <li key={idx} className="flex items-start gap-4 p-3 rounded-2xl hover:bg-white/60 transition-colors border border-transparent hover:border-[#E5E7EB]">
+                  <div className="mt-1 bg-[#B87333]/10 p-1.5 rounded-full border border-[#B87333]/20 shrink-0">
+                    <CheckCircle2 className="w-4 h-4 text-[#B87333]" />
                   </div>
                   <div>
-                    <h3 className="text-white font-bold text-sm">{item.title}</h3>
-                    <p className="text-slate-400 text-xs mt-0.5">{item.desc}</p>
+                    <h3 className="text-[#1E293B] font-bold text-sm lg:text-base">{item.title}</h3>
+                    <p className="text-slate-500 text-sm mt-0.5">{item.desc}</p>
                   </div>
                 </li>
               ))}
@@ -172,60 +174,58 @@ const Register = () => {
         </div>
 
         {/* RIGHT SIDE: Auth Form */}
-        <div className="w-full md:w-7/12 lg:w-1/2 bg-[#020617] flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
+        <div className="w-full md:w-7/12 lg:w-1/2 bg-white flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
           
-          <div className="absolute top-1/4 right-0 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full pointer-events-none"></div>
-
-          <div className="w-full max-w-md relative z-10 bg-slate-900/40 p-8 sm:p-8 rounded-3xl border border-slate-800 backdrop-blur-xl shadow-2xl">
+          <div className="w-full max-w-md relative z-10">
             
             <div className="text-center mb-6">
-              <Link to="/" className="md:hidden flex items-center gap-1 text-slate-400 mb-4 justify-center text-sm">
-                <ChevronLeft className="w-4 h-4" /> Quay lại
+              <Link to="/" className="md:hidden flex items-center gap-1 text-slate-400 mb-4 justify-center text-sm font-medium">
+                <ChevronLeft className="w-4 h-4" /> Trở về
               </Link>
-              <h2 className="text-3xl font-extrabold text-white mb-2">Đăng ký</h2>
-              <p className="text-slate-400 text-sm">Thiết lập tài khoản của bạn</p>
+              <h2 className="text-3xl font-extrabold text-[#1E293B] mb-2">Đăng ký</h2>
+              <p className="text-slate-500 text-sm">Thiết lập hồ sơ học thuật của bạn</p>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm font-medium flex items-center gap-2">
+              <div className="mb-4 p-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-sm font-medium flex items-center gap-2 shadow-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
                 {error}
               </div>
             )}
 
             {/* Role Selection */}
-            <div className="mb-5 flex p-1 bg-slate-950/50 border border-slate-800 rounded-2xl">
+            <div className="mb-5 flex p-1 bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl">
               <button
                 type="button"
                 onClick={() => setSelectedRole('student')}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
                   selectedRole === 'student'
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    ? 'bg-white text-[#B87333] shadow-md border border-[#E5E7EB]/50'
+                    : 'text-slate-500 hover:text-[#1E293B] hover:bg-white/50'
                 }`}
               >
-                <BookOpen className="w-4 h-4" /> Học sinh
+                <BookOpen className="w-4 h-4" /> Học viên
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedRole('teacher')}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
                   selectedRole === 'teacher'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    ? 'bg-white text-[#0E7490] shadow-md border border-[#E5E7EB]/50'
+                    : 'text-slate-500 hover:text-[#1E293B] hover:bg-white/50'
                 }`}
               >
-                <GraduationCap className="w-4 h-4" /> Giáo viên
+                <GraduationCap className="w-4 h-4" /> Giảng viên
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-300 pl-1">Họ và tên</label>
+                <label className="text-xs font-bold text-[#1E293B] pl-1">Họ và tên</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-4 w-4 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                    <User className="h-4 w-4 text-slate-400 group-focus-within:text-[#B87333] transition-colors" />
                   </div>
                   <input
                     type="text"
@@ -233,17 +233,17 @@ const Register = () => {
                     value={formData.username}
                     onChange={handleChange}
                     required
-                    className="w-full bg-slate-950/50 border border-slate-800 text-white placeholder-slate-500 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all font-medium text-sm"
+                    className="w-full bg-[#FDFCF8] border-2 border-[#E5E7EB] text-[#1E293B] placeholder-slate-400 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#B87333] focus:ring-4 focus:ring-[#B87333]/10 transition-all font-medium text-sm"
                     placeholder="Nhập họ và tên"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-300 pl-1">Email</label>
+                <label className="text-xs font-bold text-[#1E293B] pl-1">Email</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                    <Mail className="h-4 w-4 text-slate-400 group-focus-within:text-[#B87333] transition-colors" />
                   </div>
                   <input
                     type="email"
@@ -251,7 +251,7 @@ const Register = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full bg-slate-950/50 border border-slate-800 text-white placeholder-slate-500 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all font-medium text-sm"
+                    className="w-full bg-[#FDFCF8] border-2 border-[#E5E7EB] text-[#1E293B] placeholder-slate-400 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#B87333] focus:ring-4 focus:ring-[#B87333]/10 transition-all font-medium text-sm"
                     placeholder="Nhập địa chỉ email"
                   />
                 </div>
@@ -259,10 +259,10 @@ const Register = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-300 pl-1">Mật khẩu</label>
+                  <label className="text-xs font-bold text-[#1E293B] pl-1">Mật khẩu</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                      <Lock className="h-4 w-4 text-slate-400 group-focus-within:text-[#B87333] transition-colors" />
                     </div>
                     <input
                       type="password"
@@ -270,17 +270,17 @@ const Register = () => {
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      className="w-full bg-slate-950/50 border border-slate-800 text-white placeholder-slate-500 rounded-xl py-3 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all font-medium text-sm"
+                      className="w-full bg-[#FDFCF8] border-2 border-[#E5E7EB] text-[#1E293B] placeholder-slate-400 rounded-xl py-3 pl-9 pr-3 focus:outline-none focus:border-[#B87333] focus:ring-4 focus:ring-[#B87333]/10 transition-all font-medium text-sm"
                       placeholder="Ít nhất 6 ký tự"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-300 pl-1">Xác nhận</label>
+                  <label className="text-xs font-bold text-[#1E293B] pl-1">Xác nhận</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                      <Lock className="h-4 w-4 text-slate-400 group-focus-within:text-[#B87333] transition-colors" />
                     </div>
                     <input
                       type="password"
@@ -288,7 +288,7 @@ const Register = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       required
-                      className="w-full bg-slate-950/50 border border-slate-800 text-white placeholder-slate-500 rounded-xl py-3 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all font-medium text-sm"
+                      className="w-full bg-[#FDFCF8] border-2 border-[#E5E7EB] text-[#1E293B] placeholder-slate-400 rounded-xl py-3 pl-9 pr-3 focus:outline-none focus:border-[#B87333] focus:ring-4 focus:ring-[#B87333]/10 transition-all font-medium text-sm"
                       placeholder="Nhập lại"
                     />
                   </div>
@@ -298,9 +298,8 @@ const Register = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full relative group overflow-hidden bg-white text-slate-900 rounded-xl py-3.5 font-black text-base transition-transform active:scale-[0.98] mt-2 border border-transparent hover:border-purple-300 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                className="w-full relative group overflow-hidden bg-gradient-to-r from-[#B87333] to-[#8C5523] text-white rounded-xl py-3.5 font-black text-base transition-all hover:shadow-[0_8px_25px_rgba(184,115,51,0.3)] active:scale-[0.98] mt-2"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative flex justify-center items-center gap-2 group-hover:text-white transition-colors duration-300">
                   {loading ? 'Đang khởi tạo...' : 'Tạo tài khoản'}
                 </span>
@@ -309,24 +308,24 @@ const Register = () => {
 
             <div className="mt-6 relative flex items-center justify-center">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-800"></div>
+                <div className="w-full border-t border-[#E5E7EB]"></div>
               </div>
-              <span className="relative px-4 text-xs font-semibold text-slate-500 uppercase bg-slate-900/40">Hoặc</span>
+              <span className="relative px-4 text-xs font-bold text-slate-400 uppercase bg-white">Hoặc tiếp tục với</span>
             </div>
 
             <button
               type="button"
               onClick={handleGoogleRegister}
               disabled={loading}
-              className="mt-5 w-full flex items-center justify-center gap-3 py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 border border-slate-700 hover:border-slate-600 transition-all active:scale-[0.98] text-sm"
+              className="mt-5 w-full flex items-center justify-center gap-3 py-3 bg-white text-[#1E293B] font-bold rounded-xl hover:bg-slate-50 border-2 border-[#E5E7EB] hover:border-slate-300 transition-all active:scale-[0.98] text-sm shadow-sm hover:shadow-md"
             >
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
               <span>Đăng ký với Google</span>
             </button>
 
-            <p className="mt-6 text-center text-slate-400 text-xs sm:text-sm">
+            <p className="mt-6 text-center text-slate-500 text-xs sm:text-sm font-medium">
               Đã có tài khoản?{' '}
-              <Link to="/login" className="font-bold text-purple-400 hover:text-white transition-colors">
+              <Link to="/login" className="font-bold text-[#B87333] hover:text-[#8C5523] transition-colors">
                 Đăng nhập ngay
               </Link>
             </p>

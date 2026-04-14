@@ -20,7 +20,7 @@ const LectureClassSelector = () => {
         ...data
       }));
       setLectures(lectureList);
-      setSubjectName(subject === 'physics' ? 'Vật Lý' : 'Hóa Học');
+      setSubjectName('Vật Lý');
     }
   }, [subject, grade]);
 
@@ -80,11 +80,7 @@ const LectureClassSelector = () => {
               className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 overflow-hidden group"
             >
               {/* Color Header */}
-              <div className={`${
-                subject === 'physics'
-                  ? 'bg-gradient-to-r from-green-500 to-teal-600'
-                  : 'bg-gradient-to-r from-blue-500 to-indigo-600'
-              } p-6 text-white`}>
+              <div className="bg-gradient-to-r from-green-500 to-teal-600 p-6 text-white">
                 <div className="flex items-center justify-between mb-2">
                   <Play className="w-6 h-6 group-hover:scale-110 transition-transform" />
                   <div className="text-sm opacity-80">Bài {index + 1}</div>
@@ -115,11 +111,7 @@ const LectureClassSelector = () => {
                 </div>
 
                 {/* Button */}
-                <button className={`w-full py-2 px-4 rounded-lg font-semibold transition-all ${
-                  subject === 'physics'
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
-                    : 'bg-blue-500 hover:bg-blue-600 text-white'
-                }`}>
+                <button className="w-full py-2 px-4 rounded-lg font-semibold transition-all bg-green-500 hover:bg-green-600 text-white">
                   Bắt đầu bài học →
                 </button>
               </div>

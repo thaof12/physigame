@@ -10,18 +10,6 @@ const ProgramSelection = () => {
 
   const programs = [
     {
-      id: 'chemistry',
-      name: 'Hóa học',
-      icon: '🧪',
-      description: 'Khám phá thế giới của các nguyên tố, phản ứng và các hợp chất hóa học qua các bài học tương tác và thí nghiệm ảo.',
-      gradient: 'from-blue-500 to-indigo-600',
-      hoverGradient: 'from-blue-600 to-indigo-700',
-      available: true,
-      grades: [8, 9, 10, 11, 12],
-      totalLessons: 150,
-      highlights: ['Thí nghiệm ảo', 'Bảng tuần hoàn tương tác', 'Bài tập tự động chấm']
-    },
-    {
       id: 'physics',
       name: 'Vật lý',
       icon: '⚛️',
@@ -32,30 +20,6 @@ const ProgramSelection = () => {
       grades: [6, 7, 8, 9, 10, 11, 12],
       totalLessons: 200,
       highlights: ['Mô phỏng vật lý', 'Game tương tác', 'Thí nghiệm ảo']
-    },
-    {
-      id: 'biology',
-      name: 'Sinh học',
-      icon: '🧬',
-      description: 'Khám phá sự sống từ tế bào đến sinh thái, hiểu về cơ thể người, di truyền học và đa dạng sinh học.',
-      gradient: 'from-emerald-500 to-green-600',
-      hoverGradient: 'from-emerald-600 to-green-700',
-      available: false,
-      grades: [8, 9, 10, 11, 12],
-      totalLessons: 130,
-      highlights: ['Hình ảnh 3D', 'Video sinh học', 'Thực hành quan sát']
-    },
-    {
-      id: 'math',
-      name: 'Toán học',
-      icon: '📐',
-      description: 'Phát triển tư duy logic và giải quyết vấn đề qua đại số, hình học, giải tích và xác suất thống kê.',
-      gradient: 'from-purple-500 to-pink-600',
-      hoverGradient: 'from-purple-600 to-pink-700',
-      available: false,
-      grades: [8, 9, 10, 11, 12],
-      totalLessons: 160,
-      highlights: ['Công cụ vẽ đồ thị', 'Bài tập tự luyện', 'Lời giải chi tiết']
     }
   ];
 
@@ -66,31 +30,12 @@ const ProgramSelection = () => {
     }
 
     if (!user) {
-      // Chưa đăng nhập -> chuyển đến trang login
-      // Nếu là vật lý thì chuyển đến trang vật lý, còn không thì đến placement test
-      const redirectPath = program.id === 'physics' 
-        ? `/program/${program.id}` 
-        : `/placement-test/${program.id}`;
-      navigate('/login', { state: { from: redirectPath } });
+      navigate('/login', { state: { from: `/program/${program.id}` } });
       return;
     }
 
-    // Đặc biệt cho môn Vật lý: vào thẳng trang Vật lý, không qua placement test
-    if (program.id === 'physics') {
-      navigate(`/program/${program.id}`);
-      return;
-    }
-
-    // Kiểm tra xem user đã đăng ký chương trình này chưa (áp dụng cho các môn khác)
-    const userProgram = user.programs?.find(p => p.programId === program.id);
-    
-    if (userProgram && userProgram.placementTestCompleted) {
-      // Đã làm placement test và đăng ký -> chuyển đến trang học
-      navigate(`/program/${program.id}`);
-    } else {
-      // Chưa làm placement test -> chuyển đến placement test
-      navigate(`/placement-test/${program.id}`);
-    }
+    // Với môn Vật lý: vào thẳng trang học
+    navigate(`/program/${program.id}`);
   };
 
   return (

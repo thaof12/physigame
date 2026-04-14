@@ -1,8 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, BookOpen, Trophy, Lock, Flag, Orbit, Zap, Target, Hexagon, Shield } from 'lucide-react';
+import { ArrowLeft, BookOpen, Trophy, Lock, Flag, Zap, Target, Shield, CheckCircle, ChevronRight } from 'lucide-react';
 import { physicsLessons, getLessonStats } from '../data/physicsLessons';
-import SolarSystemBackground from '../../../components/animations/SolarSystemBackground';
 
 const PhysicsClassDashboard = () => {
   const { classId } = useParams();
@@ -57,14 +56,15 @@ const PhysicsClassDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex justify-center items-center relative">
-         <SolarSystemBackground />
+      <div className="min-h-screen bg-[#F8F5F0] flex justify-center items-center relative">
+         <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
+              style={{ backgroundImage:'linear-gradient(#B87333 1px,transparent 1px),linear-gradient(90deg,#B87333 1px,transparent 1px)', backgroundSize:'40px 40px' }} />
          <div className="relative z-10 flex flex-col items-center">
-            <div className="w-24 h-24 relative flex items-center justify-center">
-               <div className="absolute inset-0 rounded-full border-t-2 border-cyan-500 animate-spin"></div>
-               <Orbit className="w-10 h-10 text-cyan-400 animate-pulse" />
+            <div className="w-20 h-20 relative flex items-center justify-center">
+               <div className="absolute inset-0 rounded-full border-[3px] border-[#B87333]/30 border-t-[#B87333] animate-spin"></div>
+               <BookOpen className="w-8 h-8 text-[#B87333]" />
             </div>
-            <h2 className="text-xl font-bold text-cyan-400 mt-4 tracking-wider">ĐANG TẢI DỮ LIỆU...</h2>
+            <h2 className="text-lg font-black text-[#5C4033] mt-4 tracking-widest uppercase">Đang tải dữ liệu...</h2>
          </div>
       </div>
     );
@@ -72,20 +72,19 @@ const PhysicsClassDashboard = () => {
 
   if (!currentGrade) {
     return (
-      <div className="min-h-screen bg-slate-950 py-8 px-4 relative flex items-center justify-center">
-        <SolarSystemBackground />
+      <div className="min-h-screen bg-[#F8F5F0] py-8 px-4 relative flex items-center justify-center">
         <div className="relative z-10 w-full max-w-lg">
-          <div className="bg-slate-900/80 backdrop-blur-xl rounded-3xl p-10 border border-red-500/30 text-center shadow-[0_0_50px_rgba(239,68,68,0.1)]">
-            <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Hexagon className="w-10 h-10 text-red-500" />
+          <div className="bg-white rounded-3xl p-10 border-2 border-red-200 text-center shadow-[0_8px_30px_rgba(225,29,72,0.08)]">
+            <div className="w-20 h-20 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-200">
+              <Target className="w-10 h-10 text-red-500" />
             </div>
-            <h2 className="text-3xl font-black text-white mb-4">LỖI KẾT NỐI</h2>
-            <p className="text-slate-400 mb-8 font-medium">Không tìm thấy phân khu nhiệm vụ của Lớp {classId}. Vui lòng kiểm tra lại tọa độ.</p>
+            <h2 className="text-3xl font-black text-slate-800 mb-4">Không tìm thấy</h2>
+            <p className="text-slate-500 mb-8 font-medium">Không tìm thấy chương trình học của Lớp {classId}. Vui lòng kiểm tra lại.</p>
             <button
               onClick={() => navigate('/program/physics')}
-              className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl text-white font-bold hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all"
+              className="w-full py-4 pg-btn-brass rounded-xl text-white font-bold"
             >
-              VỀ TRẠM ĐIỀU HÀNH CHÍNH
+              Về Trang Chủ Vật Lý
             </button>
           </div>
         </div>
@@ -94,11 +93,13 @@ const PhysicsClassDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen relative bg-slate-950 pb-20">
-      {/* Dynamic Background */}
-      <div className="fixed inset-0 z-0">
-         <SolarSystemBackground />
-         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/80 to-slate-950"></div>
+    <div className="min-h-screen relative bg-[#F8F5F0] pb-20">
+      {/* Warm ambient blobs */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-20 left-1/4 w-[600px] h-[600px] rounded-full blur-[150px] bg-amber-100/50" />
+        <div className="absolute bottom-20 right-10 w-[400px] h-[400px] rounded-full blur-[120px] bg-orange-100/40" />
+        <div className="absolute inset-0 opacity-[0.025]"
+             style={{ backgroundImage:'linear-gradient(#B87333 1px,transparent 1px),linear-gradient(90deg,#B87333 1px,transparent 1px)', backgroundSize:'40px 40px' }} />
       </div>
 
       <div className="relative z-10 container mx-auto max-w-6xl px-4 pt-8">
@@ -107,36 +108,36 @@ const PhysicsClassDashboard = () => {
         <div className="mb-10">
           <button
             onClick={() => navigate('/program/physics')}
-            className="group flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors font-medium mb-6 bg-cyan-950/30 px-4 py-2 rounded-full border border-cyan-800/50 w-fit backdrop-blur-md"
+            className="group flex items-center gap-2 text-[#B87333] hover:text-[#8C5523] transition-colors font-bold mb-6 bg-white px-4 py-2 rounded-full border-2 border-[#B87333]/20 w-fit shadow-sm hover:shadow-md"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            TRẠM ĐIỀU HÀNH
+            Trạm Điều Hành
           </button>
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 font-bold text-xs mb-3 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
-                  <Target className="w-3 h-3" /> NHIỆM VỤ CHÍNH TUYẾN
+               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#B87333]/10 border border-[#B87333]/20 text-[#8C5523] font-black text-xs mb-3">
+                  <Target className="w-3 h-3" /> CHƯƠNG TRÌNH CHÍNH TUYẾN
                </div>
-               <h1 className="text-4xl md:text-5xl font-black text-white drop-shadow-lg">
+               <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#5C4033] to-[#B87333]">
                  Vật Lý Lớp {classId}
                </h1>
-               <p className="text-lg text-slate-300 mt-2 font-medium max-w-2xl">
+               <p className="text-lg text-slate-500 mt-2 font-medium max-w-2xl">
                  {currentGrade.description || "Khám phá các quy luật vĩ đại cấu thành nên vũ trụ."}
                </p>
             </div>
             
-            {/* Global Progress Capacitor */}
-            <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700 p-4 rounded-2xl w-full md:w-72 shadow-xl">
+            {/* Global Progress */}
+            <div className="bg-white border-2 border-[#B87333]/15 p-5 rounded-2xl w-full md:w-72 shadow-[0_4px_20px_rgba(184,115,51,0.08)]">
                <div className="flex justify-between items-end mb-2">
-                 <span className="text-sm font-bold text-slate-400">TỔNG TIẾN ĐỘ</span>
-                 <span className="text-2xl font-black text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]">
+                 <span className="text-sm font-black text-slate-400 uppercase tracking-wider">Tổng tiến độ</span>
+                 <span className="text-2xl font-black text-[#B87333]">
                    {Math.round(overallProgress)}%
                  </span>
                </div>
-               <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden shadow-inner flex">
+               <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
                  <div
-                   className="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 shadow-[0_0_10px_rgba(52,211,153,0.5)] transition-all duration-1000 ease-out"
+                   className="h-full bg-gradient-to-r from-[#B87333] to-[#D4AF37] rounded-full transition-all duration-1000 ease-out"
                    style={{ width: `${overallProgress}%` }}
                  ></div>
                </div>
@@ -146,38 +147,38 @@ const PhysicsClassDashboard = () => {
 
         {/* Stats Row */}
         <div className="grid grid-cols-3 gap-4 mb-10">
-          <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-2xl p-5 flex items-center gap-4 hover:border-blue-500/30 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-               <BookOpen className="w-6 h-6 text-blue-400" />
+          <div className="bg-white border-2 border-slate-100 rounded-2xl p-5 flex items-center gap-4 hover:border-[#B87333]/30 transition-all shadow-sm hover:shadow-md">
+            <div className="w-12 h-12 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center">
+               <BookOpen className="w-6 h-6 text-sky-600" />
             </div>
             <div>
-               <p className="text-sm font-bold text-slate-400">TỔNG BÀI</p>
-               <p className="text-2xl font-black text-white">{stats.total}</p>
+               <p className="text-sm font-black text-slate-400 uppercase tracking-wider">Tổng bài</p>
+               <p className="text-2xl font-black text-slate-800">{stats.total}</p>
             </div>
           </div>
           
-          <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-2xl p-5 flex items-center gap-4 hover:border-emerald-500/30 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-               <Trophy className="w-6 h-6 text-emerald-400" />
+          <div className="bg-white border-2 border-slate-100 rounded-2xl p-5 flex items-center gap-4 hover:border-emerald-300 transition-all shadow-sm hover:shadow-md">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+               <Trophy className="w-6 h-6 text-emerald-600" />
             </div>
             <div>
-               <p className="text-sm font-bold text-slate-400">HOÀN THÀNH</p>
-               <p className="text-2xl font-black text-white">{stats.completed}</p>
+               <p className="text-sm font-black text-slate-400 uppercase tracking-wider">Hoàn thành</p>
+               <p className="text-2xl font-black text-slate-800">{stats.completed}</p>
             </div>
           </div>
           
-          <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-600 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
+          <div className="bg-white border-2 border-slate-100 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 transition-all shadow-sm hover:shadow-md">
+            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center">
                <Lock className="w-6 h-6 text-slate-400" />
             </div>
             <div>
-               <p className="text-sm font-bold text-slate-400">CHƯA HỌC</p>
-               <p className="text-2xl font-black text-white">{stats.total - stats.completed}</p>
+               <p className="text-sm font-black text-slate-400 uppercase tracking-wider">Chưa học</p>
+               <p className="text-2xl font-black text-slate-800">{stats.total - stats.completed}</p>
             </div>
           </div>
         </div>
 
-        {/* Chapters - Mission Briefing */}
+        {/* Chapters */}
         <div className="space-y-6">
           {currentGrade.chapters.map((chapter, idx) => {
             const chapterCompleted = chapter.lessons.filter(lesson => {
@@ -190,35 +191,35 @@ const PhysicsClassDashboard = () => {
             const chapterProgress = chapterTotal > 0 ? (chapterCompleted / chapterTotal) * 100 : 0;
 
             return (
-              <div key={chapter.id} className={`bg-slate-900/60 backdrop-blur-xl border ${isFullyCompleted ? 'border-cyan-500/40 shadow-[0_0_30px_rgba(6,182,212,0.1)]' : hasStarted ? 'border-indigo-500/30' : 'border-slate-800'} rounded-3xl p-6 relative overflow-hidden transition-all duration-500 hover:-translate-y-1`}>
+              <div key={chapter.id} className={`bg-white border-2 ${isFullyCompleted ? 'border-[#B87333]/40 shadow-[0_8px_30px_rgba(184,115,51,0.1)]' : hasStarted ? 'border-amber-200' : 'border-slate-100'} rounded-3xl p-6 relative overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-lg`}>
                 
                 {/* Glow Effect for completed */}
                 {isFullyCompleted && (
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-[80px] pointer-events-none"></div>
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-amber-100/50 blur-[80px] pointer-events-none"></div>
                 )}
                 
                 <div className="flex flex-col lg:flex-row gap-6 relative z-10">
                    {/* Chapter Summary */}
-                   <div className="w-full lg:w-1/3 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-slate-700/50 pb-6 lg:pb-0 lg:pr-6">
+                   <div className="w-full lg:w-1/3 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-slate-100 pb-6 lg:pb-0 lg:pr-6">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className={`px-2 py-1 rounded text-xs font-bold ${isFullyCompleted ? 'bg-cyan-500 text-slate-900' : 'bg-slate-800 text-slate-300'}`}>
+                        <div className={`px-2.5 py-1 rounded-lg text-xs font-black ${isFullyCompleted ? 'bg-[#B87333] text-white' : 'bg-slate-100 text-slate-500'}`}>
                            CHƯƠNG {idx + 1}
                         </div>
-                        {isFullyCompleted && <div className="text-cyan-400 font-bold text-xs flex items-center gap-1"><Zap className="w-3 h-3 fill-current"/> CLEARED</div>}
+                        {isFullyCompleted && <div className="text-[#B87333] font-black text-xs flex items-center gap-1"><Zap className="w-3 h-3 fill-current"/> HOÀN TẤT</div>}
                       </div>
-                      <h2 className={`text-2xl font-black ${isFullyCompleted ? 'text-white' : 'text-slate-200'} leading-tight mb-4`}>
+                      <h2 className={`text-2xl font-black ${isFullyCompleted ? 'text-[#5C4033]' : 'text-slate-700'} leading-tight mb-4`}>
                         {chapter.title}
                       </h2>
                       <div className="mt-auto">
                          <div className="flex justify-between items-center mb-1.5">
-                            <span className="text-xs font-bold text-slate-400">Tiến độ phân khu</span>
-                            <span className={`text-sm font-black ${isFullyCompleted ? 'text-cyan-400' : 'text-slate-300'}`}>
+                            <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Tiến độ chương</span>
+                            <span className={`text-sm font-black ${isFullyCompleted ? 'text-[#B87333]' : 'text-slate-500'}`}>
                                {chapterCompleted}/{chapterTotal}
                             </span>
                          </div>
-                         <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                            <div
-                             className={`h-full rounded-full transition-all duration-700 ${isFullyCompleted ? 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]' : 'bg-indigo-500'}`}
+                             className={`h-full rounded-full transition-all duration-700 ${isFullyCompleted ? 'bg-gradient-to-r from-[#B87333] to-[#D4AF37]' : 'bg-amber-400'}`}
                              style={{ width: `${chapterProgress}%` }}
                            ></div>
                          </div>
@@ -237,25 +238,26 @@ const PhysicsClassDashboard = () => {
                            onClick={() => handleLessonClick(chapter.id, lesson.id)}
                            className={`group relative flex items-center p-4 rounded-2xl cursor-pointer transition-all duration-300 ${
                              isCompleted
-                               ? 'bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/20 shadow-[inset_0_0_20px_rgba(6,182,212,0.05)]'
-                               : 'bg-slate-800/50 border border-slate-700 hover:border-indigo-400/50 hover:bg-slate-800'
+                               ? 'bg-[#B87333]/5 border-2 border-[#B87333]/25 hover:bg-[#B87333]/10 hover:border-[#B87333]/40'
+                               : 'bg-slate-50/50 border-2 border-slate-100 hover:border-[#B87333]/30 hover:bg-white hover:shadow-md'
                            }`}
                          >
-                           <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center mr-4 transition-colors ${
+                           <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center mr-4 transition-all font-black text-sm ${
                                isCompleted
-                                 ? 'bg-cyan-500 text-slate-900 shadow-[0_0_15px_rgba(6,182,212,0.5)]'
-                                 : 'bg-slate-900 border border-slate-600 text-slate-400 group-hover:border-indigo-400 group-hover:text-indigo-300'
+                                 ? 'bg-[#B87333] text-white shadow-[0_4px_12px_rgba(184,115,51,0.3)]'
+                                 : 'bg-white border-2 border-slate-200 text-slate-400 group-hover:border-[#B87333]/50 group-hover:text-[#B87333]'
                              }`}>
-                               {isCompleted ? <Flag className="w-5 h-5" /> : (lIdx + 1)}
+                               {isCompleted ? <CheckCircle className="w-5 h-5" /> : (lIdx + 1)}
                            </div>
                            <div className="flex-1 pr-2">
-                             <p className={`font-bold text-sm leading-snug line-clamp-2 ${isCompleted ? 'text-white' : 'text-slate-300 group-hover:text-white'}`}>
+                             <p className={`font-bold text-sm leading-snug line-clamp-2 ${isCompleted ? 'text-[#5C4033]' : 'text-slate-600 group-hover:text-slate-800'}`}>
                                {lesson.title}
                              </p>
-                             <p className={`text-[10px] font-bold mt-1 uppercase tracking-wider ${isCompleted ? 'text-cyan-400' : 'text-slate-500/80'}`}>
-                               {isCompleted ? 'Hoàn thành' : 'Chưa thu thập'}
+                             <p className={`text-[10px] font-black mt-1 uppercase tracking-wider ${isCompleted ? 'text-[#B87333]' : 'text-slate-400'}`}>
+                               {isCompleted ? '✓ Hoàn thành' : 'Chưa học'}
                              </p>
                            </div>
+                           <ChevronRight className={`w-4 h-4 flex-shrink-0 transition-all ${isCompleted ? 'text-[#B87333]' : 'text-slate-300 group-hover:text-[#B87333] group-hover:translate-x-1'}`} />
                          </div>
                        );
                      })}
@@ -266,21 +268,21 @@ const PhysicsClassDashboard = () => {
           })}
         </div>
 
-        {/* Note / Promo */}
-        <div className="mt-12 bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/30 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-           <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-blue-500/20 blur-3xl rounded-full pointer-events-none"></div>
+        {/* Promo / CTA */}
+        <div className="mt-12 bg-gradient-to-r from-[#B87333] to-[#8C5523] rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden shadow-[0_8px_30px_rgba(184,115,51,0.25)]">
+           <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-white/10 blur-3xl rounded-full pointer-events-none"></div>
            <div>
               <h3 className="text-2xl font-black text-white flex items-center gap-3">
-                 <Shield className="w-6 h-6 text-blue-400" />
+                 <Shield className="w-6 h-6 text-amber-200" />
                  Thực Hành Kiến Thức
               </h3>
-              <p className="text-slate-300 mt-2 font-medium max-w-xl">
+              <p className="text-white/80 mt-2 font-medium max-w-xl">
                  Bạn đã nắm vững lý thuyết? Hãy áp dụng chúng vào mô phỏng không gian và vượt qua các thử thách Mini-game tương tác.
               </p>
            </div>
            <button
              onClick={() => navigate('/advanced-physics-challenge')}
-             className="whitespace-nowrap px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-2xl font-bold backdrop-blur-md transition-all active:scale-95"
+             className="whitespace-nowrap px-8 py-4 bg-white text-[#5C4033] rounded-2xl font-black shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95"
            >
              Vào Khu Thử Thách
            </button>

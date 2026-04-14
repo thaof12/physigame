@@ -7,7 +7,6 @@ import {
   TrendingUp, Calendar, Edit3, Camera, ChevronRight,
   Swords, Users, CheckCircle, Lock, Hexagon
 } from 'lucide-react';
-import SolarSystemBackground from '../components/animations/SolarSystemBackground';
 import { Link } from 'react-router-dom';
 
 const Profile = () => {
@@ -162,309 +161,403 @@ const Profile = () => {
   const RankIcon = rank.icon;
 
   return (
-    <div className="min-h-full relative font-sans text-white pb-20">
+    <div className="min-h-screen bg-[#FDFCF8] font-sans text-[#1E293B] overflow-x-hidden selection:bg-[#B87333]/20">
       
-      {/* Background Layer */}
-      <div className="absolute inset-0 z-0 opacity-40">
-        <SolarSystemBackground />
-      </div>
+      {/* Background patterns */}
+      <div className="fixed inset-0 graph-grid opacity-[0.15] pointer-events-none" />
+      <div className="fixed top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#B87333]/5" />
+      <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#D4AF37]/5" />
 
-      <div className="relative z-10 container mx-auto max-w-6xl px-4 sm:px-6 py-8">
+      <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6 py-12 lg:py-16">
         
-        {/* Navigation / Back */}
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-black text-white flex items-center gap-3 tracking-wide">
-            <div className="w-1.5 h-8 bg-cyan-500 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.8)]"></div>
-            Hồ sơ Không Không Gian
-          </h1>
-        </div>
-
-        {/* PROFILE ID CARD */}
-        <div className="bg-[#0B1221]/90 backdrop-blur-xl border border-slate-700/50 rounded-[2rem] overflow-hidden mb-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-          {/* Top Banner */}
-          <div className="h-32 sm:h-40 bg-gradient-to-r from-purple-900 via-indigo-900 to-cyan-900 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-cyan-500/30 blur-[50px] rounded-full"></div>
-            <div className="absolute top-4 right-4 flex items-center gap-2 bg-black/40 backdrop-blur-md rounded-full px-4 py-1.5 border border-white/10">
-              <RankIcon className={`w-5 h-5 ${rank.color}`} />
-              <span className={`font-bold text-sm tracking-wide ${rank.color}`}>{rank.name}</span>
-            </div>
-          </div>
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           
-          <div className="px-6 pb-8 sm:px-10 relative">
-            {/* Avatar Hologram */}
-            <div className="absolute -top-16 sm:-top-20 left-6 sm:left-10">
-              <div className="relative group cursor-pointer">
-                <div className={`w-32 h-32 sm:w-40 sm:h-40 rounded-3xl bg-slate-900 p-1.5 shadow-2xl ${rank.glow}`}>
-                  <div className="w-full h-full rounded-[1.25rem] bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden border border-slate-700">
+          {/* ──────────────────────────────────────────────
+              SIDEBAR: USER IDENTITY & NAVIGATION
+              ────────────────────────────────────────────── */}
+          <aside className="w-full lg:w-80 space-y-8">
+            
+            {/* User Info Card */}
+            <div className="bg-white rounded-[2.5rem] border border-[#E5E7EB] shadow-[0_20px_50px_-15px_rgba(0,0,0,0.05)] p-8 text-center relative overflow-hidden group">
+              {/* Decorative brass accent */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-gradient-to-r from-transparent via-[#B87333]/30 to-transparent" />
+              
+              <div className="relative inline-block mb-6 pt-2">
+                <div className={`w-32 h-32 rounded-full p-1.5 bg-white border-2 border-[#E5E7EB] group-hover:border-[#B87333]/50 transition-colors duration-500 shadow-xl overflow-hidden`}>
+                  <div className="w-full h-full rounded-full bg-[#F8F4EF] flex items-center justify-center overflow-hidden border border-[#B87333]/10">
                     {userData?.profile?.avatar ? (
                       <img src={userData.profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 to-blue-500">
+                      <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#8C5523] to-[#B87333]">
                         {userData?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'ID'}
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-slate-800 rounded-full border border-slate-600 flex items-center justify-center group-hover:bg-cyan-500 group-hover:text-white transition-colors">
-                  <Camera className="w-5 h-5 text-slate-400 group-hover:text-white" />
+                <button 
+                  className="absolute bottom-1 right-1 w-9 h-9 bg-white rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#B87333] shadow-lg hover:bg-[#FDFCF8] transition-colors"
+                  title="Thay đổi ảnh đại diện"
+                >
+                  <Camera className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-1">
+                <h2 className="text-2xl font-black text-[#1E293B] tracking-tight truncate px-2">
+                  {userData?.displayName || user?.email?.split('@')[0] || 'Unknown Cadet'}
+                </h2>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F8F4EF] text-[#8C5523] text-[10px] font-black tracking-widest uppercase border border-[#B87333]/10">
+                  <RankIcon className={`w-3 h-3 ${rank.color}`} /> {rank.name}
+                </div>
+              </div>
+
+              {/* Login Streak */}
+              <div className="mt-8 pt-8 border-t border-[#F1F5F9] flex items-center justify-center gap-6">
+                <div className="text-center group/streak">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#FFF7ED] text-orange-500 mb-2 border border-orange-100 group-hover/streak:scale-110 transition-transform">
+                    <Flame className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <div className="text-lg font-black text-[#1E293B] leading-none mb-1">{stats.currentStreak}</div>
+                  <div className="text-[9px] font-black text-slate-400 uppercase tracking-tight">Ngày liên tục</div>
+                </div>
+                <div className="text-center group/xp">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 mb-2 border border-indigo-100 group-hover/xp:scale-110 transition-transform">
+                    <Zap className="w-6 h-6" />
+                  </div>
+                  <div className="text-lg font-black text-[#1E293B] leading-none mb-1">{stats.level}</div>
+                  <div className="text-[9px] font-black text-slate-400 uppercase tracking-tight">Cấp độ (LVL)</div>
                 </div>
               </div>
             </div>
 
-            {/* Profile Info Space */}
-            <div className="pt-20 sm:pt-24 flex flex-col md:flex-row md:items-start md:justify-between gap-8">
+            {/* Navigation Menu */}
+            <nav className="bg-white rounded-[2rem] border border-[#E5E7EB] shadow-sm overflow-hidden p-3">
+              {[
+                { id: 'info', label: 'Thông tin cá nhân', icon: Users, color: 'text-blue-500' },
+                { id: 'overview', label: 'Thống kê & Thành tựu', icon: TrendingUp, color: 'text-emerald-500' },
+                { id: 'achievements', label: 'Kho Huy hiệu', icon: Trophy, color: 'text-amber-500' },
+                { id: 'activity', label: 'Nhật ký Hoạt động', icon: Clock, color: 'text-indigo-500' },
+                { id: 'pk', label: 'Lịch sử Đấu trường', icon: Swords, color: 'text-rose-500' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl font-black text-sm transition-all text-left mb-1 group ${
+                    activeTab === item.id 
+                      ? 'bg-[#FDFCF8] border border-[#B87333]/20 text-[#B87333] shadow-sm' 
+                      : 'text-slate-500 hover:bg-[#F8F9FA] hover:text-[#1E293B]'
+                  }`}
+                >
+                  <item.icon className={`w-5 h-5 ${activeTab === item.id ? item.color : 'text-slate-400 opacity-60'}`} />
+                  <span className="flex-1">{item.label}</span>
+                  {activeTab === item.id && <ChevronRight className="w-4 h-4" />}
+                </button>
+              ))}
+              <div className="mt-2 pt-2 border-t border-[#F1F5F9]">
+                <button className="w-full flex items-center gap-4 px-5 py-4 rounded-xl font-black text-sm text-rose-500 hover:bg-rose-50 transition-all">
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Đăng xuất</span>
+                </button>
+              </div>
+            </nav>
+          </aside>
+
+          {/* ──────────────────────────────────────────────
+              MAIN CONTENT: SECTION DETAILS
+              ────────────────────────────────────────────── */}
+          <main className="flex-1 animate-fade-in-right">
+            
+            {/* Header for content */}
+            <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E7EB] pb-8">
+              <div>
+                <h1 className="text-3xl font-black text-[#1E293B] tracking-tight">
+                  {activeTab === 'info' && 'Thông tin cá nhân'}
+                  {activeTab === 'overview' && 'Thống kê tổng quan'}
+                  {activeTab === 'achievements' && 'Bộ sưu tập danh dự'}
+                  {activeTab === 'activity' && 'Lịch sử khám phá'}
+                  {activeTab === 'pk' && 'Dữ liệu đấu trường'}
+                </h1>
+                <p className="text-slate-500 font-medium text-sm mt-1">Quản lý và cập nhật tiến trình khoa học của bạn.</p>
+              </div>
+              {activeTab === 'info' && !isEditing && (
+                <button 
+                  onClick={() => setIsEditing(true)}
+                  className="pg-btn-brass px-6 py-3 text-xs flex items-center gap-2"
+                >
+                  <Edit3 className="w-4 h-4" /> Cập nhật thông tin
+                </button>
+              )}
+            </div>
+
+            {/* Content Display based on activeTab */}
+            <div className="space-y-8">
               
-              {/* Identity Details */}
-              <div className="flex-1 max-w-xl">
-                {isEditing ? (
-                  <div className="space-y-4 bg-slate-900/50 p-6 rounded-2xl border border-slate-700">
-                    <input
-                      type="text"
-                      value={editForm.displayName}
-                      onChange={(e) => setEditForm({...editForm, displayName: e.target.value})}
-                      className="w-full bg-slate-950 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                      placeholder="Danh xưng"
-                    />
-                    <textarea
-                      value={editForm.bio}
-                      onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
-                      className="w-full bg-slate-950 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 resize-none"
-                      placeholder="Tiểu sử / Nhiệm vụ cá nhân..."
-                      rows={2}
-                    />
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <input
-                        type="text"
-                        value={editForm.school}
-                        onChange={(e) => setEditForm({...editForm, school: e.target.value})}
-                        className="flex-1 bg-slate-950 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                        placeholder="Trạm cơ sở (Trường học)"
-                      />
-                      <select
-                        value={editForm.grade}
-                        onChange={(e) => setEditForm({...editForm, grade: e.target.value})}
-                        className="sm:w-1/3 bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                      >
-                         <option value="">Cấp bậc</option>
-                         {[6,7,8,9,10,11,12].map(g => <option key={g} value={g}>Lớp {g}</option>)}
-                      </select>
+              {/* SECTION: PERSONAL INFO / FORM */}
+              {activeTab === 'info' && (
+                <div className="bg-white rounded-[2rem] border border-[#E5E7EB] p-8 sm:p-10 shadow-sm relative overflow-hidden">
+                   {isEditing ? (
+                    <div className="max-w-2xl space-y-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Danh xưng hiển thị</label>
+                          <input
+                            type="text"
+                            value={editForm.displayName}
+                            onChange={(e) => setEditForm({...editForm, displayName: e.target.value})}
+                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#B87333]/50 focus:ring-4 focus:ring-[#B87333]/5 transition-all font-bold"
+                          />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email (Tài khoản)</label>
+                          <input
+                            type="text"
+                            value={user?.email}
+                            disabled
+                            className="w-full bg-slate-50 border border-[#E5E7EB] text-slate-400 rounded-2xl px-5 py-4 cursor-not-allowed font-medium"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiểu sử / Châm ngôn khoa học</label>
+                        <textarea
+                          value={editForm.bio}
+                          onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
+                          rows={3}
+                          className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#B87333]/50 focus:ring-4 focus:ring-[#B87333]/5 transition-all font-medium"
+                          placeholder="Mô tả hành trình khám phá vũ trụ của bạn..."
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Trường học / Cơ sở</label>
+                          <input
+                            type="text"
+                            value={editForm.school}
+                            onChange={(e) => setEditForm({...editForm, school: e.target.value})}
+                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#B87333]/50 focus:ring-4 focus:ring-[#B87333]/5 transition-all font-bold"
+                          />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Khối lớp (Grade)</label>
+                          <select
+                            value={editForm.grade}
+                            onChange={(e) => setEditForm({...editForm, grade: e.target.value})}
+                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#B87333]/50 transition-all font-bold appearance-none"
+                          >
+                             <option value="">Lựa chọn cấp bậc</option>
+                             {[6,7,8,9,10,11,12].map(g => <option key={g} value={g}>Lớp {g}</option>)}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4 pt-4">
+                        <button onClick={handleSaveProfile} className="pg-btn-brass px-8 py-4 text-sm font-black shadow-lg shadow-[#B87333]/20">Đồng bộ dữ liệu</button>
+                        <button onClick={() => setIsEditing(false)} className="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-2xl transition-all text-sm">Hủy bỏ</button>
+                      </div>
                     </div>
-                    <div className="flex gap-3 pt-2">
-                       <button onClick={handleSaveProfile} className="px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-colors">Đồng bộ dữ liệu</button>
-                       <button onClick={() => setIsEditing(false)} className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-colors">Hủy</button>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                      <div className="space-y-10">
+                        <div className="flex items-start gap-6">
+                          <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center shrink-0 border border-blue-100 font-bold">1</div>
+                          <div>
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Họ và tên</h4>
+                            <p className="text-xl font-bold text-[#1E293B]">{userData?.displayName || 'Chưa cập nhật'}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-6">
+                          <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center shrink-0 border border-emerald-100 font-bold">2</div>
+                          <div>
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email liên hệ</h4>
+                            <p className="text-xl font-bold text-[#1E293B]">{user?.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-6">
+                          <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center shrink-0 border border-amber-100 font-bold">3</div>
+                          <div>
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Trường học</h4>
+                            <p className="text-xl font-bold text-[#1E293B]">{userData?.profile?.school || 'Chưa cập nhật'}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-10">
+                        <div className="flex items-start gap-6">
+                          <div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center shrink-0 border border-purple-100 font-bold">4</div>
+                          <div>
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cấp lớp</h4>
+                            <p className="text-xl font-bold text-[#1E293B]">{userData?.profile?.grade ? `Lớp ${userData.profile.grade}` : 'Chưa cập nhật'}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-6">
+                          <div className="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center shrink-0 border border-indigo-100 font-bold">5</div>
+                          <div>
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ngày tham gia</h4>
+                            <p className="text-xl font-bold text-[#1E293B]">{new Date(userData?.createdAt || Date.now()).toLocaleDateString('vi-VN')}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-6">
+                          <div className="w-12 h-12 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center shrink-0 border border-slate-100 font-bold">6</div>
+                          <div className="flex-1">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tiểu sử</h4>
+                            <p className="text-sm font-medium text-slate-600 italic">"{userData?.profile?.bio || 'Chưa thiết lập châm ngôn...'}"</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* SECTION: OVERVIEW & PROGRESS */}
+              {activeTab === 'overview' && (
+                <div className="space-y-10">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                    <StatCardAcademic icon={<BookOpen />} color="text-blue-500" value={`${stats.completedLessons}/${stats.totalLessons}`} label="Lượt khám phá" />
+                    <StatCardAcademic icon={<Flame />} color="text-orange-500" value={stats.currentStreak} label="Chuỗi ngày học" subtext={`Kỷ lục: ${stats.longestStreak}`} />
+                    <StatCardAcademic icon={<Swords />} color="text-rose-500" value={stats.pkWins} label="Chiến thắng PK" />
+                    <StatCardAcademic icon={<Zap />} color="text-indigo-500" value={stats.totalXP.toLocaleString()} label="Tổng kinh nghiệm" />
+                  </div>
+
+                  <div className="bg-white rounded-[2rem] border border-[#E5E7EB] p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-10">
+                      <div className="p-2 bg-[#F8F4EF] rounded-xl border border-[#B87333]/10">
+                        <TrendingUp className="w-5 h-5 text-[#B87333]" />
+                      </div>
+                      <h3 className="text-xl font-black text-[#1E293B]">Tiến độ Giải mã Khoa học</h3>
+                    </div>
+                    
+                    <div className="space-y-10">
+                      {calculateProgressByLevel(userData?.progress?.completedLessons || []).map((lvl, idx) => (
+                        <div key={idx} className="relative">
+                          <div className="flex justify-between items-end mb-3">
+                            <span className="font-black text-sm text-[#1E293B] uppercase tracking-tight">{lvl.name}</span>
+                            <span className="text-sm font-black text-[#B87333]">{lvl.percentage}% ({lvl.completed}/{lvl.total})</span>
+                          </div>
+                          <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                            <div 
+                              className={`h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-[#B87333] to-[#D4AF37] shadow-[0_0_10px_rgba(184,115,51,0.2)]`} 
+                              style={{ width: `${lvl.percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ) : (
-                  <div>
-                    <div className="flex items-center gap-4 mb-3">
-                      <h2 className="text-3xl font-black text-white tracking-wide">
-                        {userData?.displayName || user?.email?.split('@')[0] || 'Unknown Cadet'}
-                      </h2>
-                      <button onClick={() => setIsEditing(true)} className="p-2 bg-slate-800 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-400 rounded-lg transition-all border border-transparent hover:border-cyan-500/50">
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <p className="text-slate-400 font-mono text-sm mb-4">ID: {user?.email}</p>
-                    
-                    <div className="flex flex-wrap gap-3 mb-6">
-                       {userData?.profile?.school && (
-                         <span className="px-3 py-1 bg-slate-800 text-slate-300 text-xs font-bold rounded-full border border-slate-700">📍 {userData.profile.school}</span>
-                       )}
-                       {userData?.profile?.grade && (
-                         <span className="px-3 py-1 bg-slate-800 text-slate-300 text-xs font-bold rounded-full border border-slate-700">🎓 Lớp {userData.profile.grade}</span>
-                       )}
-                       <span className="px-3 py-1 bg-slate-800 text-slate-300 text-xs font-bold rounded-full border border-slate-700 flex items-center gap-1">
-                          <Calendar className="w-3 h-3" /> Đăng ký: {new Date(userData?.createdAt || Date.now()).toLocaleDateString('vi-VN')}
-                       </span>
-                    </div>
+                </div>
+              )}
 
-                    {userData?.profile?.bio && (
-                      <p className="text-slate-300 italic border-l-2 border-cyan-500 pl-4 py-1 bg-slate-800/30 rounded-r-lg">
-                        "{userData.profile.bio}"
-                      </p>
+              {/* SECTION: ACHIEVEMENTS */}
+              {activeTab === 'achievements' && (
+                <div className="bg-white rounded-[2rem] border border-[#E5E7EB] p-8 shadow-sm">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    {allAchievements.map((ach) => {
+                      const isUnlocked = ach.unlockedAt;
+                      return (
+                        <div 
+                          key={ach.id} 
+                          className={`relative flex flex-col items-center text-center p-6 rounded-3xl border transition-all duration-500 ${
+                            isUnlocked 
+                              ? 'bg-white border-[#B87333]/30 shadow-lg shadow-[#B87333]/5 hover:scale-105' 
+                              : 'bg-slate-50 border-slate-100 opacity-60'
+                          }`}
+                        >
+                          {isUnlocked && <CheckCircle className="absolute top-3 right-3 w-5 h-5 text-emerald-500" />}
+                          <div className={`w-16 h-16 mb-4 flex items-center justify-center rounded-2xl ${
+                            isUnlocked 
+                              ? 'bg-[#FDFCF8] text-[#B87333] border-2 border-[#B87333]/10 shadow-[inner_0_0_10px_rgba(184,115,51,0.1)]' 
+                              : 'bg-slate-100 text-slate-300'
+                          }`}>
+                            {isUnlocked ? ach.icon : <Lock className="w-7 h-7" />}
+                          </div>
+                          <h4 className={`font-black tracking-tight text-sm mb-1 ${isUnlocked ? 'text-[#1E293B]' : 'text-slate-400'}`}>
+                            {ach.title}
+                          </h4>
+                          <p className="text-[10px] text-slate-500 font-medium leading-tight mb-2">
+                            {ach.description}
+                          </p>
+                          {isUnlocked && (
+                            <span className="text-[8px] font-black text-emerald-500 tracking-widest uppercase mt-auto">
+                              {new Date(ach.unlockedAt).toLocaleDateString('vi-VN')}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: ACTIVITY */}
+              {activeTab === 'activity' && (
+                <div className="bg-white rounded-[2.5rem] border border-[#E5E7EB] p-8 sm:p-10 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#B87333]/5 blur-[60px] rounded-full" />
+                  <div className="space-y-6">
+                    {recentActivity.length > 0 ? recentActivity.map((act, i) => (
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-6 p-6 bg-white rounded-2xl border border-slate-100 hover:border-[#B87333]/20 hover:shadow-md transition-all group">
+                        <div className="p-4 bg-[#F8F4EF] rounded-2xl text-[#B87333] transition-colors group-hover:bg-[#B87333] group-hover:text-white border border-[#B87333]/10">
+                          {act.type === 'lesson' ? <BookOpen className="w-6 h-6" /> : act.type === 'achievement' ? <Trophy className="w-6 h-6" /> : <Swords className="w-6 h-6" />}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-black text-[#1E293B] text-lg leading-tight mb-1">{act.title}</h4>
+                          <p className="text-sm font-medium text-slate-500">{act.detail}</p>
+                        </div>
+                        <div className="sm:text-right flex sm:flex-col justify-between items-center sm:items-end gap-1">
+                          <span className="text-emerald-600 font-black text-xl">+{act.xp} XP</span>
+                          <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{act.time}</span>
+                        </div>
+                      </div>
+                    )) : (
+                      <div className="text-center py-20 text-slate-400">
+                        <Clock className="w-16 h-16 mx-auto mb-4 opacity-10" />
+                        <p className="font-bold">Chưa có dấu vết hành trình tại đây.</p>
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              {/* Energy/Level Capacitor */}
-              <div className="w-full md:w-64 bg-slate-900 border border-slate-700 rounded-2xl p-5 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 blur-[30px] rounded-full group-hover:bg-cyan-500/20 transition-colors duration-700"></div>
-                <div className="relative z-10 flex items-center justify-between mb-4">
-                  <span className="text-slate-400 text-sm font-bold tracking-widest uppercase">Năng lượng</span>
-                  <Zap className="w-5 h-5 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+              {/* SECTION: PK ARENA */}
+              {activeTab === 'pk' && (
+                <div className="space-y-10">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <StatCardAcademic icon={<Swords />} color="text-rose-500" value={stats.pkWins + stats.pkLosses} label="Tổng trận PK" />
+                    <StatCardAcademic icon={<Trophy />} color="text-emerald-500" value={stats.pkWins} label="Dành chiến thắng" />
+                    <StatCardAcademic icon={<Target />} color="text-orange-500" value={stats.pkWins + stats.pkLosses > 0 ? Math.round((stats.pkWins / (stats.pkWins + stats.pkLosses)) * 100) + '%' : '0%'} label="Tỷ lệ thắng" />
+                    <StatCardAcademic icon={<TrendingUp />} color="text-purple-500" value={stats.pkRating} label="Xếp hạng Elo" />
+                  </div>
+                  <div className="bg-white rounded-[2rem] border border-[#E5E7EB] p-16 text-center shadow-sm">
+                    <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-100">
+                      <Users className="w-10 h-10" />
+                    </div>
+                    <h3 className="text-2xl font-black text-[#1E293B] mb-3">Sảnh Danh Vọng Đấu Trường</h3>
+                    <p className="text-slate-500 max-w-md mx-auto font-medium">Lịch sử giao đấu chi tiết đang được đồng bộ hóa từ máy chủ trung tâm.</p>
+                  </div>
                 </div>
-                <div className="relative z-10 flex items-baseline gap-2 mb-4">
-                  <span className="text-5xl font-black text-white">{stats.level}</span>
-                  <span className="text-slate-500 font-bold">LVL</span>
-                </div>
-                <div className="relative z-10 w-full h-2.5 bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                  <div 
-                    className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)]"
-                    style={{ width: `${levelProgress}%` }}
-                  ></div>
-                </div>
-                <div className="relative z-10 mt-3 flex justify-between text-xs font-bold text-slate-400">
-                  <span>{currentLevelXP}/{100} XP</span>
-                  <span className="text-cyan-400">Cần {xpNeeded} XP</span>
-                </div>
-              </div>
+              )}
 
             </div>
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
-          {[
-            { id: 'overview', label: 'Báo Cáo Tổng Quan', icon: TrendingUp },
-            { id: 'achievements', label: 'Kho Huy Hiệu', icon: Trophy },
-            { id: 'activity', label: 'Nhật Ký Hành Trình', icon: Clock },
-            { id: 'pk', label: 'Lịch Sử Đấu Trường', icon: Swords },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3 rounded-2xl font-bold transition-all whitespace-nowrap border ${
-                activeTab === tab.id
-                  ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]'
-                  : 'bg-slate-900/50 text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-800'
-              }`}
-            >
-              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content Display */}
-        <div className="animate-fade-in">
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatCard icon={<BookOpen />} iconColor="text-blue-400" bgColor="bg-blue-500/10" value={`${stats.completedLessons}/${stats.totalLessons}`} label="LƯỢT KHÁM PHÁ" />
-                <StatCard icon={<Flame />} iconColor="text-orange-500" bgColor="bg-orange-500/10" value={stats.currentStreak} label="CHUỖI NGÀY ONLINE" subtext={`Kỷ lục đỉnh cao: ${stats.longestStreak}`} />
-                <StatCard icon={<Star />} iconColor="text-amber-400" bgColor="bg-amber-400/10" value={stats.totalXP.toLocaleString()} label="KINH NGHIỆM TỔNG" />
-                <StatCard icon={<Target />} iconColor="text-emerald-400" bgColor="bg-emerald-500/10" value={`${stats.averageScore}%`} label="TỶ LỆ CHÍNH XÁC" />
-              </div>
-
-              <div className="bg-[#0B1221]/80 backdrop-blur-md rounded-3xl p-6 border border-slate-800">
-                <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-purple-500" /> Tiến độ Giải mã Không gian
-                </h3>
-                <div className="space-y-6">
-                  {calculateProgressByLevel(userData?.progress?.completedLessons || []).map((lvl, idx) => (
-                    <div key={idx} className="relative">
-                      <div className="flex justify-between items-end mb-2">
-                        <span className="font-bold text-slate-300">{lvl.name}</span>
-                        <span className="text-sm font-mono text-cyan-400">{lvl.percentage}% ({lvl.completed}/{lvl.total})</span>
-                      </div>
-                      <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden shadow-inner border border-slate-800/50">
-                        <div className={`h-full rounded-full transition-all duration-1000 bg-gradient-to-r ${lvl.color}`} style={{ width: `${lvl.percentage}%` }}></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'achievements' && (
-             <div className="bg-[#0B1221]/80 backdrop-blur-md border border-slate-800 rounded-[2rem] p-8">
-               <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-                 <h2 className="text-2xl font-black text-white flex items-center gap-3">
-                   <Trophy className="w-6 h-6 text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
-                   Bộ sưu tập Huy Hiệu
-                 </h2>
-                 <div className="px-4 py-2 bg-slate-900 rounded-full border border-slate-700 text-slate-300 text-sm font-bold">
-                    Đã mở khóa: <span className="text-cyan-400">{stats.achievementsUnlocked}/{stats.totalAchievements}</span>
-                 </div>
-               </div>
-
-               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-                 {allAchievements.map((ach) => {
-                   const isUnlocked = ach.unlockedAt;
-                   return (
-                     <div key={ach.id} className={`relative flex flex-col items-center text-center p-5 rounded-2xl border transition-all duration-500 ${isUnlocked ? 'bg-slate-900/80 border-cyan-500/40 hover:scale-105 hover:shadow-[0_0_20px_rgba(6,182,212,0.2)]' : 'bg-slate-900/30 border-slate-800 opacity-60'}`}>
-                        {isUnlocked && <CheckCircle className="absolute top-2 right-2 w-5 h-5 text-emerald-400" />}
-                        <div className={`w-16 h-16 mb-4 flex items-center justify-center rounded-2xl ${isUnlocked ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 shadow-[inset_0_0_15px_rgba(6,182,212,0.4)]' : 'bg-slate-800 text-slate-500'}`}>
-                           {isUnlocked ? ach.icon : <Lock className="w-8 h-8" />}
-                        </div>
-                        <h4 className={`font-bold mb-1 text-sm ${isUnlocked ? 'text-white' : 'text-slate-400'}`}>{ach.title}</h4>
-                        <p className="text-xs text-slate-500 mb-2">{ach.description}</p>
-                        {isUnlocked && <span className="text-[10px] text-emerald-500 font-mono tracking-wider mt-auto">{new Date(ach.unlockedAt).toLocaleDateString('vi-VN')}</span>}
-                     </div>
-                   );
-                 })}
-               </div>
-             </div>
-          )}
-
-          {activeTab === 'activity' && (
-             <div className="bg-[#0B1221]/80 backdrop-blur-md border border-slate-800 rounded-[2rem] p-8">
-               <h2 className="text-xl font-black text-white flex items-center gap-3 mb-6">
-                  <Clock className="w-5 h-5 text-cyan-400" />
-                  Nhật Ký Hành Trình
-               </h2>
-               <div className="space-y-4">
-                 {recentActivity.length > 0 ? recentActivity.map((act, i) => (
-                    <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-slate-900/50 rounded-2xl border border-slate-800 hover:border-slate-700 transition-colors">
-                       <div className="p-3 bg-slate-800 rounded-xl text-slate-300 w-fit">
-                          {act.type === 'lesson' ? <BookOpen /> : act.type === 'achievement' ? <Trophy className="text-amber-500" /> : <Swords className="text-rose-500" />}
-                       </div>
-                       <div className="flex-1">
-                          <h4 className="font-bold text-white text-base">{act.title}</h4>
-                          <p className="text-sm text-slate-400">{act.detail}</p>
-                       </div>
-                       <div className="sm:text-right flex sm:flex-col justify-between items-center sm:items-end w-full sm:w-auto mt-2 sm:mt-0 border-t sm:border-0 border-slate-800 pt-2 sm:pt-0">
-                          <span className="text-emerald-400 font-black text-lg">+{act.xp} XP</span>
-                          <span className="text-xs font-mono text-slate-500">{act.time}</span>
-                       </div>
-                    </div>
-                 )) : (
-                    <div className="text-center py-12 text-slate-500">
-                      <Clock className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                      <p>Hệ thống chưa ghi nhận hoạt động nào.</p>
-                    </div>
-                 )}
-               </div>
-             </div>
-          )}
-
-          {activeTab === 'pk' && (
-             <div className="space-y-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                   <StatCard icon={<Swords />} iconColor="text-rose-500" bgColor="bg-rose-500/10" value={stats.pkWins + stats.pkLosses} label="TỔNG TRẬN PK" />
-                   <StatCard icon={<Trophy />} iconColor="text-emerald-500" bgColor="bg-emerald-500/10" value={stats.pkWins} label="DÀNH CHIẾN THẮNG" />
-                   <StatCard icon={<Target />} iconColor="text-orange-500" bgColor="bg-orange-500/10" value={stats.pkWins + stats.pkLosses > 0 ? Math.round((stats.pkWins / (stats.pkWins + stats.pkLosses)) * 100) + '%' : '0%'} label="TỶ LỆ THẮNG" />
-                   <StatCard icon={<TrendingUp />} iconColor="text-purple-500" bgColor="bg-purple-500/10" value={stats.pkRating} label="ĐIỂM ELO" />
-                </div>
-                <div className="bg-[#0B1221]/80 backdrop-blur-md border border-slate-800 rounded-[2rem] p-10 text-center">
-                   <Users className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                   <h3 className="text-xl font-bold text-white mb-2">Bảng Xếp Hạng PK</h3>
-                   <p className="text-slate-400">Dữ liệu đấu trường đang được đồng bộ hoá với Cổng Không Gian...</p>
-                </div>
-             </div>
-          )}
+          </main>
         </div>
       </div>
     </div>
   );
 };
 
-const StatCard = ({ icon, value, label, subtext, bgColor, iconColor }) => (
-  <div className="bg-[#0B1221]/80 backdrop-blur border border-slate-800 rounded-3xl p-5 hover:border-cyan-500/30 transition-all group overflow-hidden relative">
-    <div className={`absolute -right-4 -top-4 w-16 h-16 rounded-full ${bgColor} blur-2xl group-hover:bg-cyan-500/20 transition-all`}></div>
-    <div className="flex items-center gap-3 mb-3 relative z-10">
-      <div className={`p-2 rounded-xl bg-slate-900 border border-slate-800 ${iconColor}`}>
+const StatCardAcademic = ({ icon, value, label, subtext, color }) => (
+  <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] hover:border-[#B87333]/20 shadow-sm transition-all group overflow-hidden relative">
+    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#B87333]/20 to-transparent" />
+    <div className="flex items-center gap-3 mb-4">
+      <div className={`p-2 rounded-xl bg-slate-50 border border-slate-100 ${color} group-hover:scale-110 transition-transform`}>
         {icon}
       </div>
     </div>
-    <div className="relative z-10">
-      <div className="text-3xl font-black text-white mb-1">{value}</div>
-      <div className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-wider uppercase">{label}</div>
-      {subtext && <div className="text-xs text-slate-500 mt-2 font-mono">{subtext}</div>}
+    <div>
+      <div className="text-3xl font-black text-[#1E293B] tracking-tight">{value}</div>
+      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{label}</div>
+      {subtext && <div className="text-[10px] text-[#B87333] mt-2 font-bold">{subtext}</div>}
     </div>
   </div>
 );

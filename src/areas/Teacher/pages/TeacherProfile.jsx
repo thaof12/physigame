@@ -27,7 +27,7 @@ const TeacherProfile = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const subjects = ['Vật lý', 'Hóa học', 'Toán học', 'Sinh học', 'Khác'];
+  const subjects = ['Vật lý'];
   const grades = [6, 7, 8, 9, 10, 11, 12];
 
   const handleChange = (e) => {

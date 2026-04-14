@@ -22,7 +22,7 @@ const AdminSettings = () => {
 
   const [settings, setSettings] = useState({
     siteName: 'PhysiGame',
-    siteDescription: 'Nền tảng học Vật lý và Hóa học tương tác',
+    siteDescription: 'Nền tảng học Vật lý tương tác',
     maintenanceMode: false,
     allowRegistration: true,
     emailNotifications: true,

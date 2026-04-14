@@ -49,7 +49,6 @@ const mockRecentUsers = [
 const mockPopularLessons = [
   { id: 1, title: 'Chuyển động thẳng đều', subject: 'Vật lý 10', views: 1520, completion: 92 },
   { id: 2, title: 'Định luật Ôm', subject: 'Vật lý 9', views: 1380, completion: 88 },
-  { id: 3, title: 'Nguyên tử và phân tử', subject: 'Hóa học 8', views: 1245, completion: 85 },
   { id: 4, title: 'Lực đẩy Archimedes', subject: 'Vật lý 8', views: 1180, completion: 82 },
   { id: 5, title: 'Điện tích và dòng điện', subject: 'Vật lý 7', views: 1050, completion: 79 }
 ];
@@ -363,48 +362,16 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Subject distribution */}
       <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-        <h3 className="text-lg font-semibold text-white mb-4">Phân bố theo môn học</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">Trạng thái hệ thống</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex items-center gap-4 p-4 bg-slate-800/30 rounded-xl">
             <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl">
               <Atom className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">65%</p>
-              <p className="text-sm text-slate-400">Vật lý</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 p-4 bg-slate-800/30 rounded-xl">
-            <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl">
-              <Beaker className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">35%</p>
-              <p className="text-sm text-slate-400">Hóa học</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 p-4 bg-slate-800/30 rounded-xl opacity-50">
-            <div className="p-3 bg-gradient-to-br from-rose-500 to-pink-600 rounded-xl">
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm4 10H8v-1c0-1.33 2.67-2 4-2s4 .67 4 2v1z"/>
-              </svg>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">0%</p>
-              <p className="text-sm text-slate-400">Sinh học (sắp ra mắt)</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 p-4 bg-slate-800/30 rounded-xl opacity-50">
-            <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl">
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM17 14v8M14 17h6"/>
-              </svg>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">0%</p>
-              <p className="text-sm text-slate-400">Toán học (sắp ra mắt)</p>
+              <p className="text-2xl font-bold text-white">100%</p>
+              <p className="text-sm text-slate-400">Vật lý (Chuyên sâu)</p>
             </div>
           </div>
         </div>

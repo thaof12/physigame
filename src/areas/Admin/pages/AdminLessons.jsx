@@ -21,8 +21,6 @@ const mockLessons = [
   { id: 1, title: 'Chuyển động thẳng đều', subject: 'physics', grade: 10, chapter: 1, views: 1520, completion: 92, duration: 25, rating: 4.8 },
   { id: 2, title: 'Chuyển động thẳng biến đổi đều', subject: 'physics', grade: 10, chapter: 1, views: 1380, completion: 88, duration: 30, rating: 4.7 },
   { id: 3, title: 'Định luật Newton', subject: 'physics', grade: 10, chapter: 2, views: 1245, completion: 85, duration: 35, rating: 4.9 },
-  { id: 4, title: 'Cấu tạo nguyên tử', subject: 'chemistry', grade: 8, chapter: 1, views: 980, completion: 82, duration: 20, rating: 4.6 },
-  { id: 5, title: 'Bảng tuần hoàn', subject: 'chemistry', grade: 8, chapter: 1, views: 1100, completion: 79, duration: 28, rating: 4.5 },
   { id: 6, title: 'Định luật Ôm', subject: 'physics', grade: 9, chapter: 3, views: 1450, completion: 90, duration: 22, rating: 4.8 },
 ];
 
@@ -42,7 +40,6 @@ const AdminLessons = () => {
   const stats = {
     total: lessons.length,
     physics: lessons.filter(l => l.subject === 'physics').length,
-    chemistry: lessons.filter(l => l.subject === 'chemistry').length,
     avgCompletion: Math.round(lessons.reduce((a, b) => a + b.completion, 0) / lessons.length)
   };
 
@@ -84,17 +81,6 @@ const AdminLessons = () => {
         </div>
         <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-xl p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-500/20 rounded-lg">
-              <Beaker className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{stats.chemistry}</p>
-              <p className="text-xs text-slate-400">Hóa học</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-xl p-4">
-          <div className="flex items-center gap-3">
             <div className="p-2.5 bg-amber-500/20 rounded-lg">
               <BarChart3 className="w-5 h-5 text-amber-400" />
             </div>
@@ -125,7 +111,6 @@ const AdminLessons = () => {
           >
             <option value="all">Tất cả môn</option>
             <option value="physics">Vật lý</option>
-            <option value="chemistry">Hóa học</option>
           </select>
           <select
             value={filterGrade}

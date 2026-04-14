@@ -44,8 +44,7 @@ const AdminStatistics = () => {
   ];
 
   const subjectStats = [
-    { subject: 'Vật lý', icon: Atom, color: 'from-cyan-500 to-blue-600', users: 812, lessons: 98, exercises: 245, completion: 78 },
-    { subject: 'Hóa học', icon: Beaker, color: 'from-emerald-500 to-teal-600', users: 436, lessons: 58, exercises: 187, completion: 72 }
+    { subject: 'Vật lý', icon: Atom, color: 'from-cyan-500 to-blue-600', users: 1248, lessons: 156, exercises: 432, completion: 78 }
   ];
 
   return (

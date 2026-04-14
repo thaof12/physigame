@@ -19,9 +19,7 @@ import {
 const mockExercises = [
   { id: 1, title: 'Bài tập chuyển động thẳng đều', subject: 'physics', grade: 10, type: 'multiple_choice', questions: 15, attempts: 3420, avgScore: 78, difficulty: 'medium' },
   { id: 2, title: 'Quiz định luật Newton', subject: 'physics', grade: 10, type: 'quiz', questions: 10, attempts: 2850, avgScore: 82, difficulty: 'easy' },
-  { id: 3, title: 'Bài tập cấu tạo nguyên tử', subject: 'chemistry', grade: 8, type: 'fill_blank', questions: 12, attempts: 1980, avgScore: 75, difficulty: 'medium' },
   { id: 4, title: 'Thí nghiệm ảo định luật Ôm', subject: 'physics', grade: 9, type: 'simulation', questions: 5, attempts: 4200, avgScore: 88, difficulty: 'easy' },
-  { id: 5, title: 'Game cân bằng phương trình', subject: 'chemistry', grade: 8, type: 'game', questions: 20, attempts: 5600, avgScore: 71, difficulty: 'hard' },
 ];
 
 const typeLabels = {
@@ -137,7 +135,6 @@ const AdminExercises = () => {
           >
             <option value="all">Tất cả môn</option>
             <option value="physics">Vật lý</option>
-            <option value="chemistry">Hóa học</option>
           </select>
           <select
             value={filterType}
