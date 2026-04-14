@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Node modules
 node_modules/
 
@@ -9,29 +8,32 @@ build/
 # Local env files
 .env
 .env.*
+.env.local
 backend/.env
+local-*.env
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
+logs
+*.log
 
 # OS files
 .DS_Store
 Thumbs.db
+*.DS_Store
 
 # Editor directories and files
 .vscode/
 .idea/
 *.sublime-workspace
 *.sublime-project
+out/
 
 # Dependency directories
 /.pnp
 .pnp.js
-
-# Mac
-*.DS_Store
 
 # Optional npm cache
 .npm
@@ -59,24 +61,9 @@ coverage/
 # Firebase
 .firebase/
 
-# Logs
-logs
-*.log
-npm-debug.log*
-
 # Lock files
 package-lock.json
 pnpm-lock.yaml
 
 # Certificates
 *.pem
-
-# JetBrains
-.idea/
-out/
-
-# Local envs
-local-*.env
-=======
-node_modules
->>>>>>> d7d3174 (new push)

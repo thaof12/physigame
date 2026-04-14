@@ -39,7 +39,7 @@ app.use((req, res, next) => {
 });
 
 // Database connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://physiquiz:cL7bNuvMPrmUbmfa@cluster0.kpsduay.mongodb.net/physicslearn?retryWrites=true&w=majority&appName=Cluster0';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // Set mongoose options
 mongoose.set('strictQuery', false);
