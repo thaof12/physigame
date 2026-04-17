@@ -1,86 +1,49 @@
-const mongoose = require('mongoose');
+// Challenge model - Supabase version
+const { supabase } = require('../src/config/supabase.cjs');
 
-const challengeSchema = new mongoose.Schema({
-  id: {
-    type: Number,
-    required: true,
-    unique: true
+const TABLE = 'challenges';
+
+const Challenge = {
+  async findById(id) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*').eq('id', id).single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
-  name: {
-    type: String,
-    required: true
+
+  async findByChallengeId(challengeId) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*').eq('challenge_id', challengeId).single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
-  description: {
-    type: String,
-    required: true
+
+  async findAll() {
+    const { data, error } = await supabase
+      .from(TABLE).select('*').order('challenge_id', { ascending: true });
+    if (error) throw error;
+    return data || [];
   },
-  icon: {
-    type: String,
-    required: true
+
+  async create(challengeData) {
+    const { data, error } = await supabase
+      .from(TABLE).insert(challengeData).select().single();
+    if (error) throw error;
+    return data;
   },
-  difficulty: {
-    type: String,
-    required: true,
-    enum: ['Dễ', 'Trung bình', 'Khó', 'Rất khó']
+
+  async update(challengeId, updates) {
+    const { data, error } = await supabase
+      .from(TABLE).update(updates).eq('challenge_id', challengeId).select().single();
+    if (error) throw error;
+    return data;
   },
-  difficultyLevel: {
-    type: String,
-    required: true,
-    enum: ['easy', 'medium', 'hard'],
-    default: 'medium'
-  },
-  difficultyColor: {
-    type: String,
-    required: true
-  },
-  category: {
-    type: String,
-    required: true,
-    enum: ['molecule', 'experiment', 'electrochemistry', 'solution', 'reaction', 'structure', 'game'],
-    default: 'experiment'
-  },
-  grade: {
-    type: Number,
-    required: true,
-    enum: [8, 9, 10, 11, 12],
-    default: 8
-  },
-  time: {
-    type: String,
-    required: true
-  },
-  points: {
-    type: Number,
-    required: true
-  },
-  status: {
-    type: String,
-    required: true,
-    enum: ['available', 'coming-soon', 'locked'],
-    default: 'available'
-  },
-  link: {
-    type: String,
-    required: false
-  },
-  features: [{
-    type: String,
-    required: true
-  }],
-  // Prerequisites to unlock this challenge
-  prerequisite: {
-    classId: {
-      type: Number,
-      required: false,
-      enum: [8, 9, 10, 11, 12]
-    },
-    lessonId: {
-      type: Number,
-      required: false
-    }
+
+  async delete(challengeId) {
+    const { error } = await supabase
+      .from(TABLE).delete().eq('challenge_id', challengeId);
+    if (error) throw error;
   }
-}, {
-  timestamps: true
-});
+};
 
-module.exports = mongoose.model('Challenge', challengeSchema);
+module.exports = Challenge;

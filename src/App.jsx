@@ -26,6 +26,7 @@ import MainLayout from './components/layout/MainLayout';
 // Physics area
 import PhysicsHome from './areas/Vatly/pages/PhysicsHome';
 import PhysicsClassDashboard from './areas/Vatly/pages/PhysicsClassDashboard';
+import PhysicsClasses from './areas/Vatly/pages/PhysicsClasses';
 import PhysicsLesson from './areas/Vatly/pages/PhysicsLesson';
 import AdvancedPhysicsChallenge from './areas/Vatly/gamelist/AdvancedPhysicsChallenge';
 import PhysicsGradeSelector from './areas/Vatly/gamelist/PhysicsGradeSelector';
@@ -227,6 +228,7 @@ const AppContent = () => {
           <Route path="/placement-test/:programId?" element={<PlacementTest />} />
           <Route path="/program/physics" element={<PhysicsHome />} />
           <Route path="/program/physics/dashboard" element={<Navigate to="/program/physics" replace />} />
+          <Route path="/physics-classes" element={<PhysicsClasses />} />
         </Route>
 
         <Route path="/game-journey" element={<GameJourney />} />

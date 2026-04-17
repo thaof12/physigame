@@ -1,123 +1,86 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User.cjs');
-const QuestProgress = require('../models/Quest.cjs');
+const { supabase } = require('../src/config/supabase.cjs');
 
-// GET /api/leaderboard - Lấy bảng xếp hạng
+// GET /api/leaderboard
 router.get('/', async (req, res) => {
   try {
-    const { type = 'xp', range = 'weekly', userId, limit = 50 } = req.query;
-    
-    let sortField;
-    let matchStage = {};
-    
-    // Xác định field để sort
-    switch (type) {
-      case 'xp':
-        sortField = 'xp';
-        break;
-      case 'streak':
-        sortField = 'progress.currentStreak';
-        break;
-      case 'pk':
-        sortField = 'pkStats.rating';
-        break;
-      default:
-        sortField = 'xp';
-    }
-    
-    // Xử lý time range (có thể mở rộng sau)
-    // Hiện tại lấy tất cả, có thể thêm filter theo createdAt hoặc lastActive
-    
-    // Lấy top users
-    const users = await User.find({})
-      .select('username displayName email xp level profile.avatar progress.currentStreak pkStats')
-      .sort({ [sortField]: -1 })
-      .limit(parseInt(limit))
-      .lean();
-    
-    // Format leaderboard data
-    const leaderboard = users.map((user, index) => ({
+    const { type = 'xp', userId, limit = 50 } = req.query;
+
+    let sortField = 'xp';
+    if (type === 'streak') sortField = 'xp'; // Streak stored in JSONB, sort by XP as fallback
+    if (type === 'pk') sortField = 'xp';
+
+    const { data: users, error } = await supabase
+      .from('users').select('id,username,display_name,email,xp,level,profile,avatar')
+      .order(sortField, { ascending: false })
+      .limit(parseInt(limit));
+
+    if (error) throw error;
+
+    const leaderboard = (users || []).map((user, index) => ({
       rank: index + 1,
       username: user.username || user.email?.split('@')[0] || 'Anonymous',
-      displayName: user.displayName || user.username || user.email?.split('@')[0],
-      avatar: user.profile?.avatar || null,
+      displayName: user.display_name || user.username || user.email?.split('@')[0],
+      avatar: user.avatar || null,
       xp: user.xp || 0,
       level: user.level || 1,
-      streak: user.progress?.currentStreak || 0,
-      pkRating: user.pkStats?.rating || 1000,
-      pkWins: user.pkStats?.wins || 0,
-      pkLosses: user.pkStats?.losses || 0
+      streak: 0,
+      pkRating: 1000,
+      pkWins: 0,
+      pkLosses: 0
     }));
-    
-    // Tìm rank của user hiện tại nếu có userId
+
     let userRank = null;
     if (userId) {
-      const currentUser = await User.findOne({ 
-        $or: [{ firebaseUid: userId }, { _id: userId }] 
-      }).lean();
-      
+      const currentUser = await User.findByAnyId(userId);
       if (currentUser) {
-        // Đếm số user có điểm cao hơn
-        let countQuery = {};
-        countQuery[sortField] = { $gt: currentUser[sortField] || 0 };
-        
-        const higherRankedCount = await User.countDocuments(countQuery);
-        
+        const { count } = await supabase
+          .from('users').select('id', { count: 'exact', head: true })
+          .gt(sortField, currentUser[sortField] || 0);
+
         userRank = {
-          rank: higherRankedCount + 1,
+          rank: (count || 0) + 1,
           username: currentUser.username || currentUser.email?.split('@')[0],
-          displayName: currentUser.displayName || currentUser.username,
-          avatar: currentUser.profile?.avatar || null,
-          xp: currentUser.xp || 0,
-          streak: currentUser.progress?.currentStreak || 0,
-          pkRating: currentUser.pkStats?.rating || 1000
+          displayName: currentUser.display_name || currentUser.username,
+          avatar: currentUser.avatar || null,
+          xp: currentUser.xp || 0
         };
       }
     }
-    
-    res.json({
-      success: true,
-      leaderboard,
-      userRank,
-      total: await User.countDocuments({})
-    });
-    
+
+    const { count: total } = await supabase
+      .from('users').select('id', { count: 'exact', head: true });
+
+    res.json({ success: true, leaderboard, userRank, total: total || 0 });
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to fetch leaderboard',
-      message: error.message 
-    });
+    res.status(500).json({ success: false, error: 'Failed to fetch leaderboard', message: error.message });
   }
 });
 
-// GET /api/leaderboard/top - Lấy top 3 nhanh cho widget
+// GET /api/leaderboard/top
 router.get('/top', async (req, res) => {
   try {
     const { type = 'xp' } = req.query;
-    
-    let sortField = type === 'streak' ? 'progress.currentStreak' : 
-                   type === 'pk' ? 'pkStats.rating' : 'xp';
-    
-    const topUsers = await User.find({})
-      .select('username displayName xp profile.avatar progress.currentStreak pkStats.rating')
-      .sort({ [sortField]: -1 })
-      .limit(3)
-      .lean();
-    
+
+    const { data: topUsers, error } = await supabase
+      .from('users').select('username,display_name,xp,avatar')
+      .order('xp', { ascending: false })
+      .limit(3);
+
+    if (error) throw error;
+
     res.json({
       success: true,
-      top: topUsers.map((user, index) => ({
+      top: (topUsers || []).map((user, index) => ({
         rank: index + 1,
-        displayName: user.displayName || user.username,
-        avatar: user.profile?.avatar,
-        value: type === 'streak' ? user.progress?.currentStreak : 
-               type === 'pk' ? user.pkStats?.rating : user.xp
+        displayName: user.display_name || user.username,
+        avatar: user.avatar,
+        value: user.xp
       }))
     });
-    
   } catch (error) {
     console.error('Error fetching top leaderboard:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch top users' });

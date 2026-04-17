@@ -1,175 +1,81 @@
-const mongoose = require('mongoose');
+// Lesson model - Supabase version
+const { supabase } = require('../src/config/supabase.cjs');
 
-const lessonSchema = new mongoose.Schema({
-  // classId: represents 'lớp' or learning path grouping (optional - kept for flexibility)
-  classId: {
-    type: Number,
-    required: false
-  },
-  // chapterId: represents 'chương' within a class
-  chapterId: {
-    type: Number,
-    required: false
-  },
-  // lessonId: bài học identifier inside chapter
-  lessonId: {
-    type: Number,
-    required: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  description: String,
-  level: {
-    type: String,
-    enum: ['Beginner', 'Intermediate', 'Advanced'],
-    default: 'Beginner'
-  },
-  // Theory content (HTML/Markdown) shown in lesson theory tab
-  theory: {
-    type: String
+const TABLE = 'lessons';
+
+const Lesson = {
+  async findById(id) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*').eq('id', id).single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
 
-  // Legacy content field kept for backward compatibility (optional)
-  content: {
-    type: String
+  async find(filters = {}, options = {}) {
+    let query = supabase.from(TABLE).select('*');
+    Object.entries(filters).forEach(([key, value]) => {
+      query = query.eq(key, value);
+    });
+    if (options.sort) {
+      Object.entries(options.sort).forEach(([field, dir]) => {
+        query = query.order(field, { ascending: dir === 1 || dir === 'asc' });
+      });
+    }
+    if (options.limit) query = query.limit(options.limit);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
   },
 
-  // Game object containing quizzes / interactive content
-  game: {
-    // Quiz array - single level (new structure)
-    quizzes: [{
-      type: {
-        type: String,
-        enum: ['multiple-choice', 'true-false', 'fill-in-blank', 'matching', 'ordering', 'drag-drop', 'molecule-assembly'],
-        required: true
-      },
-      question: {
-        type: String,
-        required: true
-      },
-      options: [String],
-      pairs: [{
-        left: String,
-        right: String
-      }],
-      correctOrder: [String],
-      correctAnswer: mongoose.Schema.Types.Mixed,
-      inline: Boolean,
-      slots: [{
-        id: Number,
-        label: String,
-        correct: String,
-        value: String
-      }],
-      explanation: String,
-      points: {
-        type: Number,
-        default: 10
-      },
-      hint: String
-    }],
-    // Legacy structure - kept for backward compatibility
-    basic: [{
-      type: {
-        type: String,
-        enum: ['multiple-choice', 'true-false', 'fill-in-blank', 'matching', 'ordering', 'drag-drop', 'molecule-assembly'],
-        required: true
-      },
-      question: {
-        type: String,
-        required: true
-      },
-      options: [String],
-      pairs: [{
-        left: String,
-        right: String
-      }],
-      correctOrder: [String],
-      correctAnswer: mongoose.Schema.Types.Mixed,
-      inline: Boolean,
-      slots: [{
-        id: Number,
-        label: String,
-        correct: String,
-        value: String
-      }],
-      explanation: String,
-      points: {
-        type: Number,
-        default: 10
-      },
-      hint: String
-    }],
-    intermediate: [{
-      type: {
-        type: String,
-        enum: ['multiple-choice', 'true-false', 'fill-in-blank', 'matching', 'ordering', 'drag-drop', 'molecule-assembly'],
-        required: true
-      },
-      question: {
-        type: String,
-        required: true
-      },
-      options: [String],
-      pairs: [{
-        left: String,
-        right: String
-      }],
-      correctOrder: [String],
-      correctAnswer: mongoose.Schema.Types.Mixed,
-      inline: Boolean,
-      slots: [{
-        id: Number,
-        label: String,
-        correct: String,
-        value: String
-      }],
-      explanation: String,
-      points: {
-        type: Number,
-        default: 15
-      },
-      hint: String
-    }],
-    advanced: [{
-      type: {
-        type: String,
-        enum: ['multiple-choice', 'true-false', 'fill-in-blank', 'matching', 'ordering', 'drag-drop', 'molecule-assembly'],
-        required: true
-      },
-      question: {
-        type: String,
-        required: true
-      },
-      options: [String],
-      pairs: [{
-        left: String,
-        right: String
-      }],
-      correctOrder: [String],
-      correctAnswer: mongoose.Schema.Types.Mixed,
-      inline: Boolean,
-      slots: [{
-        id: Number,
-        label: String,
-        correct: String,
-        value: String
-      }],
-      explanation: String,
-      points: {
-        type: Number,
-        default: 20
-      },
-      hint: String
-    }]
+  async findAll() {
+    const { data, error } = await supabase
+      .from(TABLE).select('*')
+      .order('class_id', { ascending: true })
+      .order('chapter_id', { ascending: true })
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    return data || [];
   },
-  order: Number,
-  createdAt: {
-    type: Date,
-    default: Date.now
+
+  async findByClassAndChapter(classId, chapterId) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*')
+      .eq('class_id', classId)
+      .eq('chapter_id', chapterId)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async findByClassChapterLesson(classId, chapterId, lessonId) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*')
+      .eq('class_id', classId)
+      .eq('chapter_id', chapterId)
+      .eq('lesson_id', lessonId)
+      .single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+
+  async create(lessonData) {
+    const { data, error } = await supabase
+      .from(TABLE).insert(lessonData).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async update(id, updates) {
+    const { data, error } = await supabase
+      .from(TABLE).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async delete(id) {
+    const { error } = await supabase.from(TABLE).delete().eq('id', id);
+    if (error) throw error;
   }
-});
+};
 
-module.exports = mongoose.model('Lesson', lessonSchema);
+module.exports = Lesson;

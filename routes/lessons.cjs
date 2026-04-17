@@ -1,13 +1,15 @@
 const express = require('express');
-const Lesson = require('../models/Lesson.cjs');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth.cjs');
 const path = require('path');
+
+// Note: Lessons are primarily loaded from filesystem (areas/Vatly/classX/index.cjs)
+// The Supabase lessons table is used as a secondary source
 
 // Get all lessons
 router.get('/', async (req, res) => {
   try {
-    const lessons = await Lesson.find().sort({ pathId: 1, order: 1 });
+    const Lesson = require('../models/Lesson.cjs');
+    const lessons = await Lesson.findAll();
     res.json(lessons);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -17,18 +19,18 @@ router.get('/', async (req, res) => {
 // Get lessons grouped by classId -> chapterId -> lessons
 router.get('/grouped', async (req, res) => {
   try {
-    const lessons = await Lesson.find().sort({ classId: 1, chapterId: 1, order: 1 });
+    const Lesson = require('../models/Lesson.cjs');
+    const lessons = await Lesson.findAll();
 
     const grouped = {};
     lessons.forEach((l) => {
-      const cId = l.classId || 0;
-      const chId = l.chapterId || 0;
+      const cId = l.class_id || 0;
+      const chId = l.chapter_id || 0;
       if (!grouped[cId]) grouped[cId] = {};
       if (!grouped[cId][chId]) grouped[cId][chId] = [];
       grouped[cId][chId].push(l);
     });
 
-    // convert to array structure
     const result = Object.keys(grouped).map((c) => ({
       classId: parseInt(c, 10),
       chapters: Object.keys(grouped[c]).map((ch) => ({
@@ -46,90 +48,70 @@ router.get('/grouped', async (req, res) => {
 // Get class statistics summary
 router.get('/statistics', async (req, res) => {
   try {
-    const lessons = await Lesson.find();
-    
-    // Group lessons by classId
+    const Lesson = require('../models/Lesson.cjs');
+    const lessons = await Lesson.findAll();
+
     const classStats = {};
-    
     lessons.forEach(lesson => {
-      const classId = lesson.classId;
+      const classId = lesson.class_id;
       if (!classStats[classId]) {
-        classStats[classId] = {
-          classId,
-          chapters: new Set(),
-          lessons: 0,
-          topics: new Set()
-        };
+        classStats[classId] = { classId, chapters: new Set(), lessons: 0 };
       }
-      
       classStats[classId].lessons++;
-      if (lesson.chapterId) {
-        classStats[classId].chapters.add(lesson.chapterId);
-      }
+      if (lesson.chapter_id) classStats[classId].chapters.add(lesson.chapter_id);
     });
-    
-    // Convert to array and format
+
     const result = Object.values(classStats).map(stat => ({
-      grade: stat.classId,
-      chapters: stat.chapters.size,
-      lessons: stat.lessons,
-      topics: [] // Topics will need to be defined separately or extracted from chapter names
+      grade: stat.classId, chapters: stat.chapters.size, lessons: stat.lessons, topics: []
     })).sort((a, b) => a.grade - b.grade);
-    
+
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Get lessons by path
+// Get lessons by class and chapter
 router.get('/class/:classId/chapter/:chapterId', async (req, res) => {
   try {
-    const lessons = await Lesson.find({
-      classId: parseInt(req.params.classId),
-      chapterId: parseInt(req.params.chapterId)
-    }).sort({ order: 1 });
-    
+    const Lesson = require('../models/Lesson.cjs');
+    const lessons = await Lesson.findByClassAndChapter(
+      parseInt(req.params.classId),
+      parseInt(req.params.chapterId)
+    );
     res.json(lessons);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Get specific lesson by classId, chapterId, lessonId (per-chapter)
+// Get specific lesson - loads from filesystem
 router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, res) => {
   try {
     const { classId, chapterId, lessonId } = req.params;
-    const subject = req.query.subject || 'physics'; // Default to physics
+    const subject = req.query.subject || 'physics';
 
-    console.log(`📂 Attempting to load lesson: subject=${subject}, class=${classId}, chapter=${chapterId}, lesson=${lessonId} (in-chapter index)`);
+    console.log(`📂 Loading lesson: subject=${subject}, class=${classId}, chapter=${chapterId}, lesson=${lessonId}`);
 
     try {
-      // Sử dụng path.resolve để đảm bảo đường dẫn chính xác từ root của project
       const basePath = subject === 'physics' ? 'Vatly' : 'Hoahoc';
       const lessonFilePath = path.resolve(__dirname, '..', 'areas', basePath, `class${classId}`, 'index.cjs');
-      
+
       console.log(`📁 Loading from: ${lessonFilePath}`);
-      
-      // Xóa cache để đảm bảo load file mới nhất
       delete require.cache[require.resolve(lessonFilePath)];
-      
       const allLessonsForClass = require(lessonFilePath);
 
       const lessonsInChapter = allLessonsForClass.filter(lesson => lesson.chapterId == chapterId);
-
-      // lessonId from URL is 1-based, array is 0-based.
       const lessonData = lessonsInChapter[parseInt(lessonId, 10) - 1];
 
       if (lessonData) {
-        console.log('✅ Loaded lesson from file system using chapter-based index');
+        console.log('✅ Loaded lesson from file system');
         return res.json(lessonData);
       } else {
-        console.log(`⚠️ Lesson not found for in-chapter index: ${lessonId}`);
         return res.status(404).json({ message: 'Lesson not found' });
       }
     } catch (fileError) {
-      console.log(`⚠️ Could not load lessons for class ${classId} from file system:`, fileError.message);
+      console.log(`⚠️ Could not load lessons for class ${classId}:`, fileError.message);
       return res.status(500).json({ message: `Could not load lesson data for class ${classId}.` });
     }
   } catch (error) {
@@ -138,61 +120,55 @@ router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, re
   }
 });
 
-// Get specific lesson (legacy route - kept for backward compatibility)
+// Get specific lesson (legacy route)
 router.get('/:pathId/:lessonId', async (req, res) => {
   try {
-    const lesson = await Lesson.findOne({ 
-      pathId: parseInt(req.params.pathId),
-      lessonId: parseInt(req.params.lessonId)
-    });
-    
-    if (!lesson) {
+    const Lesson = require('../models/Lesson.cjs');
+    const { data, error } = await require('../src/config/supabase.cjs').supabase
+      .from('lessons').select('*')
+      .eq('class_id', parseInt(req.params.pathId))
+      .eq('lesson_id', parseInt(req.params.lessonId))
+      .single();
+
+    if (error || !data) {
       return res.status(404).json({ message: 'Lesson not found' });
     }
-    
-    res.json(lesson);
+    res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Create new lesson (admin only)
+// Create new lesson
 router.post('/', async (req, res) => {
-  const lesson = new Lesson(req.body);
-  
   try {
-    const newLesson = await lesson.save();
-    res.status(201).json(newLesson);
+    const Lesson = require('../models/Lesson.cjs');
+    const lesson = await Lesson.create(req.body);
+    res.status(201).json(lesson);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-// Update lesson (admin only)
+// Update lesson
 router.patch('/:id', async (req, res) => {
   try {
-    const lesson = await Lesson.findById(req.params.id);
+    const Lesson = require('../models/Lesson.cjs');
+    const lesson = await Lesson.update(req.params.id, req.body);
     if (!lesson) {
       return res.status(404).json({ message: 'Lesson not found' });
     }
-    
-    Object.assign(lesson, req.body);
-    const updatedLesson = await lesson.save();
-    res.json(updatedLesson);
+    res.json(lesson);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-// Delete lesson (admin only)
+// Delete lesson
 router.delete('/:id', async (req, res) => {
   try {
-    const lesson = await Lesson.findById(req.params.id);
-    if (!lesson) {
-      return res.status(404).json({ message: 'Lesson not found' });
-    }
-    
-    await lesson.deleteOne();
+    const Lesson = require('../models/Lesson.cjs');
+    await Lesson.delete(req.params.id);
     res.json({ message: 'Lesson deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });

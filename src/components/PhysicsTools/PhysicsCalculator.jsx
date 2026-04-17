@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Calculator, Book, RefreshCw, Copy, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Calculator, Book, RefreshCw, Copy, Check, ArrowLeft, Terminal, Power } from 'lucide-react';
 import physicsConstants from '../../data/physicsConstants.json';
 
 // Định nghĩa các công thức vật lý theo chủ đề
@@ -276,13 +277,13 @@ const physicsFormulas = {
         ],
         calculate: (values) => {
           if (values.d && values.dp) {
-            return { f: 1 / (1/values.d + 1/values.dp) };
+            return { f: 1 / (1 / values.d + 1 / values.dp) };
           }
           if (values.f && values.d) {
-            return { dp: 1 / (1/values.f - 1/values.d) };
+            return { dp: 1 / (1 / values.f - 1 / values.d) };
           }
           if (values.f && values.dp) {
-            return { d: 1 / (1/values.f - 1/values.dp) };
+            return { d: 1 / (1 / values.f - 1 / values.dp) };
           }
           return null;
         }
@@ -315,11 +316,14 @@ const physicsFormulas = {
 };
 
 const PhysicsCalculator = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('mechanics');
   const [selectedFormula, setSelectedFormula] = useState(null);
   const [inputValues, setInputValues] = useState({});
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
+
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Chọn công thức đầu tiên khi thay đổi category
   const handleCategoryChange = (category) => {
@@ -345,11 +349,16 @@ const PhysicsCalculator = () => {
   };
 
   // Tính toán
-  const handleCalculate = () => {
+  const executeCalculation = () => {
     if (!selectedFormula) return;
-    
-    const calculatedResult = selectedFormula.calculate(inputValues);
-    setResult(calculatedResult);
+
+    try {
+      const calculatedResult = selectedFormula.calculate(inputValues);
+      setResult(calculatedResult || false); // Use false to denote error explicitly if needed
+    } catch (error) {
+      console.error('Calculation Error:', error);
+      setResult(false);
+    }
   };
 
   // Reset
@@ -361,80 +370,127 @@ const PhysicsCalculator = () => {
   // Copy kết quả
   const handleCopy = () => {
     if (!result) return;
-    
+
     const resultText = Object.entries(result)
-      .map(([key, value]) => `${key} = ${value.toFixed(4)}`)
+      .map(([key, value]) => `${key} = ${typeof value === 'number' ? value.toFixed(4) : value}`)
       .join('\n');
-    
+
     navigator.clipboard.writeText(resultText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   // Khởi tạo công thức đầu tiên
-  if (!selectedFormula && physicsFormulas[selectedCategory]) {
-    setSelectedFormula(physicsFormulas[selectedCategory].formulas[0]);
-  }
+  useEffect(() => {
+    if (!selectedFormula && physicsFormulas[selectedCategory]) {
+      setSelectedFormula(physicsFormulas[selectedCategory].formulas[0]);
+    }
+  }, [selectedCategory, selectedFormula]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="bg-[#FDFCF8] font-sans min-h-screen selection:bg-[#B87333]/20 selection:text-[#4A3728] relative overflow-hidden">
+      {/* Background Ambience */}
+      <div className="absolute inset-0 graph-grid opacity-[0.25] pointer-events-none" />
+      <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#B87333]/10" />
+
+      {/* Global CSS for Terminal Effect */}
+      <style>{`
+        @keyframes crt-flicker {
+            0% { opacity: 0.95; text-shadow: 0 0 5px rgba(212,175,55,0.8); }
+            5% { opacity: 0.8; }
+            10% { opacity: 1; text-shadow: 0 0 10px rgba(212,175,55,1); }
+            100% { opacity: 0.95; }
+        }
+        @keyframes typing {
+          from { width: 0 }
+          to { width: 100% }
+        }
+        .terminal-text {
+            color: #D4AF37;
+            text-shadow: 0 0 8px rgba(212,175,55,0.6);
+            animation: crt-flicker 0.15s infinite;
+        }
+      `}</style>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Calculator className="w-12 h-12 text-indigo-600 dark:text-indigo-400" />
-            <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
-              Máy Tính Vật Lý
-            </h1>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/physics-tools')}
+              className="group flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-[#E5E7EB] text-[#8C5523] shadow-sm hover:border-[#B87333]/30 hover:bg-[#F8F4EF] hover:shadow-md transition-all active:scale-95"
+            >
+              <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+            </button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-[#1E293B] tracking-tight flex items-center gap-3">
+                <Calculator className="w-8 h-8 text-[#B87333]" />
+                Máy Trạm Xử Lý Số Liệu
+              </h1>
+              <p className="text-slate-500 font-medium mt-1">
+                Lập trình và mô phỏng hệ thống đại lượng vật lý
+              </p>
+            </div>
           </div>
-          <p className="text-gray-600 dark:text-gray-300">
-            Tính toán các đại lượng vật lý theo công thức
-          </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+
           {/* Sidebar - Danh mục và công thức */}
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                <Book className="w-5 h-5" />
-                Chọn Công Thức
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <div className="bg-white rounded-[2rem] border border-[#E5E7EB] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] p-6 overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[#F8F4EF] rounded-bl-[100px] flex items-start justify-end p-5">
+                <Power className="w-6 h-6 text-[#B87333]/20" />
+              </div>
+
+              <h2 className="text-lg font-black text-[#1E293B] mb-6 flex items-center gap-2 relative z-10">
+                <span className="w-2 h-2 rounded-full bg-[#B87333]" />
+                Bảng Công Tắc Logic
               </h2>
 
-              {/* Categories */}
-              <div className="space-y-2 mb-4">
+              {/* Advanced Toggle Switch Categories */}
+              <div className="grid grid-cols-2 gap-3 mb-6 relative z-10">
                 {Object.entries(physicsFormulas).map(([key, category]) => (
                   <button
                     key={key}
                     onClick={() => handleCategoryChange(key)}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                      selectedCategory === key
-                        ? 'bg-indigo-600 text-white shadow-md'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
+                    className={`relative p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 group
+                      ${selectedCategory === key
+                        ? 'bg-[#F8F4EF] border-[#B87333] shadow-[inset_0_2px_5px_rgba(0,0,0,0.05)]'
+                        : 'bg-white border-[#E5E7EB] hover:border-[#B87333]/30'}`}
                   >
-                    {category.name}
+                    {/* Simulated LED Indicator */}
+                    <div className={`absolute top-2 right-2 w-1.5 h-1.5 rounded-full shadow-[0_0_5px] 
+                      ${selectedCategory === key ? 'bg-green-400 shadow-green-400 animate-pulse' : 'bg-slate-300 shadow-transparent'}`} />
+                    <div className="font-bold text-xs text-center leading-tight mt-1">
+                      <span className={selectedCategory === key ? 'text-[#8C5523]' : 'text-slate-500 group-hover:text-[#8C5523]'}>
+                        {category.name}
+                      </span>
+                    </div>
                   </button>
                 ))}
               </div>
 
               {/* Formulas */}
               {selectedCategory && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-4 mb-2">
-                    Công thức:
-                  </h3>
+                <div className="space-y-3 relative z-10 p-4 bg-[#FDFCF8] rounded-2xl border border-[#E5E7EB]">
+                  <div className="text-[10px] font-black text-[#B87333] tracking-[0.1em] uppercase mb-4 flex items-center gap-2">
+                    <Terminal className="w-3 h-3" /> CHỌN CHƯƠNG TRÌNH:
+                  </div>
                   {physicsFormulas[selectedCategory].formulas.map((formula) => (
                     <button
                       key={formula.id}
                       onClick={() => handleFormulaChange(formula)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
-                        selectedFormula?.id === formula.id
-                          ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border-2 border-blue-500'
-                          : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                      }`}
+                      className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group flex items-center justify-between ${selectedFormula?.id === formula.id
+                          ? 'bg-[#1E293B] text-white shadow-md'
+                          : 'bg-white text-slate-600 border border-[#E5E7EB] hover:border-[#B87333]/30 hover:bg-[#F8F4EF]'
+                        }`}
                     >
-                      {formula.name}
+                      <span className={`group-hover:translate-x-1 transition-transform ${selectedFormula?.id === formula.id ? 'text-[#D4AF37]' : ''}`}>{formula.name}</span>
+                      {selectedFormula?.id === formula.id && (
+                        <div className="w-2 h-2 rounded-full bg-[#D4AF37] shadow-[0_0_8px_#D4AF37] animate-pulse" />
+                      )}
                     </button>
                   ))}
                 </div>
@@ -443,112 +499,145 @@ const PhysicsCalculator = () => {
           </div>
 
           {/* Main Calculator */}
-          <div className="lg:col-span-2">
-            {selectedFormula && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                {/* Formula Info */}
-                <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30 rounded-lg border-l-4 border-indigo-500">
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                    {selectedFormula.name}
-                  </h3>
-                  <p className="text-3xl font-mono text-indigo-600 dark:text-indigo-400 mb-2">
-                    {selectedFormula.formula}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    {selectedFormula.description}
-                  </p>
-                </div>
+          <div className="lg:col-span-8 flex flex-col gap-6 relative">
+            {selectedFormula ? (
+              <div className="bg-white rounded-[2rem] border border-[#E5E7EB] shadow-[0_20px_40px_-15px_rgba(184,115,51,0.05)] p-8 sm:p-10 relative overflow-hidden group/calc">
 
-                {/* Input Fields */}
-                <div className="space-y-4 mb-6">
-                  <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                    Nhập giá trị:
-                  </h4>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {selectedFormula.variables.map((variable) => (
-                      <div key={variable.id}>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          {variable.name}
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="number"
-                            step="any"
-                            value={inputValues[variable.id] ?? variable.default ?? ''}
-                            onChange={(e) => handleInputChange(variable.id, e.target.value)}
-                            placeholder={variable.default ? `Mặc định: ${variable.default}` : 'Nhập giá trị'}
-                            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                          />
-                          <span className="flex items-center px-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg text-sm">
-                            {variable.unit}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                <div className="absolute inset-0 opacity-0 group-hover/calc:opacity-100 transition-opacity duration-1000 border-2 border-[#B87333]/5 rounded-[2rem] pointer-events-none" />
+
+                {/* Formula Header Info */}
+                <div className="mb-8 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[#E5E7EB] pb-8">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-[#1E293B] border border-[#B87333]/20 text-[#D4AF37] font-black text-[10px] tracking-[0.2em] uppercase shadow-sm">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                      Mạch đang mở
+                    </div>
+                    <h3 className="text-3xl font-black text-[#1E293B] mb-2 tracking-tight">
+                      {selectedFormula.name}
+                    </h3>
+                    <p className="text-slate-500 font-medium">
+                      {selectedFormula.description}
+                    </p>
+                  </div>
+
+                  {/* Digital Formula Display */}
+                  <div className="px-6 py-4 bg-[#0F172A] rounded-xl relative overflow-hidden flex-shrink-0 border-2 border-black/50 shadow-[inset_0_2px_10px_rgba(0,0,0,0.8)] max-w-full">
+                    <div className="absolute inset-0 graph-grid opacity-20" />
+                    <p className="text-xl md:text-2xl font-mono font-bold terminal-text relative z-10 whitespace-nowrap overflow-x-auto hide-scrollbar">
+                      &gt; {selectedFormula.formula}
+                    </p>
                   </div>
                 </div>
 
-                {/* Buttons */}
-                <div className="flex gap-4 mb-6">
+                {/* Terminal Input Interfaces */}
+                <div className="mb-10 relative z-10">
+                  <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
+                    {selectedFormula.variables.map((variable) => {
+                      return (
+                        <div key={variable.id} className="group">
+                          <label className="flex justify-between text-sm font-bold text-slate-700 mb-2 group-focus-within:text-[#B87333] transition-colors uppercase tracking-wider text-[11px]">
+                            <span>{variable.name}</span>
+                            <span className="text-slate-400">[{variable.id}]</span>
+                          </label>
+                          <div className="relative flex items-center">
+                            <input
+                              type="number"
+                              step="any"
+                              value={inputValues[variable.id] ?? variable.default ?? ''}
+                              onChange={(e) => handleInputChange(variable.id, e.target.value)}
+                              onKeyPress={(e) => e.key === 'Enter' && executeCalculation()}
+                              placeholder={variable.default ? `Mặc định: ${variable.default}` : '0.00'}
+                              className="w-full bg-[#FDFCF8] border-2 border-[#E5E7EB] px-4 py-3.5 pr-16 rounded-xl font-mono text-lg font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#B87333]/20 focus:border-[#B87333] transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] placeholder:text-slate-300"
+                            />
+                            <span className="absolute right-4 font-black text-[#8C5523] text-sm bg-white border border-[#E5E7EB] px-2 py-1 rounded shadow-sm select-none">
+                              {variable.unit}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Operation Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-4 relative z-10 pt-4 border-t border-[#E5E7EB]">
                   <button
-                    onClick={handleCalculate}
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                    onClick={executeCalculation}
+                    disabled={isProcessing}
+                    className="flex-1 pg-btn-brass py-4 rounded-xl flex items-center justify-center gap-3 font-bold shadow-lg text-sm sm:text-base disabled:opacity-50 disabled:cursor-wait relative overflow-hidden group"
                   >
-                    <Calculator className="w-5 h-5" />
-                    Tính Toán
+                    <Power className={`w-5 h-5 ${isProcessing ? 'animate-spin' : ''}`} />
+                    {isProcessing ? 'ĐANG BIÊN DỊCH...' : 'THỰC THI LỆNH'}
                   </button>
                   <button
                     onClick={handleReset}
-                    className="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                    className="px-8 py-4 bg-white border-2 border-[#E5E7EB] hover:bg-[#F8F4EF] hover:border-[#B87333]/50 text-slate-600 hover:text-[#8C5523] rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm sm:text-base group"
                   >
-                    <RefreshCw className="w-5 h-5" />
-                    Làm Lại
+                    <RefreshCw className="w-5 h-5 group-hover:-rotate-180 transition-transform duration-500" />
+                    LÀM MỚI
                   </button>
                 </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-[2rem] border border-[#E5E7EB] border-dashed p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+                <Terminal className="w-16 h-16 text-slate-200 mb-4" />
+                <p className="text-slate-500 font-medium">Hệ thống đang chờ. Vui lòng nạp chương trình công thức.</p>
+              </div>
+            )}
 
-                {/* Result */}
-                {result && (
-                  <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg border-l-4 border-green-500">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-lg font-bold text-gray-800 dark:text-white">
-                        Kết Quả:
-                      </h4>
-                      <button
-                        onClick={handleCopy}
-                        className="flex items-center gap-2 px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors"
-                      >
-                        {copied ? (
-                          <>
-                            <Check className="w-4 h-4" />
-                            Đã copy
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-4 h-4" />
-                            Copy
-                          </>
-                        )}
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      {Object.entries(result).map(([key, value]) => {
-                        const variable = selectedFormula.variables.find(v => 
-                          v.id === key || v.id.replace('p', '\'') === key
-                        );
-                        return (
-                          <div key={key} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg">
-                            <span className="text-gray-700 dark:text-gray-300 font-medium">
-                              {variable?.name || key}:
-                            </span>
-                            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                              {typeof value === 'number' ? value.toFixed(4) : value} {variable?.unit}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
+            {/* Instant Result Area */}
+            {result !== null && selectedFormula && (
+              <div className="bg-[#0F172A] rounded-[2rem] shadow-2xl p-8 sm:p-10 relative overflow-hidden border border-[#B87333]/20">
+                <div className="absolute inset-0 bg-[#D4AF37]/5 pointer-events-none" />
+                
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                  <div className="w-full">
+                    <h4 className="text-[10px] font-black tracking-[0.2em] uppercase text-slate-400 mb-4 flex items-center gap-2">
+                       <Terminal className="w-4 h-4 text-[#D4AF37]" />
+                       Kết Quả Truy Xuất
+                    </h4>
+                    {result === false ? (
+                      <p className="text-xl font-mono text-red-400 font-bold">LỖI: Thiếu tham số hoặc tham số không hợp lệ.</p>
+                    ) : (
+                      <div className="flex flex-col gap-4">
+                        {Object.entries(result).map(([key, value]) => {
+                          const variable = selectedFormula.variables.find(v => v.id === key || v.id.replace('p', '\'') === key);
+                          const displayValue = typeof value === 'number' ?
+                            (Math.abs(value) > 10000 || (Math.abs(value) < 0.0001 && value !== 0) ? value.toExponential(4) : value.toFixed(4))
+                            : value;
+                          return (
+                            <div key={key} className="flex items-baseline gap-4">
+                                <span className="text-3xl font-mono text-slate-400 font-bold">{key} = </span>
+                                <span className="text-4xl sm:text-5xl font-black text-[#D4AF37] font-mono tracking-wider truncate">
+                                    {displayValue}
+                                </span>
+                                <span className="text-xl font-mono text-slate-300 ml-2">{variable?.unit || ''}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  {result !== false && (
+                    <button
+                      onClick={handleCopy}
+                      className="inline-flex items-center gap-2 px-6 py-4 bg-[#1E293B] hover:bg-[#334155] border-2 border-white/10 text-[#D4AF37] rounded-xl text-sm font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 shrink-0"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="w-5 h-5 text-green-400" />
+                          <span className="text-green-400">Đã Sao Chép</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-5 h-5" />
+                          Sao Chép Logs
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>

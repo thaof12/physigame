@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calculator, BookOpen, ArrowLeftRight, ArrowLeft, Zap, Target } from 'lucide-react';
+import { Calculator, BookOpen, ArrowLeftRight, ArrowLeft, Wrench, Sparkles, ChevronRight, CheckCircle2 } from 'lucide-react';
+import heroMaster from '../assets/images/hero_master.png';
 
 const PhysicsToolsHub = () => {
   const navigate = useNavigate();
@@ -9,189 +10,233 @@ const PhysicsToolsHub = () => {
     {
       id: 'calculator',
       name: 'Máy Tính Vật Lý',
-      description: 'Tính toán các đại lượng vật lý theo công thức. Hỗ trợ cơ học, điện học, nhiệt học, quang học.',
+      description: 'Hệ thống tính toán tích hợp chuẩn xác. Nhập số liệu và kết xuất đáp án tức thời cho Cơ học, Điện học, Nhiệt học.',
       icon: Calculator,
-      color: 'from-blue-500 to-indigo-600',
       path: '/physics-tools/calculator',
-      features: ['Công thức cơ học', 'Định luật Ohm', 'Nhiệt lượng', 'Quang học']
+      features: ['Hỗ trợ công thức đa dạng', 'Quy đổi kết quả tự động', 'Biểu diễn phương trình']
     },
     {
       id: 'constants',
       name: 'Tra Cứu Hằng Số',
-      description: 'Tra cứu nhanh các hằng số vật lý quan trọng như c, G, h, k, e và nhiều hơn nữa.',
+      description: 'Bảng trị số vật lý tiêu chuẩn hóa quốc tế. Tra cứu nhanh chóng các hằng số vũ trụ, lượng tử và vi mô.',
       icon: BookOpen,
-      color: 'from-purple-500 to-pink-600',
       path: '/physics-tools/constants',
-      features: ['Hằng số cơ bản', 'Hằng số lượng tử', 'Hằng số điện từ', 'Khối lượng hạt']
+      features: ['Tìm kiếm nhanh thông tin', 'Hệ số siêu chính xác', 'Kèm giải thích tham chiếu']
     },
     {
       id: 'converter',
       name: 'Chuyển Đổi Đơn Vị',
-      description: 'Chuyển đổi nhanh giữa các đơn vị đo lường vật lý như độ dài, khối lượng, năng lượng.',
+      description: 'Thiết bị biến đổi định dạng đo lường đa năng. Chuyển tiếp mượt mà giữa các hệ quy chiếu khác nhau.',
       icon: ArrowLeftRight,
-      color: 'from-green-500 to-teal-600',
       path: '/physics-tools/converter',
-      features: ['Độ dài', 'Khối lượng', 'Năng lượng', 'Công suất', 'Nhiệt độ']
+      features: ['Đầy đủ hệ SI', 'Tính toán thời gian thực', 'Bao hàm 20+ danh mục đo lường']
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-4">
+    <div className="bg-[#FDFCF8] font-sans overflow-x-hidden min-h-screen selection:bg-[#B87333]/20 selection:text-[#4A3728]">
+      {/* ══════════════════════════════════════════
+          HERO & HEADER BANNER
+          ══════════════════════════════════════════ */}
+      <section className="relative pt-8 pb-20 overflow-hidden bg-[#FDFCF8]">
+        {/* Background Atmosphere */}
+        <div className="absolute inset-0 z-0 select-none pointer-events-none">
+          <img
+            src={heroMaster}
+            alt="Academy Background"
+            className="w-full h-[500px] object-cover opacity-10 blur-sm"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FDFCF8]/90 to-[#FDFCF8]" />
+        </div>
+        
+        {/* Dynamic Background Elements */}
+        <div className="absolute inset-0 graph-grid opacity-[0.25] pointer-events-none" />
+        <div className="absolute top-[10%] left-[-10%] w-[400px] h-[400px] rounded-full blur-[100px] pointer-events-none bg-[#B87333]/10" />
+
+        <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6">
+          {/* Top Bar */}
+          <div className="flex items-center gap-4 mb-16">
             <button
-              onClick={() => navigate(-1)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              onClick={() => navigate('/')}
+              className="group flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-[#E5E7EB] text-[#8C5523] shadow-sm hover:border-[#B87333]/30 hover:bg-[#F8F4EF] hover:shadow-md transition-all active:scale-95"
             >
-              <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+              <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
-                <Zap className="w-8 h-8 text-yellow-500" />
+              <h1 className="text-xl sm:text-2xl font-black text-[#1E293B] tracking-tight flex items-center gap-2">
+                <Wrench className="w-6 h-6 text-[#B87333]" />
                 Công Cụ Vật Lý
               </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Bộ công cụ hỗ trợ học tập và giải quyết bài toán vật lý
+              <p className="text-slate-500 font-medium text-sm mt-1">
+                Bộ vi xử lý thông số và bộ công cụ học thuật
               </p>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        {/* Introduction */}
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl p-8 mb-12 shadow-xl">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-white/20 rounded-xl">
-              <Target className="w-8 h-8" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold mb-3">
-                Giải quyết bài toán vật lý nhanh chóng và chính xác
-              </h2>
-              <p className="text-blue-100 leading-relaxed">
-                Sử dụng các công cụ dưới đây để tính toán, tra cứu và chuyển đổi các đại lượng vật lý. 
-                Tất cả đều được thiết kế để hỗ trợ học tập hiệu quả từ lớp 6 đến lớp 12.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Tools Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {tools.map((tool) => {
-            const Icon = tool.icon;
-            return (
-              <div
-                key={tool.id}
-                onClick={() => navigate(tool.path)}
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 overflow-hidden group"
-              >
-                {/* Color Header */}
-                <div className={`bg-gradient-to-r ${tool.color} p-6 text-white`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-white/20 rounded-xl group-hover:scale-110 transition-transform">
-                      <Icon className="w-8 h-8" />
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm opacity-80">Công cụ</div>
-                      <div className="text-2xl font-bold">#{tools.indexOf(tool) + 1}</div>
-                    </div>
+          {/* Hero Banner Area */}
+          <div className="bg-white rounded-[2.5rem] border border-[#E5E7EB] shadow-[0_20px_40px_-15px_rgba(184,115,51,0.15)] overflow-hidden relative group">
+            {/* Inner Decoration */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 border-2 border-[#B87333]/10 rounded-[2.5rem] pointer-events-none" />
+            
+            <div className="flex flex-col lg:flex-row items-stretch">
+              <div className="p-8 sm:p-12 lg:w-3/5 lg:py-16 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F8F4EF] border border-[#B87333]/20 text-[#8C5523] font-black text-[10px] tracking-[0.2em] uppercase mb-6 shadow-sm">
+                    <Sparkles className="w-3.5 h-3.5" /> Công cụ hỗ trợ độc quyền
                   </div>
-                  <h3 className="text-2xl font-bold">
-                    {tool.name}
-                  </h3>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                    {tool.description}
+                  <h2 className="text-3xl sm:text-4xl font-black text-[#1E293B] leading-[1.2] mb-4 tracking-tight">
+                    Giải quyết bài toán cơ học, nhiệt, điện từ nhanh chóng & chính xác
+                  </h2>
+                  <p className="text-slate-500 font-medium leading-relaxed mb-8 max-w-xl text-[15px]">
+                    Sử dụng hệ thống ma trận công thức tính toán dưới đây để tra cứu và chuyển đổi các đại lượng vật lý. 
+                    Mọi tham số đều được thiết lập chuẩn hóa, hỗ trợ bạn tiếp thu kiến thức một cách thuận lợi nhất.
                   </p>
-
-                  {/* Features */}
-                  <div className="space-y-2 mb-6">
-                    <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Tính năng:
-                    </div>
-                    {tool.features.map((feature, idx) => (
-                      <div 
-                        key={idx}
-                        className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
-                      >
-                        <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${tool.color}`} />
-                        {feature}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Button */}
-                  <button className={`w-full py-3 px-4 bg-gradient-to-r ${tool.color} text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 group-hover:gap-4`}>
-                    Mở công cụ
-                    <ArrowLeftRight className="w-5 h-5" />
-                  </button>
                 </div>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Additional Info */}
-        <div className="mt-12 grid md:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-              <span className="text-2xl">💡</span>
-              Hướng dẫn sử dụng
-            </h3>
-            <ul className="space-y-2 text-gray-600 dark:text-gray-300">
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">1.</span>
-                <span>Chọn công cụ phù hợp với nhu cầu của bạn</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">2.</span>
-                <span>Nhập các giá trị cần thiết vào form</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">3.</span>
-                <span>Nhấn nút tính toán để xem kết quả</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">4.</span>
-                <span>Sử dụng nút Copy để sao chép kết quả</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-              <span className="text-2xl">🎯</span>
-              Lợi ích
-            </h3>
-            <ul className="space-y-2 text-gray-600 dark:text-gray-300">
-              <li className="flex items-start gap-2">
-                <span className="text-green-500">✓</span>
-                <span>Tiết kiệm thời gian khi làm bài tập</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500">✓</span>
-                <span>Kiểm tra kết quả tính toán nhanh chóng</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500">✓</span>
-                <span>Tra cứu hằng số và đơn vị dễ dàng</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500">✓</span>
-                <span>Học cách áp dụng công thức vật lý</span>
-              </li>
-            </ul>
+              
+              <div className="lg:w-2/5 relative bg-gradient-to-tr from-[#1E293B] to-[#0F172A] min-h-[200px] flex items-center justify-center border-l lg:border-l-[#E5E7EB] overflow-hidden">
+                <div className="absolute inset-0 graph-grid opacity-10 pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.15)_0%,transparent_70%)]" />
+                <div className="p-8 relative z-10 animate-pulse-slow">
+                  {/* Decorative Gear / Mechanism */}
+                  <div className="w-32 h-32 rounded-full border border-[#D4AF37]/30 flex items-center justify-center relative backdrop-blur-sm">
+                    <div className="absolute inset-2 rounded-full border border-[#D4AF37]/20 border-dashed animate-[spin_20s_linear_infinite]" />
+                    <div className="absolute inset-6 rounded-full border border-[#B87333]/40 flex items-center justify-center shadow-[0_0_20px_rgba(184,115,51,0.2)]">
+                       <Wrench className="w-10 h-10 text-[#D4AF37]" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* ══════════════════════════════════════════
+          TOOLS GRID SECTIONS
+          ══════════════════════════════════════════ */}
+      <section className="pb-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {tools.map((tool, index) => {
+              const Icon = tool.icon;
+              return (
+                <div
+                  key={tool.id}
+                  onClick={() => navigate(tool.path)}
+                  className="bg-white rounded-[2rem] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] border border-[#E5E7EB] hover:shadow-[0_25px_50px_-15px_rgba(184,115,51,0.2)] hover:border-[#B87333]/30 transition-all duration-500 cursor-pointer transform hover:-translate-y-2 group overflow-hidden relative flex flex-col"
+                >
+                  {/* Gradient flair on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#B87333]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  
+                  {/* Card Header */}
+                  <div className="p-8 pb-6 border-b border-[#E5E7EB]/50 relative">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-14 h-14 rounded-[1.25rem] bg-[#F8F4EF] border border-[#B87333]/20 flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:bg-[#B87333] group-hover:text-white text-[#B87333] transition-all duration-500">
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] font-black text-slate-400 tracking-[0.15em] uppercase">MODULE</div>
+                        <div className="text-xl font-black text-[#8C5523] mt-0.5 opacity-40 group-hover:opacity-100 transition-opacity">0{index + 1}</div>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-black text-[#1E293B] group-hover:text-[#8C5523] transition-colors tracking-tight">
+                      {tool.name}
+                    </h3>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="p-8 flex-1 flex flex-col relative">
+                    <p className="text-slate-500 font-medium leading-relaxed text-[14px] flex-1">
+                      {tool.description}
+                    </p>
+
+                    <div className="mt-8 space-y-3 relative z-10">
+                      <div className="text-[10px] font-black text-[#B87333] tracking-[0.1em] uppercase mb-2">TIỆN ÍCH TÍCH HỢP:</div>
+                      {tool.features.map((feature, idx) => (
+                        <div 
+                          key={idx}
+                          className="flex items-center gap-3 text-sm text-slate-600 font-medium"
+                        >
+                          <CheckCircle2 className="w-4 h-4 text-[#B87333]/60 group-hover:text-[#B87333] transition-colors" />
+                          {feature}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-[#E5E7EB]/50">
+                      <button 
+                        onClick={() => navigate(tool.path)}
+                        className="w-full flex items-center justify-center gap-2 pg-btn-brass py-3 rounded-xl shadow-md text-sm"
+                      >
+                        Khởi động <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ══════════════════════════════════════════
+              ADDITIONAL INFO PANELS
+              ══════════════════════════════════════════ */}
+          <div className="mt-16 grid md:grid-cols-2 gap-8">
+            {/* Guide Panel */}
+            <div className="bg-white rounded-3xl p-8 border border-[#E5E7EB] shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#F8F4EF] rounded-bl-[100px] flex items-start justify-end p-6">
+                 <BookOpen className="w-8 h-8 text-[#B87333]/20" />
+              </div>
+              <h3 className="text-xl font-black text-[#1E293B] mb-6 flex items-center gap-3">
+                <span className="w-8 h-8 rounded-full bg-[#1E293B] flex items-center justify-center text-white text-sm shadow-sm">💡</span>
+                Cẩm nang kích hoạt
+              </h3>
+              <ul className="space-y-4">
+                {[
+                  'Chọn thiết bị vi xử lý phù hợp với tham số của bạn',
+                  'Nhập vào các biến số vật lý nguyên thủy',
+                  'Gửi yêu cầu chuỗi mô phỏng logic để thu đáp án',
+                  'Trích xuất (Sao chép) trực tiếp tới bộ nhớ đệm',
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-4">
+                    <span className="font-black text-[#B87333] bg-[#F8F4EF] px-2 py-0.5 rounded leading-none text-xs border border-[#B87333]/20 shadow-sm">B.0{idx + 1}</span>
+                    <span className="text-slate-600 font-medium text-sm leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Benefits Panel */}
+            <div className="bg-[#1E293B] rounded-3xl p-8 shadow-xl relative overflow-hidden group">
+               {/* Ambient interior glow */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(184,115,51,0.2)_0%,transparent_60%)] pointer-events-none" />
+              <div className="absolute inset-0 graph-grid opacity-10 pointer-events-none" />
+              
+              <h3 className="text-xl font-black text-white mb-6 flex items-center gap-3 relative z-10">
+                <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[#D4AF37] border border-white/20 text-sm shadow-sm backdrop-blur-sm">🎯</span>
+                Lợi ích cốt lõi
+              </h3>
+              <ul className="space-y-4 relative z-10">
+                {[
+                  'Cắt giảm cực hạn thời gian tiến trình học thuật',
+                  'Độ chính xác chuẩn quốc tế qua các hằng số',
+                  'Tiện dụng, tối ưu trên đa nền tảng',
+                  'Tích hợp hoàn hảo với lộ trình lý thuyết',
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-center gap-4">
+                    <span className="w-5 h-5 rounded-full bg-[#8C5523] flex items-center justify-center shrink-0 border border-[#D4AF37]/30">
+                      <CheckCircle2 className="w-3 h-3 text-white" />
+                    </span>
+                    <span className="text-slate-300 font-medium text-[14px] leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+        </div>
+      </section>
     </div>
   );
 };

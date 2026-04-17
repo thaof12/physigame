@@ -1,51 +1,47 @@
-const mongoose = require('mongoose');
+// LessonCompletion model - Supabase version
+const { supabase } = require('../src/config/supabase.cjs');
 
-const lessonCompletionSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+const TABLE = 'lesson_completions';
+
+const LessonCompletion = {
+  async findOne(userId, lessonId) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*')
+      .eq('user_id', userId).eq('lesson_id', lessonId).single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
-  lessonId: {
-    type: String,
-    required: true
+
+  async findByClass(userId, classId) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*')
+      .eq('user_id', userId).eq('class_id', classId).eq('completed', true);
+    if (error) throw error;
+    return data || [];
   },
-  classId: {
-    type: Number,
-    required: true
-  },
-  chapterId: {
-    type: Number,
-    required: true
-  },
-  lessonNumber: {
-    type: Number,
-    required: true
-  },
-  completed: {
-    type: Boolean,
-    default: false
-  },
-  score: {
-    type: Number,
-    required: true
-  },
-  totalQuestions: {
-    type: Number,
-    required: true
-  },
-  quizAnswers: {
-    type: Array,
-    required: true
-  },
-  completedAt: {
-    type: Date,
-    default: Date.now
+
+  async upsert(completionData) {
+    // Check existing
+    const { data: existing } = await supabase
+      .from(TABLE).select('id')
+      .eq('user_id', completionData.user_id)
+      .eq('lesson_id', completionData.lesson_id)
+      .single();
+
+    let result;
+    if (existing) {
+      const { data, error } = await supabase
+        .from(TABLE).update(completionData).eq('id', existing.id).select().single();
+      if (error) throw error;
+      result = data;
+    } else {
+      const { data, error } = await supabase
+        .from(TABLE).insert(completionData).select().single();
+      if (error) throw error;
+      result = data;
+    }
+    return result;
   }
-});
-
-lessonCompletionSchema.index({ userId: 1, lessonId: 1 }, { unique: true });
-
-const LessonCompletion = mongoose.model('LessonCompletion', lessonCompletionSchema);
+};
 
 module.exports = LessonCompletion;

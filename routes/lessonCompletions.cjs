@@ -3,82 +3,54 @@ const router = express.Router();
 const LessonCompletion = require('../models/LessonCompletion.cjs');
 const User = require('../models/User.cjs');
 
-
-// Get lesson completion status for a specific lesson
+// Get lesson completion status
 router.get('/', async (req, res) => {
-    try {
-        const { userId, lessonId } = req.query;
-        const user = await User.findOne({ $or: [{ email: userId }, { _id: userId }] });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        const completion = await LessonCompletion.findOne({ userId: user._id, lessonId });
-        res.json(completion);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
+  try {
+    const { userId, lessonId } = req.query;
+    const user = await User.findByAnyId(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const completion = await LessonCompletion.findOne(user.id, lessonId);
+    res.json(completion);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
 });
 
 // Get all completed lessons for a user in a class
 router.get('/class/:classId', async (req, res) => {
-    try {
-        const { userId } = req.query;
-        const { classId } = req.params;
-        const user = await User.findOne({ $or: [{ email: userId }, { _id: userId }] });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        const completions = await LessonCompletion.find({ userId: user._id, classId, completed: true });
-        res.json(completions);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-});
+  try {
+    const { userId } = req.query;
+    const user = await User.findByAnyId(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
+    const completions = await LessonCompletion.findByClass(user.id, parseInt(req.params.classId));
+    res.json(completions);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
 
 // Submit lesson completion
 router.post('/', async (req, res) => {
-    try {
-        const {
-            userId,
-            lessonId,
-            classId,
-            chapterId,
-            lessonNumber,
-            completed,
-            score,
-            totalQuestions,
-            quizAnswers
-        } = req.body;
+  try {
+    const { userId, lessonId, classId, chapterId, lessonNumber, completed, score, totalQuestions, quizAnswers } = req.body;
 
-        // find user by email or id
-        const user = await User.findOne({ $or: [{ email: userId }, { _id: userId }] });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+    const user = await User.findByAnyId(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-        const completionData = {
-            userId: user._id,
-            lessonId,
-            classId,
-            chapterId,
-            lessonNumber,
-            completed,
-            score,
-            totalQuestions,
-            quizAnswers
-        };
+    const completion = await LessonCompletion.upsert({
+      user_id: user.id, lesson_id: lessonId,
+      class_id: classId, chapter_id: chapterId,
+      lesson_number: lessonNumber, completed,
+      score, total_questions: totalQuestions,
+      quiz_answers: quizAnswers
+    });
 
-        const completion = await LessonCompletion.findOneAndUpdate(
-            { userId: user._id, lessonId },
-            completionData,
-            { upsert: true, new: true, setDefaultsOnInsert: true }
-        );
-
-        res.status(201).json(completion);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
+    res.status(201).json(completion);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
 });
 
 module.exports = router;

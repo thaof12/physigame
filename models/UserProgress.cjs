@@ -1,68 +1,36 @@
-const mongoose = require('mongoose');
+// UserProgress model - Supabase version
+const { supabase } = require('../src/config/supabase.cjs');
 
-const UserProgressSchema = new mongoose.Schema({
-    // Tham chiếu đến người dùng (nếu bạn có mô hình User riêng)
-    // Nếu chưa có, bạn có thể dùng một ID hoặc tên người dùng tạm thời.
-    userId: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User', // Giả sử bạn có model 'User'
-        required: true,
-        unique: true // Mỗi người dùng chỉ có một tài liệu tiến trình
-    },
-    
-    // 1. Theo dõi Lớp học (Class) và Chương học (Chapter)
-    // Lưu trạng thái học tập hiện tại và đã hoàn thành
-    learningProgress: {
-        type: [
-            {
-                area: { type: String, enum: ['Vatly', 'Hoahoc'], required: true }, // 'Vatly' hoặc 'Hoahoc'
-                class: { type: String, required: true }, // Ví dụ: 'class6', 'class10', v.v.
-                completedChapters: {
-                    type: [
-                        {
-                            chapterId: { type: String, required: true }, // ID/slug/tên của chương
-                            completedAt: { type: Date, default: Date.now }
-                        }
-                    ],
-                    default: []
-                },
-                lastAccessed: { type: Date } // Thời gian truy cập gần nhất vào lớp này
-            }
-        ],
-        default: []
-    },
+const TABLE = 'user_progress';
 
-    // 2. Theo dõi Trò chơi (Games) đã chơi
-    // Lưu các trò chơi đã chơi và kết quả (tùy chọn)
-    gameProgress: {
-        type: [
-            {
-                gameId: { type: String, required: true }, // ID/slug/tên của trò chơi
-                area: { type: String, enum: ['Vatly', 'Hoahoc'] },
-                class: { type: String },
-                score: { type: Number }, // Điểm số hoặc kết quả cuối cùng
-                playedAt: { type: Date, default: Date.now }
-            }
-        ],
-        default: []
-    },
+const UserProgress = {
+  async findByUserId(userId) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*').eq('user_id', userId).single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
 
-   // 2. Theo dõi Trò chơi (Games) đã chơi
-    // Lưu các trò chơi đã chơi và kết quả (tùy chọn)
-    gameProgress: {
-        type: [
-            {
-                gameId: { type: String, required: true }, // ID/slug/tên của trò chơi
-                area: { type: String, enum: ['Vatly', 'Hoahoc'] },
-                class: { type: String },
-                score: { type: Number }, // Điểm số hoặc kết quả cuối cùng
-                playedAt: { type: Date, default: Date.now }
-            }
-        ],
-        default: []
-    },
+  async create(progressData) {
+    const { data, error } = await supabase
+      .from(TABLE).insert(progressData).select().single();
+    if (error) throw error;
+    return data;
+  },
 
-    // Tự động quản lý thời gian tạo/cập nhật
-}, { timestamps: true });
+  async update(userId, updates) {
+    const { data, error } = await supabase
+      .from(TABLE).update(updates).eq('user_id', userId).select().single();
+    if (error) throw error;
+    return data;
+  },
 
-module.exports = mongoose.model('UserProgress', UserProgressSchema);
+  async upsert(progressData) {
+    const { data, error } = await supabase
+      .from(TABLE).upsert(progressData, { onConflict: 'user_id' }).select().single();
+    if (error) throw error;
+    return data;
+  }
+};
+
+module.exports = UserProgress;

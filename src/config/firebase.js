@@ -4,13 +4,13 @@ import { getAnalytics } from 'firebase/analytics';
 
 // FirebaseConfig
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: "AIzaSyBSBcSWYJ9JNkUzQatW4JD-As8wbdtsoOw",
+  authDomain: "physigame.firebaseapp.com",
+  projectId: "physigame",
+  storageBucket: "physigame.firebasestorage.app",
+  messagingSenderId: "1045625689938",
+  appId: "1:1045625689938:web:b68bdcc06b9d9b378f8c8b",
+  measurementId: "G-TPNP1D1BJN"
 };
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

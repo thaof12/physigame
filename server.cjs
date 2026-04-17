@@ -1,9 +1,11 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
+
+// Verify Supabase connection
+const { supabase } = require('./src/config/supabase.cjs');
 
 const app = express();
 const server = http.createServer(app);
@@ -38,39 +40,24 @@ app.use((req, res, next) => {
   next();
 });
 
-// Database connection
-const MONGODB_URI = process.env.MONGODB_URI;
-
-// Set mongoose options
-mongoose.set('strictQuery', false);
-mongoose.set('bufferTimeoutMS', 30000); // Increase buffer timeout to 30 seconds
-
-mongoose
-  .connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 10000, // Timeout after 10s instead of default 30s
-    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
-  })
-  .then(() => {
-    console.log('✓ Connected to MongoDB');
-    console.log('✓ Database:', mongoose.connection.name);
-  })
-  .catch((err) => {
-    console.error('❌ MongoDB connection error:', err.message);
-    console.error('⚠️  Please check:');
-    console.error('   1. Your IP is whitelisted in MongoDB Atlas Network Access');
-    console.error('   2. Your credentials are correct');
-    console.error('   3. Your cluster is running');
-    process.exit(1); // Exit if cannot connect to database
-  });
-
-// Handle connection events
-mongoose.connection.on('disconnected', () => {
-  console.log('⚠️  MongoDB disconnected');
-});
-
-mongoose.connection.on('error', (err) => {
-  console.error('❌ MongoDB error:', err.message);
-});
+// Test Supabase connection
+(async () => {
+  try {
+    const { data, error } = await supabase.from('users').select('id', { count: 'exact', head: true });
+    if (error && error.code !== '42P01') {
+      console.error('❌ Supabase connection error:', error.message);
+      console.error('⚠️  Please check:');
+      console.error('   1. SUPABASE_URL is correct in .env');
+      console.error('   2. SUPABASE_SERVICE_ROLE_KEY is correct in .env');
+      console.error('   3. Database schema has been created (run supabase_schema.sql)');
+    } else {
+      console.log('✓ Connected to Supabase');
+      console.log('✓ Database: PostgreSQL (Supabase)');
+    }
+  } catch (err) {
+    console.error('❌ Supabase connection error:', err.message);
+  }
+})();
 
 // Routes
 app.use('/api/auth', require('./routes/auth.cjs'));
@@ -80,10 +67,15 @@ app.use('/api/challenges', require('./routes/challenges.cjs'));
 app.use('/api/battles', require('./routes/battles.cjs'));
 app.use('/api/quests', require('./routes/quests.cjs'));
 app.use('/api/leaderboard', require('./routes/leaderboard.cjs'));
+app.use('/api/auth', require('./routes/authRoutes.cjs'));
+app.use('/api/game-results', require('./routes/gameResults.cjs'));
+app.use('/api/lesson-completions', require('./routes/lessonCompletions.cjs'));
+app.use('/api/study-progress', require('./routes/StudyProgress.cjs'));
+app.use('/api/games-progress', require('./routes/GamesProgress.cjs'));
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
+  res.json({ status: 'OK', message: 'Server is running', database: 'Supabase' });
 });
 
 // ================================
@@ -233,26 +225,22 @@ io.on('connection', (socket) => {
 
   // Join matchmaking queue
   socket.on('pk:join-queue', (data) => {
-    const { odbaseUId, displayName, avatar, gameSettings } = data;
-    
-    // Store player info
+    const { firebaseUid, displayName, avatar, gameSettings } = data;
+
     playerSockets.set(socket.id, {
-      odbaseUId,
+      firebaseUid,
       displayName,
       avatar,
       gameSettings,
       socketId: socket.id
     });
 
-    // Check if there's someone waiting in queue
     const waitingPlayer = matchmakingQueue.find(p => p.socketId !== socket.id);
-    
+
     if (waitingPlayer) {
-      // Match found!
       const roomId = generateRoomId();
       const questions = getRandomQuestions(gameSettings?.totalQuestions || 10);
-      
-      // Create room
+
       activeRooms.set(roomId, {
         roomId,
         players: [waitingPlayer, playerSockets.get(socket.id)],
@@ -262,11 +250,9 @@ io.on('connection', (socket) => {
         status: 'playing'
       });
 
-      // Remove from queue
       const idx = matchmakingQueue.findIndex(p => p.socketId === waitingPlayer.socketId);
       if (idx > -1) matchmakingQueue.splice(idx, 1);
 
-      // Notify both players
       const player1Socket = io.sockets.sockets.get(waitingPlayer.socketId);
       const player2Socket = socket;
 
@@ -290,7 +276,6 @@ io.on('connection', (socket) => {
 
       console.log(`⚔️ Match created: ${roomId}`);
     } else {
-      // Add to queue
       matchmakingQueue.push(playerSockets.get(socket.id));
       socket.emit('pk:queue-position', matchmakingQueue.length);
       console.log(`👤 Player added to queue. Queue size: ${matchmakingQueue.length}`);
@@ -309,28 +294,26 @@ io.on('connection', (socket) => {
   // Join specific room
   socket.on('pk:join-room', async (data) => {
     const { roomId, firebaseUid, displayName, avatar, gameSettings } = data;
-    
+
     console.log(`📥 pk:join-room received: ${displayName} wants to join room ${roomId}`);
-    
+
     socket.join(roomId);
     const playerData = { firebaseUid, displayName, avatar, socketId: socket.id };
     playerSockets.set(socket.id, playerData);
-    
-    // Initialize room if not exists
+
     if (!activeRooms.has(roomId)) {
-      // Try to fetch gameSettings from database (created by API)
       let dbGameSettings = {};
       try {
         const Battle = require('./models/Battle.cjs');
-        const battle = await Battle.findOne({ roomId });
+        const battle = await Battle.findByRoomId(roomId);
         if (battle) {
           dbGameSettings = {
-            gameMode: battle.gameMode || 'mixed',
+            gameMode: battle.game_mode || 'mixed',
             grade: battle.grade || 'all',
             topic: battle.topic || 'all',
             difficulty: battle.difficulty || 'mixed',
-            totalQuestions: battle.totalQuestions || 10,
-            timePerQuestion: battle.timePerQuestion || 30
+            totalQuestions: battle.total_questions || 10,
+            timePerQuestion: battle.time_per_question || 30
           };
           console.log(`📂 Loaded gameSettings from DB for room ${roomId}:`, dbGameSettings);
         } else {
@@ -341,7 +324,7 @@ io.on('connection', (socket) => {
         console.log(`⚠️ Error loading battle from DB: ${err.message}`);
         dbGameSettings = gameSettings || {};
       }
-      
+
       activeRooms.set(roomId, {
         roomId,
         players: [playerData],
@@ -352,51 +335,33 @@ io.on('connection', (socket) => {
         status: 'waiting'
       });
       console.log(`🏠 Room created in memory: ${roomId} by ${displayName}`);
-      console.log(`📋 Room gameSettings:`, dbGameSettings);
     } else {
-      // Add player to existing room
       const room = activeRooms.get(roomId);
-      console.log(`📋 Room ${roomId} already exists with ${room.players.length} player(s)`);
-      
-      // Check if player already in room (by socketId, not firebaseUid to allow same user testing)
       const alreadyInRoom = room.players.find(p => p.socketId === socket.id);
       if (room.players.length < 2 && !alreadyInRoom) {
         room.players.push(playerData);
         console.log(`👤 ${displayName} joined room: ${roomId} (now ${room.players.length} players)`);
-        
-        // Send existing player info to the new joiner
+
         const existingPlayer = room.players[0];
-        console.log(`📤 Sending existing player info to ${displayName}: ${existingPlayer.displayName}`);
-        socket.emit('pk:player-joined', { 
-          firebaseUid: existingPlayer.firebaseUid, 
-          displayName: existingPlayer.displayName, 
-          avatar: existingPlayer.avatar 
+        socket.emit('pk:player-joined', {
+          firebaseUid: existingPlayer.firebaseUid,
+          displayName: existingPlayer.displayName,
+          avatar: existingPlayer.avatar
         });
-      } else {
-        console.log(`⚠️ Player ${displayName} already in room or room full`);
       }
     }
-    
-    // Notify others in room about new player
+
     socket.to(roomId).emit('pk:player-joined', { firebaseUid, displayName, avatar });
-    
-    // Check if room is ready (2 real players)
+
     const room = activeRooms.get(roomId);
     if (room && room.players.length === 2 && room.status === 'waiting') {
       room.status = 'playing';
-      
       const gameMode = room.gameSettings?.gameMode || 'mixed';
       console.log(`⚔️ Battle starting in room: ${roomId}`);
-      console.log(`   Players: ${room.players.map(p => p.displayName).join(' vs ')}`);
-      console.log(`   Game Mode: ${gameMode}`);
-      
-      // Small delay to ensure both clients are ready
+
       setTimeout(() => {
-        // Let client generate rounds based on gameMode
-        // Server only provides gameSettings, client handles round generation
-        io.to(roomId).emit('pk:game-start', { 
+        io.to(roomId).emit('pk:game-start', {
           gameSettings: room.gameSettings,
-          // Only provide questions if mode is quiz
           questions: gameMode === 'quiz' ? getRandomQuestions(room.gameSettings?.totalQuestions || 10) : null
         });
       }, 500);
@@ -406,18 +371,17 @@ io.on('connection', (socket) => {
   // Submit answer
   socket.on('pk:submit-answer', (data) => {
     const { roomId, questionIndex, answer, isCorrect, pointsEarned, responseTime } = data;
-    
+
     const room = activeRooms.get(roomId);
     if (room) {
       const player = playerSockets.get(socket.id);
       if (player) {
-        room.scores[player.odbaseUId] = (room.scores[player.odbaseUId] || 0) + pointsEarned;
+        room.scores[player.firebaseUid] = (room.scores[player.firebaseUid] || 0) + pointsEarned;
       }
-      
-      // Notify opponent
+
       socket.to(roomId).emit('pk:opponent-answered', {
         questionIndex,
-        opponentScore: room.scores[player?.odbaseUId] || 0
+        opponentScore: room.scores[player?.firebaseUid] || 0
       });
     }
   });
@@ -427,8 +391,7 @@ io.on('connection', (socket) => {
     const { roomId } = data;
     socket.leave(roomId);
     socket.to(roomId).emit('pk:player-left');
-    
-    // Clean up room if empty
+
     const room = io.sockets.adapter.rooms.get(roomId);
     if (!room || room.size === 0) {
       activeRooms.delete(roomId);
@@ -438,33 +401,24 @@ io.on('connection', (socket) => {
   // Disconnect
   socket.on('disconnect', () => {
     console.log('👋 Player disconnected:', socket.id);
-    
-    // Remove from queue
+
     const idx = matchmakingQueue.findIndex(p => p.socketId === socket.id);
     if (idx > -1) matchmakingQueue.splice(idx, 1);
-    
-    // Remove player from any active rooms
+
     for (const [roomId, room] of activeRooms.entries()) {
       const playerIdx = room.players.findIndex(p => p.socketId === socket.id);
       if (playerIdx > -1) {
         const removedPlayer = room.players.splice(playerIdx, 1)[0];
         console.log(`🚪 ${removedPlayer.displayName} removed from room ${roomId}`);
-        
-        // Notify other players
         io.to(roomId).emit('pk:player-left', { displayName: removedPlayer.displayName });
-        
-        // Delete room if empty
         if (room.players.length === 0) {
           activeRooms.delete(roomId);
           console.log(`🗑️ Room ${roomId} deleted (empty)`);
         }
       }
     }
-    
-    // Clean up player data
+
     playerSockets.delete(socket.id);
-    
-    // Broadcast updated count
     io.emit('pk:players-online', io.sockets.sockets.size);
   });
 });
@@ -480,5 +434,6 @@ const PORT = process.env.PORT || 5002;
 server.listen(PORT, () => {
   console.log(`✓ Server is running on port ${PORT}`);
   console.log(`✓ Socket.io enabled for PK Battle`);
+  console.log(`✓ Database: Supabase (PostgreSQL)`);
   console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
 });

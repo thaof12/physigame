@@ -1,400 +1,270 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+// User model - Supabase version
+const { supabase } = require('../src/config/supabase.cjs');
 
-const userSchema = new mongoose.Schema({
-  // Thông tin tài khoản
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    minlength: 3,
-    maxlength: 30
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  password: {
-    type: String // Để trống nếu đăng nhập bằng Google
-  },
-  firebaseUid: {
-    type: String,
-    unique: true,
-    sparse: true // Cho phép null
-  },
-  googleId: {
-    type: String,
-    unique: true,
-    sparse: true // Cho phép null
-  },
-  displayName: {
-    type: String,
-    default: ''
-  },
-  avatar: {
-    type: String,
-    default: ''
+const TABLE = 'users';
+
+const User = {
+  // ============ QUERY METHODS ============
+
+  async findById(id) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*').eq('id', id).single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
 
-  // Vai trò người dùng
-  role: {
-    type: String,
-    enum: ['student', 'teacher'],
-    default: 'student'
+  async findByEmail(email) {
+    const { data, error } = await supabase  
+      .from(TABLE).select('*').eq('email', email).single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
 
-  // Trạng thái xác minh giáo viên (chỉ áp dụng cho role = 'teacher')
-  teacherStatus: {
-    type: String,
-    enum: ['pending', 'verified', 'rejected'],
-    default: null
+  async findByUsername(username) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*').eq('username', username).single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   },
 
-  // Thông tin giáo viên
-  teacherProfile: {
-    school: {
-      type: String,
-      default: ''
-    },
-    subject: {
-      type: String,
-      default: ''
-    },
-    teachingGrades: {
-      type: [Number],
-      default: []
-    },
-    bio: {
-      type: String,
-      default: ''
-    },
-    appliedAt: Date,
-    verifiedAt: Date,
-    verifiedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    rejectedAt: Date,
-    rejectionReason: String
+  async findByEmailOrUsername(email, username) {
+    const { data, error } = await supabase
+      .from(TABLE).select('*').or(`email.eq.${email},username.eq.${username}`).limit(1);
+    if (error) throw error;
+    return data && data.length > 0 ? data[0] : null;
   },
-  
-  // Profile information
-  profile: {
-    grade: Number, // Lớp học hiện tại sau khi làm placement test
-    bio: String,
-    avatar: String
-  },
-  
-  // XP và Level
-  xp: {
-    type: Number,
-    default: 0,
-    min: 0
-  },
-  level: {
-    type: Number,
-    default: 1,
-    min: 1
-  },
-  
-  // Chương trình học
-  programs: [{
-    programId: {
-      type: String,
-      required: true,
-      enum: ['chemistry', 'physics', 'biology', 'math']
-    },
-    programName: String,
-    currentClass: Number, // Lớp đang học (8, 9, 10, 11, 12)
-    // currentLesson: Number, // Bài đang học (removed - progress tracked in progress.completedLessons)
-    isActive: {
-      type: Boolean,
-      default: true
-    },
-    placementTestCompleted: {
-      type: Boolean,
-      default: false
-    },
-    placementTestScore: Number,
-    enrolledAt: {
-      type: Date,
-      default: Date.now
-    },
-    progress: {
-      completedLessons: [Number], // Danh sách ID các bài đã hoàn thành
-      lessonStars: {
-        type: Map,
-        of: Number,
-        default: new Map() // Key: uniqueLessonId, Value: số sao (1-3)
-      },
-      totalScore: {
-        type: Number,
-        default: 0
-      },
-      lastStudyDate: Date
-    }
-  }],
-  
-  // Physics Games Progress - Tiến độ hành trình game Vật lý theo lớp
-  physicsGameProgress: {
-    type: Map,
-    of: {
-      type: Object,
-      default: () => ({
-        completed: [],  // Danh sách ID game đã hoàn thành
-        current: null   // Game đang chơi
-      })
-    },
-    default: new Map() // Key: grade (6, 7, 8, 9, 10, 11, 12), Value: { completed, current }
-  },
-  
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-});
 
-// Middleware tự động cập nhật updatedAt
-userSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
-
-// Methods - Authentication
-userSchema.methods.setPassword = async function(password) {
-  this.password = await bcrypt.hash(password, 10);
-};
-
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  if (!this.password) return false;
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
-// Methods - XP & Level
-userSchema.methods.addXP = function(amount) {
-  this.xp += amount;
-  const newLevel = Math.floor(this.xp / 100) + 1;
-  const leveledUp = newLevel > this.level;
-  this.level = newLevel;
-  
-  return { xp: this.xp, level: this.level, leveledUp };
-};
-
-// Methods - Program
-userSchema.methods.enrollProgram = function(programId, programName, currentClass = null) {
-  const existing = this.programs.find(p => p.programId === programId);
-  if (existing) return existing;
-
-    const newProgram = {
-    programId,
-    programName,
-    currentClass: currentClass, // Lớp được chọn khi đăng ký
-    enrolledAt: new Date(),
-    progress: {
-      completedLessons: [],
-      totalScore: 0,
-      lastStudyDate: null
-    }
-  };
-
-  this.programs.push(newProgram);
-  return newProgram;
-};
-
-userSchema.methods.updateProgramProgress = function(programId, classId, lessonId, score) {
-  let program = this.programs.find(p => p.programId === programId);
-  
-  // Nếu chưa có program, tự động tạo mới
-  if (!program) {
-    const programNames = {
-      chemistry: 'Hóa học',
-      physics: 'Vật lý',
-      biology: 'Sinh học',
-      math: 'Toán học'
-    };
+  async findOne(filters) {
+    let query = supabase.from(TABLE).select('*');
     
+    if (filters.email) query = query.eq('email', filters.email);
+    if (filters.id) query = query.eq('id', filters.id);
+    if (filters.username) query = query.eq('username', filters.username);
+    
+    const { data, error } = await query.limit(1).single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  },
+
+  // Find by email, id, or firebaseUid (old) - flexible lookup
+  async findByAnyId(idValue) {
+    // Try by email first
+    let { data, error } = await supabase
+      .from(TABLE).select('*').eq('email', idValue).single();
+    if (data) return data;
+
+    // Try by ID (UUID format)
+    if (idValue && idValue.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      ({ data, error } = await supabase
+        .from(TABLE).select('*').eq('id', idValue).single());
+      if (data) return data;
+    }
+
+    return null;
+  },
+
+  async find(filters = {}, options = {}) {
+    let query = supabase.from(TABLE).select(options.select || '*');
+
+    // Apply filters
+    Object.entries(filters).forEach(([key, value]) => {
+      query = query.eq(key, value);
+    });
+
+    // Apply sorting
+    if (options.sort) {
+      Object.entries(options.sort).forEach(([field, dir]) => {
+        query = query.order(field, { ascending: dir === 1 || dir === 'asc' });
+      });
+    }
+
+    // Apply limit
+    if (options.limit) query = query.limit(options.limit);
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  },
+
+  // ============ MUTATION METHODS ============
+
+  async create(userData) {
+    const { data, error } = await supabase
+      .from(TABLE).insert(userData).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async update(id, updates) {
+    const { data, error } = await supabase
+      .from(TABLE).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async upsert(userData) {
+    const { data, error } = await supabase
+      .from(TABLE).upsert(userData).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async delete(id) {
+    const { error } = await supabase
+      .from(TABLE).delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  async countDocuments(filters = {}) {
+    let query = supabase.from(TABLE).select('id', { count: 'exact', head: true });
+    Object.entries(filters).forEach(([key, value]) => {
+      query = query.eq(key, value);
+    });
+    const { count, error } = await query;
+    if (error) throw error;
+    return count || 0;
+  },
+
+  // ============ BUSINESS LOGIC METHODS ============
+
+  addXP(user, amount) {
+    user.xp = (user.xp || 0) + amount;
+    const newLevel = Math.floor(user.xp / 100) + 1;
+    const leveledUp = newLevel > (user.level || 1);
+    user.level = newLevel;
+    return { xp: user.xp, level: user.level, leveledUp };
+  },
+
+  enrollProgram(user, programId, programName, currentClass = null) {
+    const programs = user.programs || [];
+    const existing = programs.find(p => p.programId === programId);
+    if (existing) return existing;
+
     const newProgram = {
-      programId: programId,
-      programName: programNames[programId] || programId,
-      currentClass: parseInt(classId),
+      programId,
+      programName,
+      currentClass,
+      enrolledAt: new Date().toISOString(),
       isActive: true,
       placementTestCompleted: false,
-      enrolledAt: new Date(),
       progress: {
         completedLessons: [],
+        lessonStars: {},
         totalScore: 0,
         lastStudyDate: null
       }
     };
-    
-    this.programs.push(newProgram);
-    // Lấy lại reference từ array sau khi push
-    program = this.programs[this.programs.length - 1];
-    console.log('✅ Auto-created program:', programId, 'with lesson:', lessonId);
-  }
 
-  // Cập nhật lớp và bài hiện tại
-  program.currentClass = parseInt(classId);
-  
-  console.log('📝 Updating program:', {
-    programId,
-    currentClass: program.currentClass
-  });
-  
-  // Tạo unique ID cho bài học: classId * 1000 + lessonId
-  // Ví dụ: Lớp 8, Bài 1 -> 8001, Lớp 9, Bài 1 -> 9001
-  const uniqueLessonId = parseInt(classId) * 1000 + parseInt(lessonId);
-  
-  // Thêm bài đã hoàn thành (kiểm tra trùng)
-  if (!program.progress.completedLessons) {
-    program.progress.completedLessons = [];
+    programs.push(newProgram);
+    user.programs = programs;
+    return newProgram;
+  },
+
+  updateProgramProgress(user, programId, classId, lessonId, score) {
+    const programs = user.programs || [];
+    let program = programs.find(p => p.programId === programId);
+
+    if (!program) {
+      const programNames = {
+        chemistry: 'Hóa học',
+        physics: 'Vật lý',
+        biology: 'Sinh học',
+        math: 'Toán học'
+      };
+      program = {
+        programId,
+        programName: programNames[programId] || programId,
+        currentClass: parseInt(classId),
+        isActive: true,
+        placementTestCompleted: false,
+        enrolledAt: new Date().toISOString(),
+        progress: {
+          completedLessons: [],
+          lessonStars: {},
+          totalScore: 0,
+          lastStudyDate: null
+        }
+      };
+      programs.push(program);
+      user.programs = programs;
+      console.log('✅ Auto-created program:', programId);
+    }
+
+    program.currentClass = parseInt(classId);
+
+    const uniqueLessonId = parseInt(classId) * 1000 + parseInt(lessonId);
+
+    if (!program.progress) {
+      program.progress = { completedLessons: [], lessonStars: {}, totalScore: 0, lastStudyDate: null };
+    }
+
+    if (!program.progress.completedLessons) {
+      program.progress.completedLessons = [];
+    }
+
+    if (lessonId && !program.progress.completedLessons.includes(uniqueLessonId)) {
+      program.progress.completedLessons.push(uniqueLessonId);
+      console.log('✅ Added completed lesson:', uniqueLessonId);
+    }
+
+    if (score) {
+      program.progress.totalScore = (program.progress.totalScore || 0) + score;
+    }
+
+    program.progress.lastStudyDate = new Date().toISOString();
+    user.programs = programs;
+    return program;
+  },
+
+  updateLessonStars(user, programId, classId, lessonId, percentage) {
+    const programs = user.programs || [];
+    const program = programs.find(p => p.programId === programId);
+    if (!program) return null;
+
+    const uniqueLessonId = parseInt(classId) * 1000 + parseInt(lessonId);
+
+    if (!program.progress.lessonStars) {
+      program.progress.lessonStars = {};
+    }
+
+    let stars = 0;
+    if (percentage >= 100) stars = 3;
+    else if (percentage >= 80) stars = 2;
+    else if (percentage >= 50) stars = 1;
+
+    const currentStars = program.progress.lessonStars[uniqueLessonId.toString()] || 0;
+    if (stars > currentStars) {
+      program.progress.lessonStars[uniqueLessonId.toString()] = stars;
+      console.log(`⭐ Updated lesson ${uniqueLessonId} stars: ${currentStars} → ${stars}`);
+    }
+
+    user.programs = programs;
+    return stars;
+  },
+
+  getProgram(user, programId) {
+    return (user.programs || []).find(p => p.programId === programId);
+  },
+
+  savePhysicsGameProgress(user, grade, completed, current) {
+    const pgp = user.physics_game_progress || {};
+    pgp[grade.toString()] = {
+      completed: completed || [],
+      current: current || null,
+      lastUpdated: new Date().toISOString()
+    };
+    user.physics_game_progress = pgp;
+    return pgp[grade.toString()];
+  },
+
+  getPhysicsGameProgress(user, grade) {
+    const pgp = user.physics_game_progress || {};
+    return pgp[grade.toString()] || { completed: [], current: null };
+  },
+
+  getAllPhysicsGameProgress(user) {
+    return user.physics_game_progress || {};
   }
-  
-  if (lessonId && !program.progress.completedLessons.includes(uniqueLessonId)) {
-    program.progress.completedLessons.push(uniqueLessonId);
-    console.log('✅ Added completed lesson:', uniqueLessonId);
-  }
-  
-  // Cập nhật điểm
-  if (score) {
-    program.progress.totalScore = (program.progress.totalScore || 0) + score;
-  }
-  
-  program.progress.lastStudyDate = new Date();
-  
-  // Đánh dấu programs array đã thay đổi để Mongoose lưu đúng
-  this.markModified('programs');
-  
-  return program;
 };
 
-// Update lesson stars based on score percentage
-userSchema.methods.updateLessonStars = function(programId, classId, lessonId, percentage) {
-  const program = this.programs.find(p => p.programId === programId);
-  if (!program) return null;
-
-  const uniqueLessonId = parseInt(classId) * 1000 + parseInt(lessonId);
-  
-  // Initialize lessonStars Map if not exists
-  if (!program.progress.lessonStars) {
-    program.progress.lessonStars = new Map();
-  }
-
-  // Calculate stars: >=50%: 1 star, >=80%: 2 stars, 100%: 3 stars
-  let stars = 0;
-  if (percentage >= 100) {
-    stars = 3;
-  } else if (percentage >= 80) {
-    stars = 2;
-  } else if (percentage >= 50) {
-    stars = 1;
-  }
-
-  // Only update if new stars are better than existing
-  const currentStars = program.progress.lessonStars.get(uniqueLessonId.toString()) || 0;
-  if (stars > currentStars) {
-    program.progress.lessonStars.set(uniqueLessonId.toString(), stars);
-    console.log(`⭐ Updated lesson ${uniqueLessonId} stars: ${currentStars} → ${stars}`);
-  }
-
-  this.markModified('programs');
-  return stars;
-};
-
-userSchema.methods.getProgram = function(programId) {
-  return this.programs.find(p => p.programId === programId);
-};
-
-// Methods - Physics Games Progress
-userSchema.methods.savePhysicsGameProgress = function(grade, completed, current) {
-  if (!this.physicsGameProgress) {
-    this.physicsGameProgress = new Map();
-  }
-  
-  const gradeStr = grade.toString();
-  this.physicsGameProgress.set(gradeStr, {
-    completed: completed || [],
-    current: current || null,
-    lastUpdated: new Date()
-  });
-  
-  this.markModified('physicsGameProgress');
-  return this.physicsGameProgress.get(gradeStr);
-};
-
-userSchema.methods.getPhysicsGameProgress = function(grade) {
-  if (!this.physicsGameProgress) {
-    return { completed: [], current: null };
-  }
-  
-  const gradeStr = grade.toString();
-  return this.physicsGameProgress.get(gradeStr) || { completed: [], current: null };
-};
-
-userSchema.methods.getAllPhysicsGameProgress = function() {
-  if (!this.physicsGameProgress) {
-    return {};
-  }
-
-  const result = {};
-  this.physicsGameProgress.forEach((value, key) => {
-    result[key] = value;
-  });
-  return result;
-};
-
-// Methods - Teacher
-userSchema.methods.isTeacher = function() {
-  return this.role === 'teacher';
-};
-
-userSchema.methods.isVerifiedTeacher = function() {
-  return this.role === 'teacher' && this.teacherStatus === 'verified';
-};
-
-userSchema.methods.isPendingTeacher = function() {
-  return this.role === 'teacher' && this.teacherStatus === 'pending';
-};
-
-userSchema.methods.applyAsTeacher = function(teacherInfo) {
-  this.role = 'teacher';
-  this.teacherStatus = 'pending';
-  this.teacherProfile = {
-    school: teacherInfo.school || '',
-    subject: teacherInfo.subject || '',
-    teachingGrades: teacherInfo.teachingGrades || [],
-    bio: teacherInfo.bio || '',
-    appliedAt: new Date()
-  };
-  return this;
-};
-
-userSchema.methods.verifyTeacher = function(adminId) {
-  if (this.teacherStatus !== 'pending') {
-    throw new Error('Chỉ có thể duyệt giáo viên đang chờ');
-  }
-  this.teacherStatus = 'verified';
-  this.teacherProfile.verifiedAt = new Date();
-  this.teacherProfile.verifiedBy = adminId;
-  return this;
-};
-
-userSchema.methods.rejectTeacher = function(reason) {
-  if (this.teacherStatus !== 'pending') {
-    throw new Error('Chỉ có thể từ chối giáo viên đang chờ');
-  }
-  this.teacherStatus = 'rejected';
-  this.teacherProfile.rejectedAt = new Date();
-  this.teacherProfile.rejectionReason = reason || '';
-  return this;
-};
-
-module.exports = mongoose.model('User', userSchema);
+module.exports = User;

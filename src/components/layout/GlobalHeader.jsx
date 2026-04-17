@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Atom, Home, Wrench, BookOpen, FlaskConical, Trophy, LogOut, Globe, Menu, X, Rocket } from 'lucide-react';
+import { Atom, Home, Wrench, BookOpen, FlaskConical, Trophy, LogOut, Globe, Menu, X, Rocket, GraduationCap } from 'lucide-react';
 
 const GlobalHeader = () => {
   const { user, logout } = useAuth();
@@ -16,6 +16,7 @@ const GlobalHeader = () => {
 
   const navLinks = [
     { name: 'Trang chủ', path: '/program/physics/dashboard', icon: Home },
+    { name: 'Lớp học', path: '/physics-classes', icon: GraduationCap },
     { name: 'Công cụ', path: '/physics-tools', icon: Wrench },
     { name: 'Bài giảng', path: '/interactive-lectures', icon: BookOpen },
     { name: 'Thí nghiệm', path: '/vatly/virtual-lab', icon: FlaskConical },
@@ -45,11 +46,10 @@ const GlobalHeader = () => {
             const active = isActive(link.path);
             return (
               <Link key={link.name} to={link.path}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 ${
-                  active
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 ${active
                     ? 'bg-[#B87333] text-white shadow-[0_4px_12px_rgba(184,115,51,0.3)]'
                     : 'text-slate-500 hover:bg-white hover:text-[#B87333] hover:shadow-sm'
-                }`}
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 {link.name}
@@ -63,7 +63,7 @@ const GlobalHeader = () => {
           <button className="flex items-center gap-2 text-slate-500 hover:text-[#B87333] font-bold text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/50 border border-slate-100 transition-all">
             <Globe className="w-3.5 h-3.5" /> <span>VI</span>
           </button>
-          
+
           <div className="h-8 w-px bg-slate-200" />
 
           {user ? (
@@ -118,9 +118,8 @@ const GlobalHeader = () => {
               const active = isActive(link.path);
               return (
                 <Link key={link.name} to={link.path} onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl font-black text-sm transition-all ${
-                    active ? 'bg-[#B87333] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
-                  }`}
+                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl font-black text-sm transition-all ${active ? 'bg-[#B87333] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
+                    }`}
                 >
                   <Icon className="w-5 h-5" /> {link.name}
                 </Link>

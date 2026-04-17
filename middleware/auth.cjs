@@ -1,6 +1,8 @@
-const jwt = require('jsonwebtoken');
+// Auth middleware - Supabase version
+// Verifies Supabase JWT or custom JWT tokens
+const { supabase } = require('../src/config/supabase.cjs');
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
@@ -8,10 +10,17 @@ const authMiddleware = (req, res, next) => {
       return res.status(401).json({ message: 'No authentication token' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    req.userId = decoded.userId;
-    req.email = decoded.email;
-    
+    // Verify token with Supabase
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    req.userId = user.id;
+    req.email = user.email;
+    req.user = user;
+
     next();
   } catch (error) {
     res.status(401).json({ message: 'Invalid token' });

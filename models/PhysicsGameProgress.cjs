@@ -1,151 +1,108 @@
-const mongoose = require('mongoose');
+// PhysicsGameProgress model - Supabase version
+const { supabase } = require('../src/config/supabase.cjs');
 
-const physicsGameProgressSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    index: true
-  },
-  userEmail: {
-    type: String,
-    required: true,
-    index: true
-  },
-  grade: {
-    type: Number,
-    required: true,
-    enum: [6, 7, 8, 9, 10, 11, 12],
-    index: true
-  },
-  completedGames: {
-    type: [String], // Array of game IDs
-    default: []
-  },
-  currentGame: {
-    type: String, // Current game ID
-    default: null
-  },
-  totalScore: {
-    type: Number,
-    default: 0
-  },
-  totalTrophies: {
-    type: Number,
-    default: 0
-  },
-  lastPlayedAt: {
-    type: Date,
-    default: Date.now
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-}, { 
-  collection: 'physics_game_progress',
-  timestamps: true 
-});
+const TABLE = 'physics_game_progress';
 
-// Index for finding user's progress across all grades
-physicsGameProgressSchema.index({ userId: 1, grade: 1 }, { unique: true });
-physicsGameProgressSchema.index({ userEmail: 1, grade: 1 }, { unique: true });
+const PhysicsGameProgress = {
+  async saveProgress(userId, userEmail, grade, completed, current) {
+    try {
+      // Check existing
+      const { data: existing } = await supabase
+        .from(TABLE).select('id')
+        .eq('user_id', userId).eq('grade', grade).single();
 
-// Methods
-physicsGameProgressSchema.statics.saveProgress = async function(userId, userEmail, grade, completed, current) {
-  try {
-    const record = await this.findOneAndUpdate(
-      { userId, grade },
-      {
-        userId,
-        userEmail,
+      const record = {
+        user_id: userId,
+        user_email: userEmail,
         grade,
-        completedGames: completed || [],
-        currentGame: current || null,
-        totalTrophies: (completed || []).length,
-        lastPlayedAt: new Date(),
-        updatedAt: new Date()
-      },
-      { 
-        upsert: true, 
-        new: true,
-        runValidators: true 
+        completed_games: completed || [],
+        current_game: current || null,
+        total_trophies: (completed || []).length,
+        last_played_at: new Date().toISOString()
+      };
+
+      let result;
+      if (existing) {
+        const { data, error } = await supabase
+          .from(TABLE).update(record).eq('id', existing.id).select().single();
+        if (error) throw error;
+        result = data;
+      } else {
+        const { data, error } = await supabase
+          .from(TABLE).insert(record).select().single();
+        if (error) throw error;
+        result = data;
       }
-    );
-    return record;
-  } catch (error) {
-    console.error('Error saving physics game progress:', error);
-    throw error;
-  }
-};
-
-physicsGameProgressSchema.statics.getProgress = async function(userId, grade) {
-  try {
-    const record = await this.findOne({ userId, grade });
-    if (record) {
-      return {
-        completed: record.completedGames || [],
-        current: record.currentGame || null,
-        totalScore: record.totalScore || 0,
-        totalTrophies: record.totalTrophies || 0
-      };
+      return result;
+    } catch (error) {
+      console.error('Error saving physics game progress:', error);
+      throw error;
     }
-    return {
-      completed: [],
-      current: null,
-      totalScore: 0,
-      totalTrophies: 0
-    };
-  } catch (error) {
-    console.error('Error getting physics game progress:', error);
-    throw error;
-  }
-};
+  },
 
-physicsGameProgressSchema.statics.getProgressByEmail = async function(userEmail, grade) {
-  try {
-    const record = await this.findOne({ userEmail, grade });
-    if (record) {
-      return {
-        completed: record.completedGames || [],
-        current: record.currentGame || null,
-        totalScore: record.totalScore || 0,
-        totalTrophies: record.totalTrophies || 0
-      };
+  async getProgress(userId, grade) {
+    try {
+      const { data, error } = await supabase
+        .from(TABLE).select('*')
+        .eq('user_id', userId).eq('grade', grade).single();
+      if (error && error.code !== 'PGRST116') throw error;
+      if (data) {
+        return {
+          completed: data.completed_games || [],
+          current: data.current_game || null,
+          totalScore: data.total_score || 0,
+          totalTrophies: data.total_trophies || 0
+        };
+      }
+      return { completed: [], current: null, totalScore: 0, totalTrophies: 0 };
+    } catch (error) {
+      console.error('Error getting physics game progress:', error);
+      throw error;
     }
-    return {
-      completed: [],
-      current: null,
-      totalScore: 0,
-      totalTrophies: 0
-    };
-  } catch (error) {
-    console.error('Error getting physics game progress by email:', error);
-    throw error;
+  },
+
+  async getProgressByEmail(userEmail, grade) {
+    try {
+      const { data, error } = await supabase
+        .from(TABLE).select('*')
+        .eq('user_email', userEmail).eq('grade', grade).single();
+      if (error && error.code !== 'PGRST116') throw error;
+      if (data) {
+        return {
+          completed: data.completed_games || [],
+          current: data.current_game || null,
+          totalScore: data.total_score || 0,
+          totalTrophies: data.total_trophies || 0
+        };
+      }
+      return { completed: [], current: null, totalScore: 0, totalTrophies: 0 };
+    } catch (error) {
+      console.error('Error getting physics game progress by email:', error);
+      throw error;
+    }
+  },
+
+  async getAllProgress(userId) {
+    try {
+      const { data, error } = await supabase
+        .from(TABLE).select('*')
+        .eq('user_id', userId).order('grade', { ascending: true });
+      if (error) throw error;
+      const result = {};
+      (data || []).forEach(record => {
+        result[record.grade.toString()] = {
+          completed: record.completed_games || [],
+          current: record.current_game || null,
+          totalScore: record.total_score || 0,
+          totalTrophies: record.total_trophies || 0
+        };
+      });
+      return result;
+    } catch (error) {
+      console.error('Error getting all physics game progress:', error);
+      throw error;
+    }
   }
 };
 
-physicsGameProgressSchema.statics.getAllProgress = async function(userId) {
-  try {
-    const records = await this.find({ userId }).sort({ grade: 1 });
-    const result = {};
-    records.forEach(record => {
-      result[record.grade.toString()] = {
-        completed: record.completedGames || [],
-        current: record.currentGame || null,
-        totalScore: record.totalScore || 0,
-        totalTrophies: record.totalTrophies || 0
-      };
-    });
-    return result;
-  } catch (error) {
-    console.error('Error getting all physics game progress:', error);
-    throw error;
-  }
-};
-
-module.exports = mongoose.model('PhysicsGameProgress', physicsGameProgressSchema);
+module.exports = PhysicsGameProgress;

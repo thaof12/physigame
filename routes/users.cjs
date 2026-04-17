@@ -1,109 +1,77 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
 const User = require('../models/User.cjs');
+const { supabase } = require('../src/config/supabase.cjs');
 
-// Register route
+// Register route - creates Supabase auth user + profile
 router.post('/register', async (req, res) => {
   try {
-    console.log('📝 Register request received:', { 
-      username: req.body.username, 
-      email: req.body.email 
-    });
-    
-    const { username, email, password, isGoogleAuth } = req.body;
+    const { username, email, password } = req.body;
+    console.log('📝 Register request received:', { username, email });
 
-    // Validation
-    if (!username || !email || (!password && !isGoogleAuth)) {
-      console.log('❌ Validation failed: Missing required fields');
-      return res.status(400).json({ 
-        message: 'Vui lòng điền đầy đủ thông tin' 
-      });
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin' });
     }
 
-    // Check if user exists in MongoDB
-    const existingUser = await User.findOne({ 
-      $or: [{ email }, { username }] 
-    });
-    
+    // Check if username already taken
+    const existingUser = await User.findByEmailOrUsername(email, username);
     if (existingUser) {
-      console.log('❌ User already exists:', email);
       const field = existingUser.email === email ? 'Email' : 'Tên người dùng';
-      return res.status(400).json({ 
-        message: `${field} đã được sử dụng` 
-      });
+      return res.status(400).json({ message: `${field} đã được sử dụng` });
     }
 
-    // Hash password if not Google auth
-    let hashedPassword = '';
-    if (!isGoogleAuth && password) {
-      hashedPassword = await bcrypt.hash(password, 10);
-    }
-
-    // Create new user in MongoDB
-    const newUser = new User({
-      username,
+    // Create Supabase auth user
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
-      hashedPassword,
-      displayName: username,
+      password,
+      user_metadata: { username, display_name: username },
+      email_confirm: true
+    });
+
+    if (authError) {
+      console.error('❌ Supabase auth error:', authError);
+      if (authError.message?.includes('already')) {
+        return res.status(400).json({ message: 'Email đã được sử dụng' });
+      }
+      throw authError;
+    }
+
+    // Update the auto-created profile with additional data
+    const user = await User.update(authData.user.id, {
+      username,
+      display_name: username,
       xp: 0,
       level: 1,
-      progress: {
-        completedLessons: [],
-        currentStreak: 0,
-        totalPoints: 0,
-        totalStudyTime: 0
-      },
-      learningPrograms: [],
-      achievements: [],
-      settings: {
-        notifications: true,
-        soundEffects: true,
-        dailyGoal: 30
-      }
+      programs: [],
+      profile: {}
     });
 
-    await newUser.save();
-    
-    console.log('✅ User registered successfully:', { 
-      id: newUser._id, 
-      email: newUser.email
+    console.log('✅ User registered successfully:', { id: user.id, email: user.email });
+
+    // Sign in to get session token
+    const { data: signInData, error: signInError } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email
     });
 
-    // Generate token
-    const token = jwt.sign(
-      { userId: newUser._id.toString(), email: newUser.email },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
-    );
+    // Generate a session for the user
+    const { data: sessionData } = await supabase.auth.signInWithPassword({ email, password });
 
     res.status(201).json({
       message: 'User registered successfully',
-      token,
+      token: sessionData?.session?.access_token || '',
       user: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        displayName: newUser.displayName,
-        xp: newUser.xp,
-        level: newUser.level,
-        learningPrograms: newUser.learningPrograms
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        displayName: user.display_name,
+        xp: user.xp,
+        level: user.level,
+        programs: user.programs
       }
     });
   } catch (error) {
     console.error('❌ Register error:', error);
-    
-    // Handle MongoDB duplicate key error
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern)[0];
-      const fieldName = field === 'email' ? 'Email' : 'Tên người dùng';
-      return res.status(400).json({ 
-        message: `${fieldName} đã được sử dụng` 
-      });
-    }
-    
     res.status(500).json({ message: 'Lỗi server', error: error.message });
   }
 });
@@ -111,67 +79,47 @@ router.post('/register', async (req, res) => {
 // Login route
 router.post('/login', async (req, res) => {
   try {
-    console.log('📝 Login request received:', { email: req.body.email });
-    
     const { email, password } = req.body;
+    console.log('📝 Login request received:', { email });
 
-    // Validation
     if (!email || !password) {
-      console.log('❌ Validation failed: Missing credentials');
-      return res.status(400).json({ 
-        message: 'Vui lòng nhập email và mật khẩu' 
-      });
+      return res.status(400).json({ message: 'Vui lòng nhập email và mật khẩu' });
     }
 
-    // Find user in MongoDB
-    const user = await User.findOne({ email });
+    // Sign in with Supabase
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (authError) {
+      console.error('❌ Login error:', authError);
+      return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
+    }
+
+    // Get user profile
+    const user = await User.findById(authData.user.id);
     if (!user) {
-      console.log('❌ User not found:', email);
-      return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
+      return res.status(404).json({ message: 'User profile not found' });
     }
 
-    // Check password
-    if (!user.hashedPassword) {
-      console.log('❌ User has no password (might be OAuth user):', email);
-      return res.status(400).json({ 
-        message: 'Vui lòng đăng nhập bằng Google' 
-      });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.hashedPassword);
-    if (!isMatch) {
-      console.log('❌ Password mismatch for:', email);
-      return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
-    }
-
-    // Update last active date
-    user.progress.lastActiveDate = new Date();
-    await user.save();
-
-    // Generate token
-    const token = jwt.sign(
-      { userId: user._id.toString(), email: user.email },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
-    );
-
-    console.log('✅ Login successful:', { id: user._id, email: user.email });
+    console.log('✅ Login successful:', { id: user.id, email: user.email });
 
     res.json({
       message: 'Login successful',
-      token,
+      token: authData.session.access_token,
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
-        displayName: user.displayName,
+        displayName: user.display_name,
         xp: user.xp,
         level: user.level,
-        learningPrograms: user.learningPrograms,
-        firebaseUid: user.firebaseUid || user._id.toString(),
+        programs: user.programs,
+        firebaseUid: user.id,
         role: user.role,
-        teacherStatus: user.teacherStatus,
-        teacherProfile: user.teacherProfile
+        teacherStatus: user.teacher_status,
+        teacherProfile: user.teacher_profile
       }
     });
   } catch (error) {
@@ -180,62 +128,41 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Google OAuth login/register
+// Google OAuth - handled by Supabase Auth on frontend, this syncs profile
 router.post('/auth/google', async (req, res) => {
   try {
-    const { email, username, googleId, displayName } = req.body;
+    const { email, username, googleId, displayName, userId } = req.body;
 
-    // Find or create user in MongoDB
-    let user = await User.findOne({ email });
+    // Find or create user profile
+    let user = await User.findByEmail(email);
 
-    if (!user) {
-      // Create new user for Google auth
-      user = new User({
-        username: username || email.split('@')[0],
-        email,
-        displayName: displayName || username,
-        firebaseUid: googleId,
-        xp: 0,
-        level: 1,
-        progress: {
-          completedLessons: [],
-          currentStreak: 0,
-          totalPoints: 0,
-          totalStudyTime: 0
-        },
-        learningPrograms: [],
-        achievements: [],
-        settings: {
-          notifications: true,
-          soundEffects: true,
-          dailyGoal: 30
-        }
-      });
-      
-      await user.save();
-      console.log('✅ New Google user created:', { id: user._id, email: user.email });
-    } else {
-      console.log('✅ Existing Google user logged in:', { id: user._id, email: user.email });
+    if (!user && userId) {
+      // Profile should have been auto-created by trigger, try to update it
+      user = await User.findById(userId);
+      if (user) {
+        user = await User.update(userId, {
+          username: username || email.split('@')[0],
+          display_name: displayName || username || email.split('@')[0]
+        });
+      }
     }
 
-    // Generate token
-    const token = jwt.sign(
-      { userId: user._id.toString(), email: user.email },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
-    );
+    if (!user) {
+      return res.status(404).json({ message: 'User not found. Please sign up first.' });
+    }
+
+    console.log('✅ Google user synced:', { id: user.id, email: user.email });
 
     res.json({
       message: 'Google authentication successful',
-      token,
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
-        displayName: user.displayName,
+        displayName: user.display_name,
         xp: user.xp,
         level: user.level,
-        learningPrograms: user.learningPrograms
+        programs: user.programs
       }
     });
   } catch (error) {
@@ -249,44 +176,23 @@ router.post('/submit-lesson', async (req, res) => {
   try {
     const { firebaseUid, programId, pathId, lessonId, score, totalQuestions } = req.body;
 
-    const user = await User.findOne({ firebaseUid });
+    const user = await User.findById(firebaseUid);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Calculate percentage and stars
     const percentage = (score / totalQuestions) * 100;
-    const completed = percentage >= 50; // Need at least 50% to complete (1 star)
+    const completed = percentage >= 50;
 
-    console.log('📝 Updating lesson progress:', { 
-      programId, 
-      pathId, 
-      lessonId, 
-      score, 
-      totalQuestions,
-      percentage: percentage.toFixed(2),
-      completed
-    });
+    const updatedProgram = User.updateProgramProgress(user, programId, pathId, lessonId, score);
+    const stars = User.updateLessonStars(user, programId, pathId, lessonId, percentage);
 
-    // Update program progress using the model method
-    const updatedProgram = user.updateProgramProgress(programId, pathId, lessonId, score);
-
-    if (!updatedProgram) {
-      return res.status(404).json({ message: 'Program not found in user profile' });
-    }
-
-    // Update lesson stars based on percentage
-    const stars = user.updateLessonStars(programId, pathId, lessonId, percentage);
-
-    // Add XP based on stars: 1 star=20 XP, 2 stars=40 XP, 3 stars=60 XP
     if (completed && stars > 0) {
       const xpGain = stars * 20;
       user.xp = (user.xp || 0) + xpGain;
-      console.log(`✨ Added ${xpGain} XP to user (${stars} stars)`);
     }
 
-    await user.save();
-    console.log('✅ Lesson progress updated successfully');
+    await User.update(user.id, { programs: user.programs, xp: user.xp });
 
     res.json({
       message: 'Lesson completed',
@@ -304,223 +210,99 @@ router.post('/submit-lesson', async (req, res) => {
   }
 });
 
-// Update learning progress (legacy - kept for backward compatibility)
-router.post('/progress', async (req, res) => {
-  try {
-    const { userId, program, grade, lesson } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Find or create learning program
-    let learningProgram = user.learningPrograms.find(p => p.program === program);
-    
-    if (!learningProgram) {
-      learningProgram = {
-        program, // e.g., "Hóa học"
-        grades: []
-      };
-      user.learningPrograms.push(learningProgram);
-    }
-
-    // Find or create grade
-    let gradeData = learningProgram.grades.find(g => g.grade === grade);
-    
-    if (!gradeData) {
-      gradeData = {
-        grade, // e.g., "Lớp 8"
-        lessons: []
-      };
-      learningProgram.grades.push(gradeData);
-    }
-
-    // Add lesson if not exists
-    if (!gradeData.lessons.includes(lesson)) {
-      gradeData.lessons.push(lesson);
-      user.xp += 10; // Add XP for completing lesson
-    }
-
-    await user.save();
-    console.log('✅ Progress updated for user:', userId);
-
-    res.json({
-      message: 'Progress updated',
-      user: {
-        id: user.id,
-        xp: user.xp,
-        learningPrograms: user.learningPrograms
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
 // Update user grade after placement test
 router.post('/update-grade', async (req, res) => {
   try {
     const { userId, grade } = req.body;
-
-    // Tìm user theo firebaseUid hoặc _id
-    const user = await User.findOne({ $or: [{ firebaseUid: userId }, { _id: userId }] });
-    
+    const user = await User.findByAnyId(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Cập nhật grade vào profile nếu có
-    if (!user.profile) {
-      user.profile = {};
-    }
-    user.profile.grade = grade;
-    
-    await user.save();
-    console.log('✅ Grade updated for user:', userId, 'to grade:', grade);
+    const profile = user.profile || {};
+    profile.grade = grade;
+    await User.update(user.id, { profile });
 
-    res.json({
-      message: 'Grade updated successfully',
-      user: {
-        id: user._id,
-        grade: grade
-      }
-    });
+    res.json({ message: 'Grade updated successfully', user: { id: user.id, grade } });
   } catch (error) {
     console.error('❌ Update grade error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// Enroll user in a program after placement test
+// Enroll user in a program
 router.post('/enroll-program', async (req, res) => {
   try {
-    const { userId, programId, programName, initialClassId, placementTestScore, placementTestTotal } = req.body;
-
+    const { userId, programId, programName, initialClassId, placementTestScore } = req.body;
     console.log('📝 Enrolling user:', { userId, programId, initialClassId });
 
-    // Tìm user theo email trước (vì PlacementTest gửi email), sau đó firebaseUid
-    let user;
-    try {
-      // Thử tìm theo email hoặc firebaseUid trước
-      user = await User.findOne({ 
-        $or: [
-          { email: userId },
-          { firebaseUid: userId }
-        ] 
-      });
-      
-      // Nếu không tìm thấy và userId có format ObjectId, thử tìm theo _id
-      if (!user && userId.match(/^[0-9a-fA-F]{24}$/)) {
-        user = await User.findById(userId);
-      }
-    } catch (error) {
-      console.log('⚠️ Error finding user:', error.message);
-    }
-    
+    const user = await User.findByAnyId(userId);
     if (!user) {
-      console.log('❌ User not found:', userId);
       return res.status(404).json({ message: 'User not found' });
     }
 
-    console.log('✅ Found user:', user.email);
+    const programs = user.programs || [];
+    const existingProgram = programs.find(p => p.programId === programId);
 
-    // Kiểm tra xem đã đăng ký chương trình này chưa
-    const existingProgram = user.programs.find(p => p.programId === programId);
-    
     if (existingProgram) {
-      console.log('⚠️ Program already enrolled, updating...');
-      // Nếu đã có, cập nhật thông tin
       existingProgram.currentClass = initialClassId;
       existingProgram.placementTestCompleted = true;
       existingProgram.placementTestScore = placementTestScore || 0;
       existingProgram.isActive = true;
     } else {
-      // Chưa có, thêm mới
-      user.programs.push({
-        programId,
-        programName,
-        currentClass: initialClassId,
-        isActive: true,
-        placementTestCompleted: true,
-        placementTestScore: placementTestScore || 0,
-        enrolledAt: new Date(),
-        progress: {
-          completedLessons: [],
-          totalScore: 0,
-          lastStudyDate: null
-        }
+      programs.push({
+        programId, programName, currentClass: initialClassId, isActive: true,
+        placementTestCompleted: true, placementTestScore: placementTestScore || 0,
+        enrolledAt: new Date().toISOString(),
+        progress: { completedLessons: [], totalScore: 0, lastStudyDate: null }
       });
     }
 
-    // Cập nhật grade vào profile
-    if (!user.profile) {
-      user.profile = {};
-    }
-    user.profile.grade = initialClassId;
-    
-    await user.save();
-    console.log('✅ Program enrolled successfully for user:', user.email);
+    const profile = user.profile || {};
+    profile.grade = initialClassId;
+
+    await User.update(user.id, { programs, profile });
 
     res.json({
-      success: true,
-      message: 'Program enrolled successfully',
-      user: {
-        id: user._id,
-        email: user.email,
-        programs: user.programs,
-        profile: user.profile
-      }
+      success: true, message: 'Program enrolled successfully',
+      user: { id: user.id, email: user.email, programs, profile }
     });
   } catch (error) {
     console.error('❌ Enroll program error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Server error', 
-      error: error.message 
-    });
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
 
-// Get user by firebaseUid
+// Get user by ID (replaces firebase/:firebaseUid)
 router.get('/firebase/:firebaseUid', async (req, res) => {
   try {
     const { firebaseUid } = req.params;
-    
-    // Reject invalid firebaseUid values
     if (!firebaseUid || firebaseUid === 'undefined' || firebaseUid === 'null') {
-      return res.status(400).json({ message: 'Invalid Firebase UID' });
+      return res.status(400).json({ message: 'Invalid User ID' });
     }
-    
-    // Try to find by firebaseUid first, then by _id (MongoDB ObjectId)
-    let user = await User.findOne({ firebaseUid });
-    
-    // If not found by firebaseUid, try finding by _id (for email/password users)
-    if (!user && firebaseUid.match(/^[0-9a-fA-F]{24}$/)) {
-      user = await User.findById(firebaseUid);
-    }
-    
+
+    const user = await User.findByAnyId(firebaseUid);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     res.json({
-      id: user._id,
+      id: user.id,
       username: user.username,
       email: user.email,
-      displayName: user.displayName || user.username || '',
+      displayName: user.display_name || user.username || '',
       avatar: user.avatar || '',
       xp: user.xp,
       level: user.level,
       programs: user.programs,
       profile: user.profile,
-      firebaseUid: user.firebaseUid || user._id.toString(),
+      firebaseUid: user.id,
       role: user.role,
-      teacherStatus: user.teacherStatus,
-      teacherProfile: user.teacherProfile
+      teacherStatus: user.teacher_status,
+      teacherProfile: user.teacher_profile
     });
   } catch (error) {
-    console.error('❌ Error fetching user by firebaseUid:', error);
+    console.error('❌ Error fetching user:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -528,29 +310,18 @@ router.get('/firebase/:firebaseUid', async (req, res) => {
 // Get user profile
 router.get('/profile/:userId', async (req, res) => {
   try {
-    const user = await User.findOne({ $or: [{ firebaseUid: req.params.userId }, { _id: req.params.userId }] });
-    
+    const user = await User.findByAnyId(req.params.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     res.json({
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      displayName: user.displayName,
-      xp: user.xp,
-      level: user.level,
-      programs: user.programs,
-      profile: user.profile,
-      firebaseUid: user.firebaseUid,
-      role: user.role,
-      teacherStatus: user.teacherStatus,
-      teacherProfile: user.teacherProfile,
-      createdAt: user.createdAt,
-      progress: user.progress,
-      pkStats: user.pkStats || { wins: 0, losses: 0, rating: 1000 },
-      recentActivity: user.recentActivity || []
+      id: user.id, username: user.username, email: user.email,
+      displayName: user.display_name, xp: user.xp, level: user.level,
+      programs: user.programs, profile: user.profile,
+      firebaseUid: user.id, role: user.role,
+      teacherStatus: user.teacher_status, teacherProfile: user.teacher_profile,
+      createdAt: user.created_at
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -561,41 +332,25 @@ router.get('/profile/:userId', async (req, res) => {
 router.put('/profile/:userId', async (req, res) => {
   try {
     const { displayName, bio, school, grade } = req.body;
-    
-    const user = await User.findOne({ 
-      $or: [{ firebaseUid: req.params.userId }, { _id: req.params.userId }] 
-    });
-    
+    const user = await User.findByAnyId(req.params.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update displayName
-    if (displayName !== undefined) {
-      user.displayName = displayName;
-    }
+    const updates = {};
+    if (displayName !== undefined) updates.display_name = displayName;
 
-    // Update profile fields
-    if (!user.profile) {
-      user.profile = {};
-    }
-    
-    if (bio !== undefined) user.profile.bio = bio;
-    if (school !== undefined) user.profile.school = school;
-    if (grade !== undefined) user.profile.grade = grade;
+    const profile = user.profile || {};
+    if (bio !== undefined) profile.bio = bio;
+    if (school !== undefined) profile.school = school;
+    if (grade !== undefined) profile.grade = grade;
+    updates.profile = profile;
 
-    await user.save();
-    
-    console.log('✅ Profile updated for user:', user.email);
+    const updated = await User.update(user.id, updates);
 
     res.json({
-      success: true,
-      message: 'Profile updated successfully',
-      user: {
-        id: user._id,
-        displayName: user.displayName,
-        profile: user.profile
-      }
+      success: true, message: 'Profile updated successfully',
+      user: { id: updated.id, displayName: updated.display_name, profile: updated.profile }
     });
   } catch (error) {
     console.error('❌ Update profile error:', error);
@@ -606,334 +361,137 @@ router.put('/profile/:userId', async (req, res) => {
 // Submit physics lesson progress
 router.post('/submit-physics-lesson', async (req, res) => {
   try {
-    console.log('📤 Physics lesson submission received:', req.body);
-
     const { userId, programId, classId, chapterId, lessonId, score, totalQuestions, completed } = req.body;
 
     if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing userId'
-      });
+      return res.status(400).json({ success: false, message: 'Missing userId' });
     }
 
-    // Find user
-    let user;
-    try {
-      user = await User.findOne({
-        $or: [
-          { email: userId },
-          { firebaseUid: userId },
-          { _id: userId }
-        ]
-      });
-    } catch (error) {
-      console.log('⚠️ Error finding user:', error.message);
-    }
-
+    const user = await User.findByAnyId(userId);
     if (!user) {
-      console.log('❌ User not found:', userId);
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    console.log('✅ Found user:', user.email);
-
-    // Find or create physics program
-    let program = user.programs.find(p => p.programId === programId);
+    const programs = user.programs || [];
+    let program = programs.find(p => p.programId === programId);
 
     if (!program) {
-      // Create new physics program
       program = {
-        programId: programId || 'physics',
-        programName: 'Vật lý',
-        currentClass: classId,
-        isActive: true,
-        placementTestCompleted: true,
-        enrolledAt: new Date(),
-        progress: {
-          completedLessons: [],
-          totalScore: 0,
-          lastStudyDate: new Date()
-        }
+        programId: programId || 'physics', programName: 'Vật lý',
+        currentClass: classId, isActive: true, placementTestCompleted: true,
+        enrolledAt: new Date().toISOString(),
+        progress: { completedLessons: [], totalScore: 0, lastStudyDate: new Date().toISOString() }
       };
-      user.programs.push(program);
+      programs.push(program);
     }
 
-    // Create lesson key
     const lessonKey = `${classId}-${chapterId}-${lessonId}`;
-
-    // Update progress
     if (!program.progress) {
-      program.progress = {
-        completedLessons: [],
-        totalScore: 0,
-        lastStudyDate: new Date()
-      };
+      program.progress = { completedLessons: [], totalScore: 0, lastStudyDate: null };
     }
-
-    // Add to completed lessons if not already there
     if (completed && !program.progress.completedLessons.includes(lessonKey)) {
       program.progress.completedLessons.push(lessonKey);
-      console.log('✅ Added lesson to completed:', lessonKey);
     }
-
-    // Update score
     if (score !== undefined) {
       program.progress.totalScore = (program.progress.totalScore || 0) + score;
     }
+    program.progress.lastStudyDate = new Date().toISOString();
 
-    // Update last study date
-    program.progress.lastStudyDate = new Date();
+    const xpGained = score * 10;
+    const newXp = (user.xp || 0) + xpGained;
 
-    // Update XP
-    const xpGained = score * 10; // 10 XP per correct answer
-    user.xp = (user.xp || 0) + xpGained;
-
-    await user.save();
-
-    console.log('✅ Physics lesson progress saved:', {
-      user: user.email,
-      lesson: lessonKey,
-      score,
-      xpGained
-    });
+    await User.update(user.id, { programs, xp: newXp });
 
     res.json({
-      success: true,
-      message: 'Progress saved successfully',
-      xpGained,
-      totalXP: user.xp,
-      completedLessons: program.progress.completedLessons
+      success: true, message: 'Progress saved successfully',
+      xpGained, totalXP: newXp, completedLessons: program.progress.completedLessons
     });
   } catch (error) {
     console.error('❌ Submit physics lesson error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
 
 // ============ TEACHER MANAGEMENT APIs ============
 
-// Get all pending teachers (for Admin)
 router.get('/pending-teachers', async (req, res) => {
   try {
-    const pendingTeachers = await User.find({
-      role: 'teacher',
-      teacherStatus: 'pending'
-    }).select('_id username email displayName avatar teacherProfile createdAt');
-
-    res.json({
-      success: true,
-      count: pendingTeachers.length,
-      teachers: pendingTeachers
-    });
+    const teachers = await User.find(
+      { role: 'teacher', teacher_status: 'pending' },
+      { select: 'id,username,email,display_name,avatar,teacher_profile,created_at' }
+    );
+    res.json({ success: true, count: teachers.length, teachers });
   } catch (error) {
-    console.error('❌ Get pending teachers error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
 
-// Get all teachers (for Admin)
 router.get('/teachers', async (req, res) => {
   try {
-    const { status } = req.query; // optional filter by status
+    const { status } = req.query;
+    const filters = { role: 'teacher' };
+    if (status) filters.teacher_status = status;
 
-    const query = { role: 'teacher' };
-    if (status) {
-      query.teacherStatus = status;
-    }
-
-    const teachers = await User.find(query)
-      .select('_id username email displayName avatar teacherProfile teacherStatus createdAt')
-      .sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      count: teachers.length,
-      teachers
-    });
+    const teachers = await User.find(filters, { sort: { created_at: -1 } });
+    res.json({ success: true, count: teachers.length, teachers });
   } catch (error) {
-    console.error('❌ Get teachers error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
 
-// Verify a teacher (Admin only)
 router.post('/verify-teacher/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { adminId } = req.body; // ID of admin who verifies
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    if (user.role !== 'teacher') return res.status(400).json({ success: false, message: 'User is not a teacher' });
+    if (user.teacher_status !== 'pending') return res.status(400).json({ success: false, message: 'Teacher is not in pending status' });
 
-    const user = await User.findById(id);
+    const teacherProfile = user.teacher_profile || {};
+    teacherProfile.verifiedAt = new Date().toISOString();
+    teacherProfile.verifiedBy = req.body.adminId || null;
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
+    await User.update(user.id, { teacher_status: 'verified', teacher_profile: teacherProfile });
 
-    if (user.role !== 'teacher') {
-      return res.status(400).json({
-        success: false,
-        message: 'User is not a teacher'
-      });
-    }
-
-    if (user.teacherStatus !== 'pending') {
-      return res.status(400).json({
-        success: false,
-        message: 'Teacher is not in pending status'
-      });
-    }
-
-    // Verify the teacher
-    user.teacherStatus = 'verified';
-    user.teacherProfile.verifiedAt = new Date();
-    user.teacherProfile.verifiedBy = adminId && mongoose.Types.ObjectId.isValid(adminId)
-      ? adminId
-      : null;
-
-    await user.save();
-
-    console.log('✅ Teacher verified:', user.email);
-
-    res.json({
-      success: true,
-      message: 'Giáo viên đã được duyệt thành công',
-      teacher: {
-        id: user._id,
-        email: user.email,
-        displayName: user.displayName,
-        teacherStatus: user.teacherStatus,
-        teacherProfile: user.teacherProfile
-      }
-    });
+    res.json({ success: true, message: 'Giáo viên đã được duyệt thành công' });
   } catch (error) {
-    console.error('❌ Verify teacher error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
 
-// Reject a teacher (Admin only)
 router.post('/reject-teacher/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { reason } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    if (user.role !== 'teacher') return res.status(400).json({ success: false, message: 'User is not a teacher' });
+    if (user.teacher_status !== 'pending') return res.status(400).json({ success: false, message: 'Teacher is not in pending status' });
 
-    const user = await User.findById(id);
+    const teacherProfile = user.teacher_profile || {};
+    teacherProfile.rejectedAt = new Date().toISOString();
+    teacherProfile.rejectionReason = req.body.reason || 'Không đáp ứng yêu cầu';
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
+    await User.update(user.id, { teacher_status: 'rejected', teacher_profile: teacherProfile });
 
-    if (user.role !== 'teacher') {
-      return res.status(400).json({
-        success: false,
-        message: 'User is not a teacher'
-      });
-    }
-
-    if (user.teacherStatus !== 'pending') {
-      return res.status(400).json({
-        success: false,
-        message: 'Teacher is not in pending status'
-      });
-    }
-
-    // Reject the teacher
-    user.teacherStatus = 'rejected';
-    user.teacherProfile.rejectedAt = new Date();
-    user.teacherProfile.rejectionReason = reason || 'Không đáp ứng yêu cầu';
-
-    await user.save();
-
-    console.log('❌ Teacher rejected:', user.email);
-
-    res.json({
-      success: true,
-      message: 'Đã từ chối đăng ký giáo viên',
-      teacher: {
-        id: user._id,
-        email: user.email,
-        teacherStatus: user.teacherStatus
-      }
-    });
+    res.json({ success: true, message: 'Đã từ chối đăng ký giáo viên' });
   } catch (error) {
-    console.error('❌ Reject teacher error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
 
-// Get teacher stats (for teacher dashboard)
 router.get('/teacher-stats/:teacherId', async (req, res) => {
   try {
-    const { teacherId } = req.params;
-
-    const teacher = await User.findById(teacherId);
-
+    const teacher = await User.findById(req.params.teacherId);
     if (!teacher || teacher.role !== 'teacher') {
-      return res.status(404).json({
-        success: false,
-        message: 'Teacher not found'
-      });
+      return res.status(404).json({ success: false, message: 'Teacher not found' });
     }
-
-    // TODO: Calculate actual stats from lessons, exercises created by this teacher
-    // For now return placeholder data
-    const stats = {
-      lessonsCreated: 0,
-      exercisesCreated: 0,
-      experimentsCreated: 0,
-      totalStudents: 0,
-      totalViews: 0,
-      averageCompletion: 0
-    };
 
     res.json({
       success: true,
-      stats,
-      teacher: {
-        id: teacher._id,
-        displayName: teacher.displayName,
-        teacherStatus: teacher.teacherStatus,
-        teacherProfile: teacher.teacherProfile
-      }
+      stats: { lessonsCreated: 0, exercisesCreated: 0, experimentsCreated: 0, totalStudents: 0, totalViews: 0, averageCompletion: 0 },
+      teacher: { id: teacher.id, displayName: teacher.display_name, teacherStatus: teacher.teacher_status, teacherProfile: teacher.teacher_profile }
     });
   } catch (error) {
-    console.error('❌ Get teacher stats error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
 
 module.exports = router;
-

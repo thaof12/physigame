@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '../config/firebase';
-import { API_BASE_URL } from '../config/api';
 import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, Lightbulb } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, setUser } = useAuth();
+  const { login, loginWithGoogle, setUser } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [selectedRole, setSelectedRole] = useState('student');
   const [error, setError] = useState('');
@@ -23,53 +20,8 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-
-      const response = await fetch(`${API_BASE_URL}/auth/google-login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firebaseUid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          avatar: user.photoURL,
-          selectedProgram: 'physics',
-          role: selectedRole
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token || '');
-
-        if (data.user.role === 'teacher') {
-          if (data.user.teacherStatus === 'pending') {
-            window.alert('Tài khoản giáo viên đang chờ duyệt.');
-            navigate('/teacher/pending');
-          } else if (data.user.teacherStatus === 'verified') {
-            navigate('/teacher/dashboard');
-          } else {
-            navigate('/teacher/pending');
-          }
-        } else {
-          if (data.user.programs && data.user.programs.length > 0) {
-            const activeProgram = data.user.programs.find(p => p.isActive);
-            if (activeProgram) {
-              navigate(`/program/${activeProgram.programId}`);
-            } else {
-              navigate('/');
-            }
-          } else {
-            navigate('/home');
-          }
-        }
-      } else {
-        setError(data.message || 'Đăng nhập thất bại');
-      }
+      await loginWithGoogle();
+      // Supabase will redirect back, auth state change handler will navigate
     } catch (err) {
       setError('Đăng nhập với Google thất bại. Vui lòng thử lại.');
     } finally {

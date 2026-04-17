@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '../config/firebase';
-import { API_BASE_URL } from '../config/api';
 import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, User, Navigation } from 'lucide-react';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { register, setUser, updateGoogleUserRole } = useAuth();
+  const { register, setUser, loginWithGoogle } = useAuth();
   
   const [formData, setFormData] = useState({
     username: '',
@@ -43,46 +40,9 @@ const Register = () => {
   const handleGoogleRegister = async () => {
     setLoading(true);
     setError('');
-    
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      
-      const response = await fetch(`${API_BASE_URL}/auth/google-login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firebaseUid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          avatar: user.photoURL,
-          selectedProgram: 'physics',
-          role: selectedRole,
-          isRegistration: true
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token || '');
-
-        if (data.user.role === 'teacher') {
-          if (data.user.teacherStatus === 'pending') {
-            navigate('/teacher/pending');
-          } else if (data.user.teacherStatus === 'verified') {
-            navigate('/teacher/dashboard');
-          } else {
-            navigate('/teacher/pending');
-          }
-        } else {
-          navigate('/placement-test/physics');
-        }
-      } else {
-        setError(data.message || 'Đăng ký thất bại');
-      }
+      await loginWithGoogle();
+      // Supabase will redirect back, auth state change handler will navigate
     } catch (err) {
       setError('Đăng ký bằng Google thất bại. Vui lòng thử lại.');
     } finally {
@@ -99,10 +59,9 @@ const Register = () => {
 
     try {
       const result = await register(
+        formData.username,
         formData.email, 
-        formData.password, 
-        formData.username, 
-        selectedRole
+        formData.password
       );
       
       if (selectedRole === 'teacher') {

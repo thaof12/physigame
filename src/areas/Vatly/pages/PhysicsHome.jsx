@@ -8,17 +8,9 @@ import {
 } from 'lucide-react';
 import physicsBanner from '../../../assets/images/physics_banner.png';
 import heroMaster from '../../../assets/images/hero_master.png';
-import grade6 from '../../../assets/images/grade_6.png';
-import grade7 from '../../../assets/images/grade_7.png';
-import grade8 from '../../../assets/images/grade_8.png';
-import grade9 from '../../../assets/images/grade_9.png';
-import grade10 from '../../../assets/images/grade_10.png';
-import grade11 from '../../../assets/images/grade_11.png';
-import grade12 from '../../../assets/images/grade_12.png';
 import utilLab from '../../../assets/images/util_lab.png';
 import utilArena from '../../../assets/images/util_arena.png';
 import utilJourney from '../../../assets/images/util_journey.png';
-import utilTools from '../../../assets/images/util_tools.png';
 import utilLectures from '../../../assets/images/util_lectures.png';
 
 /* ────────────────────────────────────────────
@@ -197,9 +189,9 @@ const PhysicsHome = () => {
       <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-[#FDFCF8]">
         {/* Master Background Image with Blur/Fade */}
         <div className="absolute inset-0 z-0 select-none pointer-events-none">
-          <img 
-            src={heroMaster} 
-            alt="Academy Background" 
+          <img
+            src={heroMaster}
+            alt="Academy Background"
             className="w-full h-full object-cover opacity-15"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF8] via-transparent to-[#FDFCF8]" />
@@ -212,7 +204,7 @@ const PhysicsHome = () => {
 
         <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6 py-20">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-            
+
             {/* Left Content (Moved from Section 1) */}
             <div className="w-full lg:w-3/5 space-y-8 animate-fade-in-up">
               <div>
@@ -299,209 +291,110 @@ const PhysicsHome = () => {
         </div>
       </section>
 
+
+
       {/* ══════════════════════════════════════════
-          SECTION 2: VISUAL LEARNING JOURNEY
+          FEATURE BANNERS — Split Layout
           ══════════════════════════════════════════ */}
-      <section className="py-24 sm:py-32 bg-[#FDFCF8] relative overflow-hidden">
-        <div className="absolute inset-0 graph-grid opacity-[0.2] pointer-events-none" />
-        
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative z-10 text-center">
-          <div className="mb-16 sm:mb-24">
-            <h2 className="text-4xl sm:text-5xl font-black text-[#1E293B] tracking-tight mb-6">Bắt đầu hành trình học tập tại đây</h2>
-            <p className="text-slate-500 max-w-2xl mx-auto font-medium text-lg leading-relaxed">
-              Mỗi cấp độ là một hành trình mới với câu chuyện riêng và thử thách thú vị, giúp bạn khám phá Vật Lý một cách tự nhiên và phát triển toàn diện.
-            </p>
-          </div>
+      {[
+        {
+          title: 'Lộ trình học tập',
+          highlight: 'Trực tuyến bài bản',
+          desc: 'Từ kiến thức cơ bản của Vật lý 6 đến các chuyên đề nâng cao của Vật lý 12. Nội dung được số hóa thành các bài học tương tác tinh tiến, rèn giữa cả lý thuyết và bài tập.',
+          cta: 'Khám phá Lớp học',
+          img: physicsBanner,
+          path: `/physics-classes`,
+          accentColor: '#10B981',
+        },
+        {
+          title: 'Phòng thí nghiệm',
+          highlight: 'Ảo 3D tương tác',
+          desc: 'Mô phỏng đồ họa 3D chân thực, chuẩn xác. Thực hành các thí nghiệm Vật lý kinh điển ngay trên trình duyệt với giao diện trực quan và kết quả thời gian thực.',
+          cta: 'Vào phòng Lab',
+          img: utilLab,
+          path: '/vatly/virtual-lab',
+          accentColor: '#3B82F6',
+        },
+        {
+          title: 'Đấu trường',
+          highlight: 'PK trực tuyến',
+          desc: 'Sân chơi trí tuệ, mài giũa tư duy. Thi đấu online theo thời gian thực với bạn bè hoặc đối thủ ngẫu nhiên, chinh phục bảng xếp hạng toàn quốc.',
+          cta: 'Tham gia ngay',
+          img: utilArena,
+          path: '/pk-battle',
+          accentColor: '#EF4444',
+        },
+        {
+          title: 'Hành trình',
+          highlight: 'Chinh phục kiến thức',
+          desc: 'Phiêu lưu qua các chương trình học theo hình thức game nhập vai. Thu thập thành tựu, mở khóa cấp độ mới và ghi danh bảng vàng cùng cộng đồng học tập.',
+          cta: 'Bắt đầu hành trình',
+          img: utilJourney,
+          path: '/game-journey',
+          accentColor: '#8B5CF6',
+        },
+        {
+          title: 'Bài giảng tương tác',
+          highlight: 'Trực quan & sinh động',
+          desc: 'Lý thuyết được trình bày qua các slide tương tác, video minh họa và câu hỏi kiểm tra ngay trong bài. Học mọi lúc, mọi nơi với nội dung chuẩn chương trình.',
+          cta: 'Xem bài giảng',
+          img: utilLectures,
+          path: '/interactive-lectures',
+          accentColor: '#6366F1',
+        },
+      ].map((feature, idx) => {
+        const isReversed = idx % 2 !== 0;
+        return (
+          <section
+            key={idx}
+            className={`py-20 sm:py-24 ${idx % 2 === 0 ? 'bg-white' : 'bg-[#FDFCF8]'} border-t border-[#E5E7EB]/60 overflow-hidden`}
+          >
+            <div className="container mx-auto max-w-6xl px-4 sm:px-6">
+              <div className={`flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-12 lg:gap-20`}>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-            {[
-              { 
-                title: 'Khoa học tự nhiên 6', 
-                desc: 'Đo lường, Chuyển thể của chất và Năng lượng cơ bản trong đời sống.', 
-                img: grade6, 
-                grades: 'Lớp 6',
-                path: 6 
-              },
-              { 
-                title: 'Khoa học tự nhiên 7', 
-                desc: 'Khám phá Tốc độ, Sóng âm, Ánh sáng và Từ trường thực nghiệm.', 
-                img: grade7, 
-                grades: 'Lớp 7',
-                path: 7
-              },
-              { 
-                title: 'Khoa học tự nhiên 8', 
-                desc: 'Nghiên cứu Lực, Áp suất, Công và Năng lượng cơ học ứng dụng.', 
-                img: grade8, 
-                grades: 'Lớp 8',
-                path: 8
-              },
-              { 
-                title: 'Khoa học tự nhiên 9', 
-                desc: 'Điện học, Định luật Ohm và Khúc xạ ánh sáng nâng cao với tương tác 3D.', 
-                img: grade9, 
-                grades: 'Lớp 9',
-                path: 9
-              },
-              { 
-                title: 'Vật lý 10', 
-                desc: 'Động học, Động lực học, Năng lượng và các định luật Bảo toàn động lượng.', 
-                img: grade10, 
-                grades: 'Lớp 10',
-                path: 10
-              },
-              { 
-                title: 'Vật lý 11', 
-                desc: 'Dao động điều hòa, Sóng cơ, Điện trường và quy luật Vật lý nhiệt.', 
-                img: grade11, 
-                grades: 'Lớp 11',
-                path: 11
-              },
-              { 
-                title: 'Vật lý 12', 
-                desc: 'Vật lý hạt nhân, Khí lý tưởng và Từ trường theo chuẩn Kết nối tri thức.', 
-                img: grade12, 
-                grades: 'Lớp 12',
-                path: 12
-              }
-            ].map((card, idx) => (
-              <div 
-                key={idx} 
-                className="group relative bg-white rounded-[2.5rem] overflow-hidden border border-[#E5E7EB] shadow-[0_15px_30px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_40px_80px_-20px_rgba(184,115,51,0.15)] hover:-translate-y-2 transition-all duration-700 cursor-pointer"
-                onClick={() => navigate(`/physics-class/${card.path}`)}
-              >
-                {/* Image Container */}
-                <div className="aspect-[4/5] relative overflow-hidden">
-                  <img 
-                    src={card.img} 
-                    alt={card.title} 
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#B87333]/10 to-transparent group-hover:opacity-40 transition-opacity" />
-                  
-                  {/* Grade Badge */}
-                  <div className="absolute top-5 left-5 px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur-md border border-white/50 text-[#8C5523] font-black text-[9px] tracking-[0.1em] uppercase shadow-sm">
-                    {card.grades}
-                  </div>
-
-                  {/* Program Badge */}
-                  <div className="absolute bottom-5 left-5 right-5 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md text-white font-bold text-[8px] tracking-[0.05em] uppercase opacity-0 group-hover:opacity-100 transition-opacity text-center">
-                    Kết nối tri thức với cuộc sống
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-8 text-left">
-                  <h3 className="text-xl font-black text-[#1E293B] mb-3 group-hover:text-[#B87333] transition-colors leading-tight">
-                    {card.title}
-                  </h3>
-                  <p className="text-slate-500 font-medium leading-relaxed text-[13px]">
-                    {card.desc}
+                {/* Text Side */}
+                <div className="w-full lg:w-1/2 space-y-6">
+                  <h2 className="text-3xl sm:text-[2.5rem] font-black text-[#1E293B] leading-[1.15] tracking-tight">
+                    {feature.title}<br />
+                    <span style={{ color: feature.accentColor }}>{feature.highlight}</span>
+                  </h2>
+                  <p className="text-slate-500 font-medium leading-relaxed text-[15px] max-w-lg">
+                    {feature.desc}
                   </p>
-                  
-                  <div className="mt-6 flex items-center gap-2 text-[#B87333] font-black text-[10px] tracking-widest uppercase group-hover:gap-4 transition-all">
-                    Bắt đầu học <ChevronRight className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════
-          SECTION 3: CORE PLATFORM UTILITIES
-          ══════════════════════════════════════════ */}
-      <section className="py-24 bg-white relative border-t border-[#E5E7EB] overflow-hidden">
-        {/* Decorative background accent */}
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-[#B87333]/5 to-transparent pointer-events-none" />
-
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-black text-[#1E293B] mb-4">Tiện ích Hệ thống</h2>
-            <p className="text-slate-500 font-medium max-w-2xl mx-auto">
-              Truy cập nhanh các phân khu chức năng được tối ưu riêng cho nhu cầu học tập và rèn luyện của bạn.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {[
-              { 
-                title: 'Phòng Lab Ảo', 
-                desc: 'Thử nghiệm 3D sống động', 
-                img: utilLab, 
-                path: '/vatly/virtual-lab',
-                color: 'from-blue-600/20'
-              },
-              { 
-                title: 'Đấu Trường PK', 
-                desc: 'Thi đấu online gay cấn', 
-                img: utilArena, 
-                path: '/pk-battle',
-                color: 'from-red-600/20'
-              },
-              { 
-                title: 'Game Hành Trình', 
-                desc: 'Phiêu lưu chinh phục Vật lý', 
-                img: utilJourney, 
-                path: '/game-journey',
-                color: 'from-emerald-600/20'
-              },
-              { 
-                title: 'Trạm Công Cụ', 
-                desc: 'Tính toán & Tra cứu chuyên sâu', 
-                img: utilTools, 
-                path: '/physics-tools',
-                color: 'from-amber-600/20'
-              },
-              { 
-                title: 'Bài Giảng Động', 
-                desc: 'Lý thuyết tương tác trực quan', 
-                img: utilLectures, 
-                path: '/interactive-lectures',
-                color: 'from-indigo-600/20'
-              }
-            ].map((util, idx) => (
-              <div 
-                key={idx}
-                onClick={() => navigate(util.path)}
-                className="group relative bg-[#FDFCF8] rounded-3xl p-2 border border-[#E5E7EB] hover:border-[#B87333]/40 hover:shadow-[0_20px_40px_-15px_rgba(184,115,51,0.2)] transition-all duration-500 cursor-pointer flex flex-col h-full"
-              >
-                {/* Visual Area */}
-                <div className="relative aspect-square rounded-2xl overflow-hidden mb-4">
-                  <img 
-                    src={util.img} 
-                    alt={util.title} 
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className={`absolute inset-0 bg-gradient-to-t ${util.color} to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
-                  
-                  {/* Glass highlight */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/5 pointer-events-none" />
-                </div>
-
-                {/* Content Area */}
-                <div className="px-4 pb-6 text-center flex-grow flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-base font-black text-[#1E293B] mb-2 group-hover:text-[#B87333] transition-colors">
-                      {util.title}
-                    </h3>
-                    <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                      {util.desc}
-                    </p>
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-[#E5E7EB]/50">
-                    <span className="inline-flex items-center gap-1.5 text-[9px] font-black text-[#B87333] tracking-widest uppercase opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all">
-                      Truy cập <ChevronRight className="w-3 h-3" />
+                  <button
+                    onClick={() => navigate(feature.path)}
+                    className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-[#1E293B] text-white font-black text-sm hover:bg-[#0F172A] transition-colors shadow-lg hover:shadow-xl active:scale-[0.97]"
+                  >
+                    {feature.cta}
+                    <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                      <ChevronRight className="w-4 h-4" />
                     </span>
+                  </button>
+                </div>
+
+                {/* Image Side */}
+                <div className="w-full lg:w-1/2 flex justify-center">
+                  <div className="relative w-full max-w-md">
+                    <div
+                      className="absolute -inset-4 rounded-[2rem] opacity-20 blur-[40px] pointer-events-none"
+                      style={{ background: feature.accentColor }}
+                    />
+                    <div className="relative rounded-[1.5rem] overflow-hidden shadow-[0_20px_50px_-15px_rgba(0,0,0,0.15)] border-4 border-white group">
+                      <img
+                        src={feature.img}
+                        alt={feature.title}
+                        className="w-full h-auto aspect-[4/3] object-cover transform group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-black/5 via-transparent to-white/10 pointer-events-none" />
+                    </div>
                   </div>
                 </div>
+
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
+          </section>
+        );
+      })}
 
     </div>
   );

@@ -1,25 +1,22 @@
-const mongoose = require("mongoose");
+// Supabase connection helper (replaces old MongoDB connectDB)
+const { supabase } = require('./supabase.cjs');
 
 const connectDB = async () => {
   try {
-    // MongoDB Atlas connection - sử dụng database 'test' của bạn
-    const atlasUri = "mongodb+srv://trancongviet0710_db_user:TIpYFg6BN3mzqsRk@cluster0.aixbbzb.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0";
-    
-    await mongoose.connect(atlasUri, {
-      serverSelectionTimeoutMS: 10000, // Tăng timeout lên 10 giây
-    });
-    console.log("✅ MongoDB Atlas connected successfully!");
-    console.log("📊 Database:", mongoose.connection.name);
+    // Test connection with simple query
+    const { error } = await supabase.from('users').select('id', { count: 'exact', head: true });
+    if (error && error.code !== '42P01') {
+      throw new Error(`Supabase connection failed: ${error.message}`);
+    }
+    console.log("✅ Supabase connected successfully!");
+    console.log("📊 Database: PostgreSQL (Supabase)");
   } catch (error) {
-    console.error("❌ MongoDB Atlas connection failed!");
+    console.error("❌ Supabase connection failed!");
     console.error("Error:", error.message);
     console.error("\n🔧 Solutions:");
-    console.error("1. Whitelist your IP (1.54.56.32) in MongoDB Atlas Network Access");
-    console.error("2. Or allow access from anywhere (0.0.0.0/0)");
-    console.error("3. Check your internet connection");
-    console.error("4. Verify MongoDB Atlas cluster is running");
-    
-    // Không dùng fallback - báo lỗi rõ ràng
+    console.error("1. Check SUPABASE_URL in .env");
+    console.error("2. Check SUPABASE_SERVICE_ROLE_KEY in .env");
+    console.error("3. Ensure database schema has been created");
     throw error;
   }
 };
