@@ -1,4 +1,3 @@
-// Bài 23: Suất điện động cảm ứng
 module.exports = {
   "id": "vatly-11-23",
   "title": "Suất điện động cảm ứng",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Độ lớn suất điện động cảm ứng tỉ lệ với đại lượng nào sau đây?",
+        "question": "Độ lớn suất điện động cảm ứng tỉ lệ với đại lượng nào sau đây?",
         "type": "multiple-choice",
         "options": [
           "Từ thông.",
           "Tốc độ biến thiên từ thông.",
           "Diện tích khung dây.",
-          " Cảm ứng từ.",
+          " Cảm ứng từ."
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Suất điện động cảm ứng",
+      "Trong tam chuong 5",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Suất điện động cảm ứng\".",
+      "Neu vi du thuc te lien quan den \"Suất điện động cảm ứng\".",
+      "So sanh kien thuc trong \"Suất điện động cảm ứng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

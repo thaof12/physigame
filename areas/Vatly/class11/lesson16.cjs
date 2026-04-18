@@ -1,4 +1,3 @@
-// Bài 16: Từ trường
 module.exports = {
   "id": "vatly-11-16",
   "title": "Từ trường",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Vật liệu nào sau đây không thể dùng làm nam châm?",
+        "question": "Vật liệu nào sau đây không thể dùng làm nam châm?",
         "type": "multiple-choice",
         "options": [
           "Sắt và hợp chất của sắt.",
           "Niken và hợp chất của niken.",
           "Cô ban và hợp chất của cô ban.",
-          "Nhôm và hợp chất của nhôm.",
+          "Nhôm và hợp chất của nhôm."
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Từ trường",
+      "Trong tam chuong 4",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Từ trường\".",
+      "Neu vi du thuc te lien quan den \"Từ trường\".",
+      "So sanh kien thuc trong \"Từ trường\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

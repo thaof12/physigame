@@ -1,4 +1,3 @@
-// Bài 9: Lực ma sát
 module.exports = {
   "id": "vatly-10-9",
   "title": "Lực ma sát",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Trường hợp nào sau đây xuất hiện lực ma sát trượt?",
+        "question": "Trường hợp nào sau đây xuất hiện lực ma sát trượt?",
         "type": "multiple-choice",
         "options": [
           "Viên bi lăn trên mặt đường.",
           "Lốp xe đạp chạy trên đường.",
           "Kéo một chiếc hộp nặng trượt trên sàn nhà.",
-          "Bánh xe ô tô lăn trên đường.",
+          "Bánh xe ô tô lăn trên đường."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Lực ma sát",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Lực ma sát\".",
+      "Neu vi du thuc te lien quan den \"Lực ma sát\".",
+      "So sanh kien thuc trong \"Lực ma sát\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,4 +1,3 @@
-// Bài 7: Lực hấp dẫn - Định luật vũ trụ
 module.exports = {
   "id": "vatly-10-7",
   "title": "Lực hấp dẫn - Định luật vũ trụ",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Lực hấp dẫn giữa Trái Đất và Mặt Trăng là gì?",
+        "question": "Lực hấp dẫn giữa Trái Đất và Mặt Trăng là gì?",
         "type": "multiple-choice",
         "options": [
           "Lực đẩy",
           "Lực hút",
           "Lực từ",
-          "Lực tương tác",
+          "Lực tương tác"
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Lực hấp dẫn - Định luật vũ trụ",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Lực hấp dẫn - Định luật vũ trụ\".",
+      "Neu vi du thuc te lien quan den \"Lực hấp dẫn - Định luật vũ trụ\".",
+      "So sanh kien thuc trong \"Lực hấp dẫn - Định luật vũ trụ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

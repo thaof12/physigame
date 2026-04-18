@@ -1,4 +1,3 @@
-// Bài 2: Đo lường trong vật lý
 module.exports = {
   "id": "vatly-6-2",
   "title": "Đo lường trong vật lý",
@@ -33,6 +32,16 @@ module.exports = {
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Đo lường trong vật lý",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Đo lường trong vật lý\".",
+      "Neu vi du thuc te lien quan den \"Đo lường trong vật lý\".",
+      "So sanh kien thuc trong \"Đo lường trong vật lý\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

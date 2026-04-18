@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
+import BackNavButton from '../components/ui/BackNavButton';
 
 const ProgramSelection = () => {
   const { user } = useAuth();
@@ -82,6 +83,10 @@ const ProgramSelection = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="container mx-auto px-4 pt-4">
+        <BackNavButton fallbackPath="/login" />
+      </div>
+
       {/* Hero Section */}
       <section className="py-16 px-4 text-center bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
         <div className="container mx-auto">

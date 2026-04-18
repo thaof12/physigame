@@ -1,4 +1,3 @@
-// Bài 10: Ứng dụng của nam châm điện
 module.exports = {
   "id": "vatly-9-10",
   "title": "Ứng dụng của nam châm điện",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  " Thiết bị nào sau đây sử dụng nam châm điện?",
+        "question": " Thiết bị nào sau đây sử dụng nam châm điện?",
         "type": "multiple-choice",
         "options": [
           "Bóng đèn pin",
           "Bàn là điện",
           "Chuông điện",
-          "Bóng đèn sợi đốt ",
+          "Bóng đèn sợi đốt "
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Ứng dụng của nam châm điện",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Ứng dụng của nam châm điện\".",
+      "Neu vi du thuc te lien quan den \"Ứng dụng của nam châm điện\".",
+      "So sanh kien thuc trong \"Ứng dụng của nam châm điện\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

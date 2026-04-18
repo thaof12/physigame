@@ -1,4 +1,3 @@
-// Bài 9: Sóng dừng
 module.exports = {
   "id": "vatly-12-9",
   "title": "Sóng dừng",
@@ -11,17 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Khi có sóng dừng trên dây đàn hồi, điều gì xảy ra?",
+        "question": "Khi có sóng dừng trên dây đàn hồi, điều gì xảy ra?",
         "type": "multiple-choice",
         "options": [
           "Tất cả các điểm đều đứng yên.",
           "Nguồn phát ngừng dao động.",
           "Các điểm dao động mạnh xen kẽ điểm đứng yên.",
-          "Mọi điểm dao động với biên độ cực đại.",
+          "Mọi điểm dao động với biên độ cực đại."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Sóng dừng",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Sóng dừng\".",
+      "Neu vi du thuc te lien quan den \"Sóng dừng\".",
+      "So sanh kien thuc trong \"Sóng dừng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };
-

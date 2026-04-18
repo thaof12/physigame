@@ -1,4 +1,3 @@
-// Bài 8: Đặc trưng vật lý của âm
 module.exports = {
   "id": "vatly-7-8",
   "title": "Đặc trưng vật lý của âm",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  " Đặc trưng vật lý nào của âm giúp ta phân biệt âm cao, âm trầm?",
+        "question": " Đặc trưng vật lý nào của âm giúp ta phân biệt âm cao, âm trầm?",
         "type": "multiple-choice",
         "options": [
           "Cường độ âm",
           "Tần số",
           "Âm sắc",
-          "Mức cường độ âm",
+          "Mức cường độ âm"
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Đặc trưng vật lý của âm",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Đặc trưng vật lý của âm\".",
+      "Neu vi du thuc te lien quan den \"Đặc trưng vật lý của âm\".",
+      "So sanh kien thuc trong \"Đặc trưng vật lý của âm\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

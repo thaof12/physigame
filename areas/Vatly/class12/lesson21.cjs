@@ -1,4 +1,3 @@
-// Bài 21: Giao thoa ánh sáng
 module.exports = {
   "id": "vatly-12-21",
   "title": "Giao thoa ánh sáng",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Yếu tố nào sau đây của ánh sáng đơn sắc quyết định màu của nó?",
+        "question": "Yếu tố nào sau đây của ánh sáng đơn sắc quyết định màu của nó?",
         "type": "multiple-choice",
         "options": [
           "Bước sóng trong môi trường.",
           "Tần số.",
           "Tốc độ truyền sóng.",
-          "Cường độ của chùm ánh sáng.",
+          "Cường độ của chùm ánh sáng."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Giao thoa ánh sáng",
+      "Trong tam chuong 5",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Giao thoa ánh sáng\".",
+      "Neu vi du thuc te lien quan den \"Giao thoa ánh sáng\".",
+      "So sanh kien thuc trong \"Giao thoa ánh sáng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

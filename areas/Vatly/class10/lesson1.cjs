@@ -7,6 +7,16 @@ module.exports = {
   "lessonNumber": 1,
   "content": {
     "theory": "<h2>Chuyển động cơ học</h2>\n<p>Chuyển động cơ học là sự thay đổi vị trí của một vật theo thời gian so với một vật khác được chọn làm mốc (vật mốc). Nó mang tính tương đối, nghĩa là một vật có thể chuyển động so với vật này nhưng lại đứng yên so với vật khác.</p>",
+    "topics": [
+      "Khái niệm chuyển động cơ học",
+      "Vật mốc",
+      "Tính tương đối của chuyển động"
+    ],
+    "theoryQuestions": [
+      "Thế nào là chuyển động cơ học? Cho một ví dụ cụ thể.",
+      "Vì sao nói chuyển động mang tính tương đối?",
+      "Trong cùng một tình huống, một vật có thể vừa chuyển động vừa đứng yên được không? Giải thích."
+    ],
     "examples": [],
     "exercises": [
       {

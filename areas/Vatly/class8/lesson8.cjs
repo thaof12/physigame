@@ -1,4 +1,3 @@
-// Bài 8: Áp suất chất rắn
 module.exports = {
   "id": "vatly-8-8",
   "title": "Áp suất chất rắn",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  " Áp suất chất rắn phụ thuộc vào yếu tố nào sau đây?",
+        "question": " Áp suất chất rắn phụ thuộc vào yếu tố nào sau đây?",
         "type": "multiple-choice",
         "options": [
           "Lực tác dụng và thể tích.",
           "Lực tác dụng và diện tích tiếp xúc.",
           "Khối lượng riêng và nhiệt độ.",
-          "Lực tác dụng và thời gian tác dụng.",
+          "Lực tác dụng và thời gian tác dụng."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Áp suất chất rắn",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Áp suất chất rắn\".",
+      "Neu vi du thuc te lien quan den \"Áp suất chất rắn\".",
+      "So sanh kien thuc trong \"Áp suất chất rắn\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

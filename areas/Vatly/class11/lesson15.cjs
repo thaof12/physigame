@@ -1,4 +1,3 @@
-// Bài 15: Dòng điện trong chất bán dẫn
 module.exports = {
   "id": "vatly-11-15",
   "title": "Dòng điện trong chất bán dẫn",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Bản chất dòng điện trong chất bán dẫn là dòng chuyển dời có hướng của các hạt tải điện nào?",
+        "question": "Bản chất dòng điện trong chất bán dẫn là dòng chuyển dời có hướng của các hạt tải điện nào?",
         "type": "multiple-choice",
         "options": [
           "Chỉ các electron tự do.",
           "Chỉ các lỗ trống.",
           "Cả electron tự do và lỗ trống.",
-          "Các ion dương và ion âm.",
+          "Các ion dương và ion âm."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Dòng điện trong chất bán dẫn",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Dòng điện trong chất bán dẫn\".",
+      "Neu vi du thuc te lien quan den \"Dòng điện trong chất bán dẫn\".",
+      "So sanh kien thuc trong \"Dòng điện trong chất bán dẫn\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trophy, Lock, CheckCircle, Star, Target, Clock, Zap } from 'lucide-react';
+import { ArrowLeft, Trophy, Lock, CheckCircle, Star, PlayCircle, Crown } from 'lucide-react';
 import { grade6Games } from '../areas/Vatly/data/grade6Games';
 import { grade7Games } from '../areas/Vatly/data/grade7Games';
 import { grade8Games } from '../areas/Vatly/data/grade8Games';
@@ -12,84 +12,115 @@ import { useAuth } from '../contexts/AuthContext';
 import { useGameProgress } from '../contexts/GameProgressContext';
 import './GameJourney.css';
 
+const GRADE_ITEMS = [
+  { id: 6, label: 'Lớp 6', subtitle: 'Khởi động nền tảng', icon: '🌱' },
+  { id: 7, label: 'Lớp 7', subtitle: 'Nâng cấp kỹ năng', icon: '🚀' },
+  { id: 8, label: 'Lớp 8', subtitle: 'Tăng tốc tư duy', icon: '⚡' },
+  { id: 9, label: 'Lớp 9', subtitle: 'Vững chắc kiến thức', icon: '🛡️' },
+  { id: 10, label: 'Lớp 10', subtitle: 'Bứt phá nâng cao', icon: '🔥' },
+  { id: 11, label: 'Lớp 11', subtitle: 'Chiến thuật chuyên sâu', icon: '🎯' },
+  { id: 12, label: 'Lớp 12', subtitle: 'Chinh phục đỉnh cao', icon: '👑' }
+];
+
+const GAMES_BY_GRADE = {
+  6: grade6Games,
+  7: grade7Games,
+  8: grade8Games,
+  9: grade9Games,
+  10: grade10Games,
+  11: grade11Games,
+  12: grade12Games
+};
+
 const GameJourney = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { 
-    progressByGrade, 
+  const {
+    progressByGrade,
     gameResults,
-    loading, 
-    loadGradeProgress, 
-    completeGame,
+    loading,
+    loadGradeProgress,
     isGameCompleted,
     isGameUnlocked,
     getCurrentGame,
-    getTotalTrophies,
-    resetGradeProgress
+    getTotalTrophies
   } = useGameProgress();
-  
-  const [selectedGrade, setSelectedGrade] = useState(11);
 
-  // Lấy danh sách game theo lớp đã chọn
-  const getGamesForGrade = (grade) => {
-    switch (grade) {
-      case 6: return grade6Games;
-      case 7: return grade7Games;
-      case 8: return grade8Games;
-      case 9: return grade9Games;
-      case 10: return grade10Games;
-      case 11: return grade11Games;
-      case 12: return grade12Games;
-      default: return [];
-    }
-  };
+  const [selectedGrade, setSelectedGrade] = useState(6);
 
-  const games = getGamesForGrade(selectedGrade);
-
-  // Thông tin các lớp
-  const grades = [
-    { id: 6, name: 'Lớp 6', icon: '📚', color: 'from-purple-400 to-purple-600' },
-    { id: 7, name: 'Lớp 7', icon: '🔬', color: 'from-blue-400 to-blue-600' },
-    { id: 8, name: 'Lớp 8', icon: '⚡', color: 'from-green-400 to-green-600' },
-    { id: 9, name: 'Lớp 9', icon: '🔋', color: 'from-yellow-400 to-yellow-600' },
-    { id: 10, name: 'Lớp 10', icon: '🎯', color: 'from-orange-400 to-orange-600' },
-    { id: 11, name: 'Lớp 11', icon: '🔥', color: 'from-red-400 to-red-600' },
-    { id: 12, name: 'Lớp 12', icon: '⚛️', color: 'from-pink-400 to-pink-600' },
-  ];
-
-  // Load progress khi component mount hoặc khi chuyển lớp
   useEffect(() => {
-    loadGradeProgress(selectedGrade);
-  }, [selectedGrade, loadGradeProgress]);
-
-  // Load progress cho tất cả các lớp để hiển thị tổng trophies
-  useEffect(() => {
-    grades.forEach(grade => {
+    GRADE_ITEMS.forEach((grade) => {
       loadGradeProgress(grade.id);
     });
-  }, []);
+  }, [loadGradeProgress]);
 
-  // Lấy progress của grade hiện tại
-  const currentProgress = progressByGrade[selectedGrade] || { completed: [], current: null };
-  const completedGames = currentProgress.completed || [];
-  const currentGame = getCurrentGame(selectedGrade, games);
+  const getGamesForGrade = (grade) => GAMES_BY_GRADE[grade] || [];
 
-  // Kiểm tra game đã hoàn thành
-  const checkCompleted = (gameId) => isGameCompleted(gameId, selectedGrade);
+  const getGradeStats = (gradeId) => {
+    const gradeProgress = progressByGrade[gradeId] || { completed: [] };
+    const games = getGamesForGrade(gradeId);
+    const completed = (gradeProgress.completed || []).length;
+    const total = games.length;
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  // Kiểm tra game đang chơi (game tiếp theo chưa hoàn thành)
-  const isCurrent = (gameId) => gameId === currentGame;
-
-  // Kiểm tra game bị khóa
-  const isLocked = (gameId) => !isGameUnlocked(gameId, selectedGrade, games);
-
-  // Lấy kết quả game (stars, score...)
-  const getGameResult = (gameId) => {
-    const gradeResults = gameResults[selectedGrade] || {};
-    return gradeResults[gameId] || null;
+    return {
+      completed,
+      total,
+      percent,
+      isCompleted: total > 0 && completed >= total
+    };
   };
 
-  // Điều hướng quay lại với fallback khi không có history
+  const isGradeUnlocked = (gradeId) => {
+    if (gradeId === 6) {
+      return true;
+    }
+
+    const previousGradeStats = getGradeStats(gradeId - 1);
+    return previousGradeStats.isCompleted;
+  };
+
+  const journeyNodes = useMemo(() => {
+    return GRADE_ITEMS.map((grade) => {
+      const stats = getGradeStats(grade.id);
+      const unlocked = isGradeUnlocked(grade.id);
+
+      return {
+        ...grade,
+        ...stats,
+        unlocked,
+        status: !unlocked ? 'locked' : stats.isCompleted ? 'done' : 'active'
+      };
+    });
+  }, [progressByGrade]);
+
+  useEffect(() => {
+    const firstActive = journeyNodes.find((node) => node.status === 'active');
+    const fallbackNode = journeyNodes.find((node) => node.unlocked) || journeyNodes[0];
+    const targetGrade = firstActive?.id || fallbackNode?.id || 6;
+
+    setSelectedGrade((current) => {
+      const selectedNode = journeyNodes.find((node) => node.id === current);
+      if (selectedNode?.unlocked) {
+        return current;
+      }
+      return targetGrade;
+    });
+  }, [journeyNodes]);
+
+  const games = getGamesForGrade(selectedGrade);
+  const selectedNode = journeyNodes.find((node) => node.id === selectedGrade);
+  const completedGames = progressByGrade[selectedGrade]?.completed || [];
+  const currentGame = getCurrentGame(selectedGrade, games);
+  const selectedResults = gameResults[selectedGrade] || {};
+
+  const completedGrades = journeyNodes.filter((node) => node.isCompleted).length;
+  const totalTrophies = getTotalTrophies();
+
+  const checkCompleted = (gameId) => isGameCompleted(gameId, selectedGrade);
+  const isCurrent = (gameId) => gameId === currentGame;
+  const isLocked = (gameId) => !isGameUnlocked(gameId, selectedGrade, games);
+
   const handleBack = () => {
     const hasHistory = window.history.state && window.history.state.idx > 0;
     if (hasHistory) {
@@ -99,7 +130,6 @@ const GameJourney = () => {
     }
   };
 
-  // Xử lý click vào game node
   const handleGameClick = (game) => {
     if (isLocked(game.id)) {
       return;
@@ -107,79 +137,21 @@ const GameJourney = () => {
     navigate(game.path);
   };
 
-  // Xử lý đánh dấu hoàn thành (manual) - chỉ dùng cho debug/testing
-  const handleCompleteGame = async (e, game) => {
-    e.stopPropagation();
-    
-    const result = await completeGame({
-      gameId: game.id,
-      grade: selectedGrade,
-      chapter: game.chapter,
-      score: 100, // Manual complete luôn cho 100 điểm
-      maxScore: 100
-    });
-
-    if (result && !result.passed) {
-      alert(result.message);
-    }
-  };
-
-  // Xử lý reset tiến độ
-  const handleResetProgress = () => {
-    if (confirm('Bạn có chắc muốn reset tiến độ không?')) {
-      resetGradeProgress(selectedGrade);
-    }
-  };
-
-  // Nhóm games theo chapter
-  const groupGamesByChapter = () => {
-    const chapters = {};
-    games.forEach(game => {
-      const chapterKey = `chapter-${game.chapter}`;
-      if (!chapters[chapterKey]) {
-        chapters[chapterKey] = {
-          number: game.chapter,
-          games: []
-        };
-      }
-      chapters[chapterKey].games.push(game);
-    });
-    return Object.values(chapters);
-  };
-
-  const chapters = groupGamesByChapter();
-
-  // Tính toán thống kê cho lớp hiện tại
   const totalGames = games.length;
   const completedCount = completedGames.length;
-  const progress = totalGames > 0 ? Math.round((completedCount / totalGames) * 100) : 0;
+  const progressPercent = totalGames > 0 ? Math.round((completedCount / totalGames) * 100) : 0;
 
-  // Tính toán tổng cúp của tất cả các lớp
-  const totalTrophies = getTotalTrophies();
-
-  // Lấy progress cho từng lớp để hiển thị
-  const getGradeStats = (gradeId) => {
-    const gradeProgress = progressByGrade[gradeId] || { completed: [] };
-    const gradeGames = getGamesForGrade(gradeId);
-    const gradeCompleted = (gradeProgress.completed || []).length;
-    const gradeTotal = gradeGames.length;
-    const gradePercent = gradeTotal > 0 ? Math.round((gradeCompleted / gradeTotal) * 100) : 0;
-    
-    return { gradeCompleted, gradeTotal, gradePercent };
-  };
-
-  // Render stars cho game đã hoàn thành
   const renderStars = (gameId) => {
-    const result = getGameResult(gameId);
+    const result = selectedResults[gameId];
     const stars = result?.stars || 0;
-    
+
     return (
-      <div className="game-stars">
+      <div className="journey-stars">
         {[1, 2, 3].map(i => (
           <Star
             key={i}
             size={14}
-            className={i <= stars ? 'star-filled' : 'star-empty'}
+            className={i <= stars ? 'filled' : 'empty'}
             fill={i <= stars ? '#FFD700' : 'none'}
             stroke={i <= stars ? '#FFD700' : '#666'}
           />
@@ -188,234 +160,183 @@ const GameJourney = () => {
     );
   };
 
+  const formatEstimatedTime = (value) => {
+    if (typeof value === 'number') {
+      return `${value} phút`;
+    }
+    if (typeof value === 'string') {
+      return value.includes('phút') ? value : `${value} phút`;
+    }
+    return '-';
+  };
+
+  const getCurrentMilestoneLabel = () => {
+    const firstActive = journeyNodes.find((node) => node.status === 'active');
+    if (firstActive) {
+      return `Bạn đang ở ${firstActive.label}`;
+    }
+    return 'Bạn đã hoàn thành toàn bộ hành trình';
+  };
+
   return (
-    <div className="game-journey-container">
-      {/* Header */}
+    <div className="journey-page">
       <div className="journey-header">
-        <button 
-          onClick={handleBack}
-          className="back-button"
-        >
+        <button onClick={handleBack} className="journey-back-button">
           <ArrowLeft size={24} />
         </button>
-        <h1 className="journey-title">Hành Trình Vật Lý</h1>
-        <div className="header-actions">
-          <div className="journey-stats current-grade">
-            <Trophy className="trophy-icon" />
-            <div className="stats-text">
-              <div className="stats-label">Lớp {selectedGrade}</div>
-              <div className="stats-value">{completedCount}/{totalGames}</div>
-            </div>
+        <div className="journey-header-content">
+          <h1>Hành Trình Game Vượt Ải</h1>
+          <p>Mỗi chương là một lớp từ 6 đến 12. Hoàn thành lớp trước để mở lớp kế tiếp.</p>
+        </div>
+      </div>
+
+      <div className="journey-overview">
+        <div className="overview-card">
+          <div className="overview-title">Tiến độ hành trình</div>
+          <div className="overview-value">{completedGrades}/7 lớp</div>
+        </div>
+        <div className="overview-card">
+          <div className="overview-title">Tổng cúp</div>
+          <div className="overview-value">
+            <Trophy size={18} />
+            <span>{totalTrophies}</span>
           </div>
-          {totalTrophies > 0 && (
-            <div className="journey-stats total-trophies">
-              <Trophy className="trophy-icon-large" />
-              <div className="stats-text">
-                <div className="stats-label">Tổng cúp</div>
-                <div className="stats-value">{totalTrophies}</div>
-              </div>
-            </div>
-          )}
-          {completedCount > 0 && (
-            <button
-              onClick={handleResetProgress}
-              className="reset-button"
-              title="Reset tiến độ"
-            >
-              🔄
-            </button>
-          )}
+        </div>
+        <div className="overview-card">
+          <div className="overview-title">Mốc hiện tại</div>
+          <div className="overview-value milestone">
+            <Crown size={18} />
+            <span>{getCurrentMilestoneLabel()}</span>
+          </div>
         </div>
       </div>
 
-      {/* Grade Selector */}
-      <div className="grade-selector">
-        {grades.map(grade => {
-          const { gradeCompleted, gradeTotal, gradePercent } = getGradeStats(grade.id);
-          
-          return (
-            <button
-              key={grade.id}
-              onClick={() => setSelectedGrade(grade.id)}
-              className={`grade-button ${selectedGrade === grade.id ? 'active' : ''}`}
-              data-color={grade.color}
-            >
-              <span className="grade-icon">{grade.icon}</span>
-              <div className="grade-info">
-                <span className="grade-name">{grade.name}</span>
-                {gradeCompleted > 0 && (
-                  <span className="grade-progress">{gradePercent}%</span>
-                )}
-              </div>
-              {gradeCompleted > 0 && (
-                <div className="grade-trophy-count">
-                  <Trophy size={14} />
-                  {gradeCompleted}
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Progress Bar */}
-      <div className="progress-section">
-        <div className="progress-info">
-          <span className="progress-label">Tiến độ Lớp {selectedGrade}</span>
-          <span className="progress-percent">{progress}%</span>
-        </div>
-        <div className="progress-bar">
-          <div 
-            className="progress-fill" 
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="progress-details">
-          <span>{completedCount} hoàn thành</span>
-          <span>•</span>
-          <span>{totalGames - completedCount} còn lại</span>
-        </div>
-      </div>
-
-      {/* Loading indicator */}
       {loading && (
-        <div className="loading-indicator">
-          <div className="spinner"></div>
-          <span>Đang tải...</span>
+        <div className="journey-loading">
+          <div className="spinner" />
+          <span>Đang tải tiến độ...</span>
         </div>
       )}
 
-      {/* Journey Path */}
-      <div className="journey-path">
-        {chapters.map((chapter, chapterIndex) => (
-          <div key={chapter.number} className="chapter-section">
-            <div className="chapter-header">
-              <h2 className="chapter-title">Chương {chapter.number}</h2>
-              <div className="chapter-stats">
-                <CheckCircle size={16} />
-                <span>{chapter.games.filter(g => checkCompleted(g.id)).length}/{chapter.games.length}</span>
-              </div>
-            </div>
-
-            <div className="games-path">
-              {chapter.games.map((game, gameIndex) => {
-                const completed = checkCompleted(game.id);
-                const current = isCurrent(game.id);
-                const locked = isLocked(game.id);
-                const position = gameIndex % 2 === 0 ? 'left' : 'right';
-                const result = getGameResult(game.id);
-
-                return (
-                  <div key={game.id} className="game-node-wrapper">
-                    {/* Connection Line */}
-                    {gameIndex > 0 && <div className="connection-line" />}
-
-                    {/* Game Node */}
-                    <div 
-                      className={`game-node ${position} ${completed ? 'completed' : ''} ${current ? 'current' : ''} ${locked ? 'locked' : ''}`}
-                      onClick={() => handleGameClick(game)}
-                    >
-                      {/* Node Icon/Circle */}
-                      <div className={`node-circle bg-gradient-to-br ${game.color}`}>
-                        {locked ? (
-                          <Lock size={24} />
-                        ) : completed ? (
-                          <CheckCircle size={28} />
-                        ) : current ? (
-                          <Star size={28} className="pulse" />
-                        ) : (
-                          <Target size={24} />
-                        )}
-                      </div>
-
-                      {/* Node Info Card */}
-                      <div className={`node-card ${position}`}>
-                        <div className="node-card-header">
-                          <h3 className="node-title">{game.title}</h3>
-                          {completed && (
-                            <div className="completion-badge">
-                              <CheckCircle size={16} />
-                            </div>
-                          )}
-                        </div>
-                        
-                        <p className="node-description">{game.description}</p>
-                        
-                        <div className="node-meta">
-                          <div className="meta-item">
-                            <Clock size={14} />
-                            <span>{game.estimatedTime} phút</span>
-                          </div>
-                          <div className={`meta-item difficulty-${game.difficulty}`}>
-                            <Zap size={14} />
-                            <span>
-                              {game.difficulty === 'easy' ? 'Dễ' : 
-                               game.difficulty === 'medium' ? 'TB' : 'Khó'}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Stars display for completed games */}
-                        {completed && renderStars(game.id)}
-
-                        {/* Score display */}
-                        {result && result.score !== undefined && (
-                          <div className="game-score">
-                            <span>Điểm: {result.score}/{result.maxScore || 100}</span>
-                          </div>
-                        )}
-
-                        {!locked && (
-                          <div className="node-actions">
-                            <button 
-                              className={`play-button ${completed ? 'replay' : current ? 'primary' : ''}`}
-                              onClick={() => handleGameClick(game)}
-                            >
-                              {completed ? 'Chơi lại' : current ? 'Bắt đầu' : 'Chơi'}
-                            </button>
-                            {!completed && (
-                              <button 
-                                className="complete-button"
-                                onClick={(e) => handleCompleteGame(e, game)}
-                                title="Đánh dấu hoàn thành"
-                              >
-                                <CheckCircle size={16} />
-                                Hoàn thành
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
+      <div className="journey-layout">
+        <section className="milestone-track" aria-label="Hành trình lớp học">
+          {journeyNodes.map((node, index) => (
+            <div key={node.id} className="milestone-item">
+              {index > 0 && <div className={`milestone-line ${node.unlocked ? 'open' : 'locked'}`} />}
+              <button
+                type="button"
+                className={`milestone-node ${node.status}`}
+                onClick={() => node.unlocked && setSelectedGrade(node.id)}
+                disabled={!node.unlocked}
+              >
+                <div className="milestone-icon-wrap">
+                  {node.unlocked ? (
+                    node.isCompleted ? <Trophy size={22} /> : <PlayCircle size={22} />
+                  ) : (
+                    <Lock size={20} />
+                  )}
+                </div>
+                <div className="milestone-info">
+                  <div className="milestone-top-row">
+                    <span className="milestone-name">{node.label}</span>
+                    <span className="milestone-emoji">{node.icon}</span>
                   </div>
-                );
-              })}
+                  <div className="milestone-subtitle">{node.subtitle}</div>
+                  <div className="milestone-progress">
+                    <span>{node.completed}/{node.total} game</span>
+                    <span>{node.percent}%</span>
+                  </div>
+                  <div className="mini-progress-bar">
+                    <div className="mini-progress-fill" style={{ width: `${node.percent}%` }} />
+                  </div>
+                </div>
+              </button>
+            </div>
+          ))}
+        </section>
+
+        <section className="grade-detail-panel">
+          <div className="grade-detail-header">
+            <div>
+              <h2>{selectedNode?.label || `Lớp ${selectedGrade}`}</h2>
+              <p>{selectedNode?.subtitle || 'Danh sách game theo lớp'}</p>
+            </div>
+            <div className="grade-detail-stats">
+              <span>
+                <CheckCircle size={16} />
+                {completedCount}/{totalGames}
+              </span>
+              <span>
+                <Trophy size={16} />
+                {selectedNode?.isCompleted ? 'Đã lấy cúp lớp' : 'Chưa hoàn thành'}
+              </span>
             </div>
           </div>
-        ))}
 
-        {/* Journey Complete */}
-        {completedCount === totalGames && totalGames > 0 && (
-          <div className="journey-complete">
-            <div className="complete-icon">
-              <Trophy size={48} />
+          <div className="grade-progress-block">
+            <div className="grade-progress-row">
+              <strong>Tiến độ lớp {selectedGrade}</strong>
+              <span>{progressPercent}%</span>
             </div>
-            <h2>Xuất sắc!</h2>
-            <p>Bạn đã hoàn thành tất cả các trò chơi lớp {selectedGrade}</p>
-            {selectedGrade < 12 && (
-              <button 
-                className="next-grade-button"
-                onClick={() => setSelectedGrade(selectedGrade + 1)}
-              >
-                Tiếp tục lớp {selectedGrade + 1}
-              </button>
+            <div className="grade-progress-bar">
+              <div className="grade-progress-fill" style={{ width: `${progressPercent}%` }} />
+            </div>
+          </div>
+
+          <div className="grade-games-grid">
+            {games.map((game) => {
+              const completed = checkCompleted(game.id);
+              const locked = isLocked(game.id);
+              const current = isCurrent(game.id);
+              const result = selectedResults[game.id];
+
+              return (
+                <article
+                  key={game.id}
+                  className={`grade-game-card ${completed ? 'done' : ''} ${current ? 'current' : ''} ${locked ? 'locked' : ''}`}
+                >
+                  <div className="game-card-top">
+                    <h3>{game.title}</h3>
+                    {locked ? <Lock size={16} /> : completed ? <CheckCircle size={16} /> : <PlayCircle size={16} />}
+                  </div>
+
+                  <p>{game.description}</p>
+
+                  <div className="game-card-meta">
+                    <span>Chương {game.chapter}</span>
+                    <span>{formatEstimatedTime(game.estimatedTime)}</span>
+                    <span>
+                      {game.difficulty === 'easy' ? 'Dễ' : game.difficulty === 'medium' ? 'Trung bình' : 'Khó'}
+                    </span>
+                  </div>
+
+                  {completed && renderStars(game.id)}
+
+                  {result?.score !== undefined && (
+                    <div className="game-score">Điểm: {result.score}/{result.maxScore || 100}</div>
+                  )}
+
+                  <button
+                    type="button"
+                    className={`play-btn ${completed ? 'replay' : ''}`}
+                    onClick={() => handleGameClick(game)}
+                    disabled={locked}
+                  >
+                    {locked ? 'Đang khóa' : completed ? 'Chơi lại' : current ? 'Bắt đầu ngay' : 'Vào chơi'}
+                  </button>
+                </article>
+              );
+            })}
+
+            {games.length === 0 && (
+              <div className="empty-grade-games">
+                Chưa có game cho lớp này.
+              </div>
             )}
           </div>
-        )}
+        </section>
       </div>
 
-      {/* Login prompt if not logged in */}
       {!user && (
         <div className="login-prompt">
           <p>Đăng nhập để lưu tiến độ của bạn!</p>

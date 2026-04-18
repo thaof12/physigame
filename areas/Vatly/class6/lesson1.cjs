@@ -1,4 +1,3 @@
-// Bài 1: Vật lý học là gì?
 module.exports = {
   "id": "vatly-6-1",
   "title": "Vật lý học là gì?",
@@ -7,6 +6,16 @@ module.exports = {
   "lessonNumber": 1,
   "content": {
     "theory": "<h2>Vật lý học là gì?</h2>\n<p>Vật lý học (Physics) là ngành khoa học cơ bản nghiên cứu về vật chất, năng lượng, không gian và thời gian, cùng các quy luật vận động và tương tác cơ bản của chúng trong vũ trụ, từ cấp độ hạt hạ nguyên tử đến các thiên hà rộng lớn. Ngành này giải thích cách thế giới vật chất hoạt động, là nền tảng cho nhiều ngành khoa học tự nhiên khác như Hóa học, Sinh học, và đóng vai trò then chốt trong công nghệ hiện đại. </p>",
+    "topics": [
+      "Khái niệm vật lý học",
+      "Đối tượng nghiên cứu của vật lý",
+      "Vai trò của vật lý trong khoa học và đời sống"
+    ],
+    "theoryQuestions": [
+      "Vì sao vật lý học được xem là khoa học nền tảng cho nhiều ngành khác?",
+      "Nêu 2 ví dụ trong đời sống mà em có thể giải thích bằng kiến thức vật lý.",
+      "Sự khác nhau giữa việc quan sát hiện tượng tự nhiên và giải thích bằng vật lý là gì?"
+    ],
     "examples": [],
     "exercises": [
       {

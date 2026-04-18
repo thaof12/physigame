@@ -1,4 +1,3 @@
-// Bài 12: Nhiệt lượng
 module.exports = {
   "id": "vatly-7-12",
   "title": "Nhiệt lượng",
@@ -11,15 +10,25 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Phát biểu nào sau đây là đúng về nhiệt lượng?",
+        "question": "Phát biểu nào sau đây là đúng về nhiệt lượng?",
         "type": "multiple-choice",
         "options": [
           "Nhiệt lượng là nội năng của vật.",
           "Nhiệt lượng là động năng của các phân tử.",
-          "Nhiệt lượng là phần nhiệt năng vật nhận thêm hoặc mất đi khi truyền nhiệt.",
+          "Nhiệt lượng là phần nhiệt năng vật nhận thêm hoặc mất đi khi truyền nhiệt."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Nhiệt lượng",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Nhiệt lượng\".",
+      "Neu vi du thuc te lien quan den \"Nhiệt lượng\".",
+      "So sanh kien thuc trong \"Nhiệt lượng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

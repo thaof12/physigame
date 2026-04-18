@@ -1,0 +1,257 @@
+{
+  "language": "vi",
+  "agent": "Physical-Assistant",
+  "intents": [
+    {
+      "displayName": "VN.Welcome",
+      "trainingPhrases": [
+        "xin chao",
+        "chao ban",
+        "hello",
+        "cho minh hoi",
+        "toi can ho tro hoc vat ly"
+      ],
+      "responses": [
+        "Chao ban. Minh la Physical-Assistant, tro ly hoc tap cua ban. Minh co the giup ban tim bai hoc, vao roadmap game va goi y cach hoc nhanh.",
+        "Xin chao. Ban muon minh huong dan hoc theo lop hay vao game vat ly ngay?"
+      ],
+      "suggestionChips": [
+        "Vao roadmap vat ly",
+        "Hoc theo lop",
+        "Cong cu vat ly"
+      ]
+    },
+    {
+      "displayName": "VN.Goodbye",
+      "trainingPhrases": [
+        "tam biet",
+        "hen gap lai",
+        "bye",
+        "cam on ban",
+        "ok duoc roi"
+      ],
+      "responses": [
+        "Cam on ban. Chuc ban hoc tot va dat diem cao mon Vat ly.",
+        "Hen gap lai. Khi can goi y bai hoc hoac game, cu nhan minh nhe."
+      ]
+    },
+    {
+      "displayName": "VN.Navigate.PhysicsDashboard",
+      "trainingPhrases": [
+        "vao dashboard vat ly",
+        "mo trang vat ly",
+        "toi muon vao vat ly",
+        "vao chuong trinh vat ly"
+      ],
+      "responses": [
+        "Ban vao Dashboard Vat ly tai duong dan: /program/physics/dashboard",
+        "Neu dang o trang khac, ban co the ve nhanh bang link: /program/physics/dashboard"
+      ],
+      "suggestionChips": [
+        "Vao roadmap vat ly",
+        "Hoc theo lop",
+        "Cong cu vat ly"
+      ]
+    },
+    {
+      "displayName": "VN.Navigate.PhysicsRoadmap",
+      "trainingPhrases": [
+        "vao roadmap vat ly",
+        "mo lo trinh game vat ly",
+        "xem lo trinh tu lop 6 den 12",
+        "toi muon choi game theo roadmap"
+      ],
+      "responses": [
+        "Roadmap game Vat ly nam o: /physics-games/grades",
+        "Ban hay chon lop truoc, sau do mo game theo tung chuong de hoc co he thong."
+      ],
+      "suggestionChips": [
+        "Lop 6",
+        "Lop 7",
+        "Lop 8",
+        "Lop 9",
+        "Lop 10",
+        "Lop 11",
+        "Lop 12"
+      ]
+    },
+    {
+      "displayName": "VN.Navigate.PhysicsGradeGames",
+      "trainingPhrases": [
+        "choi game lop 6",
+        "choi game lop 7",
+        "choi game lop 8",
+        "choi game lop 9",
+        "choi game lop 10",
+        "choi game lop 11",
+        "choi game lop 12",
+        "mo game vat ly lop $lop"
+      ],
+      "entities": [
+        {
+          "name": "lop",
+          "type": "@sys.number"
+        }
+      ],
+      "responses": [
+        "Ban vao danh sach game theo lop tai: /physics-games/grade/$lop",
+        "Neu ban moi hoc, nen di theo thu tu chuong tu de den kho trong lop $lop."
+      ]
+    },
+    {
+      "displayName": "VN.Navigate.PhysicsTools",
+      "trainingPhrases": [
+        "mo cong cu vat ly",
+        "toi can may tinh vat ly",
+        "doi don vi",
+        "xem hang so vat ly"
+      ],
+      "responses": [
+        "Trung tam cong cu Vat ly: /physics-tools",
+        "May tinh Vat ly: /physics-tools/calculator | Doi don vi: /physics-tools/converter | Hang so: /physics-tools/constants"
+      ],
+      "suggestionChips": [
+        "May tinh vat ly",
+        "Doi don vi",
+        "Hang so vat ly"
+      ]
+    },
+    {
+      "displayName": "VN.Navigate.LectureByClass",
+      "trainingPhrases": [
+        "hoc bai vat ly lop 6",
+        "hoc bai vat ly lop 7",
+        "hoc bai vat ly lop 8",
+        "hoc bai vat ly lop 9",
+        "hoc bai vat ly lop 10",
+        "hoc bai vat ly lop 11",
+        "hoc bai vat ly lop 12",
+        "toi muon hoc theo lop $lop"
+      ],
+      "entities": [
+        {
+          "name": "lop",
+          "type": "@sys.number"
+        }
+      ],
+      "responses": [
+        "Ban vao dashboard lop Vat ly tai: /physics-class/$lop",
+        "Sau do chon chuong va bai de hoc + lam game luyen tap."
+      ]
+    },
+    {
+      "displayName": "VN.Account.Login",
+      "trainingPhrases": [
+        "dang nhap o dau",
+        "toi muon dang nhap",
+        "lam sao de login",
+        "vao trang dang nhap"
+      ],
+      "responses": [
+        "Trang dang nhap: /",
+        "Neu chua co tai khoan, ban vao /register de tao moi."
+      ]
+    },
+    {
+      "displayName": "VN.Account.Register",
+      "trainingPhrases": [
+        "dang ky tai khoan",
+        "tao tai khoan moi",
+        "toi chua co tai khoan",
+        "register"
+      ],
+      "responses": [
+        "Ban dang ky tai khoan tai: /register",
+        "Sau khi dang ky xong, ban quay lai trang dang nhap de vao he thong."
+      ]
+    },
+    {
+      "displayName": "VN.Navigate.Profile",
+      "trainingPhrases": [
+        "xem ho so cua toi",
+        "vao profile",
+        "thong tin tai khoan",
+        "xem tien do hoc"
+      ],
+      "responses": [
+        "Trang ho so cua ban: /profile",
+        "Ban co the theo doi thong tin va tien do hoc tai day."
+      ]
+    },
+    {
+      "displayName": "VN.Navigate.PlacementTest",
+      "trainingPhrases": [
+        "lam bai kiem tra dau vao",
+        "placement test",
+        "test trinh do",
+        "kiem tra nang luc"
+      ],
+      "responses": [
+        "Ban vao bai Placement Test tai: /placement-test",
+        "Hoan thanh bai test de nhan goi y lo trinh phu hop."
+      ]
+    },
+    {
+      "displayName": "VN.Study.Tips.ByLevel",
+      "trainingPhrases": [
+        "toi hoc yeu vat ly",
+        "goi y cach hoc vat ly",
+        "hoc game nhu the nao",
+        "lam sao hoc nhanh",
+        "minh nen hoc tu dau"
+      ],
+      "responses": [
+        "Goi y nhanh: 1) Hoc ly thuyet ngan theo bai. 2) Choi game chuong tuong ung. 3) Ghi lai loi sai hay gap. 4) Lam lai game kho sau 2-3 ngay.",
+        "Neu ban dang mat goc, hay bat dau tu lop hien tai trong roadmap: /physics-games/grades"
+      ],
+      "suggestionChips": [
+        "Bat dau voi lop 6",
+        "Bat dau voi lop 10",
+        "Vao roadmap vat ly"
+      ]
+    },
+    {
+      "displayName": "VN.Content.GameSuggestion",
+      "trainingPhrases": [
+        "goi y game de hoc luc",
+        "nen choi game nao ve nhiet hoc",
+        "toi muon luyen dien hoc",
+        "goi y game de on quang hoc"
+      ],
+      "responses": [
+        "Ban vao /physics-games/grades, chon lop roi uu tien game theo dung chuong dang hoc tren lop.",
+        "Neu dang hoc Dien hoc, hay chon nhom game circuit, ohm-law va magnetic-field de on tong hop."
+      ]
+    },
+    {
+      "displayName": "VN.Navigation.Home",
+      "trainingPhrases": [
+        "ve trang chu",
+        "mo home",
+        "toi muon ve trang chinh",
+        "back home"
+      ],
+      "responses": [
+        "Trang chu he thong: /home",
+        "Neu muon chon chuong trinh hoc, ban vao: /program-selection"
+      ]
+    },
+    {
+      "displayName": "VN.Fallback.Custom",
+      "trainingPhrases": [
+        "ban co o do khong",
+        "toi khong biet hoi gi",
+        "khong ro"
+      ],
+      "responses": [
+        "Minh chua hieu ro cau hoi. Ban thu hoi theo 1 trong 3 mau: 'vao roadmap vat ly', 'choi game lop 10', hoac 'mo cong cu vat ly'.",
+        "Ban co the noi ngan gon hon, vi du: 'vao profile', 'dang ky', 'placement test'."
+      ],
+      "suggestionChips": [
+        "Vao roadmap vat ly",
+        "Mo cong cu vat ly",
+        "Dang nhap"
+      ]
+    }
+  ]
+}

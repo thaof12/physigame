@@ -1,4 +1,3 @@
-// Bài 4: Thấu kính hội tụ
 module.exports = {
   "id": "vatly-7-4",
   "title": "Thấu kính hội tụ",
@@ -21,6 +20,16 @@ module.exports = {
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Thấu kính hội tụ",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Thấu kính hội tụ\".",
+      "Neu vi du thuc te lien quan den \"Thấu kính hội tụ\".",
+      "So sanh kien thuc trong \"Thấu kính hội tụ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

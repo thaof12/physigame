@@ -1,4 +1,3 @@
-// Bài 22: Các loại quang phổ
 module.exports = {
   "id": "vatly-12-22",
   "title": "Các loại quang phổ",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Máy quang phổ là dụng cụ dùng để:",
+        "question": "Máy quang phổ là dụng cụ dùng để:",
         "type": "multiple-choice",
         "options": [
           "Tổng hợp ánh sáng trắng từ các ánh sáng đơn sắc.",
           "Phân tích chùm sáng phức tạp ra các thành phần đơn sắc.",
           "Đo bước sóng của các ánh sáng đơn sắc.",
-          "Nhận biết thành phần cấu tạo của một nguồn phát quang phổ liên tục.",
+          "Nhận biết thành phần cấu tạo của một nguồn phát quang phổ liên tục."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Các loại quang phổ",
+      "Trong tam chuong 5",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Các loại quang phổ\".",
+      "Neu vi du thuc te lien quan den \"Các loại quang phổ\".",
+      "So sanh kien thuc trong \"Các loại quang phổ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,4 +1,3 @@
-// Bài 5: Tốc độ
 module.exports = {
   "id": "vatly-6-5",
   "title": "Tốc độ",
@@ -33,6 +32,16 @@ module.exports = {
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Tốc độ",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Tốc độ\".",
+      "Neu vi du thuc te lien quan den \"Tốc độ\".",
+      "So sanh kien thuc trong \"Tốc độ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

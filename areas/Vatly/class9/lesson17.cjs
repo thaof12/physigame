@@ -1,4 +1,3 @@
-// Bài 17: Thấu kính phân kỳ
 module.exports = {
   "id": "vatly-9-17",
   "title": "Thấu kính phân kỳ",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Dấu hiệu nào sau đây dùng để nhận biết thấu kính phân kỳ?",
+        "question": "Dấu hiệu nào sau đây dùng để nhận biết thấu kính phân kỳ?",
         "type": "multiple-choice",
         "options": [
           "Rìa mỏng hơn giữa.",
           "Rìa dày hơn giữa",
           "Chùm tia sáng hội tụ.",
-          "Tạo ảnh lớn hơn vật.",
+          "Tạo ảnh lớn hơn vật."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Thấu kính phân kỳ",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Thấu kính phân kỳ\".",
+      "Neu vi du thuc te lien quan den \"Thấu kính phân kỳ\".",
+      "So sanh kien thuc trong \"Thấu kính phân kỳ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

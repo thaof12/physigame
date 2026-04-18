@@ -1,4 +1,3 @@
-// Bài 13: Điện tích - Điện hóa
 module.exports = {
   "id": "vatly-8-13",
   "title": "Điện tích",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Hạt nào mang điện tích âm?",
+        "question": "Hạt nào mang điện tích âm?",
         "type": "multiple-choice",
         "options": [
           "Proton",
           "Nơtron",
           "Electron",
-          "Photon",
+          "Photon"
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Điện tích",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Điện tích\".",
+      "Neu vi du thuc te lien quan den \"Điện tích\".",
+      "So sanh kien thuc trong \"Điện tích\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

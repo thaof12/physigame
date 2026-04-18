@@ -1,4 +1,3 @@
-// Bài 4: Công suất điện
 module.exports = {
   "id": "vatly-9-4",
   "title": "Công suất điện",
@@ -11,17 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  " Công suất điện cho biết điều gì?",
+        "question": " Công suất điện cho biết điều gì?",
         "type": "multiple-choice",
         "options": [
           "Mức độ mạnh, yếu của dòng điện.",
           "Khả năng thực hiện công của dòng điện.",
           "Lượng điện năng sử dụng trong một đơn vị thời gian.",
-          "Năng lượng của dòng điện.",
+          "Năng lượng của dòng điện."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Công suất điện",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Công suất điện\".",
+      "Neu vi du thuc te lien quan den \"Công suất điện\".",
+      "So sanh kien thuc trong \"Công suất điện\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };
-

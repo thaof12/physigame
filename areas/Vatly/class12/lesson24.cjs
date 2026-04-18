@@ -1,4 +1,3 @@
-// Bài 24: Tia X
 module.exports = {
   "id": "vatly-12-24",
   "title": "Tia X",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Chọn phát biểu đúng về tia X:",
+        "question": "Chọn phát biểu đúng về tia X:",
         "type": "multiple-choice",
         "options": [
           "Tia X có bước sóng dài hơn tia hồng ngoại.",
           "Tia X là sóng điện từ có tần số nhỏ hơn tia tử ngoại.",
           "Tia X có khả năng đâm xuyên mạnh.",
-          "Tia X được phát ra từ các vật bị nung nóng ở nhiệt độ cao.",
+          "Tia X được phát ra từ các vật bị nung nóng ở nhiệt độ cao."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Tia X",
+      "Trong tam chuong 5",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Tia X\".",
+      "Neu vi du thuc te lien quan den \"Tia X\".",
+      "So sanh kien thuc trong \"Tia X\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

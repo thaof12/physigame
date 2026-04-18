@@ -1,4 +1,3 @@
-// Bài 18: Sóng điện từ
 module.exports = {
   "id": "vatly-12-18",
   "title": "Sóng điện từ",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Đặc điểm nào sau đây không đúng về sóng điện từ?",
+        "question": "Đặc điểm nào sau đây không đúng về sóng điện từ?",
         "type": "multiple-choice",
         "options": [
           "Sóng ngang.",
           "Truyền được trong chân không.",
           "Tốc độ truyền trong chân không bằng tốc độ ánh sáng.",
-          "Dao động của điện trường và từ trường cùng pha.",
+          "Dao động của điện trường và từ trường cùng pha."
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Sóng điện từ",
+      "Trong tam chuong 4",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Sóng điện từ\".",
+      "Neu vi du thuc te lien quan den \"Sóng điện từ\".",
+      "So sanh kien thuc trong \"Sóng điện từ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

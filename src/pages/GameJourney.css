@@ -772,3 +772,402 @@
     background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   }
 }
+
+/* New grade-journey layout */
+.journey-page {
+  min-height: 100vh;
+  padding: 0 0 5rem;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 196, 133, 0.35), transparent 35%),
+    radial-gradient(circle at 80% 10%, rgba(133, 220, 255, 0.3), transparent 30%),
+    linear-gradient(160deg, #083344 0%, #134e4a 35%, #0f172a 100%);
+}
+
+.journey-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(2, 6, 23, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.journey-back-button {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.journey-header-content h1 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 1.6rem;
+}
+
+.journey-header-content p {
+  margin: 0.2rem 0 0;
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 0.95rem;
+}
+
+.journey-overview {
+  max-width: 1200px;
+  margin: 1rem auto 0;
+  padding: 0 1rem;
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.overview-card {
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+}
+
+.overview-title {
+  font-size: 0.78rem;
+  opacity: 0.88;
+  margin-bottom: 0.35rem;
+}
+
+.overview-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.overview-value.milestone {
+  font-size: 0.95rem;
+}
+
+.journey-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+}
+
+.journey-layout {
+  max-width: 1200px;
+  margin: 1rem auto 0;
+  padding: 0 1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 0.95fr 1.35fr;
+}
+
+.milestone-track {
+  border-radius: 18px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.milestone-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.milestone-line {
+  width: 3px;
+  height: 20px;
+  margin-left: 19px;
+}
+
+.milestone-line.open {
+  background: linear-gradient(to bottom, #fbbf24, #34d399);
+}
+
+.milestone-line.locked {
+  background: rgba(203, 213, 225, 0.45);
+}
+
+.milestone-node {
+  border: 0;
+  width: 100%;
+  text-align: left;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: start;
+  border-radius: 14px;
+  padding: 0.75rem;
+  cursor: pointer;
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.milestone-node.locked {
+  opacity: 0.66;
+  cursor: not-allowed;
+}
+
+.milestone-node.active {
+  outline: 2px solid rgba(56, 189, 248, 0.8);
+}
+
+.milestone-node.done {
+  outline: 2px solid rgba(250, 204, 21, 0.85);
+}
+
+.milestone-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+}
+
+.milestone-node.locked .milestone-icon-wrap {
+  background: #64748b;
+}
+
+.milestone-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.milestone-name {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.milestone-subtitle {
+  font-size: 0.82rem;
+  opacity: 0.9;
+  margin-top: 0.15rem;
+}
+
+.milestone-progress {
+  margin-top: 0.45rem;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+}
+
+.mini-progress-bar {
+  margin-top: 0.4rem;
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mini-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22c55e, #14b8a6);
+}
+
+.grade-detail-panel {
+  border-radius: 18px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.grade-detail-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.grade-detail-header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.35rem;
+}
+
+.grade-detail-header p {
+  margin: 0.2rem 0 0;
+  color: rgba(226, 232, 240, 0.95);
+  font-size: 0.9rem;
+}
+
+.grade-detail-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: #e2e8f0;
+  font-size: 0.86rem;
+}
+
+.grade-detail-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.grade-progress-block {
+  margin-top: 0.85rem;
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.grade-progress-row {
+  display: flex;
+  justify-content: space-between;
+  color: #f8fafc;
+  margin-bottom: 0.5rem;
+}
+
+.grade-progress-bar {
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.grade-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22c55e, #10b981);
+}
+
+.grade-games-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.grade-game-card {
+  border-radius: 14px;
+  padding: 0.8rem;
+  background: #f8fafc;
+  color: #0f172a;
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.grade-game-card.current {
+  border-color: #0ea5e9;
+}
+
+.grade-game-card.done {
+  border-color: #22c55e;
+}
+
+.grade-game-card.locked {
+  opacity: 0.6;
+}
+
+.game-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.game-card-top h3 {
+  margin: 0;
+  font-size: 0.97rem;
+}
+
+.grade-game-card p {
+  margin: 0;
+  color: #334155;
+  font-size: 0.84rem;
+  min-height: 40px;
+}
+
+.game-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.game-card-meta span {
+  border-radius: 999px;
+  padding: 0.18rem 0.48rem;
+  font-size: 0.74rem;
+  color: #0f172a;
+  background: #e2e8f0;
+}
+
+.journey-stars {
+  display: flex;
+  gap: 4px;
+}
+
+.journey-stars .empty {
+  opacity: 0.38;
+}
+
+.play-btn {
+  margin-top: auto;
+  border: 0;
+  border-radius: 10px;
+  padding: 0.56rem 0.75rem;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(90deg, #0891b2, #2563eb);
+}
+
+.play-btn.replay {
+  background: linear-gradient(90deg, #16a34a, #14b8a6);
+}
+
+.play-btn:disabled {
+  cursor: not-allowed;
+  background: #94a3b8;
+}
+
+.empty-grade-games {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 1rem;
+  border-radius: 12px;
+  color: #f8fafc;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+@media (max-width: 1024px) {
+  .journey-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .journey-overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .grade-games-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .journey-header-content h1 {
+    font-size: 1.3rem;
+  }
+
+  .journey-header-content p {
+    font-size: 0.85rem;
+  }
+}

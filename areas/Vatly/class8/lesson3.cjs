@@ -1,4 +1,3 @@
-// Bài 3: Ma sát
 module.exports = {
   "id": "vatly-8-3",
   "title": "Ma sát",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Lực ma sát xuất hiện khi nào?",
+        "question": "Lực ma sát xuất hiện khi nào?",
         "type": "multiple-choice",
         "options": [
           "Chỉ khi vật chuyển động nhanh.",
           " Khi hai vật có xu hướng trượt lên nhau.",
           " Khi vật đứng yên hoàn toàn.",
-          "Khi vật nổi trên mặt nước.",
+          "Khi vật nổi trên mặt nước."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Ma sát",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Ma sát\".",
+      "Neu vi du thuc te lien quan den \"Ma sát\".",
+      "So sanh kien thuc trong \"Ma sát\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

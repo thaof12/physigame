@@ -3,7 +3,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import { GameProgressProvider } from './contexts/GameProgressContext';
 import { GameScoreProvider } from './contexts/GameScoreContext';
 import GameJourney from './pages/GameJourney';
-import ThemeSwitcher from './ui/ThemeSwitcher';
 import "./index.css";
 
 // Hóa học area
@@ -47,6 +46,7 @@ import PhysicsToolsHub from './pages/PhysicsToolsHub';
 import PhysicsCalculator from './components/PhysicsTools/PhysicsCalculator';
 import ConstantsReference from './components/PhysicsTools/ConstantsReference';
 import UnitConverter from './components/PhysicsTools/UnitConverter';
+import DialogflowChatbot from './components/DialogflowChatbot';
 
 const AppContent = () => {
   return (
@@ -103,10 +103,8 @@ export default function App() {
       <AuthProvider>
         <GameProgressProvider>
           <GameScoreProvider>
-            <header style={{ padding: "10px" }}>
-              <ThemeSwitcher />
-            </header>
             <AppContent />
+            <DialogflowChatbot />
           </GameScoreProvider>
         </GameProgressProvider>
       </AuthProvider>

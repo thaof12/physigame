@@ -1,4 +1,3 @@
-// Bài 10: Định luật Ôm đối với đoạn mạch chứa nguồn điện
 module.exports = {
   "id": "vatly-11-10",
   "title": "Định luật Ôm đối với đoạn mạch chứa nguồn điện",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Một mạch điện kín gồm một nguồn điện có suất điện động E = 12V, điện trở trong r = 1Ω, nối với một điện trở mạch ngoài R = 5Ω. Cường độ dòng điện trong mạch là:",
+        "question": "Một mạch điện kín gồm một nguồn điện có suất điện động E = 12V, điện trở trong r = 1Ω, nối với một điện trở mạch ngoài R = 5Ω. Cường độ dòng điện trong mạch là:",
         "type": "multiple-choice",
         "options": [
           "1A.",
           "2A.",
           "3A.",
-          "4A.",
+          "4A."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Định luật Ôm đối với đoạn mạch chứa nguồn điện",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Định luật Ôm đối với đoạn mạch chứa nguồn điện\".",
+      "Neu vi du thuc te lien quan den \"Định luật Ôm đối với đoạn mạch chứa nguồn điện\".",
+      "So sanh kien thuc trong \"Định luật Ôm đối với đoạn mạch chứa nguồn điện\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

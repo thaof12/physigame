@@ -9,6 +9,15 @@ const AdvancedPhysicsChallenge = () => {
     navigate(`/advanced-physics-challenge/${game.slug}`);
   };
 
+  const formatEstimatedTime = (estimatedTime) => {
+    return typeof estimatedTime === 'number' ? `${estimatedTime} phút` : estimatedTime;
+  };
+
+  const getMentorLine = (game) => {
+    const topTopic = game.topics?.[0] || 'chủ đề chính';
+    return `Mục tiêu: nắm chắc ${topTopic.toLowerCase()} qua tình huống mô phỏng gần thực tế.`;
+  };
+
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
       case 'easy':
@@ -54,7 +63,10 @@ const AdvancedPhysicsChallenge = () => {
                 🏆 Thử thách Vật lý
               </h1>
               <p className="text-xl text-white/90">
-                9 game tương tác để khám phá thế giới vật lý
+                Hệ game thực hành giúp bạn học nhanh, hiểu sâu và nhớ lâu
+              </p>
+              <p className="text-sm md:text-base text-white/85 mt-3 max-w-2xl">
+                Mẹo học: ưu tiên game mức Dễ - Trung bình để chốt nền, rồi quay lại game Khó để luyện tư duy giải bài nâng cao.
               </p>
             </div>
             <div className="hidden md:block text-8xl opacity-80">
@@ -90,7 +102,7 @@ const AdvancedPhysicsChallenge = () => {
             Danh sách thử thách
           </h2>
           <p className="text-gray-600">
-            Chọn một thử thách để bắt đầu hành trình khám phá
+            Chọn một thử thách phù hợp với thời gian và mục tiêu ôn tập của bạn.
           </p>
         </div>
 
@@ -99,7 +111,7 @@ const AdvancedPhysicsChallenge = () => {
             <div
               key={game.id}
               onClick={() => handleGameClick(game)}
-              className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden hover:-translate-y-2"
+              className="group bg-white rounded-2xl shadow-lg ring-1 ring-black/5 hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden hover:-translate-y-2"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               {/* Card Header with Gradient */}
@@ -125,6 +137,10 @@ const AdvancedPhysicsChallenge = () => {
                   {game.description}
                 </p>
 
+                <p className="text-xs text-slate-500 mb-4 italic leading-5">
+                  {getMentorLine(game)}
+                </p>
+
                 {/* Topics */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {game.topics.slice(0, 3).map((topic, idx) => (
@@ -141,7 +157,7 @@ const AdvancedPhysicsChallenge = () => {
                 <div className="flex items-center justify-between text-sm text-gray-500 border-t pt-4">
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    <span>{game.estimatedTime}</span>
+                    <span>{formatEstimatedTime(game.estimatedTime)}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="font-medium">Lớp {game.grade}</span>
@@ -150,7 +166,7 @@ const AdvancedPhysicsChallenge = () => {
 
                 {/* Play Button */}
                 <button className="w-full mt-4 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white py-3 rounded-xl font-medium transition-all transform group-hover:scale-105 shadow-md hover:shadow-lg">
-                  Chơi ngay →
+                  Bắt đầu bài luyện →
                 </button>
               </div>
             </div>
@@ -160,10 +176,10 @@ const AdvancedPhysicsChallenge = () => {
         {/* Bottom CTA */}
         <div className="mt-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl p-8 text-white text-center">
           <h3 className="text-2xl font-bold mb-3">
-            🎯 Thử thách bản thân với các game vật lý!
+            🎯 Học như luyện đề, nhưng trực quan hơn
           </h3>
           <p className="text-white/90 mb-6">
-            Học vật lý qua các game tương tác thú vị và mô phỏng thực tế
+            Mỗi game là một tình huống học tập nhỏ. Hoàn thành đều đặn sẽ giúp bạn xử lý bài tập nhanh hơn trên lớp.
           </p>
           <div className="flex justify-center gap-4">
             <button

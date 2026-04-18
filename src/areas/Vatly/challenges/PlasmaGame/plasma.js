@@ -61,10 +61,6 @@ export class GameEngine {
       }
     } else {
       console.log('❌ Mạch chưa khép kín');
-      } else {
-        // Không đi qua tải -> NGẮN MẠCH!
-        isShort = true;
-      }
     }
 
     // Cập nhật trạng thái và tính điểm (chỉ khi thay đổi)

@@ -1,4 +1,3 @@
-// Bài 4: Chuyển động và đứng yên
 module.exports = {
   "id": "vatly-6-4",
   "title": "Chuyển động và đứng yên",
@@ -33,6 +32,16 @@ module.exports = {
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Chuyển động và đứng yên",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Chuyển động và đứng yên\".",
+      "Neu vi du thuc te lien quan den \"Chuyển động và đứng yên\".",
+      "So sanh kien thuc trong \"Chuyển động và đứng yên\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

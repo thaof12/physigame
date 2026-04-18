@@ -2,12 +2,152 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../config/api';
-import { ArrowLeft, BookOpen, CheckCircle, XCircle, Trophy } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCircle, XCircle, Trophy, Play, ExternalLink } from 'lucide-react';
 import { physicsLessons } from '../data/physicsLessons';
+import { getChapterVideoDefaults } from '../data/chapterVideoCatalog';
+import { useAuth } from '../../../contexts/AuthContext';
+
+const stripHtmlTags = (html = '') => html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+
+const extractTheoryTopics = (theoryHtml = '') => {
+  const topics = [];
+  const headingRegex = /<h[2-4][^>]*>(.*?)<\/h[2-4]>/gi;
+  let match = headingRegex.exec(theoryHtml);
+
+  while (match) {
+    const topic = stripHtmlTags(match[1]);
+    if (topic) {
+      topics.push(topic);
+    }
+    match = headingRegex.exec(theoryHtml);
+  }
+
+  return topics;
+};
+
+const buildSimilarTheoryQuestions = (lesson, topics) => {
+  const lessonTitle = lesson?.title || 'bài học này';
+  const firstTopic = topics[0] || lessonTitle;
+
+  return [
+    `Khái niệm cốt lõi của "${firstTopic}" là gì và khi nào nên áp dụng?`,
+    `Hãy nêu một ví dụ thực tế minh họa cho "${lessonTitle}" trong đời sống hằng ngày.`,
+    `So sánh "${firstTopic}" với một hiện tượng vật lý gần giống về bản chất.`
+  ];
+};
+
+const convertToEmbedUrl = (rawUrl = '') => {
+  const url = String(rawUrl || '').trim();
+  if (!url) {
+    return '';
+  }
+
+  if (url.includes('youtube.com/embed/')) {
+    return url;
+  }
+
+  try {
+    const parsed = new URL(url);
+
+    if (parsed.hostname.includes('youtu.be')) {
+      const videoId = parsed.pathname.replace('/', '').trim();
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    }
+
+    if (parsed.hostname.includes('youtube.com')) {
+      if (parsed.pathname.startsWith('/shorts/')) {
+        const videoId = parsed.pathname.split('/').filter(Boolean)[1];
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+      }
+
+      const videoId = parsed.searchParams.get('v');
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    }
+
+    return url;
+  } catch {
+    return url;
+  }
+};
+
+const normalizeVideoCollection = (rawVideos = []) => {
+  if (!Array.isArray(rawVideos)) {
+    return [];
+  }
+
+  return rawVideos
+    .map((video, index) => {
+      if (typeof video === 'string') {
+        const cleanUrl = video.trim();
+        if (!cleanUrl) {
+          return null;
+        }
+        return {
+          title: `Video ${index + 1}`,
+          url: cleanUrl,
+          embedUrl: convertToEmbedUrl(cleanUrl)
+        };
+      }
+
+      if (video && typeof video === 'object') {
+        const cleanUrl = String(video.url || '').trim();
+        if (!cleanUrl) {
+          return null;
+        }
+        return {
+          title: String(video.title || `Video ${index + 1}`).trim(),
+          url: cleanUrl,
+          embedUrl: convertToEmbedUrl(cleanUrl)
+        };
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+};
+
+const parseVideoEditorValue = (value = '') => {
+  return value
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line, index) => {
+      const parts = line.split('|').map((item) => item.trim());
+      const hasTitleAndUrl = parts.length > 1;
+      const title = hasTitleAndUrl ? parts[0] : `Video ${index + 1}`;
+      const url = hasTitleAndUrl ? parts.slice(1).join('|') : parts[0];
+
+      return {
+        title,
+        url
+      };
+    })
+    .filter((item) => item.url);
+};
+
+const stringifyVideoEditorValue = (videos = []) => {
+  if (!Array.isArray(videos) || videos.length === 0) {
+    return '';
+  }
+
+  return videos
+    .map((video, index) => {
+      if (typeof video === 'string') {
+        return `Video ${index + 1}|${video}`;
+      }
+
+      const title = String(video?.title || `Video ${index + 1}`).trim();
+      const url = String(video?.url || '').trim();
+      return url ? `${title}|${url}` : '';
+    })
+    .filter(Boolean)
+    .join('\n');
+};
 
 const PhysicsLesson = () => {
   const { classId, chapterId, lessonId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('theory');
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
@@ -17,6 +157,17 @@ const PhysicsLesson = () => {
   const [quizAnswers, setQuizAnswers] = useState([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [lessonData, setLessonData] = useState(null);
+  const [showEditor, setShowEditor] = useState(false);
+  const [editorTheory, setEditorTheory] = useState('');
+  const [editorTopics, setEditorTopics] = useState('');
+  const [editorQuestions, setEditorQuestions] = useState('');
+  const [editorVideos, setEditorVideos] = useState('');
+  const [savingTheory, setSavingTheory] = useState(false);
+  const [editorMessage, setEditorMessage] = useState('');
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
+  const [savingCompletion, setSavingCompletion] = useState(false);
+  const [completionSaved, setCompletionSaved] = useState(false);
+  const [completionMessage, setCompletionMessage] = useState('');
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -90,7 +241,106 @@ const PhysicsLesson = () => {
   const exercises = Array.isArray(lessonData?.content?.exercises)
     ? lessonData.content.exercises
     : [];
+  const adminEmailList = (import.meta.env.VITE_ADMIN_EMAILS || '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+  const userEmail = (user?.email || '').toLowerCase();
+  const isAdminUser = Boolean(
+    user?.isAdmin ||
+    user?.role === 'admin' ||
+    (userEmail && adminEmailList.includes(userEmail))
+  );
+  const content = lessonData?.content || {};
+  const declaredTopics = Array.isArray(content.topics) ? content.topics.filter(Boolean) : [];
+  const extractedTopics = extractTheoryTopics(content.theory || '');
+  const lessonTopics = [...new Set([...declaredTopics, ...extractedTopics])].slice(0, 8);
+  const declaredTheoryQuestions = Array.isArray(content.theoryQuestions)
+    ? content.theoryQuestions.filter(Boolean)
+    : [];
+  const theoryQuestions = declaredTheoryQuestions.length > 0
+    ? declaredTheoryQuestions
+    : buildSimilarTheoryQuestions(lessonData, lessonTopics);
+  const declaredVideos = normalizeVideoCollection(content.videos || []);
+  const legacyVideoUrl = typeof content.videoUrl === 'string' && content.videoUrl.trim()
+    ? [{ title: 'Video bai giang', url: content.videoUrl.trim(), embedUrl: convertToEmbedUrl(content.videoUrl.trim()) }]
+    : [];
+  const chapterDefaultVideos = normalizeVideoCollection(getChapterVideoDefaults(classId, chapterId));
+  const lessonVideos = declaredVideos.length > 0
+    ? declaredVideos
+    : (legacyVideoUrl.length > 0 ? legacyVideoUrl : chapterDefaultVideos);
+  const selectedVideo = lessonVideos[selectedVideoIndex] || lessonVideos[0] || null;
+  const canEmbedSelectedVideo = Boolean(
+    selectedVideo?.embedUrl &&
+    (selectedVideo.embedUrl.includes('youtube.com/embed/') ||
+      selectedVideo.embedUrl.includes('player.vimeo.com/video/'))
+  );
   const currentExercise = exercises[currentQuizIndex];
+
+  const submitLessonCompletion = async (answersPayload = [], finalScore = 0) => {
+    if (!lessonData) {
+      return false;
+    }
+
+    const localUser = JSON.parse(localStorage.getItem('user') || 'null');
+    const userIdentifier =
+      user?.email ||
+      user?.id ||
+      user?._id ||
+      user?.firebaseUid ||
+      user?.uid ||
+      localUser?.email ||
+      localUser?.id ||
+      localUser?._id ||
+      localUser?.firebaseUid ||
+      localUser?.uid;
+
+    if (!userIdentifier) {
+      setCompletionMessage('Chua xac dinh duoc tai khoan de luu tien do.');
+      return false;
+    }
+
+    try {
+      setSavingCompletion(true);
+      setCompletionMessage('');
+
+      await axios.post(`${API_BASE_URL}/lesson-completions`, {
+        userId: userIdentifier,
+        lessonId: `vatly-${classId}-${chapterId}-${lessonId}`,
+        classId: parseInt(classId),
+        chapterId: parseInt(chapterId),
+        lessonNumber: parseInt(lessonId),
+        completed: true,
+        score: finalScore,
+        totalQuestions: exercises.length,
+        quizAnswers: answersPayload
+      });
+
+      setCompletionSaved(true);
+      setCompletionMessage('Da cap nhat tien do bai hoc.');
+      return true;
+    } catch (error) {
+      console.error('Error saving lesson completion:', error);
+      const serverMessage = error?.response?.data?.message || error?.response?.data?.error;
+      setCompletionMessage(serverMessage ? `Luu tien do that bai: ${serverMessage}` : 'Luu tien do that bai. Ban co the bam Quay lai de thu luu lai.');
+      return false;
+    } finally {
+      setSavingCompletion(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!lessonData) {
+      return;
+    }
+
+    setEditorTheory(content.theory || '');
+    setEditorTopics((content.topics || []).join('\n'));
+    setEditorQuestions((content.theoryQuestions || []).join('\n'));
+    setEditorVideos(stringifyVideoEditorValue(content.videos || (content.videoUrl ? [{ title: 'Video bai giang', url: content.videoUrl }] : [])));
+    setSelectedVideoIndex(0);
+    setEditorMessage('');
+  }, [lessonData]);
 
   const getCorrectAnswerIndex = (exercise) => {
     if (!exercise || typeof exercise.correctAnswer !== 'number') {
@@ -124,19 +374,19 @@ const PhysicsLesson = () => {
     setShowResult(true);
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (!currentExercise) {
       return;
     }
 
-    setQuizAnswers((prev) => [
-      ...prev,
-      {
-        questionIndex: currentQuizIndex,
-        selectedAnswer,
-        correctAnswer: getCorrectAnswerIndex(currentExercise)
-      }
-    ]);
+    const answerRecord = {
+      questionIndex: currentQuizIndex,
+      selectedAnswer,
+      correctAnswer: getCorrectAnswerIndex(currentExercise)
+    };
+    const nextAnswers = [...quizAnswers, answerRecord];
+
+    setQuizAnswers(nextAnswers);
 
     if (currentQuizIndex < exercises.length - 1) {
       setCurrentQuizIndex((prev) => prev + 1);
@@ -145,11 +395,58 @@ const PhysicsLesson = () => {
       return;
     }
 
+    const finalScore = nextAnswers.filter((item) => item.selectedAnswer === item.correctAnswer).length;
+    setScore(finalScore);
+    await submitLessonCompletion(nextAnswers, finalScore);
+
     setIsCompleted(true);
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    if (exercises.length === 0 && !completionSaved) {
+      await submitLessonCompletion([], 0);
+    }
+
     navigate(`/physics-class/${classId}`);
+  };
+
+  const handleSaveTheoryContent = async () => {
+    try {
+      setSavingTheory(true);
+      setEditorMessage('');
+
+      const topicsPayload = editorTopics
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+      const questionsPayload = editorQuestions
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+      const videosPayload = parseVideoEditorValue(editorVideos);
+
+      const response = await axios.put(
+        `${API_BASE_URL}/lessons/class/${classId}/chapter/${chapterId}/lesson/${lessonId}/content`,
+        {
+          subject: 'physics',
+          theory: editorTheory,
+          topics: topicsPayload,
+          theoryQuestions: questionsPayload,
+          videos: videosPayload
+        }
+      );
+
+      if (response?.data?.lesson) {
+        setLessonData(response.data.lesson);
+      }
+
+      setEditorMessage('Da luu noi dung ly thuyet thanh cong.');
+    } catch (error) {
+      console.error('Error saving theory content:', error);
+      setEditorMessage('Luu that bai. Vui long thu lai.');
+    } finally {
+      setSavingTheory(false);
+    }
   };
 
   if (loading) {
@@ -241,11 +538,171 @@ const PhysicsLesson = () => {
             {/* Theory Tab */}
             {activeTab === 'theory' && (
               <div className="prose max-w-none">
-                <div 
-                  dangerouslySetInnerHTML={{ __html: lessonData.content.theory }}
-                  className="text-gray-800 leading-relaxed"
-                />
-                
+                {lessonTopics.length > 0 && (
+                  <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-5">
+                    <h3 className="mb-3 text-lg font-semibold text-green-800">Chủ đề chính</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {lessonTopics.map((topic, index) => (
+                        <span
+                          key={`${topic}-${index}`}
+                          className="rounded-full bg-white px-3 py-1 text-sm font-medium text-green-700 border border-green-200"
+                        >
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mb-6 rounded-xl border border-gray-200 bg-white p-5">
+                  <h3 className="mb-3 text-lg font-semibold text-gray-800">Nội dung lý thuyết</h3>
+                  <div 
+                    dangerouslySetInnerHTML={{ __html: content.theory || '<p>Nội dung lý thuyết đang được cập nhật...</p>' }}
+                    className="text-gray-800 leading-relaxed"
+                  />
+                </div>
+
+                {lessonVideos.length > 0 && (
+                  <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-5 not-prose">
+                    <div className="mb-4 flex items-center gap-2">
+                      <Play className="h-5 w-5 text-red-600" />
+                      <h3 className="text-lg font-semibold text-red-900">Video theo chương</h3>
+                    </div>
+
+                    {selectedVideo && canEmbedSelectedVideo && (
+                      <div className="mb-4 overflow-hidden rounded-xl border border-red-100 bg-black">
+                        <div className="aspect-video w-full">
+                          <iframe
+                            title={selectedVideo.title}
+                            src={selectedVideo.embedUrl || selectedVideo.url}
+                            className="h-full w-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedVideo && !canEmbedSelectedVideo && (
+                      <div className="mb-4 rounded-xl border border-red-200 bg-white p-4 text-sm text-gray-700">
+                        Video nay dang o dang lien ket tim kiem/ngoai he thong, vui long mo trong tab moi de xem.
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      {lessonVideos.map((video, index) => (
+                        <button
+                          type="button"
+                          key={`${video.url}-${index}`}
+                          onClick={() => setSelectedVideoIndex(index)}
+                          className={`w-full rounded-lg border px-4 py-3 text-left transition ${
+                            index === selectedVideoIndex
+                              ? 'border-red-500 bg-white'
+                              : 'border-red-100 bg-white/70 hover:border-red-300'
+                          }`}
+                        >
+                          <p className="font-medium text-gray-800">{video.title || `Video ${index + 1}`}</p>
+                          <a
+                            href={video.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(event) => event.stopPropagation()}
+                            className="mt-1 inline-flex items-center gap-1 text-sm text-red-700 hover:underline"
+                          >
+                            Mo trong tab moi
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {theoryQuestions.length > 0 && (
+                  <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-5">
+                    <h3 className="mb-3 text-lg font-semibold text-blue-800">Câu hỏi lý thuyết tương tự</h3>
+                    <div className="space-y-2">
+                      {theoryQuestions.map((question, index) => (
+                        <p key={`${question}-${index}`} className="text-gray-700">
+                          {index + 1}. {question}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {isAdminUser && (
+                  <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5 not-prose">
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <h3 className="text-lg font-semibold text-amber-900">Quan tri noi dung ly thuyet</h3>
+                      <button
+                        onClick={() => setShowEditor((prev) => !prev)}
+                        className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 transition"
+                      >
+                        {showEditor ? 'Dong trinh sua' : 'Mo trinh sua'}
+                      </button>
+                    </div>
+
+                    {showEditor && (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="mb-1 block text-sm font-semibold text-gray-700">Noi dung ly thuyet (HTML)</label>
+                          <textarea
+                            value={editorTheory}
+                            onChange={(e) => setEditorTheory(e.target.value)}
+                            rows={8}
+                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-amber-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-1 block text-sm font-semibold text-gray-700">Chu de (moi dong 1 muc)</label>
+                          <textarea
+                            value={editorTopics}
+                            onChange={(e) => setEditorTopics(e.target.value)}
+                            rows={4}
+                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-amber-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-1 block text-sm font-semibold text-gray-700">Cau hoi ly thuyet tuong tu (moi dong 1 cau)</label>
+                          <textarea
+                            value={editorQuestions}
+                            onChange={(e) => setEditorQuestions(e.target.value)}
+                            rows={5}
+                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-amber-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-1 block text-sm font-semibold text-gray-700">Video bai giang (dinh dang: Tieu de|URL, moi dong 1 video)</label>
+                          <textarea
+                            value={editorVideos}
+                            onChange={(e) => setEditorVideos(e.target.value)}
+                            rows={5}
+                            placeholder={'Video 1|https://www.youtube.com/watch?v=xxxx\nVideo 2|https://youtu.be/yyyy'}
+                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-amber-500"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={handleSaveTheoryContent}
+                            disabled={savingTheory}
+                            className="rounded-lg bg-green-600 px-5 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60"
+                          >
+                            {savingTheory ? 'Dang luu...' : 'Luu noi dung'}
+                          </button>
+                          {editorMessage && (
+                            <p className="text-sm text-gray-700">{editorMessage}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {exercises.length > 0 && (
                   <div className="mt-8 text-center">
                     <button
@@ -459,11 +916,17 @@ const PhysicsLesson = () => {
                     })}
 
                     <div className="text-center mt-8">
+                        {completionMessage && (
+                          <p className={`mb-4 text-sm ${completionSaved ? 'text-green-700' : 'text-red-600'}`}>
+                            {completionMessage}
+                          </p>
+                        )}
                         <button
                           onClick={handleFinish}
+                          disabled={savingCompletion}
                           className="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
                         >
-                          Quay lại
+                          {savingCompletion ? 'Dang luu tien do...' : 'Quay lại'}
                         </button>
                     </div>
                   </div>

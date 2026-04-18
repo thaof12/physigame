@@ -1,4 +1,3 @@
-// Bài 9: Áp suất chất lỏng
 module.exports = {
   "id": "vatly-8-9",
   "title": "Áp suất chất lỏng",
@@ -11,17 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Máy thủy lực hoạt động dựa trên nguyên lý nào?",
+        "question": "Máy thủy lực hoạt động dựa trên nguyên lý nào?",
         "type": "multiple-choice",
         "options": [
           "Lợi về công",
           "Lợi về lực",
           "Lợi về đường đi",
-          "Không lợi gì.",
+          "Không lợi gì."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Áp suất chất lỏng",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Áp suất chất lỏng\".",
+      "Neu vi du thuc te lien quan den \"Áp suất chất lỏng\".",
+      "So sanh kien thuc trong \"Áp suất chất lỏng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };
-

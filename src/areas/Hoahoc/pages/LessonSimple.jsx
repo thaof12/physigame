@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_URL } from '../../../config/api';
+import BackNavButton from '../../../components/ui/BackNavButton';
 
 const LessonSimple = () => {
   const { classId, chapterId, lessonId } = useParams();
@@ -80,7 +81,9 @@ const LessonSimple = () => {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-     
+      <div style={{ marginBottom: '16px' }}>
+        <BackNavButton fallbackPath={`/class/${classId}`} />
+      </div>
 
       <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>{lessonData.title}</h1>
       <p style={{ color: '#666', marginBottom: '30px' }}>{lessonData.description}</p>

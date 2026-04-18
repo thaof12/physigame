@@ -1,4 +1,3 @@
-// Bài 19: Đoạn mạch song song
 module.exports = {
   "id": "vatly-8-19",
   "title": "Đoạn mạch song song",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Trong đoạn mạch mắc song song, phát biểu nào sau đây là đúng?",
+        "question": "Trong đoạn mạch mắc song song, phát biểu nào sau đây là đúng?",
         "type": "multiple-choice",
         "options": [
           "U=U1+U2",
           "I=I1=I2 ",
           "U=U1=U2",
-          "Rtd=R1+R2",
+          "Rtd=R1+R2"
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Đoạn mạch song song",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Đoạn mạch song song\".",
+      "Neu vi du thuc te lien quan den \"Đoạn mạch song song\".",
+      "So sanh kien thuc trong \"Đoạn mạch song song\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

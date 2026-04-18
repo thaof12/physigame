@@ -1,4 +1,3 @@
-// Bài 15: Hiệu điện thế
 module.exports = {
   "id": "vatly-8-15",
   "title": "Hiệu điện thế",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Chọn câu trả lời đúng: Đo hiệu điện thế giữa hai cực của nguồn điện khi mạch điện hở.",
+        "question": "Chọn câu trả lời đúng: Đo hiệu điện thế giữa hai cực của nguồn điện khi mạch điện hở.",
         "type": "multiple-choice",
         "options": [
           "Mắc vôn kế song song với 2 cực của nguồn điện. Cực dương của vôn kế nối với cực dương, cực âm nối với cực âm của nguồn điện",
           "Mắc vôn kế song song với 2 cực của nguồn điện. Cực dương của vôn kế nối với cực âm, cực âm nối với cực dương của nguồn điện.",
           "Mắc vôn kế nối tiếp với 2 cực của nguồn điện. Cực dương của vôn kế nối với cực dương, cực âm nối với cực âm của nguồn điện.",
-          "Mắc vôn kế nối tiếp với 2 cực của nguồn điện. Cực dương của vôn kế nối với cực âm, cực âm nối với cực dương của nguồn điện.",
+          "Mắc vôn kế nối tiếp với 2 cực của nguồn điện. Cực dương của vôn kế nối với cực âm, cực âm nối với cực dương của nguồn điện."
         ],
         "correctAnswer": 1
       }
+    ],
+    "topics": [
+      "Khai niem trong Hiệu điện thế",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Hiệu điện thế\".",
+      "Neu vi du thuc te lien quan den \"Hiệu điện thế\".",
+      "So sanh kien thuc trong \"Hiệu điện thế\" voi mot hien tuong vat ly gan giong."
     ]
   }
-};  
+};

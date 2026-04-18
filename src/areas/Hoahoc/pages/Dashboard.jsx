@@ -6,6 +6,7 @@ import { API_URL } from '../../../config/api';
 import Card from '../../../components/ui/Card';
 import ProgressBar from '../../../components/ui/ProgressBar';
 import Button from '../../../components/ui/Button';
+import BackNavButton from '../../../components/ui/BackNavButton';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -224,6 +225,10 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="container mx-auto max-w-7xl">
+        <div className="mb-4">
+          <BackNavButton fallbackPath="/program/chemistry" />
+        </div>
+
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">

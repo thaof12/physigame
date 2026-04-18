@@ -7,6 +7,16 @@ module.exports = {
   "lessonNumber": 1,
   "content": {
     "theory": "<h2>Điện tích</h2>\n      <p>Điện tích là đại lượng đặc trưng cho khả năng tương tác điện của các vật.</p>\n      <h3>Hai loại điện tích</h3>\n      <ul>\n        <li>Điện tích dương (+): mất electron</li>\n        <li>Điện tích âm (-): nhận thêm electron</li>\n      </ul>\n      <h3>Định luật bảo toàn điện tích</h3>\n      <p>Trong một hệ cô lập về điện, tổng đại số các điện tích là không đổi.</p>",
+    "topics": [
+      "Điện tích",
+      "Hai loại điện tích",
+      "Định luật bảo toàn điện tích"
+    ],
+    "theoryQuestions": [
+      "Phát biểu định luật bảo toàn điện tích theo cách hiểu của em.",
+      "Dấu hiệu nào giúp phân biệt điện tích dương và điện tích âm?",
+      "Nêu một tình huống thực tế thể hiện hiện tượng tương tác điện tích."
+    ],
     "examples": [],
     "exercises": [
       {

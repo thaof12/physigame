@@ -1,4 +1,3 @@
-// Bài 5: Điện thế - Hiệu điện thế
 module.exports = {
   "id": "vatly-11-5",
   "title": "Điện thế - Hiệu điện thế",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Một proton chỉ chịu tác dụng của lực điện, chuyển động trong điện trường đều dọc theo một đường sức từ điểm C đến điểm D. Nhận xét nào sau đây sai?",
+        "question": "Một proton chỉ chịu tác dụng của lực điện, chuyển động trong điện trường đều dọc theo một đường sức từ điểm C đến điểm D. Nhận xét nào sau đây sai?",
         "type": "multiple-choice",
         "options": [
           "Đường sức điện có chiều từ C đến D.",
           "Điện thế tại điểm C cao hơn điện thế tại điểm D.",
           "Nếu điện thế tại điểm C bằng 0 thì điện thế tại điểm D có giá trị âm.",
-          "Điện thế tại điểm D cao hơn điện thế tại điểm C.",
+          "Điện thế tại điểm D cao hơn điện thế tại điểm C."
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Điện thế - Hiệu điện thế",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Điện thế - Hiệu điện thế\".",
+      "Neu vi du thuc te lien quan den \"Điện thế - Hiệu điện thế\".",
+      "So sanh kien thuc trong \"Điện thế - Hiệu điện thế\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

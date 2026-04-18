@@ -1,4 +1,3 @@
-// Bài 14: Công và công suất
 module.exports = {
   "id": "vatly-10-14",
   "title": "Công và công suất",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Lực tác dụng lên một vật đang chuyển động thẳng biến đổi đều không thực hiện công khi",
+        "question": "Lực tác dụng lên một vật đang chuyển động thẳng biến đổi đều không thực hiện công khi",
         "type": "multiple-choice",
         "options": [
           "lực vuông góc với gia tốc của vật.",
           "lực ngược chiều với gia tốc của vật.",
           "lực hợp với phương của vận tốc với góc α.",
-          "lực cùng phương với phương chuyển động của vật.",
+          "lực cùng phương với phương chuyển động của vật."
         ],
         "correctAnswer": 1
       }
+    ],
+    "topics": [
+      "Khai niem trong Công và công suất",
+      "Trong tam chuong 4",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Công và công suất\".",
+      "Neu vi du thuc te lien quan den \"Công và công suất\".",
+      "So sanh kien thuc trong \"Công và công suất\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

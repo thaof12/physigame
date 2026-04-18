@@ -1,4 +1,3 @@
-// Bài 6: Sóng cơ và sự truyền sóng cơ
 module.exports = {
   "id": "vatly-12-6",
   "title": "Sóng cơ và sự truyền sóng cơ",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Sóng ngang (cơ học) truyền được trong các môi trường:",
+        "question": "Sóng ngang (cơ học) truyền được trong các môi trường:",
         "type": "multiple-choice",
         "options": [
           "Chất rắn và bề mặt chất lỏng.",
           "Chất khí và trong lòng chất rắn.",
           "Chất rắn và trong lòng chất lỏng.",
-          "Chất khí và bề mặt chất rắn.",
+          "Chất khí và bề mặt chất rắn."
         ],
         "correctAnswer": 1
       }
+    ],
+    "topics": [
+      "Khai niem trong Sóng cơ và sự truyền sóng cơ",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Sóng cơ và sự truyền sóng cơ\".",
+      "Neu vi du thuc te lien quan den \"Sóng cơ và sự truyền sóng cơ\".",
+      "So sanh kien thuc trong \"Sóng cơ và sự truyền sóng cơ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,4 +1,3 @@
-// Bài 15: Sự tán sắc ánh sáng
 module.exports = {
   "id": "vatly-9-15",
   "title": "Sự tán sắc ánh sáng",
@@ -10,17 +9,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Hiện tượng tán sắc ánh sáng chứng tỏ điều gì?",
+        "question": "Hiện tượng tán sắc ánh sáng chứng tỏ điều gì?",
         "type": "multiple-choice",
         "options": [
           "Ánh sáng có tính chất hạt.",
           "Ánh sáng trắng là hỗn hợp của nhiều ánh sáng đơn sắc.",
           "Ánh sáng có thể truyền qua các vật cản.",
-          "Ánh sáng có thể bị phản xạ.",
+          "Ánh sáng có thể bị phản xạ."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Sự tán sắc ánh sáng",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Sự tán sắc ánh sáng\".",
+      "Neu vi du thuc te lien quan den \"Sự tán sắc ánh sáng\".",
+      "So sanh kien thuc trong \"Sự tán sắc ánh sáng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };
-

@@ -1,4 +1,3 @@
-// Bài 11: Sự truyền nhiệt
 module.exports = {
   "id": "vatly-7-11",
   "title": "Sự truyền nhiệt",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  " Chất nào sau đây dẫn nhiệt tốt nhất?",
+        "question": " Chất nào sau đây dẫn nhiệt tốt nhất?",
         "type": "multiple-choice",
         "options": [
           "Gỗ",
           "Nước",
           "Kim loại (Đồng, Sắt).",
-          "Không khí",
+          "Không khí"
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Sự truyền nhiệt",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Sự truyền nhiệt\".",
+      "Neu vi du thuc te lien quan den \"Sự truyền nhiệt\".",
+      "So sanh kien thuc trong \"Sự truyền nhiệt\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

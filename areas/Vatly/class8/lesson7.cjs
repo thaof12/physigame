@@ -1,4 +1,3 @@
-// Bài 7: Công suất
 module.exports = {
   "id": "vatly-8-7",
   "title": "Công suất",
@@ -11,17 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Công suất là đại lượng đo bằng gì?",
+        "question": "Công suất là đại lượng đo bằng gì?",
         "type": "multiple-choice",
         "options": [
           "Công sinh ra.",
           "Công sinh ra trong một đơn vị thời gian.",
           "Năng lượng tiêu thụ.",
-          "Công sinh ra trong một giờ.",
+          "Công sinh ra trong một giờ."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Công suất",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Công suất\".",
+      "Neu vi du thuc te lien quan den \"Công suất\".",
+      "So sanh kien thuc trong \"Công suất\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };
-

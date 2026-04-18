@@ -1,4 +1,3 @@
-// Bài 2: Chuyển động thẳng đều
 module.exports = {
   "id": "vatly-10-2",
   "title": "Chuyển động thẳng đều",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  " Đặc điểm nào sau đây không đúng với chuyển động thẳng đều?",
+        "question": " Đặc điểm nào sau đây không đúng với chuyển động thẳng đều?",
         "type": "multiple-choice",
         "options": [
           "Quỹ đạo là đường thẳng.",
           "Vận tốc có độ lớn không đổi.",
           "Vận tốc tức thời không đổi.",
-          "Gia tốc bằng không.",
+          "Gia tốc bằng không."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Chuyển động thẳng đều",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Chuyển động thẳng đều\".",
+      "Neu vi du thuc te lien quan den \"Chuyển động thẳng đều\".",
+      "So sanh kien thuc trong \"Chuyển động thẳng đều\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

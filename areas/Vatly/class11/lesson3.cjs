@@ -1,4 +1,3 @@
-// Bài 3: Điện trường
 module.exports = {
   "id": "vatly-11-3",
   "title": "Điện trường",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Vectơ cường độ điện trường tại một điểm có phương",
+        "question": "Vectơ cường độ điện trường tại một điểm có phương",
         "type": "multiple-choice",
         "options": [
           "Vuông góc với đường sức điện.",
           "Trùng với tiếp tuyến của đường sức điện tại điểm đó.",
           "Song song với đường sức điện.",
-          "Cùng chiều với điện tích thử.",
+          "Cùng chiều với điện tích thử."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Điện trường",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Điện trường\".",
+      "Neu vi du thuc te lien quan den \"Điện trường\".",
+      "So sanh kien thuc trong \"Điện trường\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

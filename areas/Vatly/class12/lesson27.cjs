@@ -1,4 +1,3 @@
-// Bài 28: Tính chất và cấu tạo hạt nhân
 module.exports = {
   "id": "vatly-12-27",
   "title": "Tính chất và cấu tạo hạt nhân",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Đồng vị là các hạt nhân có:",
+        "question": "Đồng vị là các hạt nhân có:",
         "type": "multiple-choice",
         "options": [
           "Số nuclon giống nhau, số neutron khác nhau.",
           "Số proton giống nhau, số neutron khác nhau.",
           "Số proton và neutron khác nhau.",
-          "Khối lượng khác nhau.",
+          "Khối lượng khác nhau."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Tính chất và cấu tạo hạt nhân",
+      "Trong tam chuong 6",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Tính chất và cấu tạo hạt nhân\".",
+      "Neu vi du thuc te lien quan den \"Tính chất và cấu tạo hạt nhân\".",
+      "So sanh kien thuc trong \"Tính chất và cấu tạo hạt nhân\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

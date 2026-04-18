@@ -1,4 +1,3 @@
-// Bài 12: Động cơ điện
 module.exports = {
   "id": "vatly-9-12",
   "title": "Động cơ điện",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Động cơ điện biến đổi năng lượng nào thành năng lượng nào?",
+        "question": "Động cơ điện biến đổi năng lượng nào thành năng lượng nào?",
         "type": "multiple-choice",
         "options": [
           "Cơ năng thành điện năng",
           "Nhiệt năng thành điện năng",
           "Điện năng thành cơ năng",
-          "Hóa năng thành điện năng ",
+          "Hóa năng thành điện năng "
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Động cơ điện",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Động cơ điện\".",
+      "Neu vi du thuc te lien quan den \"Động cơ điện\".",
+      "So sanh kien thuc trong \"Động cơ điện\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

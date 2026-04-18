@@ -1,4 +1,3 @@
-// Bài 9: Từ trường của ống dây có dòng điện chạy qua
 module.exports = {
   "id": "vatly-9-9",
   "title": "Từ trường của ống dây có dòng điện chạy qua",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Các đường sức từ trong lòng ống dây có dòng điện chạy qua có đặc điểm gì?",
+        "question": "Các đường sức từ trong lòng ống dây có dòng điện chạy qua có đặc điểm gì?",
         "type": "multiple-choice",
         "options": [
           "Cong và không đều.",
           "Song song, thẳng, cách đều nhau.",
           "Vô hạn và không có quy luật.",
-          "Cắt nhau tại trung tâm.",
+          "Cắt nhau tại trung tâm."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Từ trường của ống dây có dòng điện chạy qua",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Từ trường của ống dây có dòng điện chạy qua\".",
+      "Neu vi du thuc te lien quan den \"Từ trường của ống dây có dòng điện chạy qua\".",
+      "So sanh kien thuc trong \"Từ trường của ống dây có dòng điện chạy qua\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,4 +1,3 @@
-// Bài 16: Các màu sắc của ánh sáng
 module.exports = {
   "id": "vatly-9-16",
   "title": "Các màu sắc của ánh sáng",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  " Ánh sáng trắng là hỗn hợp của những màu nào?",
+        "question": " Ánh sáng trắng là hỗn hợp của những màu nào?",
         "type": "multiple-choice",
         "options": [
           "Vài màu cơ bản",
           "Tất cả các màu sắc trong quang phổ",
           "Ánh sáng xanh và vàng",
-          " Chỉ có màu đỏ và xanh",
+          " Chỉ có màu đỏ và xanh"
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Các màu sắc của ánh sáng",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Các màu sắc của ánh sáng\".",
+      "Neu vi du thuc te lien quan den \"Các màu sắc của ánh sáng\".",
+      "So sanh kien thuc trong \"Các màu sắc của ánh sáng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

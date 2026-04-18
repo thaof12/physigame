@@ -1,4 +1,3 @@
-// Bài 9: Ghép các nguồn điện thành bộ
 module.exports = {
   "id": "vatly-11-9",
   "title": "Ghép các nguồn điện thành bộ",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Hai nguồn điện giống nhau, mỗi nguồn có suất điện động là 2V, điện trở trong là 1Ω, được mắc song song với nhau và nối với một điện trở ngoài R. Điện trở R bằng bao nhiêu để cường độ dòng điện đi qua nó là 1A.",
+        "question": "Hai nguồn điện giống nhau, mỗi nguồn có suất điện động là 2V, điện trở trong là 1Ω, được mắc song song với nhau và nối với một điện trở ngoài R. Điện trở R bằng bao nhiêu để cường độ dòng điện đi qua nó là 1A.",
         "type": "multiple-choice",
         "options": [
           "1,5Ω.",
           "2Ω.",
           "3Ω.",
-          "1Ω.",
+          "1Ω."
         ],
         "correctAnswer": 1
       }
+    ],
+    "topics": [
+      "Khai niem trong Ghép các nguồn điện thành bộ",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Ghép các nguồn điện thành bộ\".",
+      "Neu vi du thuc te lien quan den \"Ghép các nguồn điện thành bộ\".",
+      "So sanh kien thuc trong \"Ghép các nguồn điện thành bộ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

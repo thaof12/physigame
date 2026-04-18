@@ -1,4 +1,3 @@
-// Bài 3: Sự phụ thuộc của điện trở vào vật liệu làm dây dẫn
 module.exports = {
   "id": "vatly-9-3",
   "title": "Sự phụ thuộc của điện trở vào vật liệu làm dây dẫn",
@@ -11,17 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Dây dẫn làm bằng vật liệu nào sau đây có điện trở lớn nhất (với cùng chiều dài và tiết diện)?",
+        "question": "Dây dẫn làm bằng vật liệu nào sau đây có điện trở lớn nhất (với cùng chiều dài và tiết diện)?",
         "type": "multiple-choice",
         "options": [
           "Đồng.",
           "Nhôm.",
           "Sắt.",
-          "Bạc.",
+          "Bạc."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Sự phụ thuộc của điện trở vào vật liệu làm dây dẫn",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Sự phụ thuộc của điện trở vào vật liệu làm dây dẫn\".",
+      "Neu vi du thuc te lien quan den \"Sự phụ thuộc của điện trở vào vật liệu làm dây dẫn\".",
+      "So sanh kien thuc trong \"Sự phụ thuộc của điện trở vào vật liệu làm dây dẫn\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };
-

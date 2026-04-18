@@ -1,4 +1,3 @@
-// Bài 13: Động lượng - Định luật bảo toàn động lượng
 module.exports = {
   "id": "vatly-10-13",
   "title": "Động lượng - Định luật bảo toàn động lượng",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Phát biểu nào sau đây không đúng?",
+        "question": "Phát biểu nào sau đây không đúng?",
         "type": "multiple-choice",
         "options": [
           "Động lượng của một vật bằng tích khối lượng và vận tốc của vật.",
           "Động lượng của một vật là một đại lượng vectơ.",
           "Động lượng của một vật có đơn vị của năng lượng.",
-          "Động lượng của một vật phụ thuộc vào khối lượng và vận tốc của vật.",
+          "Động lượng của một vật phụ thuộc vào khối lượng và vận tốc của vật."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Động lượng - Định luật bảo toàn động lượng",
+      "Trong tam chuong 4",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Động lượng - Định luật bảo toàn động lượng\".",
+      "Neu vi du thuc te lien quan den \"Động lượng - Định luật bảo toàn động lượng\".",
+      "So sanh kien thuc trong \"Động lượng - Định luật bảo toàn động lượng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

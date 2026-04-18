@@ -1,4 +1,3 @@
-// Bài 8: Tác dụng từ của dòng điện - Từ trường
 module.exports = {
   "id": "vatly-9-8",
   "title": "Tác dụng từ của dòng điện - Từ trường",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Tác dụng từ của dòng điện là gì?",
+        "question": "Tác dụng từ của dòng điện là gì?",
         "type": "multiple-choice",
         "options": [
           "Dòng điện làm nóng dây dẫn.",
           "Dòng điện làm kim nam châm quay.",
           "Dòng điện có thể phát ra ánh sáng.",
-          "Dòng điện có thể gây ra điện giật.",
+          "Dòng điện có thể gây ra điện giật."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Tác dụng từ của dòng điện - Từ trường",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Tác dụng từ của dòng điện - Từ trường\".",
+      "Neu vi du thuc te lien quan den \"Tác dụng từ của dòng điện - Từ trường\".",
+      "So sanh kien thuc trong \"Tác dụng từ của dòng điện - Từ trường\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

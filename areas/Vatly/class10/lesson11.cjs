@@ -1,4 +1,3 @@
-// Bài 11: Cân bằng của vật rắn chịu tác dụng của ba lực
 module.exports = {
   "id": "vatly-10-11",
   "title": "Cân bằng của vật rắn chịu tác dụng của ba lực",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Vật chịu tác dụng 3 lực (vec{F}_{1}), (vec{F}_{2}), (vec{F}_{3}) cân bằng. Điều kiện nào sau đây sai?",
+        "question": "Vật chịu tác dụng 3 lực (vec{F}_{1}), (vec{F}_{2}), (vec{F}_{3}) cân bằng. Điều kiện nào sau đây sai?",
         "type": "multiple-choice",
         "options": [
           "Ba lực đồng quy.",
           "Ba lực đồng phẳng.",
           "Tổng hợp hai lực bất kỳ cân bằng lực còn lại.",
-          "Ba lực tạo thành một tam giác đều.",
+          "Ba lực tạo thành một tam giác đều."
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Cân bằng của vật rắn chịu tác dụng của ba lực",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Cân bằng của vật rắn chịu tác dụng của ba lực\".",
+      "Neu vi du thuc te lien quan den \"Cân bằng của vật rắn chịu tác dụng của ba lực\".",
+      "So sanh kien thuc trong \"Cân bằng của vật rắn chịu tác dụng của ba lực\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

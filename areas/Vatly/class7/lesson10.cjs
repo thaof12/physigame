@@ -1,4 +1,3 @@
-// Bài 10: Nhiệt năng
 module.exports = {
   "id": "vatly-7-10",
   "title": "Nhiệt năng",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Nhiệt năng của một vật là gì?",
+        "question": "Nhiệt năng của một vật là gì?",
         "type": "multiple-choice",
         "options": [
           "Tổng thế năng của các phân tử cấu tạo nên vật.",
           "Tổng động năng của các phân tử cấu tạo nên vật.",
           "Hiệu thế năng của các phân tử cấu tạo nên vật.",
-          "Hiệu động năng của các phân tử cấu tạo nên vật.",
+          "Hiệu động năng của các phân tử cấu tạo nên vật."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Nhiệt năng",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Nhiệt năng\".",
+      "Neu vi du thuc te lien quan den \"Nhiệt năng\".",
+      "So sanh kien thuc trong \"Nhiệt năng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

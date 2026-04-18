@@ -1,4 +1,3 @@
-// Bài 29: Năng lượng liên kết của hạt nhân
 module.exports = {
   "id": "vatly-12-28",
   "title": "Năng lượng liên kết của hạt nhân",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Năng lượng liên kết của hạt nhân đặc trưng cho điều gì?",
+        "question": "Năng lượng liên kết của hạt nhân đặc trưng cho điều gì?",
         "type": "multiple-choice",
         "options": [
           "Độ bền của phản ứng hạt nhân.",
           "Độ bền vững của hạt nhân.",
           "Độ phóng xạ của hạt nhân.",
-          "Tốc độ phân rã hạt nhân.",
+          "Tốc độ phân rã hạt nhân."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Năng lượng liên kết của hạt nhân",
+      "Trong tam chuong 7",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Năng lượng liên kết của hạt nhân\".",
+      "Neu vi du thuc te lien quan den \"Năng lượng liên kết của hạt nhân\".",
+      "So sanh kien thuc trong \"Năng lượng liên kết của hạt nhân\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,4 +1,3 @@
-// Bài 21: Nội năng
 module.exports = {
   "id": "vatly-10-21",
   "title": "Nội năng",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Nội năng của một vật là gì?",
+        "question": "Nội năng của một vật là gì?",
         "type": "multiple-choice",
         "options": [
           "Động năng của vật.",
           "Thế năng của vật.",
           "Tổng động năng và thế năng của các phân tử cấu tạo nên vật.",
-          "Năng lượng do vật trao đổi với môi trường.",
+          "Năng lượng do vật trao đổi với môi trường."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Nội năng",
+      "Trong tam chuong 6",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Nội năng\".",
+      "Neu vi du thuc te lien quan den \"Nội năng\".",
+      "So sanh kien thuc trong \"Nội năng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

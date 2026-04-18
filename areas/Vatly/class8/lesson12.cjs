@@ -1,4 +1,3 @@
-// Bài 12: Lực đẩy Archimedes
 module.exports = {
   "id": "vatly-8-12",
   "title": "Lực đẩy Archimedes",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Thả một viên bi rơi vào một cốc nước. Kết quả nào sau đây là đúng?",
+        "question": "Thả một viên bi rơi vào một cốc nước. Kết quả nào sau đây là đúng?",
         "type": "multiple-choice",
         "options": [
           "Càng xuống sâu, lực đẩy Ac-si-met càng tăng, áp suất tác dụng lên viên bi càng giảm.",
           "Càng xuống sâu, lực đẩy Ac-si-met không đổi, áp suất tác dụng lên viên bi càng tăng.",
           "Càng xuống sâu, lực đẩy Ac-si-met càng giảm, áp suất tác dụng lên viên bi càng tăng.",
-          "Càng xuống sâu, lực đẩy Ac-si-met càng giảm, áp suất tác dụng lên viên bi càng giảm.",
+          "Càng xuống sâu, lực đẩy Ac-si-met càng giảm, áp suất tác dụng lên viên bi càng giảm."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Lực đẩy Archimedes",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Lực đẩy Archimedes\".",
+      "Neu vi du thuc te lien quan den \"Lực đẩy Archimedes\".",
+      "So sanh kien thuc trong \"Lực đẩy Archimedes\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

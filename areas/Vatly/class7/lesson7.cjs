@@ -1,4 +1,3 @@
-// Bài 7: Sự truyền âm
 module.exports = {
   "id": "vatly-7-7",
   "title": "Sự truyền âm",
@@ -11,15 +10,25 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Âm thanh có thể truyền qua môi trường nào sau đây?",
+        "question": "Âm thanh có thể truyền qua môi trường nào sau đây?",
         "type": "multiple-choice",
         "options": [
           "Chỉ chất khí",
           "Chất rắn, lỏng, khí và chân không",
-          "Chất rắn, lỏng, khí ",
+          "Chất rắn, lỏng, khí "
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Sự truyền âm",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Sự truyền âm\".",
+      "Neu vi du thuc te lien quan den \"Sự truyền âm\".",
+      "So sanh kien thuc trong \"Sự truyền âm\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

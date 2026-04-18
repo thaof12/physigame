@@ -1,4 +1,3 @@
-// Bài 17: Từ trường của dòng điện chạy trong dây dẫn thẳng dài
 module.exports = {
   "id": "vatly-11-17",
   "title": "Từ trường của dòng điện chạy trong dây dẫn thẳng dài",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Các đường sức từ của dòng điện chạy trong dây dẫn thẳng dài có dạng như thế nào?",
+        "question": "Các đường sức từ của dòng điện chạy trong dây dẫn thẳng dài có dạng như thế nào?",
         "type": "multiple-choice",
         "options": [
           "Đường thẳng song song.",
           "Đường tròn đồng tâm.",
           "Đường elip.",
-          "Đường xoắn ốc.",
+          "Đường xoắn ốc."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Từ trường của dòng điện chạy trong dây dẫn thẳng dài",
+      "Trong tam chuong 4",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Từ trường của dòng điện chạy trong dây dẫn thẳng dài\".",
+      "Neu vi du thuc te lien quan den \"Từ trường của dòng điện chạy trong dây dẫn thẳng dài\".",
+      "So sanh kien thuc trong \"Từ trường của dòng điện chạy trong dây dẫn thẳng dài\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

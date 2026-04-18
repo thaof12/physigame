@@ -1,4 +1,3 @@
-// Bài 3: Đơn vị đo
 module.exports = {
   "id": "vatly-6-3",
   "title": "Đơn vị đo",
@@ -33,6 +32,16 @@ module.exports = {
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Đơn vị đo",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Đơn vị đo\".",
+      "Neu vi du thuc te lien quan den \"Đơn vị đo\".",
+      "So sanh kien thuc trong \"Đơn vị đo\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

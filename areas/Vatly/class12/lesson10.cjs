@@ -1,4 +1,3 @@
-// Bài 10: Đại cương về dòng điện xoay chiều
 module.exports = {
   "id": "vatly-12-10",
   "title": "Đại cương về dòng điện xoay chiều",
@@ -11,17 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Dòng điện xoay chiều là dòng điện?",
+        "question": "Dòng điện xoay chiều là dòng điện?",
         "type": "multiple-choice",
         "options": [
           "Có cường độ biến thiên tuần hoàn theo thời gian.",
           "Có cường độ biến đổi điều hoà theo thời gian.",
           "Có chiều biến đổi theo thời gian.",
-          "Có chu kỳ thay đổi theo thời gian.",
+          "Có chu kỳ thay đổi theo thời gian."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Đại cương về dòng điện xoay chiều",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Đại cương về dòng điện xoay chiều\".",
+      "Neu vi du thuc te lien quan den \"Đại cương về dòng điện xoay chiều\".",
+      "So sanh kien thuc trong \"Đại cương về dòng điện xoay chiều\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };
-

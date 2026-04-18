@@ -1,4 +1,3 @@
-// Bài 11: Lực điện từ
 module.exports = {
   "id": "vatly-9-11",
   "title": "Lực điện từ",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Lực điện từ tác dụng lên đoạn dây dẫn mang dòng điện phụ thuộc vào yếu tố nào sau đây?",
+        "question": "Lực điện từ tác dụng lên đoạn dây dẫn mang dòng điện phụ thuộc vào yếu tố nào sau đây?",
         "type": "multiple-choice",
         "options": [
           "Chiều của dòng điện và chiều của đường sức từ.",
           "Cường độ dòng điện và cường độ lực điện từ.",
           "Chiều và cường độ dòng điện, chiều và cường độ từ trường.",
-          "Chiều của dòng điện trong dây dẫn và chiều của dây. ",
+          "Chiều của dòng điện trong dây dẫn và chiều của dây. "
         ],
         "correctAnswer": 1
       }
+    ],
+    "topics": [
+      "Khai niem trong Lực điện từ",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Lực điện từ\".",
+      "Neu vi du thuc te lien quan den \"Lực điện từ\".",
+      "So sanh kien thuc trong \"Lực điện từ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,4 +1,3 @@
-// Bài 2: Sự phản xạ ánh sáng - Gương phẳng
 module.exports = {
   "id": "vatly-7-2",
   "title": "Sự phản xạ ánh sáng - Gương phẳng",
@@ -21,6 +20,16 @@ module.exports = {
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Sự phản xạ ánh sáng - Gương phẳng",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Sự phản xạ ánh sáng - Gương phẳng\".",
+      "Neu vi du thuc te lien quan den \"Sự phản xạ ánh sáng - Gương phẳng\".",
+      "So sanh kien thuc trong \"Sự phản xạ ánh sáng - Gương phẳng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

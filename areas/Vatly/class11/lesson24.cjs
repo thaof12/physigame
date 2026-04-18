@@ -1,4 +1,3 @@
-// Bài 24: Tự cảm
 module.exports = {
   "id": "vatly-11-24",
   "title": "Tự cảm",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Kết luận nào sau đây là đúng?",
+        "question": "Kết luận nào sau đây là đúng?",
         "type": "multiple-choice",
         "options": [
           "Hiện tượng tự cảm không phải là hiện tượng cảm ứng điện từ.",
           "Hiện tượng tự cảm không xảy ra ở các mạch điện xoay chiều.",
           "Hiện tượng tự cảm là hiện tượng cảm ứng điện từ xảy ra trong một mạch có dòng điện mà sự biến thiên từ thông qua mạch được gây ra bởi sự biến thiên của cường độ dòng điện trong mạch.",
-          "Hiện tượng tự cảm là hiện tượng cảm ứng điện từ xảy ra trong một mạch có dòng điện mà sự biến thiên từ thông qua mạch được gây ra bởi sự biến thiên của từ trường bên ngoài mạch điện.",
+          "Hiện tượng tự cảm là hiện tượng cảm ứng điện từ xảy ra trong một mạch có dòng điện mà sự biến thiên từ thông qua mạch được gây ra bởi sự biến thiên của từ trường bên ngoài mạch điện."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Tự cảm",
+      "Trong tam chuong 5",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Tự cảm\".",
+      "Neu vi du thuc te lien quan den \"Tự cảm\".",
+      "So sanh kien thuc trong \"Tự cảm\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,4 +1,3 @@
-// Bài 16: Dao động điện từ
 module.exports = {
   "id": "vatly-12-16",
   "title": "Dao động điện từ",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Dao động điện từ trong mạch LC là quá trình?",
+        "question": "Dao động điện từ trong mạch LC là quá trình?",
         "type": "multiple-choice",
         "options": [
           "Biến đổi không tuần hoàn của điện tích trên tụ điện.",
           "Biến đổi theo hàm số mũ của chuyển động.",
           "Chuyển hoá tuần hoàn giữa năng lượng từ trường và năng lượng điện trường.",
-          "Bảo toàn hiệu điện thế giữa hai bản cực tụ điện.",
+          "Bảo toàn hiệu điện thế giữa hai bản cực tụ điện."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Dao động điện từ",
+      "Trong tam chuong 4",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Dao động điện từ\".",
+      "Neu vi du thuc te lien quan den \"Dao động điện từ\".",
+      "So sanh kien thuc trong \"Dao động điện từ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

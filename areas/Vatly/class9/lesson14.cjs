@@ -1,4 +1,3 @@
-// Bài 14: Máy phát điện
 module.exports = {
   "id": "vatly-9-14",
   "title": "Máy phát điện",
@@ -11,17 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  " Nguyên tắc hoạt động chính của máy phát điện xoay chiều là gì?",
+        "question": " Nguyên tắc hoạt động chính của máy phát điện xoay chiều là gì?",
         "type": "multiple-choice",
         "options": [
           "Hiệu ứng nhiệt điện",
           "Từ tính của nam châm",
           "Cảm ứng điện từ",
-          "Dòng Foucault",
+          "Dòng Foucault"
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Máy phát điện",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Máy phát điện\".",
+      "Neu vi du thuc te lien quan den \"Máy phát điện\".",
+      "So sanh kien thuc trong \"Máy phát điện\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };
-

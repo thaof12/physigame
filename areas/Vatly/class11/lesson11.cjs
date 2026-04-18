@@ -1,4 +1,3 @@
-// Bài 11: Dòng điện trong kim loại
 module.exports = {
   "id": "vatly-11-11",
   "title": "Dòng điện trong kim loại",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Dòng điện trong kim loại là dòng chuyển dời có hướng của các hạt nào?",
+        "question": "Dòng điện trong kim loại là dòng chuyển dời có hướng của các hạt nào?",
         "type": "multiple-choice",
         "options": [
           "Ion dương.",
           "Ion âm.",
           "Electron tự do.",
-          "Nguyên tử.",
+          "Nguyên tử."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Dòng điện trong kim loại",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Dòng điện trong kim loại\".",
+      "Neu vi du thuc te lien quan den \"Dòng điện trong kim loại\".",
+      "So sanh kien thuc trong \"Dòng điện trong kim loại\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

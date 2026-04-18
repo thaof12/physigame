@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import BackNavButton from '../components/ui/BackNavButton';
 
 // Sample questions - in a real app, these would come from a database
 const questions = [
@@ -317,6 +318,10 @@ const PlacementTest = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+        <div className="mb-4">
+          <BackNavButton fallbackPath="/program-selection" />
+        </div>
+
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">Bài kiểm tra đánh giá năng lực</h1>
         <p className="text-center text-gray-600 mb-8">Hoàn thành 30 câu hỏi để chúng tôi có thể đề xuất lộ trình học phù hợp nhất cho bạn.</p>
         

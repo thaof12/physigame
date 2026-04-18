@@ -1,4 +1,3 @@
-// Bài 10: Bình thông nhau
 module.exports = {
   "id": "vatly-8-10",
   "title": "Bình thông nhau",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Trong bình thông nhau chứa nước đứng yên, phát biểu nào sau đây là đúng?",
+        "question": "Trong bình thông nhau chứa nước đứng yên, phát biểu nào sau đây là đúng?",
         "type": "multiple-choice",
         "options": [
           "Mực nước ở các nhánh có thể khác nhau.",
           "Tiết diện các nhánh phải bằng nhau",
           "Mực nước ở các nhánh luôn ở cùng một độ cao.",
-          "Áp suất ở đáy bình ở các nhánh khác nhau.",
+          "Áp suất ở đáy bình ở các nhánh khác nhau."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Bình thông nhau",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Bình thông nhau\".",
+      "Neu vi du thuc te lien quan den \"Bình thông nhau\".",
+      "So sanh kien thuc trong \"Bình thông nhau\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

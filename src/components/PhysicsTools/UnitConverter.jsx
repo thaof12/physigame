@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeftRight, RefreshCw, Repeat } from 'lucide-react';
 import unitConversions from '../../data/unitConversions.json';
+import BackNavButton from '../ui/BackNavButton';
 
 const UnitConverter = () => {
   const [selectedQuantity, setSelectedQuantity] = useState('length');
@@ -88,6 +89,10 @@ const UnitConverter = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-teal-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
       <div className="max-w-6xl mx-auto">
+        <div className="mb-4">
+          <BackNavButton fallbackPath="/physics-tools" />
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">

@@ -1,4 +1,3 @@
-// Bài 12: Các mạch điện xoay chiều
 module.exports = {
   "id": "vatly-12-12",
   "title": "Các mạch điện xoay chiều",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Trong một đoạn mạch điện xoay chiều chỉ có tụ điện thì điện áp ở hai đầu mạch:",
+        "question": "Trong một đoạn mạch điện xoay chiều chỉ có tụ điện thì điện áp ở hai đầu mạch:",
         "type": "multiple-choice",
         "options": [
           "Sớm pha 0,5π so với cường độ dòng điện.",
           "Sớm pha 0,25π so với cường độ dòng điện.",
           "Trễ pha 0,5π so với cường độ dòng điện.",
-          "Cùng pha với cường độ dòng điện.",
+          "Cùng pha với cường độ dòng điện."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Các mạch điện xoay chiều",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Các mạch điện xoay chiều\".",
+      "Neu vi du thuc te lien quan den \"Các mạch điện xoay chiều\".",
+      "So sanh kien thuc trong \"Các mạch điện xoay chiều\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

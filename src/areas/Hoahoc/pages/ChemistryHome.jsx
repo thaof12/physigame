@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import Button from '../../../components/ui/Button';
+import BackNavButton from '../../../components/ui/BackNavButton';
 import { useEffect, useState } from 'react';
 import { BookOpen, Trophy, Target, Clock, Star, Flame, Zap, Award, TrendingUp, Play, LogOut, ChevronDown } from 'lucide-react';
 import api from '../../../config/api';
@@ -238,74 +239,78 @@ const ChemistryHome = () => {
         <div className="container mx-auto max-w-7xl">
           {/* Navigation Bar */}
           <div className="flex items-center justify-between mb-6">
-            {/* Program Selector Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowProgramDropdown(!showProgramDropdown)}
-                className="flex items-center gap-3 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-medium transition-all shadow-md hover:shadow-lg border border-gray-200"
-              >
-                <span className="text-2xl">🧪</span>
-                <span>Hóa học</span>
-                <ChevronDown className={`w-5 h-5 transition-transform ${showProgramDropdown ? 'rotate-180' : ''}`} />
-              </button>
+            <div className="flex items-center gap-3">
+              <BackNavButton fallbackPath="/program-selection" className="bg-white" />
 
-              {/* Dropdown Menu */}
-              {showProgramDropdown && (
-                <>
-                  {/* Backdrop */}
-                  <div 
-                    className="fixed inset-0 z-40" 
-                    onClick={() => setShowProgramDropdown(false)}
-                  ></div>
-                  
-                  {/* Dropdown Content */}
-                  <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50">
-                    <div className="p-3">
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 py-2">
-                        Chọn chương trình học
-                      </p>
-                      {availablePrograms.map((program) => {
-                        const isActive = program.id === 'chemistry';
-                        const isEnrolled = user.programs?.some(p => p.programId === program.id && p.isActive);
-                        
-                        return (
-                          <button
-                            key={program.id}
-                            onClick={() => handleProgramChange(program)}
-                            disabled={!program.available && !isEnrolled}
-                            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
-                              isActive 
-                                ? 'bg-blue-50 text-blue-700 border-2 border-blue-200' 
-                                : program.available
-                                ? 'hover:bg-gray-50 text-gray-700'
-                                : 'opacity-50 cursor-not-allowed text-gray-400'
-                            }`}
-                          >
-                            <span className="text-2xl">{program.icon}</span>
-                            <div className="flex-1 text-left">
-                              <p className="font-semibold">{program.name}</p>
+              {/* Program Selector Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowProgramDropdown(!showProgramDropdown)}
+                  className="flex items-center gap-3 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-medium transition-all shadow-md hover:shadow-lg border border-gray-200"
+                >
+                  <span className="text-2xl">🧪</span>
+                  <span>Hóa học</span>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${showProgramDropdown ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showProgramDropdown && (
+                  <>
+                    {/* Backdrop */}
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setShowProgramDropdown(false)}
+                    ></div>
+                    
+                    {/* Dropdown Content */}
+                    <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                      <div className="p-3">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 py-2">
+                          Chọn chương trình học
+                        </p>
+                        {availablePrograms.map((program) => {
+                          const isActive = program.id === 'chemistry';
+                          const isEnrolled = user.programs?.some(p => p.programId === program.id && p.isActive);
+                          
+                          return (
+                            <button
+                              key={program.id}
+                              onClick={() => handleProgramChange(program)}
+                              disabled={!program.available && !isEnrolled}
+                              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
+                                isActive 
+                                  ? 'bg-blue-50 text-blue-700 border-2 border-blue-200' 
+                                  : program.available
+                                  ? 'hover:bg-gray-50 text-gray-700'
+                                  : 'opacity-50 cursor-not-allowed text-gray-400'
+                              }`}
+                            >
+                              <span className="text-2xl">{program.icon}</span>
+                              <div className="flex-1 text-left">
+                                <p className="font-semibold">{program.name}</p>
+                                {isActive && (
+                                  <p className="text-xs text-blue-600">Đang học</p>
+                                )}
+                                {!program.available && !isActive && (
+                                  <p className="text-xs">Sắp ra mắt</p>
+                                )}
+                                {isEnrolled && !isActive && (
+                                  <p className="text-xs text-green-600">Đã đăng ký</p>
+                                )}
+                              </div>
                               {isActive && (
-                                <p className="text-xs text-blue-600">Đang học</p>
+                                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
                               )}
-                              {!program.available && !isActive && (
-                                <p className="text-xs">Sắp ra mắt</p>
-                              )}
-                              {isEnrolled && !isActive && (
-                                <p className="text-xs text-green-600">Đã đăng ký</p>
-                              )}
-                            </div>
-                            {isActive && (
-                              <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            )}
-                          </button>
-                        );
-                      })}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Logout Button */}

@@ -1,4 +1,3 @@
-// Bài 25: Hiện tượng quang điện
 module.exports = {
   "id": "vatly-12-25",
   "title": "Hiện tượng quang điện",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Để hiện tượng quang điện xảy ra thì điều kiện nào sau đây là bắt buộc?",
+        "question": "Để hiện tượng quang điện xảy ra thì điều kiện nào sau đây là bắt buộc?",
         "type": "multiple-choice",
         "options": [
           "Tần số của ánh sáng chiếu vào phải lớn hơn một giá trị nhất định (tần số giới hạn).",
           "Cường độ chùm sáng phải đủ mạnh. ",
           "Ánh sáng phải có bước sóng nhỏ.",
-          "Ánh sáng phải có màu tím.",
+          "Ánh sáng phải có màu tím."
         ],
         "correctAnswer": 1
       }
+    ],
+    "topics": [
+      "Khai niem trong Hiện tượng quang điện",
+      "Trong tam chuong 6",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Hiện tượng quang điện\".",
+      "Neu vi du thuc te lien quan den \"Hiện tượng quang điện\".",
+      "So sanh kien thuc trong \"Hiện tượng quang điện\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

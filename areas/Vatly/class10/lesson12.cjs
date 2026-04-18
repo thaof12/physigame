@@ -1,4 +1,3 @@
-// Bài 12: Mômen lực
 module.exports = {
   "id": "vatly-10-12",
   "title": "Mômen lực",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Tác dụng làm quay của lực quanh một trục được đặc trưng bởi đại lượng nào?",
+        "question": "Tác dụng làm quay của lực quanh một trục được đặc trưng bởi đại lượng nào?",
         "type": "multiple-choice",
         "options": [
           "Lực (F)",
           "Khối lượng (m)",
           "Mômen lực (M)",
-          "Tốc độ góc (omega)",
+          "Tốc độ góc (omega)"
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Mômen lực",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Mômen lực\".",
+      "Neu vi du thuc te lien quan den \"Mômen lực\".",
+      "So sanh kien thuc trong \"Mômen lực\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

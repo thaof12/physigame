@@ -1,4 +1,3 @@
-// Bài 9: Đặc trưng sinh lý của âm
 module.exports = {
   "id": "vatly-7-9",
   "title": "Đặc trưng sinh lý của âm",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Các đặc trưng sinh lý của âm là:",
+        "question": "Các đặc trưng sinh lý của âm là:",
         "type": "multiple-choice",
         "options": [
           "Tần số, Biên độ, Vận tốc.",
           "Độ cao, Độ to, Âm sắc.",
           "Cường độ âm, Tần số, Phổ âm.",
-          "Dao động, Sóng cơ, Môi trường truyền âm.",
+          "Dao động, Sóng cơ, Môi trường truyền âm."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Đặc trưng sinh lý của âm",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Đặc trưng sinh lý của âm\".",
+      "Neu vi du thuc te lien quan den \"Đặc trưng sinh lý của âm\".",
+      "So sanh kien thuc trong \"Đặc trưng sinh lý của âm\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

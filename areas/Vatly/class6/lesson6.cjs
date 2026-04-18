@@ -1,4 +1,3 @@
-// Bài 6: Đồ thị chuyển động
 module.exports = {
   "id": "vatly-6-6",
   "title": "Đồ thị chuyển động",
@@ -33,6 +32,16 @@ module.exports = {
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Đồ thị chuyển động",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Đồ thị chuyển động\".",
+      "Neu vi du thuc te lien quan den \"Đồ thị chuyển động\".",
+      "So sanh kien thuc trong \"Đồ thị chuyển động\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

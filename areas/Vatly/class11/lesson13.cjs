@@ -1,4 +1,3 @@
-// Bài 13: Dòng điện trong chất khí
 module.exports = {
   "id": "vatly-11-13",
   "title": "Dòng điện trong chất khí",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Hạt tải điện cơ bản trong chất khí là gì?",
+        "question": "Hạt tải điện cơ bản trong chất khí là gì?",
         "type": "multiple-choice",
         "options": [
           "Chỉ có ion dương và ion âm.",
           "Electron và ion.",
           "Electron, ion dương và ion âm.",
-          "Chỉ có electron.",
+          "Chỉ có electron."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Dòng điện trong chất khí",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Dòng điện trong chất khí\".",
+      "Neu vi du thuc te lien quan den \"Dòng điện trong chất khí\".",
+      "So sanh kien thuc trong \"Dòng điện trong chất khí\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

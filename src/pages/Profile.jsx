@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Card from '../components/ui/Card';
 import ProgressBar from '../components/ui/ProgressBar';
 import api from '../config/api';
+import BackNavButton from '../components/ui/BackNavButton';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -154,6 +155,10 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="container mx-auto max-w-6xl">
+        <div className="mb-4">
+          <BackNavButton fallbackPath="/program-selection" />
+        </div>
+
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Hồ sơ của tôi</h1>
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">

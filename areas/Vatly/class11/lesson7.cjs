@@ -1,4 +1,3 @@
-// Bài 7: Dòng điện không đổi
 module.exports = {
   "id": "vatly-11-7",
   "title": "Dòng điện không đổi",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Dòng điện là:",
+        "question": "Dòng điện là:",
         "type": "multiple-choice",
         "options": [
           "Dòng chuyển dời có hướng của các điện tích.",
           "Dòng chuyển động của các điện tích.",
           "Dòng chuyển dời có hướng của electron.",
-          "Dòng chuyển dời có hướng của ion dương.",
+          "Dòng chuyển dời có hướng của ion dương."
         ],
         "correctAnswer": 1
       }
+    ],
+    "topics": [
+      "Khai niem trong Dòng điện không đổi",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Dòng điện không đổi\".",
+      "Neu vi du thuc te lien quan den \"Dòng điện không đổi\".",
+      "So sanh kien thuc trong \"Dòng điện không đổi\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,4 +1,3 @@
-// Bài 6: Định luật Jun - Lenxơ
 module.exports = {
   "id": "vatly-9-6",
   "title": "Định luật Jun - Lenxơ",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Định luật Jun – Len-xơ cho biết điện năng biến đổi thành:",
+        "question": "Định luật Jun – Len-xơ cho biết điện năng biến đổi thành:",
         "type": "multiple-choice",
         "options": [
           "Cơ năng",
           "Năng lượng ánh sáng",
           "Hoá năng ",
-          "Nhiệt năng",
+          "Nhiệt năng"
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Định luật Jun - Lenxơ",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Định luật Jun - Lenxơ\".",
+      "Neu vi du thuc te lien quan den \"Định luật Jun - Lenxơ\".",
+      "So sanh kien thuc trong \"Định luật Jun - Lenxơ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

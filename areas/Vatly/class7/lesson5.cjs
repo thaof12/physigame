@@ -1,4 +1,3 @@
-// Bài 5: Ảnh của một vật tạo bởi thấu kính hội tụ
 module.exports = {
   "id": "vatly-7-5",
   "title": "Ảnh của một vật tạo bởi thấu kính hội tụ",
@@ -21,6 +20,16 @@ module.exports = {
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Ảnh của một vật tạo bởi thấu kính hội tụ",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Ảnh của một vật tạo bởi thấu kính hội tụ\".",
+      "Neu vi du thuc te lien quan den \"Ảnh của một vật tạo bởi thấu kính hội tụ\".",
+      "So sanh kien thuc trong \"Ảnh của một vật tạo bởi thấu kính hội tụ\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

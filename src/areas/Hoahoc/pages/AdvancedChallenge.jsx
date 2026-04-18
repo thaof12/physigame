@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Button from '../../../components/ui/Button';
+import BackNavButton from '../../../components/ui/BackNavButton';
 import { Trophy, Lock, Clock, Award, CheckCircle2 } from 'lucide-react';
 import api from '../../../config/api';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -129,6 +130,10 @@ const AdvancedChallenge = () => {
         
         {/* Content */}
         <div className="container mx-auto max-w-7xl px-4 py-12 relative z-10">
+          <div className="mb-6 text-left">
+            <BackNavButton fallbackPath="/program/chemistry" />
+          </div>
+
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/90 backdrop-blur-sm rounded-full mb-4 shadow-2xl border-2 border-gray-200">
               <Trophy className="w-10 h-10 text-yellow-500" />

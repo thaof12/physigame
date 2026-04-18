@@ -1,4 +1,3 @@
-// Bài 14: Dòng điện trong chân không
 module.exports = {
   "id": "vatly-11-14",
   "title": "Dòng điện trong chân không",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Dòng điện trong chân không là gì?",
+        "question": "Dòng điện trong chân không là gì?",
         "type": "multiple-choice",
         "options": [
           "Dòng chuyển dời có hướng của ion dương và âm.",
           "Dòng chuyển dời có hướng của electron.",
           "Dòng chuyển dời có hướng của phân tử khí.",
-          "Dòng chuyển động nhiệt của electron.",
+          "Dòng chuyển động nhiệt của electron."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Dòng điện trong chân không",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Dòng điện trong chân không\".",
+      "Neu vi du thuc te lien quan den \"Dòng điện trong chân không\".",
+      "So sanh kien thuc trong \"Dòng điện trong chân không\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

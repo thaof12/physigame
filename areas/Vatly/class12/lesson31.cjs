@@ -1,4 +1,3 @@
-// Bài 32: Phản ứng nhiệt hạch
 module.exports = {
   "id": "vatly-12-31",
   "title": "Phản ứng nhiệt hạch",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Câu hỏi định nghĩa: Phản ứng nhiệt hạch là phản ứng trong đó: ",
+        "question": "Câu hỏi định nghĩa: Phản ứng nhiệt hạch là phản ứng trong đó: ",
         "type": "multiple-choice",
         "options": [
           "Một hạt nhân nặng vỡ thành hạt nhân nhẹ hơn (Phân hạch).",
           "Hai hay nhiều hạt nhân nhẹ kết hợp thành một hạt nhân nặng hơn.",
           "Hạt nhân hấp thụ nơtron rồi vỡ.",
-          "Hạt nhân phóng xạ phân rã.",
+          "Hạt nhân phóng xạ phân rã."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Phản ứng nhiệt hạch",
+      "Trong tam chuong 7",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Phản ứng nhiệt hạch\".",
+      "Neu vi du thuc te lien quan den \"Phản ứng nhiệt hạch\".",
+      "So sanh kien thuc trong \"Phản ứng nhiệt hạch\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

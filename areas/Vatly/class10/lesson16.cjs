@@ -1,4 +1,3 @@
-// Bài 16: Thế năng
 module.exports = {
   "id": "vatly-10-16",
   "title": "Thế năng",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Chỉ ra câu sai trong các phát biểu sau.",
+        "question": "Chỉ ra câu sai trong các phát biểu sau.",
         "type": "multiple-choice",
         "options": [
           "Thế năng của một vật có tính tương đối. Thế năng tại mỗi vị trí có thể có giá trị khác nhau tùy theo cách chọn gốc tọa độ.",
           "Động năng của một vật chỉ phụ thuộc khối lượng và vận tốc của vật. Thế năng chỉ phụ thuộc vị trí tương đối giữa các phần của hệ với điều kiện lực tương tác trong hệ là lực thế.",
           "Công của trọng lực luôn luôn làm giảm thế năng nên công của trọng lực luôn luôn dương.",
-          "Thế năng của quả cầu dưới tác dụng của lực đàn hồi cũng là thế năng đàn hồi.",
+          "Thế năng của quả cầu dưới tác dụng của lực đàn hồi cũng là thế năng đàn hồi."
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Thế năng",
+      "Trong tam chuong 4",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Thế năng\".",
+      "Neu vi du thuc te lien quan den \"Thế năng\".",
+      "So sanh kien thuc trong \"Thế năng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

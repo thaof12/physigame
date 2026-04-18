@@ -1,4 +1,3 @@
-// Bài 8: Giao thoa sóng
 module.exports = {
   "id": "vatly-12-8",
   "title": "Giao thoa sóng",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Thế nào là 2 sóng kết hợp?",
+        "question": "Thế nào là 2 sóng kết hợp?",
         "type": "multiple-choice",
         "options": [
           "Hai sóng chuyển động cùng chiều và cùng tốc độ.",
           "Hai sóng luôn đi kèm với nhau.",
           "Hai sóng có cùng tần số và có độ lệch pha không đổi theo thời gian.",
-          "Hai sóng có cùng bước sóng và có độ lệch pha biến thiên tuần hoàn.",
+          "Hai sóng có cùng bước sóng và có độ lệch pha biến thiên tuần hoàn."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Giao thoa sóng",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Giao thoa sóng\".",
+      "Neu vi du thuc te lien quan den \"Giao thoa sóng\".",
+      "So sanh kien thuc trong \"Giao thoa sóng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

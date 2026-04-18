@@ -1,8 +1,60 @@
 const express = require('express');
 const Lesson = require('../models/Lesson.cjs');
+const User = require('../models/User.cjs');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth.js');
 const path = require('path');
+const fs = require('fs');
+
+const parseAdminEmails = () => {
+  return (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+};
+
+const getUserFromToken = async (req) => {
+  const authHeader = req.header('Authorization') || '';
+  const token = authHeader.startsWith('Bearer ')
+    ? authHeader.replace('Bearer ', '').trim()
+    : '';
+
+  if (!token) {
+    return null;
+  }
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+  const potentialId = decoded?.userId;
+
+  if (!potentialId) {
+    return null;
+  }
+
+  if (String(potentialId).match(/^[0-9a-fA-F]{24}$/)) {
+    return User.findById(potentialId).select('-password');
+  }
+
+  return User.findOne({
+    $or: [
+      { email: potentialId },
+      { firebaseUid: potentialId }
+    ]
+  }).select('-password');
+};
+
+const isAdminUser = (user) => {
+  if (!user) {
+    return false;
+  }
+
+  if (user.isAdmin || user.role === 'admin') {
+    return true;
+  }
+
+  const adminEmails = parseAdminEmails();
+  return adminEmails.includes(String(user.email || '').toLowerCase());
+};
 // Get all lessons
 router.get('/', async (req, res) => {
   try {
@@ -136,6 +188,104 @@ router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, re
   } catch (error) {
     console.error('❌ Error fetching lesson:', error);
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Update physics lesson theory content in file system
+router.put('/class/:classId/chapter/:chapterId/lesson/:lessonId/content', async (req, res) => {
+  try {
+    const requestUser = await getUserFromToken(req);
+    if (!isAdminUser(requestUser)) {
+      return res.status(403).json({ message: 'Only admin users can update lesson theory content.' });
+    }
+
+    const { classId, chapterId, lessonId } = req.params;
+    const subject = req.body?.subject || 'physics';
+
+    if (subject !== 'physics') {
+      return res.status(400).json({ message: 'Only physics subject is supported for file updates.' });
+    }
+
+    const classFolder = path.resolve(__dirname, '..', 'areas', 'Vatly', `class${classId}`);
+    if (!fs.existsSync(classFolder)) {
+      return res.status(404).json({ message: `Class folder not found: class${classId}` });
+    }
+
+    const lessonFiles = fs
+      .readdirSync(classFolder)
+      .filter((fileName) => /^lesson\d+\.cjs$/i.test(fileName))
+      .sort((a, b) => {
+        const aNum = parseInt(a.match(/\d+/)?.[0] || '0', 10);
+        const bNum = parseInt(b.match(/\d+/)?.[0] || '0', 10);
+        return aNum - bNum;
+      });
+
+    const loadedLessons = lessonFiles.map((fileName) => {
+      const fullPath = path.join(classFolder, fileName);
+      delete require.cache[require.resolve(fullPath)];
+      const data = require(fullPath);
+      return { fileName, fullPath, data };
+    });
+
+    const lessonsInChapter = loadedLessons.filter((entry) => String(entry.data?.chapterId) === String(chapterId));
+    const targetLesson = lessonsInChapter[parseInt(lessonId, 10) - 1];
+
+    if (!targetLesson) {
+      return res.status(404).json({ message: 'Lesson not found for given chapter lesson index.' });
+    }
+
+    const payload = req.body || {};
+    const theory = typeof payload.theory === 'string' ? payload.theory : targetLesson.data?.content?.theory;
+    const topics = Array.isArray(payload.topics)
+      ? payload.topics.map((item) => String(item).trim()).filter(Boolean)
+      : (targetLesson.data?.content?.topics || []);
+    const theoryQuestions = Array.isArray(payload.theoryQuestions)
+      ? payload.theoryQuestions.map((item) => String(item).trim()).filter(Boolean)
+      : (targetLesson.data?.content?.theoryQuestions || []);
+    const videos = Array.isArray(payload.videos)
+      ? payload.videos
+          .map((item) => {
+            if (typeof item === 'string') {
+              const url = item.trim();
+              return url ? { title: '', url } : null;
+            }
+
+            if (!item || typeof item !== 'object') {
+              return null;
+            }
+
+            const title = String(item.title || '').trim();
+            const url = String(item.url || '').trim();
+
+            return url ? { title, url } : null;
+          })
+          .filter(Boolean)
+      : (targetLesson.data?.content?.videos || []);
+
+    const updatedLesson = {
+      ...targetLesson.data,
+      content: {
+        ...(targetLesson.data?.content || {}),
+        theory,
+        topics,
+        theoryQuestions,
+        videos
+      }
+    };
+
+    const serialized = `module.exports = ${JSON.stringify(updatedLesson, null, 2)};\n`;
+    fs.writeFileSync(targetLesson.fullPath, serialized, 'utf8');
+
+    delete require.cache[require.resolve(targetLesson.fullPath)];
+
+    return res.json({
+      message: 'Lesson content updated successfully.',
+      lesson: updatedLesson,
+      file: targetLesson.fileName
+    });
+  } catch (error) {
+    console.error('❌ Error updating lesson content:', error);
+    return res.status(500).json({ message: error.message });
   }
 });
 

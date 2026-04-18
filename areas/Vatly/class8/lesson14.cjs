@@ -1,4 +1,3 @@
-// Bài 14: Dòng điện và cường độ dòng điện
 module.exports = {
   "id": "vatly-8-14",
   "title": "Dòng điện và cường độ dòng điện",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Hạt nào mang điện tích âm?",
+        "question": "Hạt nào mang điện tích âm?",
         "type": "multiple-choice",
         "options": [
           "Proton",
           "Nơtron",
           "Electron",
-          "Photon",
+          "Photon"
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Dòng điện và cường độ dòng điện",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Dòng điện và cường độ dòng điện\".",
+      "Neu vi du thuc te lien quan den \"Dòng điện và cường độ dòng điện\".",
+      "So sanh kien thuc trong \"Dòng điện và cường độ dòng điện\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

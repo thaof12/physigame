@@ -1,4 +1,3 @@
-// Bài 12: Dòng điện trong chất điện phân
 module.exports = {
   "id": "vatly-11-12",
   "title": "Dòng điện trong chất điện phân",
@@ -11,17 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Phát biểu nào sau đây là đúng?",
+        "question": "Phát biểu nào sau đây là đúng?",
         "type": "multiple-choice",
         "options": [
           "Dòng điện trong chất điện phân là dòng chuyển dịch có hướng của các iôn âm, electron đi về anốt và iôn dương đi về catốt.",
           "Dòng điện trong chất điện phân là dòng chuyển dịch có hướng của các electron đi về anốt và các iôn dương đi về catốt.",
           "Dòng điện trong chất điện phân là dòng chuyển dịch có hướng của các iôn âm đi về anốt và các iôn dương đi về catốt.",
-          "Dòng điện trong chất điện phân là dòng chuyển dịch có hướng của các electron đi về từ catốt về anốt, khi catốt bị nung nóng.",
+          "Dòng điện trong chất điện phân là dòng chuyển dịch có hướng của các electron đi về từ catốt về anốt, khi catốt bị nung nóng."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Dòng điện trong chất điện phân",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Dòng điện trong chất điện phân\".",
+      "Neu vi du thuc te lien quan den \"Dòng điện trong chất điện phân\".",
+      "So sanh kien thuc trong \"Dòng điện trong chất điện phân\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };
-

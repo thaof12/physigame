@@ -1,4 +1,3 @@
-// Bài 11: Các giá trị đặc trưng của dòng điện xoay chiều
 module.exports = {
   "id": "vatly-12-11",
   "title": "Các giá trị đặc trưng của dòng điện xoay chiều",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Giá trị nào sau đây không phải là giá trị đặc trưng cơ bản của dòng điện xoay chiều?",
+        "question": "Giá trị nào sau đây không phải là giá trị đặc trưng cơ bản của dòng điện xoay chiều?",
         "type": "multiple-choice",
         "options": [
           "Tần số (f).",
           "Giá trị hiệu dụng (I).",
           "Giá trị tức thời (i).",
-          "Công suất tức thời (p).",
+          "Công suất tức thời (p)."
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Các giá trị đặc trưng của dòng điện xoay chiều",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Các giá trị đặc trưng của dòng điện xoay chiều\".",
+      "Neu vi du thuc te lien quan den \"Các giá trị đặc trưng của dòng điện xoay chiều\".",
+      "So sanh kien thuc trong \"Các giá trị đặc trưng của dòng điện xoay chiều\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

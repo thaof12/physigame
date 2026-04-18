@@ -1,4 +1,3 @@
-// Bài 11: Áp suất khí quyển
 module.exports = {
   "id": "vatly-8-11",
   "title": "Áp suất khí quyển",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Hút bớt không khí trong một vỏ hộp đựng sữa bằng giấy, ta thấy vỏ hộp giấy bị bẹp lại vì:",
+        "question": "Hút bớt không khí trong một vỏ hộp đựng sữa bằng giấy, ta thấy vỏ hộp giấy bị bẹp lại vì:",
         "type": "multiple-choice",
         "options": [
           "việc hút mạnh đã làm bẹp hộp.",
           "áp suất bên trong hộp tăng lên làm cho hộp bị biến dạng.",
           "áp suất bên trong hộp giảm, áp suất khí quyển ở bên ngoài hộp lớn hơn làm nó bẹp.",
-          "khi hút mạnh làm yếu các thành hộp làm hộp bẹp đi.",
+          "khi hút mạnh làm yếu các thành hộp làm hộp bẹp đi."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Áp suất khí quyển",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Áp suất khí quyển\".",
+      "Neu vi du thuc te lien quan den \"Áp suất khí quyển\".",
+      "So sanh kien thuc trong \"Áp suất khí quyển\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,4 +1,3 @@
-// Bài 1: Dao động điều hòa
 module.exports = {
   "id": "vatly-12-1",
   "title": "Dao động điều hòa",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Trong dao động điều hoà của chất điểm, chất điểm đổi chiều chuyển động khi?",
+        "question": "Trong dao động điều hoà của chất điểm, chất điểm đổi chiều chuyển động khi?",
         "type": "multiple-choice",
         "options": [
           "Lực tác dụng đổi chiều.",
           "Lực tác dụng bằng không.",
           "Lực tác dụng có độ lớn cực đại.",
-          "Lực tác dụng có độ lớn cực tiểu.",
+          "Lực tác dụng có độ lớn cực tiểu."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Dao động điều hòa",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Dao động điều hòa\".",
+      "Neu vi du thuc te lien quan den \"Dao động điều hòa\".",
+      "So sanh kien thuc trong \"Dao động điều hòa\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

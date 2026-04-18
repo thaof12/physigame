@@ -76,6 +76,25 @@ const PhysicsGradeGames = () => {
     navigate(game.path || `/advanced-physics-challenge/${game.slug}`);
   };
 
+  const formatEstimatedTime = (estimatedTime) => {
+    return typeof estimatedTime === 'number' ? `${estimatedTime} phút` : estimatedTime;
+  };
+
+  const getLearningHint = (game) => {
+    const topTopic = game.topics?.[0] || 'kiến thức trọng tâm';
+
+    switch (game.difficulty) {
+      case 'easy':
+        return `Bắt đầu nhẹ nhàng với ${topTopic.toLowerCase()}, ưu tiên làm đúng bước cơ bản.`;
+      case 'medium':
+        return `Luyện chắc ${topTopic.toLowerCase()} qua tình huống có dữ kiện gần thực tế.`;
+      case 'hard':
+        return `Thử thách nâng cao về ${topTopic.toLowerCase()}, cần phân tích dữ kiện trước khi tính.`;
+      default:
+        return `Ôn lại ${topTopic.toLowerCase()} theo lộ trình từng bước.`;
+    }
+  };
+
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
       case 'easy':
@@ -137,6 +156,9 @@ const PhysicsGradeGames = () => {
                   </h1>
                   <p className="text-xl text-white/90 mt-1">
                     {currentGrade.description}
+                  </p>
+                  <p className="text-sm md:text-base text-white/85 mt-3 max-w-2xl">
+                    Gợi ý học nhanh: chọn game theo thứ tự chương để nắm nền trước, sau đó quay lại các game khó để tăng tốc độ giải bài.
                   </p>
                 </div>
               </div>
@@ -207,7 +229,7 @@ const PhysicsGradeGames = () => {
                       <div
                         key={game.id}
                         onClick={() => handleGameClick(game)}
-                        className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden hover:-translate-y-2"
+                        className="group bg-white rounded-2xl shadow-lg ring-1 ring-black/5 hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden hover:-translate-y-2"
                         style={{ animationDelay: `${index * 100}ms` }}
                       >
                         {/* Card Header with Gradient */}
@@ -229,8 +251,12 @@ const PhysicsGradeGames = () => {
                             {game.title}
                           </h3>
 
-                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">
                             {game.description}
+                          </p>
+
+                          <p className="text-xs text-slate-500 mb-4 italic leading-5">
+                            {getLearningHint(game)}
                           </p>
 
                           {/* Topics */}
@@ -249,7 +275,7 @@ const PhysicsGradeGames = () => {
                           <div className="flex items-center justify-between text-sm text-gray-500 border-t pt-4">
                             <div className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
-                              <span>{game.estimatedTime}</span>
+                              <span>{formatEstimatedTime(game.estimatedTime)}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <Target className="w-4 h-4" />
@@ -259,7 +285,7 @@ const PhysicsGradeGames = () => {
 
                           {/* Play Button */}
                           <button className={`w-full mt-4 bg-gradient-to-r ${game.color} hover:opacity-90 text-white py-3 rounded-xl font-medium transition-all transform group-hover:scale-105 shadow-md hover:shadow-lg`}>
-                            Chơi ngay →
+                            Vào phòng thí nghiệm →
                           </button>
                         </div>
                       </div>
@@ -272,10 +298,10 @@ const PhysicsGradeGames = () => {
             {/* Bottom CTA */}
             <div className={`mt-12 bg-gradient-to-r ${currentGrade.color} rounded-2xl p-8 text-white text-center`}>
               <h3 className="text-2xl font-bold mb-3">
-                🎯 Hoàn thành tất cả để mở khóa thành tựu!
+                🎯 Hoàn thành theo chương để học chắc hơn
               </h3>
               <p className="text-white/90 mb-6">
-                Chơi các game và thu thập sao để tăng trình độ của bạn
+                Mỗi game đều gắn với một ý trọng tâm trong bài học. Học theo nhịp ổn định sẽ giúp bạn làm bài tập nhanh và ít sai hơn.
               </p>
               <div className="flex justify-center gap-4 flex-wrap">
                 <button

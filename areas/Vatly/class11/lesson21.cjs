@@ -1,4 +1,3 @@
-// Bài 21: Từ thông
 module.exports = {
   "id": "vatly-11-21",
   "title": "Từ thông",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Phát biểu nào sau đây không đúng?",
+        "question": "Phát biểu nào sau đây không đúng?",
         "type": "multiple-choice",
         "options": [
           "Từ thông là một đại lượng vô hướng.",
           "Từ thông qua mặt phẳng khung dây bằng 0 khi khung dây dẫn đặt trong từ trường có các đường sức từ song song với mặt phẳng khung dây.",
           "Từ thông qua một mặt kín luôn khác 0.",
-          "Từ thông qua một mặt kín có thể bằng 0 hoặc khác 0.",
+          "Từ thông qua một mặt kín có thể bằng 0 hoặc khác 0."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Từ thông",
+      "Trong tam chuong 5",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Từ thông\".",
+      "Neu vi du thuc te lien quan den \"Từ thông\".",
+      "So sanh kien thuc trong \"Từ thông\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

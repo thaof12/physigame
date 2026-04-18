@@ -1,4 +1,3 @@
-// Bài 14: Máy phát điện xoay chiều
 module.exports = {
   "id": "vatly-12-14",
   "title": "Máy phát điện xoay chiều",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Máy phát điện xoay chiều biến đổi dạng năng lượng nào thành dạng năng lượng nào?",
+        "question": "Máy phát điện xoay chiều biến đổi dạng năng lượng nào thành dạng năng lượng nào?",
         "type": "multiple-choice",
         "options": [
           "Nhiệt năng thành điện năng.",
           "Cơ năng thành điện năng.",
           "Hóa năng thành điện năng.",
-          "Điện năng thành cơ năng.",
+          "Điện năng thành cơ năng."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Máy phát điện xoay chiều",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Máy phát điện xoay chiều\".",
+      "Neu vi du thuc te lien quan den \"Máy phát điện xoay chiều\".",
+      "So sanh kien thuc trong \"Máy phát điện xoay chiều\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

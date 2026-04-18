@@ -76,7 +76,7 @@ const GasLawsExplorer = () => {
       // Quá trình đẳng nhiệt: P₁V₁ = P₂V₂
       const P1 = Math.round((Math.random() * 300 + 100) * 1000); // 100-400 kPa
       const V1 = Math.round((Math.random() * 15 + 5) * 10) / 10; // 5-20 L
-      const V2 = Math.round((Math.random() * 15 + 5) * 10) / 10;
+      let V2 = Math.round((Math.random() * 15 + 5) * 10) / 10;
       while (Math.abs(V2 - V1) < 2) {
         V2 = Math.round((Math.random() * 15 + 5) * 10) / 10;
       }

@@ -1,4 +1,3 @@
-// Bài 18: Đoạn mạch nối tiếp
 module.exports = {
   "id": "vatly-8-18",
   "title": "Đoạn mạch nối tiếp",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Đoạn mạch gồm các điện trở mắc nối tiếp là đoạn mạch không có đặc điểm nào dưới đây?",
+        "question": "Đoạn mạch gồm các điện trở mắc nối tiếp là đoạn mạch không có đặc điểm nào dưới đây?",
         "type": "multiple-choice",
         "options": [
           "Đoạn mạch có những điểm nối chung của nhiều điện trở.",
           "Đoạn mạch có những điểm nối chung chỉ của hai điện trở.",
           "Dòng điện chạy qua các điện trở của đoạn mạch có cùng cường độ.",
-          "Đoạn mạch có những điện trở mắc liên tiếp với nhau và không có mạch rẽ.",
+          "Đoạn mạch có những điện trở mắc liên tiếp với nhau và không có mạch rẽ."
         ],
         "correctAnswer": 1
       }
+    ],
+    "topics": [
+      "Khai niem trong Đoạn mạch nối tiếp",
+      "Trong tam chuong 3",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Đoạn mạch nối tiếp\".",
+      "Neu vi du thuc te lien quan den \"Đoạn mạch nối tiếp\".",
+      "So sanh kien thuc trong \"Đoạn mạch nối tiếp\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

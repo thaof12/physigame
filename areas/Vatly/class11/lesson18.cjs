@@ -1,4 +1,3 @@
-// Bài 18: Từ trường của dòng điện chạy trong dây dẫn uốn thành vòng tròn
 module.exports = {
   "id": "vatly-11-18",
   "title": "Từ trường của dòng điện chạy trong dây dẫn uốn thành vòng tròn",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Dòng điện chạy qua vòng dây tròn tạo ra từ trường có đặc điểm gì?",
+        "question": "Dòng điện chạy qua vòng dây tròn tạo ra từ trường có đặc điểm gì?",
         "type": "multiple-choice",
         "options": [
           "Giống từ trường dây dẫn thẳng, đường sức từ song song.",
           "Giống từ trường nam châm thẳng, đường sức từ khép kín.",
           "Chỉ có từ trường tại tâm vòng dây.",
-          "Từ trường đều ở mọi nơi.",
+          "Từ trường đều ở mọi nơi."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Từ trường của dòng điện chạy trong dây dẫn uốn thành vòng tròn",
+      "Trong tam chuong 4",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Từ trường của dòng điện chạy trong dây dẫn uốn thành vòng tròn\".",
+      "Neu vi du thuc te lien quan den \"Từ trường của dòng điện chạy trong dây dẫn uốn thành vòng tròn\".",
+      "So sanh kien thuc trong \"Từ trường của dòng điện chạy trong dây dẫn uốn thành vòng tròn\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

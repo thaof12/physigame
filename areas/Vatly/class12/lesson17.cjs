@@ -1,4 +1,3 @@
-// Bài 17: Điện từ trường
 module.exports = {
   "id": "vatly-12-17",
   "title": "Điện từ trường",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Trong điện từ trường, vectơ cường độ điện trường và vectơ cảm ứng từ luôn?",
+        "question": "Trong điện từ trường, vectơ cường độ điện trường và vectơ cảm ứng từ luôn?",
         "type": "multiple-choice",
         "options": [
           "Có phương vuông góc với nhau",
           "Cùng phương, ngược chiều.",
           "Cùng phương, cùng chiều.",
-          "Có phương lệch nhau 45º.",
+          "Có phương lệch nhau 45º."
         ],
         "correctAnswer": 1
       }
+    ],
+    "topics": [
+      "Khai niem trong Điện từ trường",
+      "Trong tam chuong 4",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Điện từ trường\".",
+      "Neu vi du thuc te lien quan den \"Điện từ trường\".",
+      "So sanh kien thuc trong \"Điện từ trường\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

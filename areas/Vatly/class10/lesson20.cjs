@@ -1,4 +1,3 @@
-// Bài 20: Quá trình đẳng tích - Định luật Charles
 module.exports = {
   "id": "vatly-10-20",
   "title": "Quá trình đẳng tích - Định luật Charles",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Thể tích của một lượng khí nhất định tỉ lệ thuận với nhiệt độ tuyệt đối ở áp suất không đổi là nội dung của",
+        "question": "Thể tích của một lượng khí nhất định tỉ lệ thuận với nhiệt độ tuyệt đối ở áp suất không đổi là nội dung của",
         "type": "multiple-choice",
         "options": [
           "Định luật Boyle.",
           "Định luật Charles.",
           "Định luật Gay Lussac.",
-          "Định luật Danhton.",
+          "Định luật Danhton."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Quá trình đẳng tích - Định luật Charles",
+      "Trong tam chuong 5",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Quá trình đẳng tích - Định luật Charles\".",
+      "Neu vi du thuc te lien quan den \"Quá trình đẳng tích - Định luật Charles\".",
+      "So sanh kien thuc trong \"Quá trình đẳng tích - Định luật Charles\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

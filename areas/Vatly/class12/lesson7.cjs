@@ -1,4 +1,3 @@
-// Bài 7: Phương trình sóng
 module.exports = {
   "id": "vatly-12-7",
   "title": "Phương trình sóng",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Phát biểu nào sau đây sai? Khi xảy ra hiện tượng giao thoa sóng trên mặt chất lỏng?",
+        "question": "Phát biểu nào sau đây sai? Khi xảy ra hiện tượng giao thoa sóng trên mặt chất lỏng?",
         "type": "multiple-choice",
         "options": [
           "Các điểm không dao động tạo thành các vân cực tiểu.",
           "Tồn tại các điểm dao động với biên độ cực đại.",
           "Tồn tại các điểm không dao động.",
-          "Các điểm dao động mạnh tạo thành các đường thẳng cực đại.",
+          "Các điểm dao động mạnh tạo thành các đường thẳng cực đại."
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Phương trình sóng",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Phương trình sóng\".",
+      "Neu vi du thuc te lien quan den \"Phương trình sóng\".",
+      "So sanh kien thuc trong \"Phương trình sóng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

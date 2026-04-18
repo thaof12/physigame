@@ -1,4 +1,3 @@
-// Bài 1: Nguồn sáng - Sự truyền ánh sáng
 module.exports = {
   "id": "vatly-7-1",
   "title": "Nguồn sáng - Sự truyền ánh sáng",
@@ -21,6 +20,16 @@ module.exports = {
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Nguồn sáng - Sự truyền ánh sáng",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Nguồn sáng - Sự truyền ánh sáng\".",
+      "Neu vi du thuc te lien quan den \"Nguồn sáng - Sự truyền ánh sáng\".",
+      "So sanh kien thuc trong \"Nguồn sáng - Sự truyền ánh sáng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

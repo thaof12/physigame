@@ -1,4 +1,3 @@
-// Bài 4: Áp lực - Áp suất
 module.exports = {
   "id": "vatly-8-4",
   "title": "Áp lực - Áp suất",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Tác dụng của áp lực càng lớn khi:",
+        "question": "Tác dụng của áp lực càng lớn khi:",
         "type": "multiple-choice",
         "options": [
           "Diện tích mặt bị ép càng lớn.",
           "Diện tích mặt bị ép không quan trọng. ",
           "Độ lớn áp lực càng nhỏ.",
-          "Diện tích mặt bị ép càng nhỏ và độ lớn áp lực càng lớn",
+          "Diện tích mặt bị ép càng nhỏ và độ lớn áp lực càng lớn"
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Áp lực - Áp suất",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Áp lực - Áp suất\".",
+      "Neu vi du thuc te lien quan den \"Áp lực - Áp suất\".",
+      "So sanh kien thuc trong \"Áp lực - Áp suất\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

@@ -1,4 +1,3 @@
-// Bài 8: Định luật Ôm đối với toàn mạch
 module.exports = {
   "id": "vatly-11-8",
   "title": "Định luật Ôm đối với toàn mạch",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  " Cho một mạch điện kín gồm nguồn điện có suất điện động E = 12 (V), điện trở trong r = 3 (Ω), mạch ngoài gồm điện trở R1 = 6 (Ω) mắc song song với một điện trở R. Để công suất tiêu thụ trên điện trở R đạt giá trị lớn nhất thì điện trở R phải có giá trị",
+        "question": " Cho một mạch điện kín gồm nguồn điện có suất điện động E = 12 (V), điện trở trong r = 3 (Ω), mạch ngoài gồm điện trở R1 = 6 (Ω) mắc song song với một điện trở R. Để công suất tiêu thụ trên điện trở R đạt giá trị lớn nhất thì điện trở R phải có giá trị",
         "type": "multiple-choice",
         "options": [
           "R = 1 (Ω).",
           "R = 2 (Ω).",
           "R = 3 (Ω).",
-          "R = 4 (Ω).",
+          "R = 4 (Ω)."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Định luật Ôm đối với toàn mạch",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Định luật Ôm đối với toàn mạch\".",
+      "Neu vi du thuc te lien quan den \"Định luật Ôm đối với toàn mạch\".",
+      "So sanh kien thuc trong \"Định luật Ôm đối với toàn mạch\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

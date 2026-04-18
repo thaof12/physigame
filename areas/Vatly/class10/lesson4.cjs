@@ -1,4 +1,3 @@
-// Bài 4: Sự rơi tự do
 module.exports = {
   "id": "vatly-10-4",
   "title": "Sự rơi tự do",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Phát biểu nào sau đây là sai khi nói về sự rơi tự do?",
+        "question": "Phát biểu nào sau đây là sai khi nói về sự rơi tự do?",
         "type": "multiple-choice",
         "options": [
           "Vật rơi chỉ dưới tác dụng của trọng lực.",
           "Chuyển động rơi tự do là chuyển động thẳng nhanh dần đều.",
           "Mọi vật rơi nhanh chậm khác nhau do khối lượng khác nhau.",
-          "Gia tốc rơi tự do ở gần mặt đất là như nhau.",
+          "Gia tốc rơi tự do ở gần mặt đất là như nhau."
         ],
         "correctAnswer": 3
       }
+    ],
+    "topics": [
+      "Khai niem trong Sự rơi tự do",
+      "Trong tam chuong 1",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Sự rơi tự do\".",
+      "Neu vi du thuc te lien quan den \"Sự rơi tự do\".",
+      "So sanh kien thuc trong \"Sự rơi tự do\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

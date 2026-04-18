@@ -1,4 +1,3 @@
-// Bài 30: Phản ứng hạt nhân
 module.exports = {
   "id": "vatly-12-29",
   "title": "Phản ứng hạt nhân",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Câu hỏi về định nghĩa: Điều nào sau đây sai khi nói về phản ứng hạt nhân?",
+        "question": "Câu hỏi về định nghĩa: Điều nào sau đây sai khi nói về phản ứng hạt nhân?",
         "type": "multiple-choice",
         "options": [
           "Là quá trình biến đổi hạt nhân.",
           "Năng lượng tỏa ra lớn hơn phản ứng hóa học.",
           "Có định luật bảo toàn năng lượng, động lượng.",
-          "Xảy ra ở lớp vỏ nguyên tử.",
+          "Xảy ra ở lớp vỏ nguyên tử."
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Phản ứng hạt nhân",
+      "Trong tam chuong 7",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Phản ứng hạt nhân\".",
+      "Neu vi du thuc te lien quan den \"Phản ứng hạt nhân\".",
+      "So sanh kien thuc trong \"Phản ứng hạt nhân\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

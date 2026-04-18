@@ -1,4 +1,3 @@
-// Bài 26: Thuyết lượng tử ánh sáng
 module.exports = {
   "id": "vatly-12-26",
   "title": "Thuyết lượng tử ánh sáng",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Nếu chiếu một chùm tia hồng ngoại vào tấm kẽm tích điện âm thì:",
+        "question": "Nếu chiếu một chùm tia hồng ngoại vào tấm kẽm tích điện âm thì:",
         "type": "multiple-choice",
         "options": [
           "Tấm kẽm mất dần điện tích dương.",
           "Tấm kẽm mất dần điện tích âm. ",
           "Tấm kẽm trở nên trung hoà về điện.",
-          "Điện tích âm của tấm kẽm không đổi.",
+          "Điện tích âm của tấm kẽm không đổi."
         ],
         "correctAnswer": 4
       }
+    ],
+    "topics": [
+      "Khai niem trong Thuyết lượng tử ánh sáng",
+      "Trong tam chuong 6",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Thuyết lượng tử ánh sáng\".",
+      "Neu vi du thuc te lien quan den \"Thuyết lượng tử ánh sáng\".",
+      "So sanh kien thuc trong \"Thuyết lượng tử ánh sáng\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };

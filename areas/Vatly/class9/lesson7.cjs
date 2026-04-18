@@ -1,4 +1,3 @@
-// Bài 7: Nam châm vĩnh cửu
 module.exports = {
   "id": "vatly-9-7",
   "title": "Nam châm vĩnh cửu",
@@ -11,16 +10,26 @@ module.exports = {
     "exercises": [
       {
         "id": 1,
-        "question":  "Nam châm vĩnh cửu có đặc tính nào sau đây?",
+        "question": "Nam châm vĩnh cửu có đặc tính nào sau đây?",
         "type": "multiple-choice",
         "options": [
           "Chỉ có một cực từ.",
           "Luôn có hai cực (Bắc và Nam).",
           "Từ trường chỉ xuất hiện khi có dòng điện.",
-          "Chỉ hút sắt.",
+          "Chỉ hút sắt."
         ],
         "correctAnswer": 2
       }
+    ],
+    "topics": [
+      "Khai niem trong Nam châm vĩnh cửu",
+      "Trong tam chuong 2",
+      "Ung dung thuc te"
+    ],
+    "theoryQuestions": [
+      "Phat bieu noi dung chinh cua bai \"Nam châm vĩnh cửu\".",
+      "Neu vi du thuc te lien quan den \"Nam châm vĩnh cửu\".",
+      "So sanh kien thuc trong \"Nam châm vĩnh cửu\" voi mot hien tuong vat ly gan giong."
     ]
   }
 };
