@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 import { ChevronRight } from 'lucide-react';
 import grade6 from '../../../assets/images/grade_6.png';
 import grade7 from '../../../assets/images/grade_7.png';
@@ -10,6 +12,13 @@ import grade12 from '../../../assets/images/grade_12.png';
 
 const PhysicsClasses = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
 
   return (
     <div className="bg-[#FDFCF8] font-sans overflow-x-hidden min-h-screen selection:bg-[#B87333]/20 selection:text-[#4A3728]">

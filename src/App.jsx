@@ -211,6 +211,13 @@ import ClassManagement from './areas/Teacher/pages/ClassManagement';
 import TeacherProfile from './areas/Teacher/pages/TeacherProfile';
 
 
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+};
+
 const AppContent = () => {
   const location = useLocation();
 
@@ -224,202 +231,204 @@ const AppContent = () => {
         <Route element={<MainLayout />}>
           <Route path="/" element={<PhysicsHome />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/placement-test/:programId?" element={<PlacementTest />} />
+          
+          {/* Protected Routes */}
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/placement-test/:programId?" element={<ProtectedRoute><PlacementTest /></ProtectedRoute>} />
           <Route path="/program/physics" element={<PhysicsHome />} />
           <Route path="/program/physics/dashboard" element={<Navigate to="/program/physics" replace />} />
-          <Route path="/physics-classes" element={<PhysicsClasses />} />
-          <Route path="/game-journey" element={<GameJourney />} />
+          <Route path="/physics-classes" element={<ProtectedRoute><PhysicsClasses /></ProtectedRoute>} />
+          <Route path="/game-journey" element={<ProtectedRoute><GameJourney /></ProtectedRoute>} />
 
           {/* PK Battle Routes */}
-          <Route path="/pk-battle" element={<PKLobby />} />
-          <Route path="/pk-battle/matchmaking" element={<PKMatchmaking />} />
-          <Route path="/pk-battle/result" element={<PKResult />} />
+          <Route path="/pk-battle" element={<ProtectedRoute><PKLobby /></ProtectedRoute>} />
+          <Route path="/pk-battle/matchmaking" element={<ProtectedRoute><PKMatchmaking /></ProtectedRoute>} />
+          <Route path="/pk-battle/result" element={<ProtectedRoute><PKResult /></ProtectedRoute>} />
 
           {/* Physics Routes */}
-          <Route path="/physics-class/:classId" element={<PhysicsClassDashboard />} />
-          <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<PhysicsLesson />} />
+          <Route path="/physics-class/:classId" element={<ProtectedRoute><PhysicsClassDashboard /></ProtectedRoute>} />
+          <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<ProtectedRoute><PhysicsLesson /></ProtectedRoute>} />
           
           {/* Physics Tools Hub */}
-          <Route path="/physics-tools" element={<PhysicsToolsHub />} />
-          <Route path="/physics-tools/calculator" element={<PhysicsCalculator />} />
-          <Route path="/physics-tools/constants" element={<ConstantsReference />} />
-          <Route path="/physics-tools/converter" element={<UnitConverter />} />
+          <Route path="/physics-tools" element={<ProtectedRoute><PhysicsToolsHub /></ProtectedRoute>} />
+          <Route path="/physics-tools/calculator" element={<ProtectedRoute><PhysicsCalculator /></ProtectedRoute>} />
+          <Route path="/physics-tools/constants" element={<ProtectedRoute><ConstantsReference /></ProtectedRoute>} />
+          <Route path="/physics-tools/converter" element={<ProtectedRoute><UnitConverter /></ProtectedRoute>} />
           
           {/* Interactive Lecture Hub Routes */}
-          <Route path="/interactive-lectures" element={<InteractiveLectureHub />} />
-          <Route path="/interactive-lectures/:subject" element={<LectureGradeSelector />} />
-          <Route path="/interactive-lectures/:subject/:grade" element={<LectureClassSelector />} />
-          <Route path="/interactive-lectures/:subject/:grade/:lectureId" element={<LectureViewer />} />
+          <Route path="/interactive-lectures" element={<ProtectedRoute><InteractiveLectureHub /></ProtectedRoute>} />
+          <Route path="/interactive-lectures/:subject" element={<ProtectedRoute><LectureGradeSelector /></ProtectedRoute>} />
+          <Route path="/interactive-lectures/:subject/:grade" element={<ProtectedRoute><LectureClassSelector /></ProtectedRoute>} />
+          <Route path="/interactive-lectures/:subject/:grade/:lectureId" element={<ProtectedRoute><LectureViewer /></ProtectedRoute>} />
           
           {/* Legacy Physics Calculator - redirect to new hub */}
           <Route path="/physics-calculator" element={<PhysicsToolsHub />} />
           
           {/* Virtual Lab - Phòng thí nghiệm ảo */}
-          <Route path="/vatly/virtual-lab" element={<VirtualLabHome />} />
+          <Route path="/vatly/virtual-lab" element={<ProtectedRoute><VirtualLabHome /></ProtectedRoute>} />
           
           {/* Physics Games - New grade-based navigation */}
-          <Route path="/physics-games/grades" element={<PhysicsGradeSelector />} />
-          <Route path="/physics-games/grade/:gradeId" element={<PhysicsGradeGames />} />
+          <Route path="/physics-games/grades" element={<ProtectedRoute><PhysicsGradeSelector /></ProtectedRoute>} />
+          <Route path="/physics-games/grade/:gradeId" element={<ProtectedRoute><PhysicsGradeGames /></ProtectedRoute>} />
           
           {/* Legacy route - redirect to grade selector */}
           <Route path="/advanced-physics-challenge" element={<PhysicsGradeSelector />} />
         </Route>
 
         {/* PK Battle Room (Keep fullscreen) */}
-        <Route path="/pk-battle/room/:roomId" element={<PKBattleRoom />} />
+        <Route path="/pk-battle/room/:roomId" element={<ProtectedRoute><PKBattleRoom /></ProtectedRoute>} />
 
         {/* Virtual Lab Experiments (Keep fullscreen or focused) */}
-        <Route path="/vatly/virtual-lab/pendulum" element={<PendulumLab />} />
-        <Route path="/vatly/virtual-lab/free-fall" element={<FreeFallLabVirtual />} />
-        <Route path="/vatly/virtual-lab/ohm-law" element={<OhmLawLab />} />
-        <Route path="/vatly/virtual-lab/lens-focal" element={<LensOpticsLab />} />
-        <Route path="/vatly/virtual-lab/standing-wave" element={<StandingWaveLab />} />
-        <Route path="/vatly/virtual-lab/calorimeter" element={<CalorimeterLab />} />
-        <Route path="/vatly/virtual-lab/inclined-plane" element={<InclinedPlaneLab />} />
-        <Route path="/vatly/virtual-lab/resistor-circuit" element={<ResistorCircuitLab />} />
-        <Route path="/vatly/virtual-lab/light-interference" element={<LightInterferenceLab />} />
+        <Route path="/vatly/virtual-lab/pendulum" element={<ProtectedRoute><PendulumLab /></ProtectedRoute>} />
+        <Route path="/vatly/virtual-lab/free-fall" element={<ProtectedRoute><FreeFallLabVirtual /></ProtectedRoute>} />
+        <Route path="/vatly/virtual-lab/ohm-law" element={<ProtectedRoute><OhmLawLab /></ProtectedRoute>} />
+        <Route path="/vatly/virtual-lab/lens-focal" element={<ProtectedRoute><LensOpticsLab /></ProtectedRoute>} />
+        <Route path="/vatly/virtual-lab/standing-wave" element={<ProtectedRoute><StandingWaveLab /></ProtectedRoute>} />
+        <Route path="/vatly/virtual-lab/calorimeter" element={<ProtectedRoute><CalorimeterLab /></ProtectedRoute>} />
+        <Route path="/vatly/virtual-lab/inclined-plane" element={<ProtectedRoute><InclinedPlaneLab /></ProtectedRoute>} />
+        <Route path="/vatly/virtual-lab/resistor-circuit" element={<ProtectedRoute><ResistorCircuitLab /></ProtectedRoute>} />
+        <Route path="/vatly/virtual-lab/light-interference" element={<ProtectedRoute><LightInterferenceLab /></ProtectedRoute>} />
 
 
         {/* Physics Challenge Games */}
-        <Route path="/advanced-physics-challenge/balance" element={<BalanceChallenge />} />
-        <Route path="/advanced-physics-challenge/color-master" element={<ColorMaster />} />
-        <Route path="/advanced-physics-challenge/electromagnetic" element={<ElectromagneticLab />} />
-        <Route path="/advanced-physics-challenge/nanolab" element={<NanoLab />} />
-        <Route path="/advanced-physics-challenge/plasma" element={<PlasmaGame />} />
-        <Route path="/advanced-physics-challenge/projectile" element={<ProjectileMotion />} />
-        <Route path="/advanced-physics-challenge/static" element={<StaticElectricity />} />
-        <Route path="/advanced-physics-challenge/thermo" element={<ThermoLab />} />
-        <Route path="/advanced-physics-challenge/water" element={<WaterLab />} />
+        <Route path="/advanced-physics-challenge/balance" element={<ProtectedRoute><BalanceChallenge /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/color-master" element={<ProtectedRoute><ColorMaster /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/electromagnetic" element={<ProtectedRoute><ElectromagneticLab /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/nanolab" element={<ProtectedRoute><NanoLab /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/plasma" element={<ProtectedRoute><PlasmaGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/projectile" element={<ProtectedRoute><ProjectileMotion /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/static" element={<ProtectedRoute><StaticElectricity /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/thermo" element={<ProtectedRoute><ThermoLab /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/water" element={<ProtectedRoute><WaterLab /></ProtectedRoute>} />
         
         {/* Grade 6 Physics Games - Chapter 1: Mechanics */}
-        <Route path="/advanced-physics-challenge/measurement" element={<MeasurementGame />} />
-        <Route path="/advanced-physics-challenge/mass-balance" element={<MassBalanceGame />} />
-        <Route path="/advanced-physics-challenge/force-world" element={<ForceWorldGame />} />
-        <Route path="/advanced-physics-challenge/weight-mass" element={<WeightMassGame />} />
-        <Route path="/advanced-physics-challenge/simple-machine" element={<SimpleMachineGame />} />
-        <Route path="/advanced-physics-challenge/pressure-challenge" element={<PressureChallengeGame />} />
+        <Route path="/advanced-physics-challenge/measurement" element={<ProtectedRoute><MeasurementGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/mass-balance" element={<ProtectedRoute><MassBalanceGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/force-world" element={<ProtectedRoute><ForceWorldGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/weight-mass" element={<ProtectedRoute><WeightMassGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/simple-machine" element={<ProtectedRoute><SimpleMachineGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/pressure-challenge" element={<ProtectedRoute><PressureChallengeGame /></ProtectedRoute>} />
         
         {/* Grade 6 Physics Games - Chapter 2: Thermodynamics */}
-        <Route path="/advanced-physics-challenge/thermometer" element={<ThermometerGame />} />
-        <Route path="/advanced-physics-challenge/thermal-expansion" element={<ThermalExpansionGame />} />
-        <Route path="/advanced-physics-challenge/evaporation" element={<EvaporationGame />} />
-        <Route path="/advanced-physics-challenge/boiling" element={<BoilingGame />} />
-        <Route path="/advanced-physics-challenge/heat-transfer" element={<HeatTransferGame />} />
-        <Route path="/advanced-physics-challenge/thermal-energy" element={<ThermalEnergyGame />} />
+        <Route path="/advanced-physics-challenge/thermometer" element={<ProtectedRoute><ThermometerGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/thermal-expansion" element={<ProtectedRoute><ThermalExpansionGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/evaporation" element={<ProtectedRoute><EvaporationGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/boiling" element={<ProtectedRoute><BoilingGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/heat-transfer" element={<ProtectedRoute><HeatTransferGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/thermal-energy" element={<ProtectedRoute><ThermalEnergyGame /></ProtectedRoute>} />
         
         {/* Grade 7 Physics Games - Chapter 1: Optics (Quang học) */}
-        <Route path="/advanced-physics-challenge/light-reflection" element={<LightReflectionGame />} />
-        <Route path="/advanced-physics-challenge/mirror-lab" element={<MirrorLabGame />} />
-        <Route path="/advanced-physics-challenge/light-path" element={<LightPathGame />} />
+        <Route path="/advanced-physics-challenge/light-reflection" element={<ProtectedRoute><LightReflectionGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/mirror-lab" element={<ProtectedRoute><MirrorLabGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/light-path" element={<ProtectedRoute><LightPathGame /></ProtectedRoute>} />
         
         {/* Grade 7 Physics Games - Chapter 2: Acoustics (Âm học) */}
-        <Route path="/physics-games/grade/7/wave-frequency" element={<WaveFrequencyGame />} />
-        <Route path="/physics-games/grade/7/sound-transmission" element={<SoundTransmissionGame />} />
-        <Route path="/physics-games/grade/7/echo-explorer" element={<EchoExplorerGame />} />
+        <Route path="/physics-games/grade/7/wave-frequency" element={<ProtectedRoute><WaveFrequencyGame /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/7/sound-transmission" element={<ProtectedRoute><SoundTransmissionGame /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/7/echo-explorer" element={<ProtectedRoute><EchoExplorerGame /></ProtectedRoute>} />
         
         {/* Grade 7 Physics Games - Chapter 3: Electricity (Điện học) */}
-        <Route path="/physics-games/grade/7/electric-charge-lab" element={<ElectricChargeLab />} />
-        <Route path="/physics-games/grade/7/circuit-builder" element={<CircuitBuilderGame />} />
-        <Route path="/physics-games/grade/7/electric-effects" element={<ElectricEffectsGame />} />
+        <Route path="/physics-games/grade/7/electric-charge-lab" element={<ProtectedRoute><ElectricChargeLab /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/7/circuit-builder" element={<ProtectedRoute><CircuitBuilderGame /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/7/electric-effects" element={<ProtectedRoute><ElectricEffectsGame /></ProtectedRoute>} />
         
         {/* Grade 8 Physics Games - Chapter 1: Mechanics (Cơ học) */}
-        <Route path="/physics-games/grade/8/race-tracker" element={<RaceTracker />} />
-        <Route path="/physics-games/grade/8/force-arena" element={<ForceArena />} />
-        <Route path="/physics-games/grade/8/pressure-master" element={<PressureMaster />} />
-        <Route path="/physics-games/grade/8/archimedes-challenge" element={<ArchimedesChallenge />} />
-        <Route path="/physics-games/grade/8/energy-lab" element={<EnergyLab />} />
+        <Route path="/physics-games/grade/8/race-tracker" element={<ProtectedRoute><RaceTracker /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/8/force-arena" element={<ProtectedRoute><ForceArena /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/8/pressure-master" element={<ProtectedRoute><PressureMaster /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/8/archimedes-challenge" element={<ProtectedRoute><ArchimedesChallenge /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/8/energy-lab" element={<ProtectedRoute><EnergyLab /></ProtectedRoute>} />
         
         {/* Grade 8 Physics Games - Chapter 2: Thermodynamics (Nhiệt học) */}
-        <Route path="/physics-games/grade/8/molecule-motion" element={<MoleculeMotion />} />
-        <Route path="/physics-games/grade/8/heat-transfer-lab" element={<HeatTransferLabGrade8 />} />
-        <Route path="/physics-games/grade/8/calorimeter" element={<Calorimeter />} />
-        <Route path="/physics-games/grade/8/fuel-energy" element={<FuelEnergy />} />
-        <Route path="/physics-games/grade/8/heat-engine" element={<HeatEngine />} />
+        <Route path="/physics-games/grade/8/molecule-motion" element={<ProtectedRoute><MoleculeMotion /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/8/heat-transfer-lab" element={<ProtectedRoute><HeatTransferLabGrade8 /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/8/calorimeter" element={<ProtectedRoute><Calorimeter /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/8/fuel-energy" element={<ProtectedRoute><FuelEnergy /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/8/heat-engine" element={<ProtectedRoute><HeatEngine /></ProtectedRoute>} />
         
         {/* Grade 9 Physics Games - Chapter 1: Electricity (Điện học) */}
-        <Route path="/physics-games/grade/9/ohm-law-circuit-lab" element={<OhmLawCircuitLab />} />
-        <Route path="/physics-games/grade/9/circuit-builder-pro" element={<CircuitBuilderPro />} />
-        <Route path="/physics-games/grade/9/power-heat-master" element={<PowerHeatMaster />} />
+        <Route path="/physics-games/grade/9/ohm-law-circuit-lab" element={<ProtectedRoute><OhmLawCircuitLab /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/9/circuit-builder-pro" element={<ProtectedRoute><CircuitBuilderPro /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/9/power-heat-master" element={<ProtectedRoute><PowerHeatMaster /></ProtectedRoute>} />
         
         {/* Grade 9 Physics Games - Chapter 2: Electromagnetism (Điện từ học) */}
-        <Route path="/physics-games/grade/9/magnetic-field-explorer" element={<MagneticFieldExplorer />} />
-        <Route path="/physics-games/grade/9/electromagnetic-induction-lab" element={<ElectromagneticInductionLab />} />
-        <Route path="/physics-games/grade/9/ac-generator-simulator" element={<ACGeneratorSimulator />} />
+        <Route path="/physics-games/grade/9/magnetic-field-explorer" element={<ProtectedRoute><MagneticFieldExplorer /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/9/electromagnetic-induction-lab" element={<ProtectedRoute><ElectromagneticInductionLab /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/9/ac-generator-simulator" element={<ProtectedRoute><ACGeneratorSimulator /></ProtectedRoute>} />
         
         {/* Grade 9 Physics Games - Chapter 3: Optics (Quang học) */}
-        <Route path="/physics-games/grade/9/light-refraction-lab" element={<LightRefractionLab />} />
-        <Route path="/physics-games/grade/9/lens-optics-challenge" element={<LensOpticsChallenge />} />
-        <Route path="/physics-games/grade/9/color-spectrum-studio" element={<ColorSpectrumStudio />} />
+        <Route path="/physics-games/grade/9/light-refraction-lab" element={<ProtectedRoute><LightRefractionLab /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/9/lens-optics-challenge" element={<ProtectedRoute><LensOpticsChallenge /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/9/color-spectrum-studio" element={<ProtectedRoute><ColorSpectrumStudio /></ProtectedRoute>} />
         
         {/* Grade 9 Physics Games - Chapter 4: Energy (Năng lượng) */}
-        <Route path="/physics-games/grade/9/energy-transformation-quest" element={<EnergyTransformationQuest />} />
-        <Route path="/physics-games/grade/9/power-plant-manager" element={<PowerPlantManager />} />
-        <Route path="/physics-games/grade/9/energy-conservation-hero" element={<EnergyConservationHero />} />
+        <Route path="/physics-games/grade/9/energy-transformation-quest" element={<ProtectedRoute><EnergyTransformationQuest /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/9/power-plant-manager" element={<ProtectedRoute><PowerPlantManager /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/9/energy-conservation-hero" element={<ProtectedRoute><EnergyConservationHero /></ProtectedRoute>} />
 
         {/* Grade 10 Physics Games - Chapter 1: Kinematics (Động học) */}
-        <Route path="/physics-games/grade/10/motion-tracker" element={<MotionTracker />} />
-        <Route path="/physics-games/grade/10/free-fall-lab" element={<FreeFallLab />} />
+        <Route path="/physics-games/grade/10/motion-tracker" element={<ProtectedRoute><MotionTracker /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/10/free-fall-lab" element={<ProtectedRoute><FreeFallLab /></ProtectedRoute>} />
         
         {/* Grade 10 Physics Games - Chapter 2: Dynamics (Động lực học) */}
-        <Route path="/physics-games/grade/10/newtons-laws-arena" element={<NewtonsLawsArena />} />
-        <Route path="/physics-games/grade/10/friction-tension-master" element={<FrictionTensionMaster />} />
+        <Route path="/physics-games/grade/10/newtons-laws-arena" element={<ProtectedRoute><NewtonsLawsArena /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/10/friction-tension-master" element={<ProtectedRoute><FrictionTensionMaster /></ProtectedRoute>} />
         
         {/* Grade 10 Physics Games - Chapter 3: Statics (Tĩnh học) */}
-        <Route path="/physics-games/grade/10/equilibrium-challenge" element={<EquilibriumChallenge />} />
-        <Route path="/physics-games/grade/10/rotation-dynamics" element={<RotationDynamics />} />
+        <Route path="/physics-games/grade/10/equilibrium-challenge" element={<ProtectedRoute><EquilibriumChallenge /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/10/rotation-dynamics" element={<ProtectedRoute><RotationDynamics /></ProtectedRoute>} />
         
         {/* Grade 10 Physics Games - Chapter 4: Work & Energy (Công & Năng lượng) */}
-        <Route path="/physics-games/grade/10/work-energy-theorem-lab" element={<WorkEnergyTheoremLab />} />
-        <Route path="/physics-games/grade/10/mechanical-energy-quest" element={<MechanicalEnergyQuest />} />
+        <Route path="/physics-games/grade/10/work-energy-theorem-lab" element={<ProtectedRoute><WorkEnergyTheoremLab /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/10/mechanical-energy-quest" element={<ProtectedRoute><MechanicalEnergyQuest /></ProtectedRoute>} />
         
         {/* Grade 10 Physics Games - Chapter 5: Thermodynamics (Nhiệt động lực học) */}
-        <Route path="/physics-games/grade/10/heat-transfer-simulator" element={<HeatTransferSimulator />} />
-        <Route path="/physics-games/grade/10/gas-laws-explorer" element={<GasLawsExplorer />} />
+        <Route path="/physics-games/grade/10/heat-transfer-simulator" element={<ProtectedRoute><HeatTransferSimulator /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/10/gas-laws-explorer" element={<ProtectedRoute><GasLawsExplorer /></ProtectedRoute>} />
         
         {/* Grade 10 Physics Games - Chapter 6: Gas Physics (Chất khí) */}
-        <Route path="/physics-games/grade/10/ideal-gas-playground" element={<IdealGasPlayground />} />
-        <Route path="/physics-games/grade/10/molecular-motion-studio" element={<MolecularMotionStudio />} />
+        <Route path="/physics-games/grade/10/ideal-gas-playground" element={<ProtectedRoute><IdealGasPlayground /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/10/molecular-motion-studio" element={<ProtectedRoute><MolecularMotionStudio /></ProtectedRoute>} />
         
         {/* Grade 10 Physics Games - Chapter 7: Thermodynamic Cycles (Chu trình nhiệt động) */}
-        <Route path="/physics-games/grade/10/thermodynamic-cycles" element={<ThermodynamicCycles />} />
-        <Route path="/physics-games/grade/10/heat-engine-optimizer" element={<HeatEngineOptimizer />} />
+        <Route path="/physics-games/grade/10/thermodynamic-cycles" element={<ProtectedRoute><ThermodynamicCycles /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/10/heat-engine-optimizer" element={<ProtectedRoute><HeatEngineOptimizer /></ProtectedRoute>} />
         
         {/* Grade 11 Physics Games - Chapter 1: Oscillations (Dao động) */}
-        <Route path="/physics-games/grade/11/simple-harmonic-motion-lab" element={<SimpleHarmonicMotionLab />} />
-        <Route path="/physics-games/grade/11/oscillation-energy-master" element={<OscillationEnergyMaster />} />
-        <Route path="/physics-games/grade/11/resonance-arena" element={<ResonanceArena />} />
+        <Route path="/physics-games/grade/11/simple-harmonic-motion-lab" element={<ProtectedRoute><SimpleHarmonicMotionLab /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/11/oscillation-energy-master" element={<ProtectedRoute><OscillationEnergyMaster /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/11/resonance-arena" element={<ProtectedRoute><ResonanceArena /></ProtectedRoute>} />
         
         {/* Grade 11 Physics Games - Chapter 2: Waves (Sóng) */}
-        <Route path="/physics-games/grade/11/wave-interference-studio" element={<WaveInterferenceStudio />} />
-        <Route path="/physics-games/grade/11/sound-wave-explorer" element={<SoundWaveExplorer />} />
-        <Route path="/physics-games/grade/11/ultrasound-application-lab" element={<UltrasoundApplicationLab />} />
+        <Route path="/physics-games/grade/11/wave-interference-studio" element={<ProtectedRoute><WaveInterferenceStudio /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/11/sound-wave-explorer" element={<ProtectedRoute><SoundWaveExplorer /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/11/ultrasound-application-lab" element={<ProtectedRoute><UltrasoundApplicationLab /></ProtectedRoute>} />
         
         {/* Grade 11 Physics Games - Chapter 3: Electricity (Điện học) */}
-        <Route path="/physics-games/grade/11/electric-field-visualizer" element={<ElectricFieldVisualizer />} />
-        <Route path="/physics-games/grade/11/capacitor-circuit-lab" element={<CapacitorCircuitLab />} />
-        <Route path="/physics-games/grade/11/dc-circuit-master" element={<DCCircuitMaster />} />
+        <Route path="/physics-games/grade/11/electric-field-visualizer" element={<ProtectedRoute><ElectricFieldVisualizer /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/11/capacitor-circuit-lab" element={<ProtectedRoute><CapacitorCircuitLab /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/11/dc-circuit-master" element={<ProtectedRoute><DCCircuitMaster /></ProtectedRoute>} />
         
         {/* Grade 11 Physics Games - Chapter 4: Magnetism (Từ học) */}
-        <Route path="/physics-games/grade/11/magnetic-field-explorer" element={<MagneticFieldExplorerGrade11 />} />
-        <Route path="/physics-games/grade/11/electromagnetic-induction-lab" element={<ElectromagneticInductionLabGrade11 />} />
-        <Route path="/physics-games/grade/11/ac-circuit-simulator" element={<ACCircuitSimulator />} />
+        <Route path="/physics-games/grade/11/magnetic-field-explorer" element={<ProtectedRoute><MagneticFieldExplorerGrade11 /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/11/electromagnetic-induction-lab" element={<ProtectedRoute><ElectromagneticInductionLabGrade11 /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/11/ac-circuit-simulator" element={<ProtectedRoute><ACCircuitSimulator /></ProtectedRoute>} />
         
         {/* Grade 12 Physics Games - Chapter 1: Electromagnetic Oscillations & Waves (Dao động & sóng điện từ) */}
-        <Route path="/physics-games/grade/12/lc-oscillator-lab" element={<LCOscillatorLab />} />
-        <Route path="/physics-games/grade/12/electromagnetic-wave-studio" element={<ElectromagneticWaveStudio />} />
+        <Route path="/physics-games/grade/12/lc-oscillator-lab" element={<ProtectedRoute><LCOscillatorLab /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/12/electromagnetic-wave-studio" element={<ProtectedRoute><ElectromagneticWaveStudio /></ProtectedRoute>} />
         
         {/* Grade 12 Physics Games - Chapter 2: Light Waves (Sóng ánh sáng) */}
-        <Route path="/physics-games/grade/12/light-interference-simulator" element={<LightInterferenceSimulator />} />
-        <Route path="/physics-games/grade/12/spectrum-explorer" element={<SpectrumExplorer />} />
+        <Route path="/physics-games/grade/12/light-interference-simulator" element={<ProtectedRoute><LightInterferenceSimulator /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/12/spectrum-explorer" element={<ProtectedRoute><SpectrumExplorer /></ProtectedRoute>} />
         
         {/* Grade 12 Physics Games - Chapter 3: Quantum of Light (Lượng tử ánh sáng) */}
-        <Route path="/physics-games/grade/12/photoelectric-effect-lab" element={<PhotoelectricEffectLab />} />
-        <Route path="/physics-games/grade/12/solar-cell-optimizer" element={<SolarCellOptimizer />} />
+        <Route path="/physics-games/grade/12/photoelectric-effect-lab" element={<ProtectedRoute><PhotoelectricEffectLab /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/12/solar-cell-optimizer" element={<ProtectedRoute><SolarCellOptimizer /></ProtectedRoute>} />
         
         {/* Grade 12 Physics Games - Chapter 4: Nuclear Physics (Vật lý hạt nhân) */}
-        <Route path="/physics-games/grade/12/nuclear-reaction-chamber" element={<NuclearReactionChamber />} />
-        <Route path="/physics-games/grade/12/radioactive-decay-simulator" element={<RadioactiveDecaySimulator />} />
+        <Route path="/physics-games/grade/12/nuclear-reaction-chamber" element={<ProtectedRoute><NuclearReactionChamber /></ProtectedRoute>} />
+        <Route path="/physics-games/grade/12/radioactive-decay-simulator" element={<ProtectedRoute><RadioactiveDecaySimulator /></ProtectedRoute>} />
 
         {/* Admin Panel Routes */}
         <Route path="/admin/login" element={

@@ -47,7 +47,15 @@ const GlobalHeader = () => {
             const Icon = link.icon;
             const active = isActive(link.path);
             return (
-              <Link key={link.name} to={link.path}
+              <button
+                key={link.name}
+                onClick={() => {
+                  if (!user) {
+                    navigate('/login');
+                  } else {
+                    navigate(link.path);
+                  }
+                }}
                 className={`flex items-center gap-2 px-3 py-2.5 rounded-xl font-bold text-[13px] whitespace-nowrap shrink-0 transition-all duration-300 ${active
                   ? 'bg-[#B87333] text-white shadow-[0_4px_12px_rgba(184,115,51,0.3)]'
                   : 'text-slate-500 hover:bg-white hover:text-[#B87333] hover:shadow-sm'
@@ -55,7 +63,7 @@ const GlobalHeader = () => {
               >
                 <Icon className="w-4 h-4" />
                 {link.name}
-              </Link>
+              </button>
             );
           })}
         </nav>
@@ -122,12 +130,21 @@ const GlobalHeader = () => {
               const Icon = link.icon;
               const active = isActive(link.path);
               return (
-                <Link key={link.name} to={link.path} onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl font-black text-sm transition-all ${active ? 'bg-[#B87333] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
+                <button
+                  key={link.name}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (!user) {
+                      navigate('/login');
+                    } else {
+                      navigate(link.path);
+                    }
+                  }}
+                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-black text-sm transition-all ${active ? 'bg-[#B87333] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
                     }`}
                 >
                   <Icon className="w-5 h-5" /> {link.name}
-                </Link>
+                </button>
               );
             })}
           </div>
