@@ -147,19 +147,17 @@ const GoldenGyroscope = () => {
 /* ────────────────────────────────────────────
    MAIN
    ──────────────────────────────────────────── */
+import EurekaLogo from '../../../components/ui/EurekaLogo';
+
+/* ────────────────────────────────────────────
+   MAIN
+   ──────────────────────────────────────────── */
 const PhysicsHome = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [grades, setGrades] = useState([]);
   const [activeGrade, setActive] = useState(10);
-
-  const scientists = { 6: 'Newton', 7: 'Archimedes', 8: 'Pascal', 9: 'Faraday', 10: 'Einstein', 11: 'Bohr', 12: 'Maxwell' };
-  const formulas = {
-    6: 'F = ma', 7: '"Cho tôi một điểm tựa..."',
-    8: 'P = F/S', 9: 'B = μ₀ I / 2πr', 10: 'E = mc²', 11: 'E = hf', 12: '∇·B = 0'
-  };
-  const subjects = { 6: 'Cơ Học Cơ Bản', 7: 'Cơ Học Sơ Cấp', 8: 'Cơ Học Nâng Cao', 9: 'Điện Từ Học', 10: 'Cơ Học Hiện Đại', 11: 'Lượng Tử', 12: 'Điện Từ Trường' };
 
   useEffect(() => {
     const init = async () => {
@@ -184,110 +182,76 @@ const PhysicsHome = () => {
     <div className="bg-[#FDFCF8] font-sans overflow-x-hidden min-h-screen selection:bg-[#B87333]/20 selection:text-[#4A3728]">
 
       {/* ══════════════════════════════════════════
-          HERO — INTEGRATED JOURNEY BANNER
+          HERO — EUREKA BRANDING
           ══════════════════════════════════════════ */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-[#FDFCF8]">
-        {/* Master Background Image with Blur/Fade */}
-        <div className="absolute inset-0 z-0 select-none pointer-events-none">
-          <img
-            src={heroMaster}
-            alt="Academy Background"
-            className="w-full h-full object-cover opacity-15"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF8] via-transparent to-[#FDFCF8]" />
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#FDFCF8] py-20 px-4">
+
+        {/* Academic Background - Formulas & Sketches */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.12] select-none">
+          {/* Subtle Grid */}
+          <div className="absolute inset-0 graph-grid" />
+
+          {/* Floating Physics Sketches (Text-based for now) */}
+          <div className="absolute top-[15%] left-[10%] text-[100px] font-serif italic text-[#8C5523] rotate-[-15deg] opacity-40">F = ma</div>
+          <div className="absolute top-[20%] right-[15%] text-[80px] font-serif italic text-[#8C5523] rotate-[10deg] opacity-30">∇ × E = -∂B/∂t</div>
+          <div className="absolute bottom-[25%] left-[20%] text-[90px] font-serif italic text-[#8C5523] rotate-[5deg] opacity-25">PV = nRT</div>
+          <div className="absolute bottom-[15%] right-[10%] text-[110px] font-serif italic text-[#8C5523] rotate-[-10deg] opacity-35">λ = h/p</div>
+
+          {/* Decorative Gradient Glows */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[160px] bg-gradient-to-tr from-[#B87333]/10 via-[#D4AF37]/5 to-transparent animate-pulse-slow" />
         </div>
 
-        {/* Dynamic Background Elements */}
-        <div className="absolute inset-0 graph-grid opacity-[0.15] pointer-events-none" />
-        <div className="absolute top-[20%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#B87333]/5 animate-pulse-slow" />
-        <div className="absolute bottom-[20%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#D4AF37]/5 animate-pulse-slow" />
+        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
 
-        <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6 py-20">
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+          {/* Header Row: Logo + Brand Group (Visual Parity) */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10 mb-16 animate-fade-in-up">
+            <div className="shrink-0">
+              <EurekaLogo className="w-48 h-48 md:w-56 md:h-56 drop-shadow-[0_15px_30px_rgba(0,0,0,0.05)]" color="#1E293B" />
+            </div>
 
-            {/* Left Content (Moved from Section 1) */}
-            <div className="w-full lg:w-3/5 space-y-8 animate-fade-in-up">
-              <div>
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#B87333]/20 text-[#8C5523] font-black text-[10px] tracking-[0.2em] uppercase mb-6 shadow-sm">
-                  <Sparkles className="w-3.5 h-3.5" /> Học qua chơi - Vui là chính!
-                </div>
-                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-[#1E293B] leading-[1.1] mb-6 tracking-tight">
-                  Hành trình học tập<br />
-                  kỳ diệu cùng
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8C5523] to-[#D4AF37]"> Vật lý</span> hiện đại
-                </h1>
-                <p className="text-slate-500 text-lg sm:text-xl font-medium leading-relaxed max-w-2xl">
-                  Khám phá thế giới qua các định luật vận hành vũ trụ, từ những hạt cơ bản đến các thiên hà xa xôi thông qua các thí nghiệm tương tác 3D.
+            <div className="flex flex-col items-center sm:items-start justify-center">
+              <h1 className="text-6xl sm:text-7xl md:text-8xl font-black italic tracking-tighter text-[#1E293B] leading-[0.8]">
+                EUREKA
+              </h1>
+              <div className="mt-3 sm:ml-1">
+                <p className="text-sm sm:text-base font-black text-[#10B981] tracking-[0.5em] uppercase opacity-90">
+                  E &nbsp;=&nbsp; m c ²
                 </p>
               </div>
-
-              <div className="flex flex-wrap gap-4">
-                <button
-                  onClick={() => navigate(`/physics-class/${activeGrade}`)}
-                  className="pg-btn-brass px-8 py-4 text-base flex items-center gap-3 shadow-[0_10px_25px_-5px_rgba(184,115,51,0.4)]"
-                >
-                  Bắt đầu học <ChevronRight className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => navigate('/vatly/virtual-lab')}
-                  className="px-8 py-4 rounded-2xl bg-white border-2 border-[#E5E7EB] text-[#4A3728] font-black text-base hover:border-[#B87333]/30 hover:bg-[#F8F4EF] transition-all"
-                >
-                  Khám phá phòng Lab
-                </button>
-              </div>
-
-              {/* Quick Stats Bar */}
-              <div className="pt-8 border-t border-[#E5E7EB]/50 flex flex-wrap gap-8 sm:gap-12">
-                {[
-                  { label: 'Học sinh', value: '12,500+', icon: GraduationCap },
-                  { label: 'Giáo viên', value: '200+', icon: Users },
-                  { label: 'Trường học', value: '50+', icon: School }
-                ].map((stat, idx) => (
-                  <div key={idx} className="flex flex-col">
-                    <span className="text-2xl font-black text-[#1E293B] tracking-tight">{stat.value}</span>
-                    <span className="text-[10px] font-black text-slate-400 tracking-[0.1em] uppercase flex items-center gap-1.5">
-                      <stat.icon className="w-3 h-3 text-[#B87333]" />
-                      {stat.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
             </div>
+          </div>
 
-            {/* Right Image/Banner (Moved from Section 1) */}
-            <div className="w-full lg:w-2/5 relative animate-fade-in-right">
-              {/* Decorative Frame */}
-              <div className="absolute -inset-4 border border-[#B87333]/10 rounded-[2.5rem] pointer-events-none" />
-              <div className="absolute -inset-2 border border-[#B87333]/20 rounded-[2rem] pointer-events-none" />
+          {/* Description Row: Centered Heading */}
+          <div className="max-w-4xl text-center mb-20 animate-fade-in-up animation-delay-200">
+            <h2 className="text-2xl sm:text-3xl lg:text-[2.25rem] font-black text-[#374151] leading-[1.3]">
+              Nền tảng học thuật Vật lý số 1 kết hợp <br />
+              mô phỏng tương tác và thi đấu trực tuyến.
+            </h2>
+          </div>
 
-              <div className="relative rounded-[1.5rem] overflow-hidden shadow-[0_30px_60px_-15px_rgba(184,115,51,0.25)] border-4 border-white group">
-                <img
-                  src={physicsBanner}
-                  alt="Physics Journey"
-                  className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-1000"
-                />
-                {/* Glass coating overlay */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#B87333]/5 via-transparent to-white/10 pointer-events-none" />
-
-                {/* Floating academic icon */}
-                <div className="absolute top-4 right-4 p-3 bg-white/80 backdrop-blur-md rounded-xl shadow-lg border border-white/50">
-                  <BookOpen className="w-6 h-6 text-[#B87333]" />
-                </div>
-              </div>
-
-              {/* Extra decorative element */}
-              <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-[#E5E7EB] animate-bounce-slow">
-                <FlaskConical className="w-10 h-10 text-[#B87333]/60" />
-              </div>
-            </div>
-
+          {/* Action Row: Centered Buttons (Pill style matching reference) */}
+          <div className="flex flex-wrap justify-center gap-6 animate-fade-in-up animation-delay-300">
+            <button
+              onClick={() => navigate(`/physics-class/${activeGrade}`)}
+              className="px-14 py-5 rounded-full bg-[#82C91E] text-white font-black text-xl shadow-[0_15px_30px_-10px_rgba(130,201,30,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(130,201,30,0.6)] hover:-translate-y-1 active:scale-95 transition-all"
+            >
+              Vào Lớp Học &rarr;
+            </button>
+            <button
+              onClick={() => navigate('/vatly/virtual-lab')}
+              className="px-14 py-5 rounded-full bg-white text-[#1E293B] font-black text-xl shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] hover:-translate-y-1 active:scale-95 transition-all border border-slate-100"
+            >
+              Vào Phòng Lab
+            </button>
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40 animate-bounce">
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Khám phá</span>
-          <ChevronRight className="w-4 h-4 rotate-90 text-[#B87333]" />
+        {/* Floating Background Particles */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-[20%] left-[15%] w-2 h-2 rounded-full bg-[#10B981] animate-float-slow opacity-20" />
+          <div className="absolute top-[40%] right-[20%] w-3 h-3 rounded-full bg-[#B87333] animate-float-medium opacity-15" />
+          <div className="absolute bottom-[30%] left-[25%] w-2 h-2 rounded-full bg-[#D4AF37] animate-float-fast opacity-20" />
+          <div className="absolute bottom-[10%] right-[40%] w-4 h-4 rounded-full bg-[#10B981] animate-float-slow opacity-10" />
         </div>
       </section>
 

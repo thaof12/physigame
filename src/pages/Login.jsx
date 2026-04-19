@@ -45,7 +45,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex font-sans bg-[#FDFCF8] items-center justify-center p-4 sm:p-8 relative overflow-hidden">
-      
+
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#B87333]/10 blur-[120px] rounded-full pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#0E7490]/10 blur-[120px] rounded-full pointer-events-none"></div>
@@ -53,10 +53,10 @@ const Login = () => {
 
       {/* Container */}
       <div className="w-full max-w-6xl rounded-[2rem] bg-white border border-[#E5E7EB] overflow-hidden flex flex-col md:flex-row shadow-[0_20px_50px_-15px_rgba(184,115,51,0.12)] relative z-10 transition-all duration-500">
-        
+
         {/* LEFT SIDE: Visuals & Value Proposition */}
         <div className="hidden md:flex flex-col md:w-5/12 lg:w-1/2 relative bg-[#F8F4EF] border-r border-[#E5E7EB] overflow-hidden p-10 lg:p-14">
-          
+
           <div className="absolute inset-0 bg-gradient-to-br from-transparent to-[#B87333]/5 pointer-events-none"></div>
 
           <Link to="/" className="relative z-10 flex items-center gap-2 mb-16 group w-fit">
@@ -70,7 +70,7 @@ const Login = () => {
             </div>
 
             <h1 className="text-4xl lg:text-5xl font-black text-[#1E293B] mb-4 leading-tight tracking-tight">
-              Khám Phá <br/>
+              Khám Phá <br />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#B87333] via-[#8C5523] to-[#4A3728]">
                 Kho Tàng Vật Lý
               </span>
@@ -101,9 +101,9 @@ const Login = () => {
 
         {/* RIGHT SIDE: Auth Form */}
         <div className="w-full md:w-7/12 lg:w-1/2 bg-white flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
-          
+
           <div className="w-full max-w-md relative z-10">
-            
+
             <div className="text-center mb-8">
               {/* Mobile Only Back Button */}
               <Link to="/" className="md:hidden flex items-center gap-1 text-slate-400 mb-6 justify-center">
@@ -127,22 +127,20 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => setSelectedRole('student')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                  selectedRole === 'student'
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${selectedRole === 'student'
                     ? 'bg-white text-[#B87333] shadow-md border border-[#E5E7EB]/50'
                     : 'text-slate-500 hover:text-[#1E293B] hover:bg-white/50'
-                }`}
+                  }`}
               >
                 <BookOpen className="w-4 h-4" /> Học viên
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedRole('teacher')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                  selectedRole === 'teacher'
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${selectedRole === 'teacher'
                     ? 'bg-white text-[#0E7490] shadow-md border border-[#E5E7EB]/50'
                     : 'text-slate-500 hover:text-[#1E293B] hover:bg-white/50'
-                }`}
+                  }`}
               >
                 <GraduationCap className="w-4 h-4" /> Giảng viên
               </button>
@@ -234,7 +232,7 @@ const Login = () => {
                 Đăng ký ngay
               </Link>
             </p>
-            
+
           </div>
         </div>
       </div>

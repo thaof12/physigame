@@ -3,6 +3,8 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Atom, Home, Wrench, BookOpen, FlaskConical, Trophy, LogOut, Globe, Menu, X, Rocket, GraduationCap } from 'lucide-react';
 
+import EurekaLogo from '../ui/EurekaLogo';
+
 const GlobalHeader = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -15,12 +17,12 @@ const GlobalHeader = () => {
   };
 
   const navLinks = [
-    { name: 'Trang chủ', path: '/program/physics/dashboard', icon: Home },
-    { name: 'Lớp học', path: '/physics-classes', icon: GraduationCap },
-    { name: 'Công cụ', path: '/physics-tools', icon: Wrench },
-    { name: 'Bài giảng', path: '/interactive-lectures', icon: BookOpen },
-    { name: 'Thí nghiệm', path: '/vatly/virtual-lab', icon: FlaskConical },
-    { name: 'Thử thách', path: '/advanced-physics-challenge', icon: Trophy },
+    { name: 'TRANG CHỦ', path: '/program/physics/dashboard', icon: Home },
+    { name: 'LỚP HỌC', path: '/physics-classes', icon: GraduationCap },
+    { name: 'KHO TÀNG', path: '/physics-tools', icon: Wrench },
+    { name: 'BÀI GIẢNG', path: '/interactive-lectures', icon: BookOpen },
+    { name: 'THÍ NGHIỆM', path: '/vatly/virtual-lab', icon: FlaskConical },
+    { name: 'THỬ THÁCH', path: '/advanced-physics-challenge', icon: Trophy },
   ];
 
   const isActive = (path) => {
@@ -29,14 +31,20 @@ const GlobalHeader = () => {
   };
 
   return (
-    <header className="sticky top-4 z-50 w-[95%] max-w-7xl mx-auto transition-all duration-300">
-      <div className="glass-panel rounded-2xl border border-white/50 shadow-[0_8px_32px_rgba(184,115,51,0.06)] px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="sticky top-4 z-50 w-[98%] max-w-7xl mx-auto transition-all duration-300">
+      <div className="glass-panel rounded-2xl border border-white/50 shadow-[0_8px_32px_rgba(184,115,51,0.08)] px-4 sm:px-6 lg:px-8 h-18 py-2 flex items-center justify-between">
 
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group cursor-pointer shrink-0">
-          <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#B87333] via-[#8C5523] to-[#4A3728] tracking-tight">
-            PhysiGame
-          </span>
+        {/* Logo & Brand */}
+        <Link to="/" className="flex items-center gap-3.5 group cursor-pointer shrink-0">
+          <EurekaLogo className="w-11 h-11" />
+          <div className="flex flex-col">
+            <span className="text-[26px] font-black bg-clip-text text-transparent bg-gradient-to-r from-[#8C5523] via-[#B87333] to-[#4A3728] tracking-[-0.04em] leading-none mb-0.5">
+              EUREKA
+            </span>
+            <span className="text-[7.5px] font-bold text-[#8C5523] tracking-[0.45em] uppercase opacity-60">
+              ACADEMY OF PHYSICS
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
@@ -47,8 +55,8 @@ const GlobalHeader = () => {
             return (
               <Link key={link.name} to={link.path}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 ${active
-                    ? 'bg-[#B87333] text-white shadow-[0_4px_12px_rgba(184,115,51,0.3)]'
-                    : 'text-slate-500 hover:bg-white hover:text-[#B87333] hover:shadow-sm'
+                  ? 'bg-[#B87333] text-white shadow-[0_4px_12px_rgba(184,115,51,0.3)]'
+                  : 'text-slate-500 hover:bg-white hover:text-[#B87333] hover:shadow-sm'
                   }`}
               >
                 <Icon className="w-4 h-4" />
