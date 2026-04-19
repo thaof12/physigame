@@ -64,7 +64,7 @@ const PhysicsGradeSelector = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/70 to-slate-950"></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-24">
 
         {/* ── MASTHEAD ── */}
         <div className="mb-10">

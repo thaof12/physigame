@@ -102,7 +102,7 @@ const PhysicsClassDashboard = () => {
              style={{ backgroundImage:'linear-gradient(#B87333 1px,transparent 1px),linear-gradient(90deg,#B87333 1px,transparent 1px)', backgroundSize:'40px 40px' }} />
       </div>
 
-      <div className="relative z-10 container mx-auto max-w-6xl px-4 pt-8">
+      <div className="relative z-10 container mx-auto max-w-6xl px-4 pt-24">
         
         {/* Navigation & Title */}
         <div className="mb-10">

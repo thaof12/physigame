@@ -38,7 +38,7 @@ const PhysicsToolsHub = () => {
       {/* ══════════════════════════════════════════
           HERO & HEADER BANNER
           ══════════════════════════════════════════ */}
-      <section className="relative pt-8 pb-20 overflow-hidden bg-[#FDFCF8]">
+      <section className="relative pt-24 pb-20 overflow-hidden bg-[#FDFCF8]">
         {/* Background Atmosphere */}
         <div className="absolute inset-0 z-0 select-none pointer-events-none">
           <img
@@ -55,7 +55,7 @@ const PhysicsToolsHub = () => {
 
         <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6">
           {/* Top Bar */}
-          <div className="flex items-center gap-4 mb-16">
+          <div className="flex items-center gap-4 mb-10">
             <button
               onClick={() => navigate('/')}
               className="group flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-[#E5E7EB] text-[#8C5523] shadow-sm hover:border-[#B87333]/30 hover:bg-[#F8F4EF] hover:shadow-md transition-all active:scale-95"

@@ -412,7 +412,7 @@ const PhysicsCalculator = () => {
         }
       `}</style>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-8">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">

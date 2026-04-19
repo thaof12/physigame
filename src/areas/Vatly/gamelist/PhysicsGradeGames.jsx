@@ -118,7 +118,7 @@ const PhysicsGradeGames = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50">
       {/* Header */}
       <div className={`bg-gradient-to-r ${currentGrade.color} text-white`}>
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 pt-24 pb-8">
           <button
             onClick={() => navigate('/physics-games/grades')}
             className="flex items-center text-white/90 hover:text-white mb-4 transition-colors"

@@ -229,39 +229,47 @@ const AppContent = () => {
           <Route path="/program/physics" element={<PhysicsHome />} />
           <Route path="/program/physics/dashboard" element={<Navigate to="/program/physics" replace />} />
           <Route path="/physics-classes" element={<PhysicsClasses />} />
+          <Route path="/game-journey" element={<GameJourney />} />
+
+          {/* PK Battle Routes */}
+          <Route path="/pk-battle" element={<PKLobby />} />
+          <Route path="/pk-battle/matchmaking" element={<PKMatchmaking />} />
+          <Route path="/pk-battle/result" element={<PKResult />} />
+
+          {/* Physics Routes */}
+          <Route path="/physics-class/:classId" element={<PhysicsClassDashboard />} />
+          <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<PhysicsLesson />} />
+          
+          {/* Physics Tools Hub */}
+          <Route path="/physics-tools" element={<PhysicsToolsHub />} />
+          <Route path="/physics-tools/calculator" element={<PhysicsCalculator />} />
+          <Route path="/physics-tools/constants" element={<ConstantsReference />} />
+          <Route path="/physics-tools/converter" element={<UnitConverter />} />
+          
+          {/* Interactive Lecture Hub Routes */}
+          <Route path="/interactive-lectures" element={<InteractiveLectureHub />} />
+          <Route path="/interactive-lectures/:subject" element={<LectureGradeSelector />} />
+          <Route path="/interactive-lectures/:subject/:grade" element={<LectureClassSelector />} />
+          <Route path="/interactive-lectures/:subject/:grade/:lectureId" element={<LectureViewer />} />
+          
+          {/* Legacy Physics Calculator - redirect to new hub */}
+          <Route path="/physics-calculator" element={<PhysicsToolsHub />} />
+          
+          {/* Virtual Lab - Phòng thí nghiệm ảo */}
+          <Route path="/vatly/virtual-lab" element={<VirtualLabHome />} />
+          
+          {/* Physics Games - New grade-based navigation */}
+          <Route path="/physics-games/grades" element={<PhysicsGradeSelector />} />
+          <Route path="/physics-games/grade/:gradeId" element={<PhysicsGradeGames />} />
+          
+          {/* Legacy route - redirect to grade selector */}
+          <Route path="/advanced-physics-challenge" element={<PhysicsGradeSelector />} />
         </Route>
 
-        <Route path="/game-journey" element={<GameJourney />} />
-
-
-
-        {/* PK Battle Routes */}
-        <Route path="/pk-battle" element={<PKLobby />} />
-        <Route path="/pk-battle/matchmaking" element={<PKMatchmaking />} />
+        {/* PK Battle Room (Keep fullscreen) */}
         <Route path="/pk-battle/room/:roomId" element={<PKBattleRoom />} />
-        <Route path="/pk-battle/result" element={<PKResult />} />
 
-        {/* Physics Routes */}
-        <Route path="/physics-class/:classId" element={<PhysicsClassDashboard />} />
-        <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<PhysicsLesson />} />
-        
-        {/* Physics Tools Hub - thay thế Physics Calculator */}
-        <Route path="/physics-tools" element={<PhysicsToolsHub />} />
-        <Route path="/physics-tools/calculator" element={<PhysicsCalculator />} />
-        <Route path="/physics-tools/constants" element={<ConstantsReference />} />
-        <Route path="/physics-tools/converter" element={<UnitConverter />} />
-        
-        {/* Interactive Lecture Hub Routes */}
-        <Route path="/interactive-lectures" element={<InteractiveLectureHub />} />
-        <Route path="/interactive-lectures/:subject" element={<LectureGradeSelector />} />
-        <Route path="/interactive-lectures/:subject/:grade" element={<LectureClassSelector />} />
-        <Route path="/interactive-lectures/:subject/:grade/:lectureId" element={<LectureViewer />} />
-        
-        {/* Legacy Physics Calculator - redirect to new hub */}
-        <Route path="/physics-calculator" element={<PhysicsToolsHub />} />
-        
-        {/* Virtual Lab - Phòng thí nghiệm ảo */}
-        <Route path="/vatly/virtual-lab" element={<VirtualLabHome />} />
+        {/* Virtual Lab Experiments (Keep fullscreen or focused) */}
         <Route path="/vatly/virtual-lab/pendulum" element={<PendulumLab />} />
         <Route path="/vatly/virtual-lab/free-fall" element={<FreeFallLabVirtual />} />
         <Route path="/vatly/virtual-lab/ohm-law" element={<OhmLawLab />} />
@@ -271,13 +279,7 @@ const AppContent = () => {
         <Route path="/vatly/virtual-lab/inclined-plane" element={<InclinedPlaneLab />} />
         <Route path="/vatly/virtual-lab/resistor-circuit" element={<ResistorCircuitLab />} />
         <Route path="/vatly/virtual-lab/light-interference" element={<LightInterferenceLab />} />
-        
-        {/* Physics Games - New grade-based navigation */}
-        <Route path="/physics-games/grades" element={<PhysicsGradeSelector />} />
-        <Route path="/physics-games/grade/:gradeId" element={<PhysicsGradeGames />} />
-        
-        {/* Legacy route - redirect to grade selector */}
-        <Route path="/advanced-physics-challenge" element={<PhysicsGradeSelector />} />
+
 
         {/* Physics Challenge Games */}
         <Route path="/advanced-physics-challenge/balance" element={<BalanceChallenge />} />
