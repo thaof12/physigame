@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Atom, Home, Wrench, BookOpen, FlaskConical, Trophy, LogOut, Globe, Menu, X, Rocket, GraduationCap } from 'lucide-react';
 
-import EurekaLogo from '../ui/EurekaLogo';
+import EurekaPremiumLogo from '../ui/EurekaPremiumLogo';
 
 const GlobalHeader = () => {
   const { user, logout } = useAuth();
@@ -32,29 +32,23 @@ const GlobalHeader = () => {
 
   return (
     <header className="sticky top-4 z-50 w-[98%] max-w-7xl mx-auto transition-all duration-300">
-      <div className="glass-panel rounded-2xl border border-white/50 shadow-[0_8px_32px_rgba(184,115,51,0.08)] px-4 sm:px-6 lg:px-8 h-18 py-2 flex items-center justify-between">
+      <div className="glass-panel rounded-2xl border border-white/60 shadow-[0_12px_40px_rgba(184,115,51,0.12)] px-6 sm:px-8 h-20 py-2 flex items-center justify-between gap-8">
 
-        {/* Logo & Brand */}
-        <Link to="/" className="flex items-center gap-3.5 group cursor-pointer shrink-0">
-          <EurekaLogo className="w-11 h-11" />
-          <div className="flex flex-col">
-            <span className="text-[26px] font-black bg-clip-text text-transparent bg-gradient-to-r from-[#8C5523] via-[#B87333] to-[#4A3728] tracking-[-0.04em] leading-none mb-0.5">
-              EUREKA
-            </span>
-            <span className="text-[7.5px] font-bold text-[#8C5523] tracking-[0.45em] uppercase opacity-60">
-              ACADEMY OF PHYSICS
-            </span>
-          </div>
-        </Link>
+        {/* Brand & Logo (Left) */}
+        <div className="flex-none">
+          <Link to="/" className="flex items-center group cursor-pointer transition-transform duration-500 hover:scale-105">
+            <EurekaPremiumLogo className="h-14 sm:h-16" />
+          </Link>
+        </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-2">
+        {/* Main Navigation (Grouped) */}
+        <nav className="hidden lg:flex flex-1 items-center justify-start gap-1">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const active = isActive(link.path);
             return (
               <Link key={link.name} to={link.path}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 ${active
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl font-bold text-[13px] whitespace-nowrap shrink-0 transition-all duration-300 ${active
                   ? 'bg-[#B87333] text-white shadow-[0_4px_12px_rgba(184,115,51,0.3)]'
                   : 'text-slate-500 hover:bg-white hover:text-[#B87333] hover:shadow-sm'
                   }`}
@@ -66,13 +60,13 @@ const GlobalHeader = () => {
           })}
         </nav>
 
-        {/* User Area */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* User Area (Right) */}
+        <div className="hidden lg:flex items-center gap-4">
           <button className="flex items-center gap-2 text-slate-500 hover:text-[#B87333] font-bold text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/50 border border-slate-100 transition-all">
             <Globe className="w-3.5 h-3.5" /> <span>VI</span>
           </button>
 
-          <div className="h-8 w-px bg-slate-200" />
+          <div className="h-10 w-px bg-slate-200 mx-1" />
 
           {user ? (
             <div className="flex items-center gap-3">
@@ -110,7 +104,10 @@ const GlobalHeader = () => {
         </div>
 
         {/* Mobile toggle */}
-        <div className="md:hidden">
+        <div className="lg:hidden flex items-center justify-between w-full">
+          <Link to="/" className="scale-75 origin-left">
+            <EurekaPremiumLogo className="h-16" />
+          </Link>
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-slate-500 hover:text-[#B87333] p-2.5 rounded-xl bg-white shadow-sm border border-slate-100">
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>

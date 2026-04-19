@@ -147,7 +147,7 @@ const GoldenGyroscope = () => {
 /* ────────────────────────────────────────────
    MAIN
    ──────────────────────────────────────────── */
-import EurekaLogo from '../../../components/ui/EurekaLogo';
+import EurekaPremiumLogo from '../../../components/ui/EurekaPremiumLogo';
 
 /* ────────────────────────────────────────────
    MAIN
@@ -184,7 +184,7 @@ const PhysicsHome = () => {
       {/* ══════════════════════════════════════════
           HERO — EUREKA BRANDING
           ══════════════════════════════════════════ */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#FDFCF8] py-20 px-4">
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#FDFCF8] pt-4 pb-12 px-4">
 
         {/* Academic Background - Formulas & Sketches */}
         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.12] select-none">
@@ -204,21 +204,8 @@ const PhysicsHome = () => {
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
 
           {/* Header Row: Logo + Brand Group (Visual Parity) */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10 mb-16 animate-fade-in-up">
-            <div className="shrink-0">
-              <EurekaLogo className="w-48 h-48 md:w-56 md:h-56 drop-shadow-[0_15px_30px_rgba(0,0,0,0.05)]" color="#1E293B" />
-            </div>
-
-            <div className="flex flex-col items-center sm:items-start justify-center">
-              <h1 className="text-6xl sm:text-7xl md:text-8xl font-black italic tracking-tighter text-[#1E293B] leading-[0.8]">
-                EUREKA
-              </h1>
-              <div className="mt-3 sm:ml-1">
-                <p className="text-sm sm:text-base font-black text-[#10B981] tracking-[0.5em] uppercase opacity-90">
-                  E &nbsp;=&nbsp; m c ²
-                </p>
-              </div>
-            </div>
+          <div className="flex flex-col items-center justify-center mb-[-6rem] animate-fade-in-up transition-all hover:scale-105 duration-1000">
+            <EurekaPremiumLogo className="h-64 sm:h-80 md:h-[28rem]" />
           </div>
 
           {/* Description Row: Centered Heading */}

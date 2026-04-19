@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700;1,900&family=Montserrat:wght@900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -177,6 +179,13 @@ html {
   .animation-delay-200 { animation-delay: 0.2s; }
   .animation-delay-300 { animation-delay: 0.3s; }
   .animation-delay-400 { animation-delay: 0.4s; }
+
+  .animate-spin-slow {
+    animation: spin-slow 25s linear infinite;
+  }
+  .animate-spin-slow-reverse {
+    animation: spin-slow-reverse 35s linear infinite;
+  }
 }
 
 /* ═══════════════ KEYFRAMES ═══════════════ */
@@ -227,6 +236,16 @@ html {
 @keyframes gyro-glow {
   0%, 100% { filter: drop-shadow(0 0 8px rgba(184,115,51,0.3)); }
   50%      { filter: drop-shadow(0 0 20px rgba(184,115,51,0.6)); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-slow-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
 }
 
 /* Smooth scroll behavior */
