@@ -4,7 +4,7 @@ const AdminAuthContext = createContext(null);
 
 // Hardcoded admin credentials for demo
 const ADMIN_CREDENTIALS = {
-  email: 'quantrivien123@gmail.com',
+  email: 'quantrivien@gmail.com',
   password: 'qtv123@',
   name: 'Quản trị viên',
   role: 'super_admin'

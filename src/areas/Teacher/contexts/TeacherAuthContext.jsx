@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../../config/supabase';
 
 const TeacherAuthContext = createContext();
 
@@ -58,12 +59,39 @@ export const TeacherAuthProvider = ({ children }) => {
   const refreshTeacher = async () => {
     try {
       const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        const userData = JSON.parse(savedUser);
-        // TODO: Fetch updated teacher data from server
-        setTeacher(userData);
-        setIsVerified(userData.teacherStatus === 'verified');
+      if (!savedUser) return;
+      
+      const userData = JSON.parse(savedUser);
+      
+      // Fetch fresh status from DB
+      const { data, error } = await supabase
+        .from('teacher profile')
+        .select('teacherStatus')
+        .eq('id', userData.id)
+        .single();
+
+      let currentStatus = userData.teacherStatus;
+      
+      if (!error && data) {
+        currentStatus = data.teacherStatus;
+      } else {
+        // Try fallback
+        const { data: fbData, error: fbError } = await supabase
+          .from('users')
+          .select('teacher_status')
+          .eq('id', userData.id)
+          .single();
+          
+        if (!fbError && fbData) {
+          currentStatus = fbData.teacher_status;
+        }
       }
+
+      const updatedUser = { ...userData, teacherStatus: currentStatus };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setTeacher(updatedUser);
+      setIsVerified(currentStatus === 'verified');
+      
     } catch (error) {
       console.error('Error refreshing teacher data:', error);
     }

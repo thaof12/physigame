@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Mail,
   Users,
   BookOpen,
   FileQuestion,
@@ -23,359 +24,424 @@ import {
   Eye,
   MousePointer,
   Target,
-  Zap
+  Zap,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Search
 } from 'lucide-react';
+import { supabase } from '../../../config/supabase';
+import api from '../../../config/api';
+import { sendTeacherStatusEmail } from '../../../services/emailService';
+import EurekaPremiumLogo from '../../../components/ui/EurekaPremiumLogo';
 
-// Mock data - Replace with real API calls
 const mockStats = {
-  totalUsers: 1248,
-  userGrowth: 12.5,
-  totalLessons: 156,
-  lessonCompletion: 78.3,
-  totalExercises: 432,
-  exerciseUsage: 85.2,
-  activeToday: 342,
-  avgSessionTime: 28
+  totalUsers: 14520,
+  userGrowth: 18.5,
+  totalLessons: 856,
+  lessonCompletion: 82.3,
+  totalExercises: 2432,
+  exerciseUsage: 89.2,
+  activeToday: 1240,
+  avgSessionTime: 32
 };
+
+const mockPendingTeachers = [
+  { id: 1, name: 'Lê Minh C', email: 'leminhc@gmail.com', school: 'ĐH Bách Khoa', subject: 'Vật lý Đại cương', date: '2025-03-20' },
+  { id: 2, name: 'Trần Văn D', email: 'tranvand@gmail.com', school: 'THPT Chuyên HN', subject: 'Vật lý 12', date: '2025-03-19' },
+];
 
 const mockRecentUsers = [
   { id: 1, name: 'Nguyễn Văn A', email: 'nguyenvana@gmail.com', role: 'student', joinDate: '2025-03-15' },
   { id: 2, name: 'Trần Thị B', email: 'tranthib@gmail.com', role: 'student', joinDate: '2025-03-14' },
-  { id: 3, name: 'Lê Minh C', email: 'leminhc@gmail.com', role: 'teacher', joinDate: '2025-03-14' },
-  { id: 4, name: 'Phạm Hồng D', email: 'phamhongd@gmail.com', role: 'student', joinDate: '2025-03-13' },
-  { id: 5, name: 'Hoàng Văn E', email: 'hoangvane@gmail.com', role: 'student', joinDate: '2025-03-12' }
-];
-
-const mockPopularLessons = [
-  { id: 1, title: 'Chuyển động thẳng đều', subject: 'Vật lý 10', views: 1520, completion: 92 },
-  { id: 2, title: 'Định luật Ôm', subject: 'Vật lý 9', views: 1380, completion: 88 },
-  { id: 4, title: 'Lực đẩy Archimedes', subject: 'Vật lý 8', views: 1180, completion: 82 },
-  { id: 5, title: 'Điện tích và dòng điện', subject: 'Vật lý 7', views: 1050, completion: 79 }
-];
-
-const mockActivityData = [
-  { day: 'T2', users: 120, lessons: 45 },
-  { day: 'T3', users: 145, lessons: 52 },
-  { day: 'T4', users: 138, lessons: 48 },
-  { day: 'T5', users: 165, lessons: 61 },
-  { day: 'T6', users: 180, lessons: 72 },
-  { day: 'T7', users: 210, lessons: 85 },
-  { day: 'CN', users: 185, lessons: 68 }
+  { id: 3, name: 'Phạm Hồng D', email: 'phamhongd@gmail.com', role: 'student', joinDate: '2025-03-13' },
 ];
 
 const StatCard = ({ title, value, change, changeType, icon: Icon, color }) => (
-  <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5 hover:border-slate-700/50 transition-all">
-    <div className="flex items-start justify-between mb-4">
-      <div className={`p-3 rounded-xl bg-gradient-to-br ${color}`}>
-        <Icon className="w-5 h-5 text-white" />
+  <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-[#274dad]/5 border border-[#85e4fb]/10 hover:shadow-blue-500/10 transition-all group">
+    <div className="flex items-start justify-between mb-6">
+      <div className={`p-4 rounded-2xl ${color} shadow-lg shadow-blue-500/10 group-hover:scale-110 transition-transform`}>
+        <Icon className="w-6 h-6 text-white" />
       </div>
-      <div className={`flex items-center gap-1 text-sm font-medium ${changeType === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
-        {changeType === 'up' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+      <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black ${changeType === 'up' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+        {changeType === 'up' ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
         <span>{change}%</span>
       </div>
     </div>
-    <p className="text-3xl font-bold text-white mb-1">{value.toLocaleString()}</p>
-    <p className="text-sm text-slate-400">{title}</p>
+    <div className="space-y-1">
+      <p className="text-3xl font-black text-[#274dad]">{value.toLocaleString()}</p>
+      <p className="text-sm font-bold text-slate-400 tracking-tight">{title}</p>
+    </div>
   </div>
 );
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(mockStats);
-  const [recentUsers, setRecentUsers] = useState(mockRecentUsers);
-  const [popularLessons, setPopularLessons] = useState(mockPopularLessons);
-  const [activityData, setActivityData] = useState(mockActivityData);
-  const [timeRange, setTimeRange] = useState('7d');
-  const [loading, setLoading] = useState(false);
+  const [pendingTeachers, setPendingTeachers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
+  
+  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState('');
 
-  const refreshData = () => {
+  useEffect(() => {
+    fetchPendingTeachers();
+  }, []);
+
+  const fetchPendingTeachers = async () => {
     setLoading(true);
-    setTimeout(() => setLoading(false), 1000);
+    console.log('%c📊 [AdminDashboard] Querying schema-validated users table...', 'color: #2099e9; font-weight: bold');
+    
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('role', 'teacher')
+        .eq('teacher_status', 'pending');
+
+      if (error) {
+        console.error('❌ [AdminDashboard] Fetch Error:', error.message);
+        setPendingTeachers([]);
+      } else {
+        console.log(`✅ [AdminDashboard] Found ${data?.length || 0} pending teachers`);
+        if (data && data.length > 0) {
+          console.table(data.map(t => ({ id: t.id, name: t.display_name, email: t.email, status: t.teacher_status })));
+          setPendingTeachers(data.map(t => ({
+            id: t.id,
+            name: t.display_name || t.username || 'Giáo viên',
+            email: t.email,
+            school: t.teacher_profile?.school || t.profile?.school || 'Chưa cập nhật',
+            subject: t.teacher_profile?.subject || t.profile?.subject || 'Vật lý',
+            originalData: t
+          })));
+        } else {
+          setPendingTeachers([]);
+        }
+      }
+    } catch (err) {
+      console.error('💥 [AdminDashboard] Critical fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const maxUsers = Math.max(...activityData.map(d => d.users));
+  const handleApprove = async (teacher) => {
+    setActionLoading(teacher.id);
+    try {
+      console.log('📡 [AdminDashboard] Elevating approval through backend API...');
+      // Use Backend API to bypass RLS
+      const response = await api.post(`/users/verify-teacher/${teacher.id}`);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Approval failed');
+      }
+
+      await sendTeacherStatusEmail(teacher.email, teacher.name, 'verified');
+      await fetchPendingTeachers();
+    } catch (err) {
+      console.error('Approval failed:', err);
+      // Fallback alert or message
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const openRejectModal = (teacher) => {
+    setSelectedTeacher(teacher);
+    setRejectionReason('');
+    setRejectionModalOpen(true);
+  };
+
+  const handleRejectSubmit = async () => {
+    if (!selectedTeacher) return;
+    
+    setActionLoading(selectedTeacher.id);
+    setRejectionModalOpen(false);
+    
+    try {
+      console.log('📡 [AdminDashboard] Elevating rejection through backend API...');
+      // Use Backend API to bypass RLS
+      const response = await api.post(`/users/reject-teacher/${selectedTeacher.id}`, {
+        reason: rejectionReason
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Rejection failed');
+      }
+
+      await sendTeacherStatusEmail(selectedTeacher.email, selectedTeacher.name, 'rejected', rejectionReason);
+      await fetchPendingTeachers();
+    } catch (err) {
+      console.error('Rejection failed:', err);
+    } finally {
+      setActionLoading(null);
+      setSelectedTeacher(null);
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400 text-sm mt-1">Tổng quan hệ thống PhysiGame</p>
+    <div className="space-y-10 pb-20 bg-[#e4f2f0] min-h-screen p-6 lg:p-10">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="space-y-2 text-center md:text-left">
+          <EurekaPremiumLogo className="h-10 mb-4 mx-auto md:mx-0" />
+          <h1 className="text-4xl font-black text-[#274dad]">Điều Hành Học Viện</h1>
+          <p className="text-slate-500 font-bold tracking-tight italic">Trung tâm quản trị hệ thống PhysiGame</p>
         </div>
-        <div className="flex items-center gap-3">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50"
-          >
-            <option value="7d">7 ngày qua</option>
-            <option value="30d">30 ngày qua</option>
-            <option value="90d">90 ngày qua</option>
-          </select>
-          <button
-            onClick={refreshData}
-            className={`flex items-center gap-2 px-4 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-xl text-slate-400 hover:text-white transition-colors ${loading ? 'animate-pulse' : ''}`}
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline text-sm">Làm mới</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl text-white text-sm font-medium hover:from-indigo-500 hover:to-violet-500 transition-all">
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Xuất báo cáo</span>
-          </button>
+        
+        <div className="flex items-center gap-4">
+           <button 
+            onClick={fetchPendingTeachers}
+            className={`p-4 bg-white rounded-2xl text-[#2099e9] border border-[#85e4fb]/30 shadow-xl shadow-blue-500/5 hover:bg-[#2099e9] hover:text-white transition-all ${loading ? 'animate-spin' : ''}`}
+           >
+              <RefreshCw className="w-6 h-6" />
+           </button>
+           <button className="px-8 py-4 bg-[#2099e9] text-white rounded-2xl font-black text-lg shadow-xl shadow-blue-500/20 hover:bg-[#274dad] transition-all flex items-center gap-3">
+              <Download className="w-6 h-6" />
+              Tải Báo Cáo Tổng
+           </button>
         </div>
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
         <StatCard
-          title="Tổng người dùng"
+          title="Tổng Nhà Vật Lý"
           value={stats.totalUsers}
           change={stats.userGrowth}
           changeType="up"
           icon={Users}
-          color="from-indigo-500 to-violet-600"
+          color="bg-[#2099e9]"
         />
         <StatCard
-          title="Bài học"
+          title="Kho Bài Giảng"
           value={stats.totalLessons}
-          change={stats.lessonCompletion}
+          change={12.4}
           changeType="up"
           icon={BookOpen}
-          color="from-emerald-500 to-teal-600"
+          color="bg-[#44b5d7]"
         />
         <StatCard
-          title="Bài tập"
+          title="Thử Thách Giải Đố"
           value={stats.totalExercises}
           change={stats.exerciseUsage}
           changeType="up"
           icon={FileQuestion}
-          color="from-amber-500 to-orange-600"
+          color="bg-[#274dad]"
         />
         <StatCard
-          title="Hoạt động hôm nay"
+          title="Năng Lượng Hệ Thống"
           value={stats.activeToday}
-          change={8.2}
+          change={24}
           changeType="up"
-          icon={Activity}
-          color="from-rose-500 to-pink-600"
+          icon={Zap}
+          color="bg-[#85e4fb]"
         />
       </div>
 
-      {/* Charts & Activity */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Activity Chart */}
-        <div className="lg:col-span-2 bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-semibold text-white">Hoạt động tuần này</h3>
-              <p className="text-sm text-slate-400">Người dùng và bài học được truy cập</p>
-            </div>
-            <button className="text-slate-400 hover:text-white transition-colors">
-              <MoreHorizontal className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Simple bar chart visualization */}
-          <div className="flex items-end justify-between h-48 gap-2">
-            {activityData.map((item, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full flex flex-col items-center gap-1 h-40 justify-end">
-                  <div
-                    className="w-full max-w-10 bg-gradient-to-t from-indigo-600 to-violet-500 rounded-t-lg transition-all hover:from-indigo-500 hover:to-violet-400"
-                    style={{ height: `${(item.users / maxUsers) * 100}%` }}
-                    title={`${item.users} người dùng`}
-                  ></div>
-                </div>
-                <span className="text-xs text-slate-500 font-medium">{item.day}</span>
+      <div className="grid lg:grid-cols-3 gap-8 lg:gap-10">
+        
+        {/* Teacher Approvals Section */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-white rounded-[3rem] p-10 shadow-2xl shadow-[#274dad]/5 border border-[#85e4fb]/20">
+            <div className="flex items-center justify-between mb-10">
+              <div className="space-y-1">
+                <h3 className="text-2xl font-black text-[#274dad]">Duyệt Hồ Sơ Giảng Viên</h3>
+                <p className="text-sm font-bold text-slate-400">Yêu cầu tham gia Học viện mới nhất</p>
               </div>
-            ))}
-          </div>
-
-          <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-slate-800/50">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gradient-to-r from-indigo-600 to-violet-500 rounded"></div>
-              <span className="text-sm text-slate-400">Người dùng hoạt động</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick stats */}
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <h3 className="text-lg font-semibold text-white mb-4">Thống kê nhanh</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-500/20 rounded-lg">
-                  <Clock className="w-4 h-4 text-indigo-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Thời gian TB</p>
-                  <p className="text-xs text-slate-500">Mỗi phiên học</p>
-                </div>
+              <div className="p-3 bg-[#e4f2f0] rounded-xl text-[#2099e9]">
+                <GraduationCap className="w-6 h-6" />
               </div>
-              <p className="text-lg font-bold text-white">{stats.avgSessionTime}p</p>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/20 rounded-lg">
-                  <Target className="w-4 h-4 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Hoàn thành</p>
-                  <p className="text-xs text-slate-500">Tỷ lệ bài học</p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">{stats.lessonCompletion}%</p>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-500/20 rounded-lg">
-                  <Zap className="w-4 h-4 text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Sử dụng bài tập</p>
-                  <p className="text-xs text-slate-500">Tỷ lệ hoàn thành</p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">{stats.exerciseUsage}%</p>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-rose-500/20 rounded-lg">
-                  <Award className="w-4 h-4 text-rose-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Giáo viên</p>
-                  <p className="text-xs text-slate-500">Trên hệ thống</p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">24</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tables */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Recent Users */}
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Người dùng mới</h3>
-            <button
-              onClick={() => navigate('/admin/users')}
-              className="flex items-center gap-1 text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
-              <span>Xem tất cả</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {recentUsers.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    user.role === 'teacher'
-                      ? 'bg-gradient-to-br from-amber-500 to-orange-600'
-                      : 'bg-gradient-to-br from-indigo-500 to-violet-600'
-                  }`}>
-                    {user.role === 'teacher' ? (
-                      <GraduationCap className="w-5 h-5 text-white" />
-                    ) : (
-                      <span className="text-white font-bold text-sm">{user.name[0]}</span>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{user.name}</p>
-                    <p className="text-xs text-slate-500">{user.email}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className={`inline-block px-2 py-1 rounded-lg text-xs font-medium ${
-                    user.role === 'teacher'
-                      ? 'bg-amber-500/20 text-amber-400'
-                      : 'bg-indigo-500/20 text-indigo-400'
-                  }`}>
-                    {user.role === 'teacher' ? 'Giáo viên' : 'Học sinh'}
-                  </span>
-                  <p className="text-xs text-slate-500 mt-1">{user.joinDate}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Popular Lessons */}
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Bài học phổ biến</h3>
-            <button
-              onClick={() => navigate('/admin/lessons')}
-              className="flex items-center gap-1 text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
-              <span>Xem tất cả</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {popularLessons.map((lesson, index) => (
-              <div
-                key={lesson.id}
-                className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-700/50 flex items-center justify-center">
-                    <span className="text-sm font-bold text-slate-400">#{index + 1}</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{lesson.title}</p>
-                    <p className="text-xs text-slate-500">{lesson.subject}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center gap-1 text-slate-400">
-                    <Eye className="w-3 h-3" />
-                    <span className="text-xs">{lesson.views.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
-                        style={{ width: `${lesson.completion}%` }}
-                      ></div>
+            {pendingTeachers.length > 0 ? (
+              <div className="space-y-6">
+                {pendingTeachers.map((teacher) => (
+                  <div key={teacher.id} className="p-6 bg-[#e4f2f0]/30 rounded-[2rem] border-2 border-transparent hover:border-[#2099e9]/30 transition-all group">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="flex items-center gap-6">
+                         <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/5 text-[#2099e9] font-black text-xl">
+                            {teacher.name[0]}
+                         </div>
+                         <div className="space-y-1">
+                            <h4 className="font-black text-[#274dad] text-lg">{teacher.name}</h4>
+                            <div className="flex items-center gap-3 text-xs font-bold text-slate-400">
+                               <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" />{teacher.email}</span>
+                               <span className="w-1 bg-slate-200 h-3"></span>
+                               <span className="flex items-center gap-1 font-black text-[#2099e9] uppercase tracking-widest">{teacher.subject}</span>
+                            </div>
+                            <p className="text-xs text-slate-500 italic mt-1">{teacher.school}</p>
+                         </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                         <button 
+                          onClick={() => handleApprove(teacher)}
+                          disabled={actionLoading === teacher.id}
+                          className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-[#2099e9] text-white rounded-xl font-black text-xs hover:bg-emerald-500 transition-all shadow-md shadow-blue-500/10 disabled:opacity-50"
+                         >
+                            {actionLoading === teacher.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                            Phê Duyệt
+                         </button>
+                         <button 
+                          onClick={() => openRejectModal(teacher)}
+                          disabled={actionLoading === teacher.id}
+                          className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white text-rose-500 border border-rose-100 rounded-xl font-black text-xs hover:bg-rose-50 transition-all disabled:opacity-50"
+                         >
+                            <XCircle className="w-4 h-4" />
+                            Từ Chối
+                         </button>
+                      </div>
                     </div>
-                    <span className="text-xs text-emerald-400">{lesson.completion}%</span>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
+                 <div className="w-20 h-20 bg-[#e4f2f0] rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-10 h-10 text-emerald-500" />
+                 </div>
+                 <p className="text-xl font-black text-[#274dad]">Tất cả hồ sơ đã được xử lý</p>
+                 <p className="text-slate-400 font-bold max-w-xs">Hệ thống đang hoạt động ở trạng thái tối ưu.</p>
+              </div>
+            )}
+          </div>
+
+          {/* User Growth Chart Placeholder */}
+          <div className="bg-white rounded-[3rem] p-10 shadow-2xl shadow-[#274dad]/5 border border-[#85e4fb]/20">
+             <div className="flex items-center justify-between mb-10">
+                <h3 className="text-2xl font-black text-[#274dad]">Phát Triển Cộng Đồng</h3>
+                <Activity className="w-6 h-6 text-[#2099e9]" />
+             </div>
+             <div className="h-64 flex items-end justify-between gap-3 px-4">
+                {[45, 60, 45, 80, 95, 70, 90, 100, 85, 110, 120, 140].map((h, i) => (
+                  <div key={i} className="flex-1 min-w-[20px] bg-[#e4f2f0] rounded-t-xl relative group">
+                    <div 
+                      className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-[#2099e9] to-[#85e4fb] rounded-t-xl group-hover:brightness-110 transition-all"
+                      style={{ height: `${(h / 140) * 100}%` }}
+                    ></div>
+                  </div>
+                ))}
+             </div>
           </div>
         </div>
+
+        {/* Sidebar Widgets */}
+        <div className="space-y-10">
+           
+           {/* System Health */}
+           <div className="bg-[#274dad] rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-900/20 overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+              <div className="relative z-10 space-y-8">
+                 <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-black">Hệ Thống</h3>
+                    <Atom className="w-6 h-6 text-[#85e4fb] animate-spin-slow" />
+                 </div>
+                 <div className="space-y-6">
+                    <div className="space-y-2">
+                       <div className="flex justify-between text-xs font-black uppercase tracking-widest">
+                          <span>Uptime</span>
+                          <span className="text-[#85e4fb]">99.9%</span>
+                       </div>
+                       <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-[#85e4fb] w-[99.9%]"></div>
+                       </div>
+                    </div>
+                    <div className="space-y-2">
+                       <div className="flex justify-between text-xs font-black uppercase tracking-widest">
+                          <span>Database</span>
+                          <span className="text-emerald-400">Stable</span>
+                       </div>
+                       <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-400 w-[95%]"></div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+
+           {/* Quick Stats Sidebar */}
+           <div className="bg-white rounded-[3rem] p-10 shadow-2xl shadow-[#274dad]/5 border border-[#85e4fb]/20">
+              <h3 className="text-xl font-black text-[#274dad] mb-8">Tổng Quan Nhanh</h3>
+              <div className="space-y-8">
+                 {[
+                   { label: 'Học sinh Hoạt động', value: '8.4k', icon: MousePointer, color: 'text-[#2099e9]' },
+                   { label: 'Nội dung Phổ biến', value: '450+', icon: BookOpen, color: 'text-[#44b5d7]' },
+                   { label: 'Tương tác API', value: '1.2M', icon: Activity, color: 'text-[#274dad]' },
+                 ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-4">
+                       <div className="p-3 bg-[#e4f2f0] rounded-xl">
+                          <item.icon className={`w-5 h-5 ${item.color}`} />
+                       </div>
+                       <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{item.label}</p>
+                          <p className="text-lg font-black text-[#274dad]">{item.value}</p>
+                       </div>
+                    </div>
+                 ))}
+              </div>
+           </div>
+
+           {/* Notifications/Alerts */}
+           <div className="p-8 bg-white rounded-[3rem] border-2 border-dashed border-[#e4f2f0] flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-[#e4f2f0] rounded-full flex items-center justify-center text-[#274dad]/20">
+                 <AlertCircle className="w-8 h-8" />
+              </div>
+              <p className="text-sm font-bold text-slate-400">Không có cảnh báo đỏ</p>
+           </div>
+
+        </div>
+
       </div>
 
-      <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-        <h3 className="text-lg font-semibold text-white mb-4">Trạng thái hệ thống</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="flex items-center gap-4 p-4 bg-slate-800/30 rounded-xl">
-            <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl">
-              <Atom className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">100%</p>
-              <p className="text-sm text-slate-400">Vật lý (Chuyên sâu)</p>
-            </div>
-          </div>
+      {/* Rejection Modal */}
+      {rejectionModalOpen && selectedTeacher && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#274dad]/20 backdrop-blur-sm animate-in fade-in duration-300">
+           <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-[#85e4fb]/20 overflow-hidden animate-in zoom-in-95 duration-300">
+              <div className="bg-gradient-to-br from-[#2099e9] to-[#274dad] p-8 text-white">
+                 <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-black">Từ Chối Hồ Sơ</h3>
+                    <button onClick={() => setRejectionModalOpen(false)} className="p-2 hover:bg-white/10 rounded-xl transition-all">
+                       <XCircle className="w-6 h-6" />
+                    </button>
+                 </div>
+                 <p className="font-bold opacity-80 italic">Gửi phản hồi cho giảng viên: <span className="text-white opacity-100">{selectedTeacher.name}</span></p>
+              </div>
+
+              <div className="p-8 space-y-6">
+                 <div className="space-y-3">
+                    <label className="text-sm font-black text-[#274dad] flex items-center gap-2">
+                       <Mail className="w-4 h-4" /> Lý do từ chối (Tùy chọn)
+                    </label>
+                    <textarea 
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      placeholder="Nhập lý do tại đây để giúp giảng viên hoàn thiện hồ sơ hơn... (Nếu để trống, email sẽ không hiển thị phần này)"
+                      className="w-full h-40 p-5 bg-[#e4f2f0]/50 border-2 border-transparent focus:border-[#2099e9] focus:bg-white rounded-2xl text-slate-700 font-bold placeholder:text-slate-300 transition-all outline-none resize-none"
+                    />
+                 </div>
+
+                 <div className="flex gap-4">
+                    <button 
+                      onClick={() => setRejectionModalOpen(false)}
+                      className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all"
+                    >
+                       Hủy bỏ
+                    </button>
+                    <button 
+                      onClick={handleRejectSubmit}
+                      className="flex-[2] py-4 bg-rose-500 text-white rounded-2xl font-black text-sm hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20"
+                    >
+                       Xác nhận Từ Chối & Gửi Email
+                    </button>
+                 </div>
+              </div>
+           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

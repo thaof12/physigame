@@ -62,6 +62,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', require('./routes/auth.cjs'));
 app.use('/api/users', require('./routes/users.cjs'));
+app.use('/api/email', require('./routes/email.cjs'));
 app.use('/api/lessons', require('./routes/lessons.cjs'));
 app.use('/api/challenges', require('./routes/challenges.cjs'));
 app.use('/api/battles', require('./routes/battles.cjs'));

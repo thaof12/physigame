@@ -23,7 +23,9 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
-import { API_BASE_URL } from '../../../config/api';
+import { supabase } from '../../../config/supabase';
+import api from '../../../config/api';
+import { sendTeacherStatusEmail } from '../../../services/emailService';
 
 // Mock data for users list
 const mockUsers = [
@@ -36,8 +38,6 @@ const mockUsers = [
   { id: 7, name: 'Đỗ Văn G', email: 'dovang@gmail.com', role: 'student', grade: '10', status: 'active', joinDate: '2024-12-20', lastActive: '2025-03-14', lessonsCompleted: 56, exercisesCompleted: 145 },
   { id: 8, name: 'Bùi Thị H', email: 'buithih@gmail.com', role: 'student', grade: '6', status: 'pending', joinDate: '2025-03-16', lastActive: '2025-03-16', lessonsCompleted: 2, exercisesCompleted: 5 },
 ];
-
-// ==================== Pending Teachers Tab ====================
 const PendingTeachersTab = () => {
   const [pendingTeachers, setPendingTeachers] = useState([]);
   const [allTeachers, setAllTeachers] = useState([]);
@@ -46,7 +46,7 @@ const PendingTeachersTab = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [rejectModal, setRejectModal] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
-  const [teacherFilter, setTeacherFilter] = useState('pending'); // 'pending' | 'verified' | 'rejected' | 'all'
+  const [teacherFilter, setTeacherFilter] = useState('pending');
 
   useEffect(() => {
     fetchTeachers();
@@ -55,47 +55,64 @@ const PendingTeachersTab = () => {
   const fetchTeachers = async () => {
     setLoading(true);
     setError('');
+    console.log('%c📊 [AdminUsers] Fetching teachers from schema-validated users table...', 'color: #44b5d7; font-weight: bold');
+    
     try {
-      const [pendingRes, allRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/users/pending-teachers`),
-        fetch(`${API_BASE_URL}/users/teachers`)
-      ]);
+      const { data: usersData, error: usersErr } = await supabase
+        .from('users')
+        .select('*')
+        .eq('role', 'teacher');
 
-      const pendingData = await pendingRes.json();
-      const allData = await allRes.json();
+      if (usersErr) throw usersErr;
 
-      if (pendingData.success) {
-        setPendingTeachers(pendingData.teachers || []);
-      }
-      if (allData.success) {
-        setAllTeachers(allData.teachers || []);
-      }
+      // Map to consistent format
+      const formatted = (usersData || []).map(t => ({
+        _id: t.id,
+        id: t.id,
+        username: t.display_name || t.username || 'Giáo viên',
+        displayName: t.display_name || t.username || 'Giáo viên',
+        email: t.email,
+        teacherStatus: t.teacher_status || 'pending',
+        teacherProfile: {
+          school: t.teacher_profile?.school || t.profile?.school || 'Chưa cập nhật',
+          subject: t.teacher_profile?.subject || t.profile?.subject || 'Vật lý',
+          appliedAt: t.created_at,
+          rejectionReason: t.profile?.rejectionReason
+        },
+        originalData: t
+      }));
+
+      setAllTeachers(formatted);
+      setPendingTeachers(formatted.filter(t => (t.teacherStatus || '').toLowerCase() === 'pending'));
+      
+      console.log(`✅ [AdminUsers] Loaded ${formatted.length} teachers`);
     } catch (err) {
       console.error('Error fetching teachers:', err);
-      setError('Không thể tải danh sách giáo viên');
+      setError('Không thể tải danh sách giáo viên từ database');
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerify = async (teacherId) => {
+    const teacher = allTeachers.find(t => t.id === teacherId);
     setActionLoading(teacherId);
     try {
-      const response = await fetch(`${API_BASE_URL}/users/verify-teacher/${teacherId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-      });
+      console.log('📡 [AdminUsers] Elevating approval through backend API...');
+      const response = await api.post(`/users/verify-teacher/${teacherId}`);
 
-      const data = await response.json();
-      if (data.success) {
-        await fetchTeachers();
-      } else {
-        setError(data.message || 'Lỗi khi duyệt giáo viên');
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Approval failed');
       }
+
+      if (teacher?.email) {
+        await sendTeacherStatusEmail(teacher.email, teacher.displayName, 'verified');
+      }
+      
+      await fetchTeachers();
     } catch (err) {
       console.error('Error verifying teacher:', err);
-      setError('Lỗi kết nối server');
+      setError('Lỗi khi duyệt giáo viên');
     } finally {
       setActionLoading(null);
     }
@@ -103,25 +120,30 @@ const PendingTeachersTab = () => {
 
   const handleReject = async () => {
     if (!rejectModal) return;
-    setActionLoading(rejectModal);
+    const teacherId = rejectModal;
+    const teacher = allTeachers.find(t => t.id === teacherId);
+    
+    setActionLoading(teacherId);
     try {
-      const response = await fetch(`${API_BASE_URL}/users/reject-teacher/${rejectModal}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: rejectReason })
+      console.log('📡 [AdminUsers] Elevating rejection through backend API...');
+      const response = await api.post(`/users/reject-teacher/${teacherId}`, {
+        reason: rejectReason
       });
 
-      const data = await response.json();
-      if (data.success) {
-        setRejectModal(null);
-        setRejectReason('');
-        await fetchTeachers();
-      } else {
-        setError(data.message || 'Lỗi khi từ chối giáo viên');
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Rejection failed');
       }
+
+      if (teacher?.email) {
+        await sendTeacherStatusEmail(teacher.email, teacher.displayName, 'rejected', rejectReason);
+      }
+
+      setRejectModal(null);
+      setRejectReason('');
+      await fetchTeachers();
     } catch (err) {
       console.error('Error rejecting teacher:', err);
-      setError('Lỗi kết nối server');
+      setError('Lỗi khi từ chối giáo viên');
     } finally {
       setActionLoading(null);
     }

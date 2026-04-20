@@ -161,13 +161,20 @@ const PhysicsHome = () => {
 
   useEffect(() => {
     const init = async () => {
-      if (!user) { navigate('/login'); return; }
       setGrades([6, 7, 8, 9, 10, 11, 12].map(g => ({ grade: g })));
       setActive(user?.profile?.grade ?? 10);
       setTimeout(() => setLoading(false), 600);
     };
     init();
-  }, [user, navigate]);
+  }, [user]);
+
+  const handleAction = (path) => {
+    if (!user) {
+      navigate('/login');
+    } else {
+      navigate(path);
+    }
+  };
 
   if (loading) return (
     <div className="h-screen bg-[#FDFCF8] flex items-center justify-center">
@@ -219,13 +226,13 @@ const PhysicsHome = () => {
           {/* Action Row: Centered Buttons (Pill style matching reference) */}
           <div className="flex flex-wrap justify-center gap-6 animate-fade-in-up animation-delay-300">
             <button
-              onClick={() => navigate(`/physics-class/${activeGrade}`)}
+              onClick={() => handleAction(`/physics-class/${activeGrade}`)}
               className="px-14 py-5 rounded-full bg-[#82C91E] text-white font-black text-xl shadow-[0_15px_30px_-10px_rgba(130,201,30,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(130,201,30,0.6)] hover:-translate-y-1 active:scale-95 transition-all"
             >
               Vào Lớp Học &rarr;
             </button>
             <button
-              onClick={() => navigate('/vatly/virtual-lab')}
+              onClick={() => handleAction('/vatly/virtual-lab')}
               className="px-14 py-5 rounded-full bg-white text-[#1E293B] font-black text-xl shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] hover:-translate-y-1 active:scale-95 transition-all border border-slate-100"
             >
               Vào Phòng Lab
@@ -313,7 +320,7 @@ const PhysicsHome = () => {
                     {feature.desc}
                   </p>
                   <button
-                    onClick={() => navigate(feature.path)}
+                    onClick={() => handleAction(feature.path)}
                     className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-[#1E293B] text-white font-black text-sm hover:bg-[#0F172A] transition-colors shadow-lg hover:shadow-xl active:scale-[0.97]"
                   >
                     {feature.cta}

@@ -37,7 +37,7 @@ const GlobalHeader = () => {
         {/* Brand & Logo (Left) */}
         <div className="flex-none">
           <Link to="/" className="flex items-center group cursor-pointer transition-transform duration-500 hover:scale-105">
-            <EurekaPremiumLogo className="h-14 sm:h-16" />
+            <EurekaPremiumLogo className="h-12 sm:h-16" />
           </Link>
         </div>
 
@@ -47,7 +47,15 @@ const GlobalHeader = () => {
             const Icon = link.icon;
             const active = isActive(link.path);
             return (
-              <Link key={link.name} to={link.path}
+              <button
+                key={link.name}
+                onClick={() => {
+                  if (!user) {
+                    navigate('/login');
+                  } else {
+                    navigate(link.path);
+                  }
+                }}
                 className={`flex items-center gap-2 px-3 py-2.5 rounded-xl font-bold text-[13px] whitespace-nowrap shrink-0 transition-all duration-300 ${active
                   ? 'bg-[#B87333] text-white shadow-[0_4px_12px_rgba(184,115,51,0.3)]'
                   : 'text-slate-500 hover:bg-white hover:text-[#B87333] hover:shadow-sm'
@@ -55,62 +63,64 @@ const GlobalHeader = () => {
               >
                 <Icon className="w-4 h-4" />
                 {link.name}
-              </Link>
+              </button>
             );
           })}
         </nav>
 
-        {/* User Area (Right) */}
-        <div className="hidden lg:flex items-center gap-4">
-          <button className="flex items-center gap-2 text-slate-500 hover:text-[#B87333] font-bold text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/50 border border-slate-100 transition-all">
+        {/* Right Actions Area (User Profile + Menu) */}
+        <div className="flex items-center gap-2 sm:gap-4 ml-auto">
+          {/* Language / VI (Hidden on small mobile) */}
+          <button className="hidden sm:flex items-center gap-2 text-slate-500 hover:text-[#B87333] font-bold text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/50 border border-slate-100 transition-all">
             <Globe className="w-3.5 h-3.5" /> <span>VI</span>
           </button>
 
-          <div className="h-10 w-px bg-slate-200 mx-1" />
+          {/* Desktop-only divider */}
+          <div className="hidden lg:block h-10 w-px bg-slate-200 mx-1" />
 
-          {user ? (
-            <div className="flex items-center gap-3">
-              <Link to="/profile"
-                className="group flex items-center gap-3 bg-white hover:bg-[#FDFCF8] rounded-2xl p-1 pr-4 cursor-pointer transition-all border border-slate-100 shadow-sm hover:shadow-md hover:border-[#B87333]/20"
-              >
-                <div className="w-9 h-9 bg-gradient-to-br from-[#B87333] to-[#4A3728] rounded-xl flex items-center justify-center shadow-inner">
-                  <span className="text-white font-bold text-sm">
-                    {user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-black text-slate-700 leading-tight">
-                    {user?.displayName || user?.email?.split('@')[0]}
-                  </span>
-                  <span className="text-[10px] text-[#B87333] font-black uppercase tracking-[0.15em] leading-none mt-0.5">Explorer</span>
-                </div>
-              </Link>
-              <button onClick={handleLogout} className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
-                <LogOut className="w-5 h-5" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login" className="text-slate-500 font-bold hover:text-[#8C5523] px-3 py-2 transition-colors text-sm">
-                Đăng nhập
-              </Link>
-              <Link to="/register"
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-black text-white bg-gradient-to-r from-[#B87333] to-[#4A3728] rounded-xl shadow-[0_8px_20px_rgba(184,115,51,0.25)] hover:shadow-[0_12px_25px_rgba(184,115,51,0.35)] hover:-translate-y-0.5 transition-all active:scale-95 active:translate-y-0"
-              >
-                Đăng ký <Rocket className="w-4 h-4" />
-              </Link>
-            </div>
-          )}
-        </div>
+          {/* Auth/Profile Section */}
+          <div className="flex items-center">
+            {user ? (
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Link to="/profile"
+                  className="group flex items-center gap-2 sm:gap-3 bg-white hover:bg-[#FDFCF8] rounded-2xl p-1 pr-2 sm:pr-4 cursor-pointer transition-all border border-slate-100 shadow-sm hover:shadow-md hover:border-[#B87333]/20"
+                >
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-[#B87333] to-[#4A3728] rounded-xl flex items-center justify-center shadow-inner">
+                    <span className="text-white font-bold text-xs sm:text-sm">
+                      {user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="hidden sm:flex flex-col">
+                    <span className="text-xs font-black text-slate-700 leading-tight">
+                      {user?.displayName || user?.email?.split('@')[0]}
+                    </span>
+                    <span className="text-[10px] text-[#B87333] font-black uppercase tracking-[0.15em] leading-none mt-0.5">Explorer</span>
+                  </div>
+                </Link>
+                <button onClick={handleLogout} className="p-2 sm:p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                  <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Link to="/login" className="text-slate-500 font-bold hover:text-[#8C5523] px-3 py-2 transition-colors text-xs sm:text-sm">
+                  Đăng nhập
+                </Link>
+                <Link to="/register"
+                  className="hidden sm:flex items-center gap-2 px-4 sm:px-6 py-2 sm:2.5 text-xs sm:text-sm font-black text-white bg-gradient-to-r from-[#B87333] to-[#4A3728] rounded-xl shadow-[0_8px_20px_rgba(184,115,51,0.25)] hover:shadow-[0_12px_25px_rgba(184,115,51,0.35)] hover:-translate-y-0.5 transition-all active:scale-95 active:translate-y-0"
+                >
+                  Đăng ký <Rocket className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
+          </div>
 
-        {/* Mobile toggle */}
-        <div className="lg:hidden flex items-center justify-between w-full">
-          <Link to="/" className="scale-75 origin-left">
-            <EurekaPremiumLogo className="h-16" />
-          </Link>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-slate-500 hover:text-[#B87333] p-2.5 rounded-xl bg-white shadow-sm border border-slate-100">
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden">
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-slate-500 hover:text-[#B87333] p-2 sm:p-2.5 rounded-xl bg-white shadow-sm border border-slate-100">
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -122,12 +132,21 @@ const GlobalHeader = () => {
               const Icon = link.icon;
               const active = isActive(link.path);
               return (
-                <Link key={link.name} to={link.path} onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl font-black text-sm transition-all ${active ? 'bg-[#B87333] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
+                <button
+                  key={link.name}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (!user) {
+                      navigate('/login');
+                    } else {
+                      navigate(link.path);
+                    }
+                  }}
+                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-black text-sm transition-all ${active ? 'bg-[#B87333] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
                     }`}
                 >
                   <Icon className="w-5 h-5" /> {link.name}
-                </Link>
+                </button>
               );
             })}
           </div>
