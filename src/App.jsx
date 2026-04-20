@@ -430,12 +430,6 @@ const AppContent = () => {
         <Route path="/physics-games/grade/12/nuclear-reaction-chamber" element={<ProtectedRoute><NuclearReactionChamber /></ProtectedRoute>} />
         <Route path="/physics-games/grade/12/radioactive-decay-simulator" element={<ProtectedRoute><RadioactiveDecaySimulator /></ProtectedRoute>} />
 
-        {/* Admin Panel Routes */}
-        <Route path="/admin/login" element={
-          <AdminAuthProvider>
-            <AdminLogin />
-          </AdminAuthProvider>
-        } />
         <Route path="/admin" element={
           <AdminAuthProvider>
             <AdminLayout />

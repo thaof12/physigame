@@ -440,21 +440,43 @@ router.get('/teachers', async (req, res) => {
 });
 
 router.post('/verify-teacher/:id', async (req, res) => {
+  const { id } = req.params;
   try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    if (user.role !== 'teacher') return res.status(400).json({ success: false, message: 'User is not a teacher' });
-    if (user.teacher_status !== 'pending') return res.status(400).json({ success: false, message: 'Teacher is not in pending status' });
+    console.log(`📡 [Backend] Attempting to verify teacher: ${id}`);
+    
+    const user = await User.findById(id);
+    if (!user) {
+      console.warn(`⚠️ [Backend] User not found for ID: ${id}`);
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
 
+    // Prepare profile update
     const teacherProfile = user.teacher_profile || {};
     teacherProfile.verifiedAt = new Date().toISOString();
-    teacherProfile.verifiedBy = req.body.adminId || null;
+    teacherProfile.verifiedBy = req.body?.adminId || 'admin-hardcoded';
 
-    await User.update(user.id, { teacher_status: 'verified', teacher_profile: teacherProfile });
+    console.log(`📡 [Backend] Updating status for: ${user.email}`);
 
-    res.json({ success: true, message: 'Giáo viên đã được duyệt thành công' });
+    // Update DB
+    const updated = await User.update(id, { 
+      teacher_status: 'verified', 
+      teacher_profile: teacherProfile,
+      role: 'teacher' // Force role to teacher just in case
+    });
+
+    if (updated) {
+      console.log(`✅ [Backend] Teacher ${id} verified successfully`);
+      return res.json({ success: true, message: 'Giáo viên đã được duyệt thành công' });
+    } else {
+      throw new Error('Update returned no data');
+    }
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    console.error('❌ [Backend] verify-teacher exception:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Lỗi máy chủ khi duyệt giáo viên', 
+      error: error.message 
+    });
   }
 });
 
