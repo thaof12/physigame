@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Atom, Home, Wrench, BookOpen, FlaskConical, LogOut, Globe, Menu, X, Rocket, GraduationCap } from 'lucide-react';
+import { Atom, Home, Wrench, BookOpen, FlaskConical, Trophy, LogOut, Globe, Menu, X, Rocket, GraduationCap } from 'lucide-react';
 
 import EurekaPremiumLogo from '../ui/EurekaPremiumLogo';
 
@@ -22,6 +22,7 @@ const GlobalHeader = () => {
     { name: 'KHO TÀNG', path: '/physics-tools', icon: Wrench },
     { name: 'BÀI GIẢNG', path: '/interactive-lectures', icon: BookOpen },
     { name: 'THÍ NGHIỆM', path: '/vatly/virtual-lab', icon: FlaskConical },
+    { name: 'THỬ THÁCH', path: '/advanced-physics-challenge', icon: Trophy },
   ];
 
   const isActive = (path) => {

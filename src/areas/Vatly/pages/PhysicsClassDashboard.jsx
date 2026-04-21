@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, BookOpen, Trophy, Lock, Flag, Zap, Target, CheckCircle, ChevronRight } from 'lucide-react';
+import { ArrowLeft, BookOpen, Trophy, Lock, Flag, Zap, Target, Shield, CheckCircle, ChevronRight } from 'lucide-react';
 import { physicsLessons, getLessonStats } from '../data/physicsLessons';
 
 const PhysicsClassDashboard = () => {
@@ -268,7 +268,26 @@ const PhysicsClassDashboard = () => {
           })}
         </div>
 
-
+        {/* Promo / CTA */}
+        <div className="mt-12 bg-gradient-to-r from-[#B87333] to-[#8C5523] rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden shadow-[0_8px_30px_rgba(184,115,51,0.25)]">
+           <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-white/10 blur-3xl rounded-full pointer-events-none"></div>
+           <div>
+              <h3 className="text-2xl font-black text-white flex items-center gap-3">
+                 <Shield className="w-6 h-6 text-amber-200" />
+                 Thực Hành Kiến Thức
+              </h3>
+              <p className="text-white/80 mt-2 font-medium max-w-xl">
+                 Bạn đã nắm vững lý thuyết? Hãy áp dụng chúng vào mô phỏng không gian và vượt qua các thử thách Mini-game tương tác.
+              </p>
+           </div>
+           <button
+             onClick={() => navigate('/advanced-physics-challenge')}
+             className="whitespace-nowrap px-8 py-4 bg-white text-[#5C4033] rounded-2xl font-black shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95"
+           >
+             Vào Khu Thử Thách
+           </button>
+        </div>
+        
       </div>
     </div>
   );
