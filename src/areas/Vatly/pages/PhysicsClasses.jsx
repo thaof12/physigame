@@ -29,7 +29,7 @@ const PhysicsClasses = () => {
           <div className="mb-10 sm:mb-16 lg:mb-24">
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-[#1E293B] tracking-tight mb-4 sm:mb-6">Bắt đầu hành trình học tập tại đây</h2>
             <p className="text-slate-500 max-w-2xl mx-auto font-medium text-sm sm:text-base lg:text-lg leading-relaxed">
-              Mỗi cấp độ là một hành trình mới với câu chuyện riêng và thử thách thú vị, giúp bạn khám phá Vật Lý một cách tự nhiên và phát triển toàn diện.
+              Mỗi cấp độ là một hành trình mới với câu chuyện riêng, giúp bạn khám phá Vật Lý một cách tự nhiên và phát triển toàn diện.
             </p>
           </div>
 

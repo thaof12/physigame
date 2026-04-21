@@ -164,7 +164,13 @@ const PhysicsGradeGames = () => {
     if (locked) {
       return;
     }
-    navigate(game.path || `/advanced-physics-challenge/${game.slug}`);
+
+    const rawPath = game.path || `/physics-games/grade/${gradeNumber}/${game.slug}`;
+    const normalizedPath = rawPath.startsWith('/advanced-physics-challenge/')
+      ? `/physics-games/grade/${gradeNumber}/${rawPath.replace('/advanced-physics-challenge/', '')}`
+      : rawPath;
+
+    navigate(normalizedPath);
   };
 
   const handleCompleteGame = async (e, game) => {
