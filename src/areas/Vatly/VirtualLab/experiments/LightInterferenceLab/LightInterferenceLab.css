@@ -94,7 +94,7 @@ input[type="range"].accent-cyan-500 {
   accent-color: #06b6d4;
 }
 
-input[type="range"].accent-yellow-500 {
+input[type="range"].accent-blue-500 {
   accent-color: #eab308;
 }
 
@@ -155,3 +155,4 @@ input[type="range"]:not(.wavelength-slider)::-webkit-slider-thumb:hover {
   z-index: -1;
   filter: blur(8px);
 }
+

@@ -39,7 +39,7 @@ const VirtualLabHome = () => {
     },
     {
       id: 'electricity', title: 'Điện học', icon: CircuitBoard,
-      color: 'from-amber-500 to-orange-500', glowColor: 'rgba(245,158,11,0.3)',
+      color: 'from-blue-500 to-cyan-500', glowColor: 'rgba(245,158,11,0.3)',
       experiments: [
         { id: 'ohm-law', name: 'Định luật Ôm', description: 'Xác minh mối quan hệ U-I-R trong mạch điện', grade: 9, difficulty: 2, available: true, path: '/vatly/virtual-lab/ohm-law', chapterName: 'Điện học' },
         { id: 'resistor-circuit', name: 'Mạch điện trở', description: 'Đo điện trở trong mạch nối tiếp và song song', grade: 9, difficulty: 3, available: true, path: '/vatly/virtual-lab/resistor-circuit', chapterName: 'Điện học' }
@@ -103,7 +103,7 @@ const VirtualLabHome = () => {
   const renderDifficulty = (level) => (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4].map(i => (
-        <Star key={i} size={10} className={i <= level ? 'text-amber-400 fill-amber-400' : 'text-slate-700 fill-slate-700'} />
+        <Star key={i} size={10} className={i <= level ? 'text-blue-400 fill-blue-400' : 'text-slate-700 fill-slate-700'} />
       ))}
     </div>
   );
@@ -204,7 +204,7 @@ const VirtualLabHome = () => {
               <div className="flex flex-wrap gap-4 text-sm">
                 {[
                   { icon: Gauge, text: 'Đo lường chính xác', color: 'text-blue-400' },
-                  { icon: FlaskConical, text: 'Thu thập số liệu', color: 'text-amber-400' },
+                  { icon: FlaskConical, text: 'Thu thập số liệu', color: 'text-blue-400' },
                   { icon: Orbit, text: 'Mô phỏng vật lý thực', color: 'text-emerald-400' },
                 ].map((item, i) => {
                   const I = item.icon;
@@ -368,3 +368,4 @@ const VirtualLabHome = () => {
 };
 
 export default VirtualLabHome;
+

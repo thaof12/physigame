@@ -4,7 +4,7 @@ import { Facebook, Youtube, Instagram, MapPin, Phone, Mail, ChevronRight } from 
 
 const GlobalFooter = () => {
   return (
-    <footer className="w-full bg-[#FDFCF8] border-t border-slate-100 pt-20 pb-10 relative overflow-hidden font-sans">
+    <footer className="w-full bg-[#FFFFFF] border-t border-slate-100 pt-20 pb-10 relative overflow-hidden font-sans">
       {/* Graph grid background */}
       <div className="absolute inset-0 graph-grid opacity-[0.4] pointer-events-none" />
 
@@ -14,7 +14,7 @@ const GlobalFooter = () => {
           {/* Brand */}
           <div className="space-y-6">
             <Link to="/" className="inline-block">
-              <span className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-br from-[#B87333] via-[#8C5523] to-[#4A3728] tracking-tighter">
+              <span className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-br from-[#274dad] via-[#2099e9] to-[#4A3728] tracking-tighter">
                 PhysiGame
               </span>
             </Link>
@@ -24,7 +24,7 @@ const GlobalFooter = () => {
             <div className="flex items-center gap-4 pt-2">
               {[Facebook, Youtube, Instagram].map((Icon, i) => (
                 <a key={i} href="#"
-                  className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#B87333] hover:border-[#B87333] hover:shadow-md transition-all">
+                  className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#274dad] hover:border-[#274dad] hover:shadow-md transition-all">
                   <Icon className="w-4 h-4" />
                 </a>
               ))}
@@ -34,7 +34,7 @@ const GlobalFooter = () => {
           {/* Khám phá */}
           <div className="space-y-6">
             <h4 className="font-black text-[#4A3728] text-base flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#B87333]" />
+              <span className="w-2 h-2 rounded-full bg-[#274dad]" />
               Khám phá
             </h4>
             <ul className="space-y-4">
@@ -46,7 +46,7 @@ const GlobalFooter = () => {
                 ['Cuộc đua PK', '/pk-battle'],
               ].map(([label, path]) => (
                 <li key={label}>
-                  <Link to={path} className="text-slate-500 hover:text-[#B87333] font-bold text-sm transition-colors flex items-center gap-2 group">
+                  <Link to={path} className="text-slate-500 hover:text-[#274dad] font-bold text-sm transition-colors flex items-center gap-2 group">
                     <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
                     {label}
                   </Link>
@@ -58,7 +58,7 @@ const GlobalFooter = () => {
           {/* Hỗ trợ */}
           <div className="space-y-6">
             <h4 className="font-black text-[#4A3728] text-base flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#B87333]" />
+              <span className="w-2 h-2 rounded-full bg-[#274dad]" />
               Hỗ trợ
             </h4>
             <ul className="space-y-4">
@@ -69,7 +69,7 @@ const GlobalFooter = () => {
                 'Điều khoản dịch vụ',
               ].map(label => (
                 <li key={label}>
-                  <span className="text-slate-500 font-bold text-sm cursor-pointer hover:text-[#B87333] transition-colors">{label}</span>
+                  <span className="text-slate-500 font-bold text-sm cursor-pointer hover:text-[#274dad] transition-colors">{label}</span>
                 </li>
               ))}
             </ul>
@@ -88,7 +88,7 @@ const GlobalFooter = () => {
                 { Icon: MapPin, title: 'Trụ sở chính', body: 'ĐH Nguyễn Tất Thành TP.HCM\n3F Nguyễn Hữu Thọ, Tân Hưng' },
               ].map(({ Icon, title, body }) => (
                 <li key={title} className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm text-[#B87333]">
+                  <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm text-[#274dad]">
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
@@ -117,3 +117,4 @@ const GlobalFooter = () => {
 };
 
 export default GlobalFooter;
+

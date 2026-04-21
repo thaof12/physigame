@@ -491,7 +491,7 @@ const LensOpticsLab = () => {
               {/* Legend */}
               <div className="absolute top-4 right-4 bg-gray-900/80 backdrop-blur-sm rounded-lg p-3 text-sm">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-4 h-1 bg-yellow-500"></div>
+                  <div className="w-4 h-1 bg-blue-500"></div>
                   <span className="text-gray-300">Tia song song</span>
                 </div>
                 <div className="flex items-center gap-2 mb-1">
@@ -556,7 +556,7 @@ const LensOpticsLab = () => {
                       step="10"
                       value={focalLength}
                       onChange={(e) => setFocalLength(parseInt(e.target.value))}
-                      className="flex-1 accent-yellow-500"
+                      className="flex-1 accent-blue-500"
                     />
                     <button
                       onClick={() => setFocalLength(f => Math.min(200, f + 10))}
@@ -834,3 +834,4 @@ const LensOpticsLab = () => {
 };
 
 export default LensOpticsLab;
+

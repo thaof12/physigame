@@ -1,152 +1,230 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../config/api';
-import { ArrowLeft, BookOpen, CheckCircle, XCircle, Trophy, Orbit, Activity, TerminalSquare, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  BookOpen, 
+  CheckCircle, 
+  XCircle, 
+  Trophy, 
+  Orbit, 
+  Compass, 
+  Target, 
+  Flag, 
+  ChevronRight, 
+  ChevronLeft,
+  Info,
+  Send,
+  Zap,
+  Star,
+  Award
+} from 'lucide-react';
 import { physicsLessons } from '../data/physicsLessons';
-import SolarSystemBackground from '../../../components/animations/SolarSystemBackground';
+
+const STATIONS = [
+  { id: 'discovery', label: 'Khám Phá', icon: Compass, color: 'sky' },
+  { id: 'assessment', label: 'Giải Mã', icon: Zap, color: 'blue' },
+  { id: 'application', label: 'Chinh Phục', icon: Target, color: 'emerald' },
+  { id: 'summary', label: 'Tổng Kết', icon: Award, color: 'indigo' }
+];
 
 const PhysicsLesson = () => {
   const { classId, chapterId, lessonId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('theory');
+  const [stationIndex, setStationIndex] = useState(0);
+  const [lessonData, setLessonData] = useState(null);
+  
+  // Quiz State
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [showResult, setShowResult] = useState(false);
-  const [score, setScore] = useState(0);
-  const [quizAnswers, setQuizAnswers] = useState([]);
+  const [showQuizResult, setShowQuizResult] = useState(false);
+  const [quizScore, setQuizScore] = useState(0);
+  
+  // Essay State
+  const [essayResponse, setEssayResponse] = useState('');
+  const [isEssaySubmitted, setIsEssaySubmitted] = useState(false);
+  
+  // Completion
   const [isCompleted, setIsCompleted] = useState(false);
-  const [lessonData, setLessonData] = useState(null);
+
+  const currentStation = STATIONS[stationIndex];
+
+  // Helper: Generate placeholder content if backend is empty
+  const generatePlaceholderContent = useMemo(() => {
+    return (title) => {
+      const qPrefix = title.split(' ').slice(0, 3).join(' ');
+      return {
+        theory: `<div class="space-y-6">
+          <p class="text-xl font-medium text-slate-700 leading-relaxed">Chào mừng bạn đến với bài học <strong>${title}</strong>.</p>
+          <div class="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-r-2xl">
+            <h4 class="font-black text-[#2099e9] uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Info className="w-5 h-5" /> Tóm tắt kiến thức
+            </h4>
+            <p class="text-[#2a4095]">Trong bài học này, chúng ta sẽ tìm hiểu về các khái niệm cơ bản của ${title}, vai trò của nó trong đời sống và cách vận dụng vào giải quyết các vấn đề thực tế.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div class="p-6 bg-white border-2 border-slate-100 rounded-2xl">
+                <h5 class="font-bold text-slate-800 mb-2">Mục tiêu 1</h5>
+                <p class="text-sm text-slate-500">Nắm vững định nghĩa và các đại lượng liên quan đến ${title}.</p>
+             </div>
+             <div class="p-6 bg-white border-2 border-slate-100 rounded-2xl">
+                <h5 class="font-bold text-slate-800 mb-2">Mục tiêu 2</h5>
+                <p class="text-sm text-slate-500">Vận dụng công thức để giải các bài tập cơ bản về ${title}.</p>
+             </div>
+          </div>
+        </div>`,
+        exercises: [
+          {
+            question: `Khái niệm cơ bản nhất của ${title} tập trung vào điều gì?`,
+            options: [
+              `Nghiên cứu các quy luật vận động của tự nhiên`,
+              `Sáng tạo ra các công cụ đo lường mới`,
+              `Giải thích các hiện tượng tâm linh`,
+              `Xử lý các dữ liệu kinh tế vĩ mô`
+            ],
+            correctAnswer: 0,
+            explanation: `Vật lý học nói chung và ${title} nói riêng luôn tập trung nghiên cứu các quy luật vận động cơ bản của thế giới tự nhiên.`
+          },
+          {
+            question: `Đơn vị đo lường phổ biến nhất được sử dụng trong ${title} là gì?`,
+            options: [
+              `Hệ đo lường Anh-Mỹ`,
+              `Hệ đo lường quốc tế SI`,
+              `Hệ đo lường cổ điển`,
+              `Tùy vào từng địa phương`
+            ],
+            correctAnswer: 1,
+            explanation: `Hệ SI là tiêu chuẩn chung được sử dụng trong nghiên cứu khoa học hiện đại.`
+          }
+        ],
+        essay: {
+          question: `Dựa trên những gì bạn đã đọc, hãy lấy một ví dụ thực tế về ứng dụng của ${title} trong đời sống hàng ngày?`,
+          sampleAnswer: `Một ví dụ điển hình là việc áp dụng các nguyên lý của ${title} vào việc thiết kế các công cụ gia dụng như cân điện tử, nhiệt kế hoặc các hệ thống giao thông.`
+        }
+      };
+    };
+  }, []);
 
   useEffect(() => {
     const fetchLesson = async () => {
       try {
         setLoading(true);
-        
-        // Fetch from backend
         const response = await axios.get(
           `${API_BASE_URL}/lessons/class/${classId}/chapter/${chapterId}/lesson/${lessonId}`,
           { params: { subject: 'physics' } }
         );
         
-        if (response.data) {
+        if (response.data && response.data.content) {
           setLessonData(response.data);
         } else {
-          // Fallback to frontend data
           const classData = physicsLessons[classId];
-          if (classData) {
-            const chapter = classData.chapters.find(ch => ch.id === parseInt(chapterId));
-            if (chapter) {
-              const lesson = chapter.lessons.find(l => l.id === parseInt(lessonId));
-              if (lesson) {
-                setLessonData({
-                  id: `vatly-${classId}-${chapterId}-${lessonId}`,
-                  title: lesson.title,
-                  classId: parseInt(classId),
-                  chapterId: parseInt(chapterId),
-                  lessonNumber: parseInt(lessonId),
-                  content: {
-                    theory: `<h2>${lesson.title}</h2><p>Nội dung dữ liệu khoa học đang được giải nén...</p>`,
-                    examples: [],
-                    exercises: []
-                  }
-                });
-              }
-            }
+          const chapter = classData?.chapters.find(ch => ch.id === parseInt(chapterId));
+          const lesson = chapter?.lessons.find(l => l.id === parseInt(lessonId));
+          
+          if (lesson) {
+            setLessonData({
+              title: lesson.title,
+              content: generatePlaceholderContent(lesson.title)
+            });
           }
         }
       } catch (error) {
-        console.error('Error fetching lesson:', error);
-        // Use fallback data
+        // Only log error if it's really unexpected. 404 is technically fine as we have fallback.
+        if (error.response?.status !== 404) {
+          console.warn('⚠️ Server lesson data not available (Status:', error.response?.status || 'Network Error', '). Using local fallback.');
+        } else {
+          console.log('ℹ️ Lesson not found in DB, using optimized local content.');
+        }
+        
+        // Fallback to locally defined physicsLessons.js
         const classData = physicsLessons[classId];
-        if (classData) {
-          const chapter = classData.chapters.find(ch => ch.id === parseInt(chapterId));
-          if (chapter) {
-            const lesson = chapter.lessons.find(l => l.id === parseInt(lessonId));
-            if (lesson) {
-              setLessonData({
-                id: `vatly-${classId}-${chapterId}-${lessonId}`,
-                title: lesson.title,
-                classId: parseInt(classId),
-                chapterId: parseInt(chapterId),
-                lessonNumber: parseInt(lessonId),
-                content: {
-                  theory: `<h2>${lesson.title}</h2><p>Dữ liệu lý thuyết dự phòng (offline mode).</p>`,
-                  examples: [],
-                  exercises: []
-                }
-              });
-            }
-          }
+        const chapter = classData?.chapters.find(ch => ch.id === parseInt(chapterId));
+        const lesson = chapter?.lessons.find(l => l.id === parseInt(lessonId));
+        
+        if (lesson) {
+          setLessonData({
+            title: lesson.title,
+            content: generatePlaceholderContent(lesson.title)
+          });
+        } else {
+          console.error('❌ Critical: Even local fallback failed for', classId, chapterId, lessonId);
         }
       } finally {
-        setLoading(false);
+        setTimeout(() => setLoading(false), 600);
       }
     };
 
     fetchLesson();
-  }, [classId, chapterId, lessonId]);
+  }, [classId, chapterId, lessonId, generatePlaceholderContent]);
 
-  const exercises = lessonData?.content?.exercises || [];
-  const currentExercise = exercises[currentQuizIndex];
-
-  const handleAnswerSelect = (answerIndex) => {
-    setSelectedAnswer(answerIndex);
-  };
-
-  const handleCheckAnswer = () => {
-    const isCorrect = selectedAnswer === currentExercise.correctAnswer;
-    
-    setQuizAnswers([...quizAnswers, {
-      questionIndex: currentQuizIndex,
-      selectedAnswer,
-      isCorrect
-    }]);
-    
-    if (isCorrect) {
-      setScore(score + 1);
+  const handleNextStation = () => {
+    if (stationIndex < STATIONS.length - 1) {
+      setStationIndex(stationIndex + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    
-    setShowResult(true);
   };
 
-  const handleNextQuestion = () => {
-    if (currentQuizIndex < exercises.length - 1) {
+  const handlePrevStation = () => {
+    if (stationIndex > 0) {
+      setStationIndex(stationIndex - 1);
+    }
+  };
+
+  const handleQuizAnswer = (idx) => {
+    if (showQuizResult) return;
+    setSelectedAnswer(idx);
+  };
+
+  const checkQuizAnswer = () => {
+    const currentQuiz = lessonData.content.exercises[currentQuizIndex];
+    if (selectedAnswer === currentQuiz.correctAnswer) {
+      setQuizScore(quizScore + 1);
+    }
+    setShowQuizResult(true);
+  };
+
+  const nextQuiz = () => {
+    if (currentQuizIndex < lessonData.content.exercises.length - 1) {
       setCurrentQuizIndex(currentQuizIndex + 1);
       setSelectedAnswer(null);
-      setShowResult(false);
+      setShowQuizResult(false);
     } else {
-      setIsCompleted(true);
+      handleNextStation();
     }
   };
 
   const handleFinish = async () => {
     try {
       const user = JSON.parse(localStorage.getItem('user'));
-      const userEmail = user?.email || user?.uid;
+      const userId = user?.email || user?.uid;
       
-      if (userEmail) {
+      if (userId) {
+        const totalEx = lessonData.content.exercises.length;
         const progressData = {
-          userId: userEmail,
+          userId,
           programId: 'physics',
           classId: parseInt(classId),
           chapterId: parseInt(chapterId),
           lessonId: parseInt(lessonId),
-          score: score,
-          totalQuestions: exercises.length,
-          completed: true
+          score: quizScore,
+          totalQuestions: totalEx,
+          completed: true,
+          completionDate: new Date().toISOString()
         };
 
+        // Submit to backend
         await axios.post(`${API_BASE_URL}/users/submit-physics-lesson`, progressData);
         
+        // Update local progress
         const lessonKey = `${classId}-${chapterId}-${lessonId}`;
         const savedProgress = JSON.parse(localStorage.getItem(`physics-progress-${classId}`) || '{}');
         savedProgress[lessonKey] = 'completed';
         localStorage.setItem(`physics-progress-${classId}`, JSON.stringify(savedProgress));
       }
     } catch (error) {
-      console.error('❌ Error saving progress:', error);
+      console.error('Error saving task progress:', error);
     }
     
     navigate(`/physics-class/${classId}`);
@@ -154,311 +232,338 @@ const PhysicsLesson = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center relative">
-        <SolarSystemBackground />
-        <div className="relative z-10 flex flex-col items-center">
+      <div className="min-h-screen bg-[#e4f2f0] flex flex-col items-center justify-center relative">
+         <div className="absolute inset-0 opacity-[0.025] pointer-events-none graph-grid" />
+         <div className="relative z-10 flex flex-col items-center">
             <div className="w-24 h-24 relative flex items-center justify-center">
-               <div className="absolute inset-0 rounded-full border-t-2 border-cyan-500 animate-spin"></div>
-               <Orbit className="w-10 h-10 text-cyan-400 animate-pulse" />
+               <div className="absolute inset-0 rounded-full border-[4px] border-[#274dad]/20 border-t-[#274dad] animate-spin"></div>
+               <Orbit className="w-10 h-10 text-[#274dad] animate-pulse" />
             </div>
-            <h2 className="text-xl font-bold text-cyan-400 mt-4 tracking-wider">ĐANG GIẢI MÃ DỮ LIỆU...</h2>
+            <h2 className="text-xl font-black text-[#2a4095] mt-6 tracking-[0.2em] uppercase">Đang mở trạm kiến thức...</h2>
          </div>
       </div>
     );
   }
 
   if (!lessonData) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center relative">
-        <SolarSystemBackground />
-        <div className="relative z-10 max-w-lg w-full px-4">
-          <div className="bg-slate-900/80 backdrop-blur-xl border border-red-500/30 rounded-3xl p-10 text-center shadow-[0_0_50px_rgba(239,68,68,0.1)]">
-            <ShieldAlert className="w-16 h-16 text-red-500 mx-auto mb-6" />
-            <h2 className="text-3xl font-black text-white mb-4">Tệp Bị Lỗi</h2>
-            <p className="text-slate-400 mb-8 font-medium">Lệnh truy cập bị từ chối hoặc máy chủ không phản hồi tệp lý thuyết này.</p>
-            <button
-              onClick={() => navigate(`/physics-class/${classId}`)}
-              className="w-full px-6 py-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl font-bold transition-all"
-            >
-              Hủy bỏ & Quay lại
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return <div className="p-20 text-center">Không tìm thấy dữ liệu bài học.</div>;
   }
 
   return (
-    <div className="min-h-screen relative bg-slate-950 pb-20">
-      <div className="fixed inset-0 z-0">
-         <SolarSystemBackground />
-         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/80 to-slate-950"></div>
+    <div className="min-h-screen bg-white pb-20 relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-[#274dad]/5 blur-[120px] rounded-full" />
+         <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-[#e4f2f0] blur-[100px] rounded-full" />
+         <div className="absolute inset-0 graph-grid opacity-[0.03]" />
       </div>
 
-      <div className="relative z-10 container mx-auto max-w-5xl px-4 pt-8">
-        {/* Header - Holographic Style */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate(`/physics-class/${classId}`)}
-            className="group flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors font-medium mb-6 bg-cyan-950/30 px-5 py-2.5 rounded-full border border-cyan-800/50 w-fit backdrop-blur-md"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            NGẮT KẾT NỐI (QUAY LẠI)
-          </button>
-          
-          <div className="bg-slate-900/60 backdrop-blur-xl border border-cyan-500/20 rounded-3xl p-6 md:p-8 flex items-center gap-6 shadow-[0_0_40px_rgba(6,182,212,0.1)]">
-            <div className="w-20 h-20 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-[inset_0_0_20px_rgba(6,182,212,0.2)]">
-               <TerminalSquare className="w-10 h-10 text-cyan-400" />
-            </div>
-            <div>
-              <div className="inline-block px-3 py-1 rounded bg-slate-800 text-slate-300 text-xs font-bold tracking-widest mb-2 border border-slate-700">
-                 TỆP DỮ LIỆU {classId}.{chapterId}.{lessonId}
+      <div className="relative z-10 container mx-auto max-w-4xl px-4 pt-24">
+        
+        {/* Navigation Header */}
+        <div className="flex items-center justify-between mb-8">
+           <button
+             onClick={() => navigate(`/physics-class/${classId}`)}
+             className="flex items-center gap-2 text-[#274dad] font-bold hover:translate-x-1 transition-transform"
+           >
+             <ArrowLeft className="w-5 h-5" /> 
+             <span className="hidden sm:inline">Quay Lại Lớp Học</span>
+           </button>
+           
+           <div className="flex items-center gap-3">
+              <div className="px-4 py-1.5 rounded-full bg-white border border-[#274dad]/20 shadow-sm flex items-center gap-2">
+                 <Star className="w-4 h-4 text-blue-500 fill-blue-500" />
+                 <span className="text-sm font-black text-[#2a4095]">LỚP {classId}</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-black text-white leading-tight">
-                 {lessonData.title}
-              </h1>
-            </div>
-          </div>
+              <div className="px-4 py-1.5 rounded-full bg-[#274dad] text-white shadow-md flex items-center gap-2">
+                 <Zap className="w-4 h-4" />
+                 <span className="text-sm font-black uppercase tracking-wider">Bài {lessonId}</span>
+              </div>
+           </div>
         </div>
 
-        {/* Console Body */}
-        <div className="bg-slate-900/60 backdrop-blur-2xl border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
-          {/* Cyberpunk Tabs */}
-          <div className="flex border-b border-slate-700/50 bg-slate-950/50">
-            <button
-              onClick={() => setActiveTab('theory')}
-              className={`flex-1 py-5 px-6 font-bold tracking-wider transition-all focus:outline-none flex items-center justify-center gap-3 ${
-                activeTab === 'theory'
-                  ? 'bg-cyan-500/10 text-cyan-400 border-b-2 border-cyan-400 shadow-[inset_0_-20px_20px_-20px_rgba(34,211,238,0.3)]'
-                  : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
-              }`}
-            >
-              <BookOpen className="w-5 h-5" />
-              LÝ THUYẾT TRẠM
-            </button>
-            {exercises.length > 0 && (
-              <button
-                onClick={() => setActiveTab('exercises')}
-                className={`flex-1 py-5 px-6 font-bold tracking-wider transition-all focus:outline-none flex items-center justify-center gap-3 ${
-                  activeTab === 'exercises'
-                    ? 'bg-emerald-500/10 text-emerald-400 border-b-2 border-emerald-400 shadow-[inset_0_-20px_20px_-20px_rgba(52,211,153,0.3)]'
-                    : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
-                }`}
-              >
-                <Activity className="w-5 h-5" />
-                MÔ PHỎNG / BÀI TẬP ({exercises.length})
-              </button>
-            )}
-          </div>
-
-          <div className="p-6 md:p-10 relative">
-            {/* Theory Tab */}
-            {activeTab === 'theory' && (
-              <div className="animate-fade-in relative">
-                {/* 
-                  Enforcing text colors for theory html injection since it comes from DB.
-                  Applying !text-white / !text-slate-300 overrides. 
-                */}
-                <div 
-                  className="prose prose-lg prose-invert max-w-none text-slate-300 prose-headings:text-white prose-a:text-cyan-400 prose-strong:text-cyan-300 prose-code:text-emerald-400 [&_*]:!text-slate-200 [&_h1]:!text-white [&_h2]:!text-white [&_h3]:!text-white [&_strong]:!text-cyan-300"
-                  dangerouslySetInnerHTML={{ __html: lessonData.content.theory }}
-                />
+        {/* Station Navigation Rail */}
+        <div className="mb-12">
+           <div className="flex items-center justify-between relative px-2">
+              {/* Progress Line */}
+              <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-100 -translate-y-1/2 z-0 rounded-full" />
+              <div 
+                className="absolute top-1/2 left-0 h-1 bg-[#274dad]/40 -translate-y-1/2 z-0 rounded-full transition-all duration-700" 
+                style={{ width: `${((stationIndex / (STATIONS.length - 1)) * 100)}%` }}
+              />
+              
+              {STATIONS.map((s, idx) => {
+                const Icon = s.icon;
+                const isActive = stationIndex === idx;
+                const isCompleted = idx < stationIndex;
                 
-                {exercises.length > 0 ? (
-                  <div className="mt-12 text-center pt-8 border-t border-slate-800/50">
-                    <button
-                      onClick={() => setActiveTab('exercises')}
-                      className="px-10 py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 rounded-2xl font-black text-lg shadow-[0_0_30px_rgba(52,211,153,0.3)] hover:shadow-[0_0_50px_rgba(52,211,153,0.5)] transition-all transform hover:-translate-y-1"
+                return (
+                  <div key={idx} className="relative z-10 flex flex-col items-center">
+                    <div 
+                      className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-lg border-2 ${
+                        isActive 
+                          ? 'bg-[#274dad] border-[#274dad] text-white scale-110 -translate-y-1' 
+                          : isCompleted
+                            ? 'bg-white border-[#274dad] text-[#274dad]'
+                            : 'bg-white border-slate-200 text-slate-300'
+                      }`}
                     >
-                      BẮT ĐẦU KIỂM TRA MÔ PHỎNG
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-12 text-center pt-8 border-t border-slate-800/50">
-                    <button
-                      onClick={handleFinish}
-                      className="px-10 py-4 bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 rounded-2xl font-bold shadow-lg transition-all"
-                    >
-                      XÁC NHẬN ĐÃ ĐỌC
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Exercises Tab */}
-            {activeTab === 'exercises' && !isCompleted && (
-              <div className="max-w-3xl mx-auto animate-fade-in">
-                {/* Progress HUD */}
-                <div className="mb-10">
-                  <div className="flex justify-between items-center mb-3">
-                    <div className="flex items-center gap-2">
-                       <ShieldCheck className="w-4 h-4 text-slate-500" />
-                       <span className="text-sm font-bold text-slate-400 tracking-wider">
-                         GIAO THỨC {currentQuizIndex + 1} / {exercises.length}
-                       </span>
+                      <Icon className={`w-6 h-6 ${isActive ? 'animate-pulse' : ''}`} />
                     </div>
-                    <span className="text-sm font-black text-emerald-400 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-                      SCORE: {score} X
+                    <span className={`mt-3 text-[10px] font-black uppercase tracking-widest ${isActive ? 'text-[#274dad]' : 'text-slate-400'}`}>
+                      {s.label}
                     </span>
-                  </div>
-                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden shadow-inner flex">
-                    <div
-                      className="bg-emerald-500 h-1.5 shadow-[0_0_10px_rgba(52,211,153,0.8)] transition-all duration-500"
-                      style={{ width: `${((currentQuizIndex + 1) / exercises.length) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                {/* Question Hologram */}
-                <div className="bg-[#0f172a] border border-slate-700 rounded-3xl p-8 mb-8 relative shadow-2xl">
-                  {/* Decorative corners */}
-                  <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyan-500 rounded-tl-2xl"></div>
-                  <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-cyan-500 rounded-tr-2xl"></div>
-                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-cyan-500 rounded-bl-2xl"></div>
-                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-cyan-500 rounded-br-2xl"></div>
-
-                  <h3 className="text-xl md:text-2xl font-bold text-white mb-8 leading-snug">
-                    {currentExercise?.question}
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    {currentExercise?.options?.map((option, index) => {
-                       let stateClass = "border-slate-700 bg-slate-800/40 text-slate-300 hover:border-cyan-500/50 hover:bg-slate-800";
-                       let idxClass = "bg-slate-700 text-slate-400";
-
-                       if (showResult) {
-                         if (index === currentExercise.correctAnswer) {
-                            stateClass = "border-emerald-500 bg-emerald-500/10 text-white shadow-[0_0_15px_rgba(52,211,153,0.2)]";
-                            idxClass = "bg-emerald-500 text-slate-900";
-                         } else if (index === selectedAnswer) {
-                            stateClass = "border-red-500 bg-red-500/10 text-red-100 shadow-[0_0_15px_rgba(239,68,68,0.2)]";
-                            idxClass = "bg-red-500 text-white";
-                         } else {
-                            stateClass = "border-slate-800 bg-slate-900/50 text-slate-500 opacity-50";
-                         }
-                       } else if (selectedAnswer === index) {
-                         stateClass = "border-cyan-500 bg-cyan-500/10 text-cyan-50 shadow-[0_0_15px_rgba(6,182,212,0.2)] scale-[1.01]";
-                         idxClass = "bg-cyan-500 text-slate-900";
-                       }
-
-                       return (
-                        <button
-                          key={index}
-                          onClick={() => !showResult && handleAnswerSelect(index)}
-                          disabled={showResult}
-                          className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 flex items-center gap-4 ${stateClass}`}
-                        >
-                          <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black transition-colors ${idxClass}`}>
-                            {String.fromCharCode(65 + index)}
-                          </div>
-                          <span className="flex-1 font-medium text-lg leading-relaxed">{option}</span>
-                          
-                          {showResult && index === currentExercise.correctAnswer && (
-                            <CheckCircle className="w-8 h-8 text-emerald-400 drop-shadow-[0_0_5px_rgba(52,211,153,0.8)]" />
-                          )}
-                          {showResult && index === selectedAnswer && index !== currentExercise.correctAnswer && (
-                            <XCircle className="w-8 h-8 text-red-500 drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]" />
-                          )}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Info Panel after answering */}
-                {showResult && (
-                  <div className={`animate-slide-up rounded-2xl p-6 mb-8 border backdrop-blur-xl ${
-                    selectedAnswer === currentExercise.correctAnswer
-                      ? 'bg-emerald-500/10 border-emerald-500/30'
-                      : 'bg-red-500/10 border-red-500/30'
-                  }`}>
-                    <div className="flex items-center gap-3 mb-3">
-                      {selectedAnswer === currentExercise.correctAnswer ? (
-                        <>
-                          <CheckCircle className="w-6 h-6 text-emerald-400" />
-                          <span className="font-bold text-emerald-400 tracking-wider">HỆ THỐNG XÁC NHẬN ĐÚNG!</span>
-                        </>
-                      ) : (
-                        <>
-                          <ShieldAlert className="w-6 h-6 text-red-400 animate-pulse" />
-                          <span className="font-bold text-red-400 tracking-wider">DỮ LIỆU CẢNH BÁO SAI</span>
-                        </>
-                      )}
-                    </div>
-                    {currentExercise.explanation && (
-                      <p className="text-slate-300 font-medium leading-relaxed pl-9 border-l border-slate-700/50 py-1">
-                        {currentExercise.explanation}
-                      </p>
+                    {isCompleted && (
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                         <CheckCircle className="w-3 h-3 text-white" />
+                      </div>
                     )}
                   </div>
+                );
+              })}
+           </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="animate-station-enter">
+          <div className="card-premium p-8 md:p-12 mb-8 relative">
+             <div className="absolute top-0 right-0 p-8 opacity-[0.05] pointer-events-none">
+                <currentStation.icon className="w-32 h-32 text-[#274dad]" />
+             </div>
+
+             <div className="relative z-10">
+                <h1 className="text-3xl md:text-4xl font-black text-[#2a4095] mb-2">{lessonData.title}</h1>
+                <p className="text-slate-400 font-bold uppercase tracking-[0.3em] mb-10 border-b border-slate-100 pb-6 flex items-center gap-3">
+                   <Flag className={`w-5 h-5 text-${currentStation.color}-500`} />
+                   Trạm {stationIndex + 1}: {currentStation.label}
+                </p>
+
+                {/* STATION CONTENTS */}
+                
+                {/* 1. DISCOVERY */}
+                {currentStation.id === 'discovery' && (
+                  <div className="prose prose-lg prose-slate max-w-none prose-headings:text-[#2a4095] prose-strong:text-[#274dad]">
+                    <div dangerouslySetInnerHTML={{ __html: lessonData.content.theory }} />
+                    
+                    <div className="mt-12 flex justify-center">
+                       <button
+                         onClick={handleNextStation}
+                         className="pg-btn-brass flex items-center gap-3"
+                       >
+                         Khám Phá Xong, Tiếp Tục <ChevronRight className="w-5 h-5" />
+                       </button>
+                    </div>
+                  </div>
                 )}
 
-                {/* Controls */}
-                <div className="flex gap-4">
-                  {!showResult && selectedAnswer !== null && (
-                    <button
-                      onClick={handleCheckAnswer}
-                      className="flex-1 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl font-black tracking-widest hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all active:scale-95 text-lg"
-                    >
-                      XÁC NHẬN CHUỖI
-                    </button>
-                  )}
-                  
-                  {showResult && (
-                    <button
-                      onClick={handleNextQuestion}
-                      className="flex-1 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-900 rounded-2xl font-black tracking-widest hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] transition-all active:scale-95 text-lg"
-                    >
-                      {currentQuizIndex < exercises.length - 1 ? 'NẠP TIẾP TỤC DỮ LIỆU' : 'BÁO CÁO NHIỆM VỤ'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
+                {/* 2. ASSESSMENT (QUIZ) */}
+                {currentStation.id === 'assessment' && (
+                  <div>
+                    <div className="flex justify-between items-center mb-8">
+                       <span className="text-sm font-black text-slate-400">CÂU HỎI {currentQuizIndex + 1} / {lessonData.content.exercises.length}</span>
+                       <div className="h-2 w-32 bg-slate-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-500 transition-all duration-300" 
+                            style={{ width: `${((currentQuizIndex + 1) / lessonData.content.exercises.length) * 100}%` }}
+                          />
+                       </div>
+                    </div>
 
-            {/* Completion Terminal Screen */}
-            {isCompleted && (
-              <div className="text-center py-16 animate-zoom-in max-w-2xl mx-auto">
-                <div className="relative inline-block mb-8 group">
-                   <div className="absolute inset-0 bg-emerald-500/30 blur-[50px] rounded-full"></div>
-                   <div className="w-32 h-32 bg-slate-900 border-2 border-emerald-500 rounded-full flex items-center justify-center relative z-10 shadow-[inset_0_0_30px_rgba(52,211,153,0.3)]">
-                      <Trophy className="w-16 h-16 text-emerald-400" />
-                   </div>
-                </div>
-                
-                <h2 className="text-3xl font-black text-white mb-2 tracking-widest">
-                  GIAO THỨC HOÀN CHỈNH
-                </h2>
-                <p className="text-slate-400 font-medium mb-10 tracking-wide uppercase">
-                  Dữ liệu ghi nhận: {score}/{exercises.length} chính xác
+                    <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-8 leading-relaxed">
+                       {lessonData.content.exercises[currentQuizIndex].question}
+                    </h3>
+
+                    <div className="space-y-4">
+                       {lessonData.content.exercises[currentQuizIndex].options.map((opt, i) => {
+                          const isSelected = selectedAnswer === i;
+                          const isCorrect = i === lessonData.content.exercises[currentQuizIndex].correctAnswer;
+                          
+                          let className = "w-full p-5 rounded-2xl border-2 text-left transition-all flex items-center gap-4 font-medium ";
+                          
+                          if (showQuizResult) {
+                            if (isCorrect) className += "bg-emerald-50 border-emerald-500 text-emerald-800";
+                            else if (isSelected) className += "bg-red-50 border-red-500 text-red-800";
+                            else className += "bg-white border-slate-100 opacity-50";
+                          } else {
+                            className += isSelected 
+                              ? "bg-blue-50 border-[#274dad] text-[#2099e9] shadow-md" 
+                              : "bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50";
+                          }
+
+                          return (
+                            <button key={i} onClick={() => handleQuizAnswer(i)} className={className}>
+                               <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0 ${
+                                 isSelected ? 'bg-[#274dad] text-white' : 'bg-slate-100 text-slate-400'
+                               }`}>
+                                  {String.fromCharCode(65 + i)}
+                               </div>
+                               <span className="flex-1">{opt}</span>
+                               {showQuizResult && isCorrect && <CheckCircle className="w-6 h-6 text-emerald-500" />}
+                               {showQuizResult && isSelected && !isCorrect && <XCircle className="w-6 h-6 text-red-500" />}
+                            </button>
+                          );
+                       })}
+                    </div>
+
+                    {showQuizResult && (
+                      <div className="mt-8 p-6 bg-slate-50 rounded-2xl border-2 border-slate-100 animate-fade-in">
+                         <h4 className="font-black text-[#2a4095] mb-2 uppercase text-xs tracking-widest flex items-center gap-2">
+                           <Info className="w-4 h-4" /> Giải thích khoa học
+                         </h4>
+                         <p className="text-slate-600 italic leading-relaxed text-sm">
+                           {lessonData.content.exercises[currentQuizIndex].explanation}
+                         </p>
+                      </div>
+                    )}
+
+                    <div className="mt-10 flex gap-4">
+                       {!showQuizResult ? (
+                         <button
+                           disabled={selectedAnswer === null}
+                           onClick={checkQuizAnswer}
+                           className="flex-1 pg-btn-brass disabled:opacity-50 disabled:grayscale transition-all"
+                         >
+                           Xác Nhận Giải Mã
+                         </button>
+                       ) : (
+                         <button
+                           onClick={nextQuiz}
+                           className="flex-1 py-4 bg-[#2a4095] text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
+                         >
+                           {currentQuizIndex < lessonData.content.exercises.length - 1 ? 'Câu Tiếp Theo' : 'Hoàn Thành Trạm'}
+                           <ChevronRight className="w-5 h-5" />
+                         </button>
+                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. APPLICATION (ESSAY) */}
+                {currentStation.id === 'application' && (
+                  <div className="space-y-8">
+                     <div className="p-6 bg-emerald-50 border-2 border-emerald-100 rounded-2xl flex gap-4">
+                        <Award className="w-10 h-10 text-emerald-600 flex-shrink-0" />
+                        <div>
+                           <h4 className="font-bold text-emerald-900 mb-1">Thử Thách Vận Dụng</h4>
+                           <p className="text-emerald-700 text-sm">Hãy tự trả lời câu hỏi bên dưới để củng cố kiến thực và nhận thêm điểm kinh nghiệm.</p>
+                        </div>
+                     </div>
+
+                     <div className="bg-white border-2 border-slate-100 p-8 rounded-3xl shadow-sm">
+                        <p className="text-xl font-bold text-slate-800 mb-6 leading-relaxed">
+                           {lessonData.content.essay?.question || "Dựa vào kiến thức đã học, hãy phân tích tầm quan trọng của bài học này đối với cuộc sống?"}
+                        </p>
+                        
+                        <textarea
+                          value={essayResponse}
+                          onChange={(e) => setEssayResponse(e.target.value)}
+                          disabled={isEssaySubmitted}
+                          placeholder="Nhập suy nghĩ của bạn tại đây..."
+                          className="w-full h-40 p-6 rounded-2xl border-2 border-slate-100 focus:border-[#274dad] focus:ring-0 transition-all font-medium text-slate-700 text-lg"
+                        />
+
+                        <div className="mt-4 flex justify-between items-center text-sm">
+                           <span className={essayResponse.length >= 10 ? 'text-emerald-600 font-bold' : 'text-slate-400'}>
+                             {essayResponse.length} / 10 ký tự tối thiểu
+                           </span>
+                           {essayResponse.length > 0 && essayResponse.length < 10 && (
+                             <span className="text-blue-600 font-bold animate-pulse flex items-center gap-1">
+                               <Info className="w-4 h-4" /> Câu trả lời hơi ngắn nè!
+                             </span>
+                           )}
+                        </div>
+
+                        {!isEssaySubmitted ? (
+                          <button
+                            onClick={() => {
+                              if (essayResponse.length >= 10) {
+                                setIsEssaySubmitted(true);
+                              }
+                            }}
+                            disabled={essayResponse.length < 10}
+                            className={`mt-6 w-full py-4 rounded-2xl font-black shadow-lg transition-all flex items-center justify-center gap-3 ${
+                              essayResponse.length >= 10 
+                                ? 'bg-emerald-600 text-white hover:bg-emerald-700' 
+                                : 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-70'
+                            }`}
+                          >
+                            {essayResponse.length < 10 ? 'Cần thêm thông tin...' : 'Gửi Câu Trả Lời'} 
+                            <Send className="w-5 h-5" />
+                          </button>
+                        ) : (
+                          <div className="mt-10 animate-fade-in">
+                             <div className="p-6 bg-slate-50 border-2 border-emerald-500/20 rounded-2xl mb-8">
+                                <h4 className="font-bold text-[#2a4095] mb-4 text-sm uppercase tracking-widest">Gợi ý câu trả lời lý tưởng:</h4>
+                                <p className="text-slate-600 line-relaxed font-medium italic">
+                                  {lessonData.content.essay?.sampleAnswer}
+                                </p>
+                             </div>
+                             <button
+                               onClick={handleNextStation}
+                               className="w-full pg-btn-brass"
+                             >
+                               Tiến Tới Trạm Cuối Cùng
+                             </button>
+                          </div>
+                        )}
+                     </div>
+                  </div>
+                )}
+
+                {/* 4. SUMMARY */}
+                {currentStation.id === 'summary' && (
+                  <div className="text-center py-10">
+                     <div className="relative inline-block mb-10">
+                        <div className="absolute inset-0 bg-blue-400 blur-3xl opacity-20" />
+                        <div className="w-40 h-40 bg-white border-4 border-[#274dad] shadow-2xl rounded-full flex items-center justify-center relative z-10 mx-auto">
+                           <Trophy className="w-20 h-20 text-[#274dad]" />
+                        </div>
+                     </div>
+
+                     <h2 className="text-4xl font-black text-[#2a4095] mb-4">Chúc Mừng Bạn!</h2>
+                     <p className="text-slate-500 font-medium mb-12 max-w-md mx-auto text-lg">
+                        Bạn đã xuất sắc vượt qua các trạm của bài học <strong>${lessonData.title}</strong>. 
+                        Kết quả đã được đồng bộ vào học bạ của bạn.
+                     </p>
+
+                     <div className="grid grid-cols-2 gap-6 max-w-sm mx-auto mb-16">
+                        <div className="p-6 bg-white border-2 border-slate-100 rounded-3xl shadow-sm">
+                           <p className="text-[#274dad] text-4xl font-black mb-1">{quizScore}/{lessonData.content.exercises.length}</p>
+                           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Độ Chính Xác</p>
+                        </div>
+                        <div className="p-6 bg-white border-2 border-slate-100 rounded-3xl shadow-sm">
+                           <p className="text-emerald-600 text-4xl font-black mb-1">+{quizScore * 50}</p>
+                           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Điểm Kinh Nghiệm</p>
+                        </div>
+                     </div>
+
+                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button
+                          onClick={handleFinish}
+                          className="px-10 py-4 pg-btn-brass min-w-[240px]"
+                        >
+                          Lưu Kết Quả & Trở Về
+                        </button>
+                     </div>
+                  </div>
+                )}
+             </div>
+          </div>
+          
+          {/* Station Assistance Info (Dynamic) */}
+          <div className="flex items-center gap-4 p-6 bg-blue-50 border border-blue-100 rounded-3xl">
+             <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center flex-shrink-0">
+                <Info className="w-6 h-6 text-blue-500" />
+             </div>
+             <div>
+                <p className="text-blue-900 text-sm font-bold">Mẹo từ Robot Hỗ Trợ:</p>
+                <p className="text-blue-800 text-xs">
+                   {stationIndex === 0 && "Hãy đọc kỹ lý thuyết trước khi bước vào trạm đánh giá để đạt điểm cao nhất nhé!"}
+                   {stationIndex === 1 && "Đừng lo lắng, hãy suy nghĩ logic để giải mã các câu hỏi trắc nghiệm."}
+                   {stationIndex === 2 && "Đây là cơ hội để bạn thể hiện tư duy và hiểu biết thực tế của mình."}
+                   {stationIndex === 3 && "Kết quả này sẽ được lưu mãi mãi để ghi nhận sự nỗ lực của bạn."}
                 </p>
-                
-                <div className="grid grid-cols-2 gap-6 max-w-md mx-auto mb-12">
-                   <div className="bg-slate-900 border border-slate-700/50 rounded-2xl p-6 relative overflow-hidden group">
-                      <div className="absolute -inset-1 bg-gradient-to-br from-emerald-500/20 to-transparent blur-xl pointer-events-none group-hover:from-emerald-500/40 transition-colors"></div>
-                      <div className="text-4xl font-black text-emerald-400 relative z-10 mb-1">
-                        {Math.round((score / exercises.length) * 100)}%
-                      </div>
-                      <div className="text-xs font-bold text-slate-500 uppercase tracking-widest relative z-10">Độ Khớp</div>
-                   </div>
-                   <div className="bg-slate-900 border border-slate-700/50 rounded-2xl p-6 relative overflow-hidden group">
-                      <div className="absolute -inset-1 bg-gradient-to-br from-cyan-500/20 to-transparent blur-xl pointer-events-none group-hover:from-cyan-500/40 transition-colors"></div>
-                      <div className="text-4xl font-black text-cyan-400 relative z-10 mb-1">
-                        +{score * 10}
-                      </div>
-                      <div className="text-xs font-bold text-slate-500 uppercase tracking-widest relative z-10">Năng Lượng</div>
-                   </div>
-                </div>
-
-                <button
-                  onClick={handleFinish}
-                  className="px-10 py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-900 rounded-3xl font-black shadow-[0_0_30px_rgba(52,211,153,0.4)] hover:shadow-[0_0_50px_rgba(52,211,153,0.6)] transition-all transform hover:-translate-y-1 active:scale-95 text-lg inline-flex items-center gap-3 tracking-widest"
-                >
-                  XÁC NHẬN LƯU VÀO CSDL
-                </button>
-              </div>
-            )}
+             </div>
           </div>
         </div>
       </div>
@@ -467,3 +572,5 @@ const PhysicsLesson = () => {
 };
 
 export default PhysicsLesson;
+
+

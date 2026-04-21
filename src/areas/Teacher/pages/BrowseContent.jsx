@@ -123,7 +123,7 @@ const BrowseContent = () => {
             <div className="flex items-start justify-between mb-4">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${
                 activeTab === 'lessons' ? 'from-emerald-500 to-teal-600' :
-                activeTab === 'exercises' ? 'from-amber-500 to-orange-600' :
+                activeTab === 'exercises' ? 'from-blue-500 to-orange-600' :
                 'from-violet-500 to-purple-600'
               }`}>
                 {activeTab === 'lessons' && <BookOpen className="w-6 h-6 text-white" />}
@@ -153,7 +153,7 @@ const BrowseContent = () => {
                 </span>
               )}
               {item.rating && (
-                <span className="flex items-center gap-1 text-amber-400">
+                <span className="flex items-center gap-1 text-blue-400">
                   <Star className="w-4 h-4 fill-current" />
                   {item.rating}
                 </span>
@@ -197,3 +197,4 @@ const BrowseContent = () => {
 };
 
 export default BrowseContent;
+

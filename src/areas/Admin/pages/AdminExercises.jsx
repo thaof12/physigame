@@ -32,7 +32,7 @@ const typeLabels = {
 
 const difficultyColors = {
   easy: 'bg-emerald-500/20 text-emerald-400',
-  medium: 'bg-amber-500/20 text-amber-400',
+  medium: 'bg-blue-500/20 text-blue-400',
   hard: 'bg-red-500/20 text-red-400'
 };
 
@@ -219,3 +219,5 @@ const AdminExercises = () => {
 };
 
 export default AdminExercises;
+
+

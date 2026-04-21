@@ -81,7 +81,7 @@ const PhysicsGradeGames = () => {
       case 'easy':
         return 'bg-green-100 text-green-700';
       case 'medium':
-        return 'bg-yellow-100 text-yellow-700';
+        return 'bg-blue-100 text-yellow-700';
       case 'hard':
         return 'bg-red-100 text-red-700';
       default:
@@ -115,7 +115,7 @@ const PhysicsGradeGames = () => {
   const chapters = Object.keys(gamesByChapter).sort();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-pink-50">
       {/* Header */}
       <div className={`bg-gradient-to-r ${currentGrade.color} text-white`}>
         <div className="container mx-auto px-4 pt-24 pb-8">
@@ -300,3 +300,4 @@ const PhysicsGradeGames = () => {
 };
 
 export default PhysicsGradeGames;
+

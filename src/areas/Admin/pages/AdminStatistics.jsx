@@ -39,7 +39,7 @@ const AdminStatistics = () => {
   const overviewStats = [
     { label: 'Người dùng mới', value: 342, change: 12.5, up: true, icon: Users, color: 'from-indigo-500 to-violet-600' },
     { label: 'Bài học được xem', value: '18.5K', change: 8.3, up: true, icon: BookOpen, color: 'from-emerald-500 to-teal-600' },
-    { label: 'Bài tập hoàn thành', value: '42.3K', change: 15.2, up: true, icon: FileQuestion, color: 'from-amber-500 to-orange-600' },
+    { label: 'Bài tập hoàn thành', value: '42.3K', change: 15.2, up: true, icon: FileQuestion, color: 'from-blue-500 to-orange-600' },
     { label: 'Thời gian học TB', value: '32 phút', change: 3.1, up: false, icon: Clock, color: 'from-rose-500 to-pink-600' }
   ];
 
@@ -184,9 +184,9 @@ const AdminStatistics = () => {
                 <tr key={student.id} className="hover:bg-slate-800/30">
                   <td className="px-4 py-3">
                     <span className={`w-6 h-6 flex items-center justify-center rounded-lg text-xs font-bold ${
-                      index === 0 ? 'bg-amber-500/20 text-amber-400' :
+                      index === 0 ? 'bg-blue-500/20 text-blue-400' :
                       index === 1 ? 'bg-slate-400/20 text-slate-300' :
-                      index === 2 ? 'bg-orange-500/20 text-orange-400' :
+                      index === 2 ? 'bg-cyan-500/20 text-orange-400' :
                       'bg-slate-700/50 text-slate-400'
                     }`}>
                       {index + 1}
@@ -220,3 +220,5 @@ const AdminStatistics = () => {
 };
 
 export default AdminStatistics;
+
+

@@ -127,8 +127,8 @@ const AdminSettings = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-amber-500/20 rounded-lg">
-                          <AlertTriangle className="w-5 h-5 text-amber-400" />
+                        <div className="p-2 bg-blue-500/20 rounded-lg">
+                          <AlertTriangle className="w-5 h-5 text-blue-400" />
                         </div>
                         <div>
                           <p className="font-medium text-white">Chế độ bảo trì</p>
@@ -138,7 +138,7 @@ const AdminSettings = () => {
                       <button
                         onClick={() => setSettings({ ...settings, maintenanceMode: !settings.maintenanceMode })}
                         className={`relative w-12 h-6 rounded-full transition-colors ${
-                          settings.maintenanceMode ? 'bg-amber-500' : 'bg-slate-700'
+                          settings.maintenanceMode ? 'bg-blue-500' : 'bg-slate-700'
                         }`}
                       >
                         <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
@@ -338,3 +338,5 @@ const AdminSettings = () => {
 };
 
 export default AdminSettings;
+
+

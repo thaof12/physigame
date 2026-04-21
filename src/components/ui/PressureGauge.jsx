@@ -42,7 +42,7 @@ const PressureGauge = ({ pressure = 30, isLoading = false }) => {
     <div className="fixed bottom-4 right-4 z-50 select-none" title={`Áp suất hệ thống: ${Math.round(displayedPressure)}%`}>
       <div className="relative w-28 h-28">
         {/* Vỏ đồng hồ - Brass ring */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#c8a060] via-[#8C5523] to-[#4a2c0a] shadow-[0_0_20px_rgba(0,0,0,0.8),inset_0_2px_4px_rgba(255,255,255,0.2)] border-4 border-[#a07040]" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#c8a060] via-[#2099e9] to-[#4a2c0a] shadow-[0_0_20px_rgba(0,0,0,0.8),inset_0_2px_4px_rgba(255,255,255,0.2)] border-4 border-[#a07040]" />
 
         {/* Mặt đồng hồ */}
         <div className="absolute inset-2 rounded-full bg-[#0a0f0a] shadow-inner overflow-hidden">
@@ -77,7 +77,7 @@ const PressureGauge = ({ pressure = 30, isLoading = false }) => {
             </g>
 
             {/* Tâm */}
-            <circle cx="50" cy="50" r="4" fill="#B87333" stroke="#a07040" strokeWidth="1" />
+            <circle cx="50" cy="50" r="4" fill="#274dad" stroke="#a07040" strokeWidth="1" />
 
             {/* Text chỉ số */}
             <text x="50" y="70" fill={isRed ? '#ef4444' : '#94a3b8'} fontSize="9" textAnchor="middle" fontFamily="monospace" fontWeight="bold">
@@ -100,9 +100,10 @@ const PressureGauge = ({ pressure = 30, isLoading = false }) => {
       </div>
 
       {/* Label */}
-      <p className="text-center text-[10px] text-[#8C5523] font-mono mt-1 tracking-wider uppercase">Áp Kế</p>
+      <p className="text-center text-[10px] text-[#2099e9] font-mono mt-1 tracking-wider uppercase">Áp Kế</p>
     </div>
   );
 };
 
 export default PressureGauge;
+

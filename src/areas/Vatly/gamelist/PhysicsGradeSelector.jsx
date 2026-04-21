@@ -26,8 +26,8 @@ const gradeConfig = [
   },
   {
     id: 9, name: 'Lớp 9', description: 'Điện từ & Sóng cơ',
-    color: 'from-amber-500 to-orange-500', glow: 'rgba(245,158,11,0.3)',
-    borderHover: 'hover:border-amber-500/50', icon: '🌊'
+    color: 'from-blue-500 to-cyan-500', glow: 'rgba(245,158,11,0.3)',
+    borderHover: 'hover:border-blue-500/50', icon: '🌊'
   },
   {
     id: 10, name: 'Lớp 10', description: 'Động học & Nhiệt động lực học',
@@ -98,7 +98,7 @@ const PhysicsGradeSelector = () => {
                 {[
                   { icon: BookOpen, value: '7', label: 'CẤP LỚP', color: 'text-blue-400' },
                   { icon: Gamepad2, value: totalGames.toString(), label: 'TỔNG GAME', color: 'text-purple-400' },
-                  { icon: Trophy, value: '0', label: 'HOÀN THÀNH', color: 'text-amber-400' },
+                  { icon: Trophy, value: '0', label: 'HOÀN THÀNH', color: 'text-blue-400' },
                 ].map((stat, i) => {
                   const Icon = stat.icon;
                   return (
@@ -238,3 +238,4 @@ const PhysicsGradeSelector = () => {
 };
 
 export default PhysicsGradeSelector;
+

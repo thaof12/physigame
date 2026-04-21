@@ -21,8 +21,8 @@ const PhysicsClasses = () => {
   }, [user, navigate]);
 
   return (
-    <div className="bg-[#FDFCF8] font-sans overflow-x-hidden min-h-screen selection:bg-[#B87333]/20 selection:text-[#4A3728]">
-      <section className="py-24 sm:py-32 bg-[#FDFCF8] relative overflow-hidden">
+    <div className="bg-[#FFFFFF] font-sans overflow-x-hidden min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728]">
+      <section className="py-24 sm:py-32 bg-[#FFFFFF] relative overflow-hidden">
         <div className="absolute inset-0 graph-grid opacity-[0.2] pointer-events-none" />
 
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative z-10 text-center">
@@ -97,10 +97,10 @@ const PhysicsClasses = () => {
                     alt={card.title}
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#B87333]/10 to-transparent group-hover:opacity-40 transition-opacity" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#274dad]/10 to-transparent group-hover:opacity-40 transition-opacity" />
 
                   {/* Grade Badge */}
-                  <div className="absolute top-5 left-5 px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur-md border border-white/50 text-[#8C5523] font-black text-[9px] tracking-[0.1em] uppercase shadow-sm">
+                  <div className="absolute top-5 left-5 px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur-md border border-white/50 text-[#2099e9] font-black text-[9px] tracking-[0.1em] uppercase shadow-sm">
                     {card.grades}
                   </div>
 
@@ -112,14 +112,14 @@ const PhysicsClasses = () => {
 
                 {/* Content */}
                 <div className="p-8 text-left">
-                  <h3 className="text-xl font-black text-[#1E293B] mb-3 group-hover:text-[#B87333] transition-colors leading-tight">
+                  <h3 className="text-xl font-black text-[#1E293B] mb-3 group-hover:text-[#274dad] transition-colors leading-tight">
                     {card.title}
                   </h3>
                   <p className="text-slate-500 font-medium leading-relaxed text-[13px]">
                     {card.desc}
                   </p>
 
-                  <div className="mt-6 flex items-center gap-2 text-[#B87333] font-black text-[10px] tracking-widest uppercase group-hover:gap-4 transition-all">
+                  <div className="mt-6 flex items-center gap-2 text-[#274dad] font-black text-[10px] tracking-widest uppercase group-hover:gap-4 transition-all">
                     Bắt đầu học <ChevronRight className="w-4 h-4" />
                   </div>
                 </div>
@@ -133,3 +133,4 @@ const PhysicsClasses = () => {
 };
 
 export default PhysicsClasses;
+

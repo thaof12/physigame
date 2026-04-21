@@ -171,12 +171,12 @@ const PendingTeachersTab = () => {
         <div
           onClick={() => setTeacherFilter('pending')}
           className={`bg-slate-900/50 backdrop-blur border rounded-xl p-4 cursor-pointer transition-all ${
-            teacherFilter === 'pending' ? 'border-amber-500/50 bg-amber-500/5' : 'border-slate-800/50 hover:border-slate-700/50'
+            teacherFilter === 'pending' ? 'border-blue-500/50 bg-blue-500/5' : 'border-slate-800/50 hover:border-slate-700/50'
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-amber-500/20 rounded-lg">
-              <Clock className="w-5 h-5 text-amber-400" />
+            <div className="p-2.5 bg-blue-500/20 rounded-lg">
+              <Clock className="w-5 h-5 text-blue-400" />
             </div>
             <div>
               <p className="text-2xl font-bold text-white">{pendingTeachers.length}</p>
@@ -291,14 +291,14 @@ const PendingTeachersTab = () => {
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 {/* Teacher info */}
                 <div className="flex items-start gap-4 flex-1">
-                  <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shrink-0">
+                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-orange-600 rounded-2xl flex items-center justify-center shrink-0">
                     <GraduationCap className="w-7 h-7 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <h4 className="text-white font-medium">{teacher.displayName || teacher.username}</h4>
                       <span className={`px-2 py-0.5 rounded-lg text-xs font-medium ${
-                        teacher.teacherStatus === 'pending' ? 'bg-amber-500/20 text-amber-400' :
+                        teacher.teacherStatus === 'pending' ? 'bg-blue-500/20 text-blue-400' :
                         teacher.teacherStatus === 'verified' ? 'bg-emerald-500/20 text-emerald-400' :
                         'bg-red-500/20 text-red-400'
                       }`}>
@@ -560,8 +560,8 @@ const AdminUsers = () => {
             </div>
             <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-xl p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-amber-500/20 rounded-lg">
-                  <GraduationCap className="w-5 h-5 text-amber-400" />
+                <div className="p-2.5 bg-blue-500/20 rounded-lg">
+                  <GraduationCap className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{stats.teachers}</p>
@@ -621,7 +621,7 @@ const AdminUsers = () => {
                 <button className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg text-sm hover:bg-emerald-500/30 transition-colors">
                   Kích hoạt
                 </button>
-                <button className="px-3 py-1.5 bg-amber-500/20 text-amber-400 rounded-lg text-sm hover:bg-amber-500/30 transition-colors">
+                <button className="px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/30 transition-colors">
                   Vô hiệu hóa
                 </button>
                 <button className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 transition-colors">
@@ -668,7 +668,7 @@ const AdminUsers = () => {
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                             user.role === 'teacher'
-                              ? 'bg-gradient-to-br from-amber-500 to-orange-600'
+                              ? 'bg-gradient-to-br from-blue-500 to-orange-600'
                               : 'bg-gradient-to-br from-indigo-500 to-violet-600'
                           }`}>
                             {user.role === 'teacher' ? (
@@ -686,7 +686,7 @@ const AdminUsers = () => {
                       <td className="px-4 py-4">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ${
                           user.role === 'teacher'
-                            ? 'bg-amber-500/20 text-amber-400'
+                            ? 'bg-blue-500/20 text-blue-400'
                             : 'bg-indigo-500/20 text-indigo-400'
                         }`}>
                           {user.role === 'teacher' ? (
@@ -707,7 +707,7 @@ const AdminUsers = () => {
                           user.status === 'active'
                             ? 'bg-emerald-500/20 text-emerald-400'
                             : user.status === 'pending'
-                            ? 'bg-amber-500/20 text-amber-400'
+                            ? 'bg-blue-500/20 text-blue-400'
                             : 'bg-slate-500/20 text-slate-400'
                         }`}>
                           {user.status === 'active' ? (
@@ -717,7 +717,7 @@ const AdminUsers = () => {
                             </>
                           ) : user.status === 'pending' ? (
                             <>
-                              <span className="w-1.5 h-1.5 bg-amber-400 rounded-full"></span>
+                              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                               Chờ xác nhận
                             </>
                           ) : (
@@ -826,7 +826,7 @@ const AdminUsers = () => {
               <div className="flex items-center gap-4">
                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
                   showUserDetail.role === 'teacher'
-                    ? 'bg-gradient-to-br from-amber-500 to-orange-600'
+                    ? 'bg-gradient-to-br from-blue-500 to-orange-600'
                     : 'bg-gradient-to-br from-indigo-500 to-violet-600'
                 }`}>
                   {showUserDetail.role === 'teacher' ? (
@@ -897,3 +897,5 @@ const AdminUsers = () => {
 };
 
 export default AdminUsers;
+
+

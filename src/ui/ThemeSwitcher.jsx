@@ -6,7 +6,7 @@ export default function ThemeSwitcher() {
   const { theme, toggleTheme } = useContext(ThemeContext);
 
   const themes = [
-    { value: "light", label: "Sáng", icon: Sun, color: "text-yellow-500" },
+    { value: "light", label: "Sáng", icon: Sun, color: "text-blue-500" },
     { value: "dark", label: "Tối", icon: Moon, color: "text-blue-400" },
     { value: "neon", label: "Neon", icon: Sparkles, color: "text-cyan-400" },
   ];
@@ -35,3 +35,4 @@ export default function ThemeSwitcher() {
     </div>
   );
 }
+

@@ -202,7 +202,7 @@ const CalculatorInput = ({ formula, solveFor, onSolveForChange, onValuesChange, 
       </div>
 
       {/* Gợi ý nhập liệu */}
-      <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
         <p className="text-sm text-yellow-800">
           💡 <strong>Mẹo:</strong> Bạn có thể nhập số mũ bằng cách dùng ký tự "e" 
           (VD: 3e8 = 3×10⁸) hoặc "^" (VD: 10^-6 = 10⁻⁶)
@@ -213,3 +213,4 @@ const CalculatorInput = ({ formula, solveFor, onSolveForChange, onValuesChange, 
 };
 
 export default CalculatorInput;
+

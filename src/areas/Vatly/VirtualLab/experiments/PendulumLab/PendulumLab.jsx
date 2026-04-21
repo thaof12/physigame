@@ -441,7 +441,7 @@ const PendulumLab = () => {
                     value={mass}
                     onChange={(e) => setMass(parseFloat(e.target.value))}
                     disabled={experimentState !== 'setup'}
-                    className="w-full accent-yellow-500"
+                    className="w-full accent-blue-500"
                   />
                   <div className="text-center text-lg font-mono text-yellow-400 param-value">
                     {mass.toFixed(1)} kg
@@ -683,3 +683,4 @@ const PendulumLab = () => {
 };
 
 export default PendulumLab;
+

@@ -195,7 +195,7 @@ const TeacherDashboard = () => {
                   
                   <div className="flex items-center gap-4">
                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                       activity.status === 'active' ? 'bg-[#2099e9]/10 text-[#2099e9]' : 'bg-amber-500/10 text-amber-500'
+                       activity.status === 'active' ? 'bg-[#2099e9]/10 text-[#2099e9]' : 'bg-blue-500/10 text-blue-500'
                      }`}>
                         {activity.status === 'active' ? 'Đã duyệt' : 'Chờ duyệt'}
                      </span>
@@ -287,3 +287,5 @@ const TeacherDashboard = () => {
 };
 
 export default TeacherDashboard;
+
+

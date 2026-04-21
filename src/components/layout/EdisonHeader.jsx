@@ -21,7 +21,7 @@ const EdisonHeader = ({ completedBulbs = 3, totalBulbs = 10, isActive = false, t
   }, [completedBulbs, totalBulbs, isActive]);
 
   return (
-    <div className="relative w-full h-14 flex items-center bg-gradient-to-b from-[#1a0e05] to-[#0f0a03] border-b-4 border-[#B87333] shadow-[0_4px_20px_rgba(0,0,0,0.8)] overflow-hidden z-30 flex-shrink-0">
+    <div className="relative w-full h-14 flex items-center bg-gradient-to-b from-[#1a0e05] to-[#0f0a03] border-b-4 border-[#274dad] shadow-[0_4px_20px_rgba(0,0,0,0.8)] overflow-hidden z-30 flex-shrink-0">
 
       {/* Nền mặt bàn gỗ cho header */}
       <div className="absolute inset-0 opacity-20"
@@ -29,12 +29,12 @@ const EdisonHeader = ({ completedBulbs = 3, totalBulbs = 10, isActive = false, t
       />
 
       {/* Thanh đồng (Copper Busbar) chạy ngang */}
-      <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-2 bg-gradient-to-b from-[#FFD700] via-[#B87333] to-[#8C5523] shadow-[0_0_8px_rgba(184,115,51,0.6)] z-0" />
+      <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-2 bg-gradient-to-b from-[#FFD700] via-[#274dad] to-[#2099e9] shadow-[0_0_8px_rgba(184,115,51,0.6)] z-0" />
 
       {/* Nút Back / Logo */}
-      <div className="relative z-10 flex items-center gap-2 pl-3 pr-4 h-full border-r border-[#B87333]/50 flex-shrink-0">
+      <div className="relative z-10 flex items-center gap-2 pl-3 pr-4 h-full border-r border-[#274dad]/50 flex-shrink-0">
         {onBack && (
-          <button onClick={onBack} className="w-7 h-7 rounded-full bg-[#1e293b] border border-[#B87333] text-[#FFD700] text-xs flex items-center justify-center hover:bg-[#B87333]/30 transition-colors">
+          <button onClick={onBack} className="w-7 h-7 rounded-full bg-[#1e293b] border border-[#274dad] text-[#FFD700] text-xs flex items-center justify-center hover:bg-[#274dad]/30 transition-colors">
             ←
           </button>
         )}
@@ -51,7 +51,7 @@ const EdisonHeader = ({ completedBulbs = 3, totalBulbs = 10, isActive = false, t
               <div className={`w-[1.5px] h-2 ${isLit ? 'bg-[#FFD700]' : 'bg-[#475569]'} transition-colors duration-500`} />
 
               {/* Đuôi bóng (bulb base - E27 cap) */}
-              <div className={`w-4 h-2 rounded-sm ${isLit ? 'bg-gradient-to-b from-[#92400e] to-[#451a03]' : 'bg-[#1e293b]'} border ${isLit ? 'border-[#B87333]' : 'border-[#334155]'} transition-all duration-500`} />
+              <div className={`w-4 h-2 rounded-sm ${isLit ? 'bg-gradient-to-b from-[#92400e] to-[#451a03]' : 'bg-[#1e293b]'} border ${isLit ? 'border-[#274dad]' : 'border-[#334155]'} transition-all duration-500`} />
 
               {/* Bóng đèn (bulb glass) */}
               <div className={`w-5 h-6 rounded-t-full relative overflow-hidden transition-all duration-700 ${isLit
@@ -74,10 +74,10 @@ const EdisonHeader = ({ completedBulbs = 3, totalBulbs = 10, isActive = false, t
       </div>
 
       {/* ─── Galvanometer (Điện kế) ─── */}
-      <div className="relative z-10 flex flex-col items-center justify-center pr-3 pl-2 h-full border-l border-[#B87333]/50 flex-shrink-0" title="Điện kế - đo cường độ học tập">
+      <div className="relative z-10 flex flex-col items-center justify-center pr-3 pl-2 h-full border-l border-[#274dad]/50 flex-shrink-0" title="Điện kế - đo cường độ học tập">
         <svg width="44" height="44" viewBox="0 0 44 44">
           {/* Mặt đồng hồ */}
-          <circle cx="22" cy="22" r="18" fill="#0f172a" stroke="#B87333" strokeWidth="2" />
+          <circle cx="22" cy="22" r="18" fill="#0f172a" stroke="#274dad" strokeWidth="2" />
 
           {/* Vạch chia */}
           {[-60, -40, -20, 0, 20, 40, 60].map((a, i) => {
@@ -98,7 +98,7 @@ const EdisonHeader = ({ completedBulbs = 3, totalBulbs = 10, isActive = false, t
             <line x1="22" y1="22" x2="22" y2="8" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" />
             <line x1="22" y1="22" x2="22" y2="27" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
           </g>
-          <circle cx="22" cy="22" r="2.5" fill="#B87333" stroke="#FFD700" strokeWidth="0.5" />
+          <circle cx="22" cy="22" r="2.5" fill="#274dad" stroke="#FFD700" strokeWidth="0.5" />
 
           {/* Label G */}
           <text x="22" y="35" textAnchor="middle" fill="#475569" fontSize="5" fontFamily="monospace">G</text>
@@ -110,3 +110,4 @@ const EdisonHeader = ({ completedBulbs = 3, totalBulbs = 10, isActive = false, t
 };
 
 export default EdisonHeader;
+

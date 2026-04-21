@@ -41,18 +41,18 @@ const PulleyLift = ({ grades = [6, 7, 8, 9, 10, 11, 12], activeGrade, onSelect }
   useEffect(() => () => cancelAnimationFrame(animFrameRef.current), []);
 
   return (
-    <div className="w-28 md:w-36 h-full flex flex-col items-center relative overflow-hidden bg-gradient-to-b from-[#0f1923] to-[#060d13] border-r-2 border-[#B87333]/30 shadow-[10px_0_30px_rgba(0,0,0,0.7)]">
+    <div className="w-28 md:w-36 h-full flex flex-col items-center relative overflow-hidden bg-gradient-to-b from-[#0f1923] to-[#060d13] border-r-2 border-[#274dad]/30 shadow-[10px_0_30px_rgba(0,0,0,0.7)]">
 
       {/* ─── TOP BLOCK (Upper Pulley Housing) ─── */}
       <div className="relative z-20 mt-4 flex flex-col items-center">
         {/* Khung ròng rọc trên */}
-        <div className="w-20 h-10 bg-gradient-to-b from-[#594024] to-[#2d1f10] border-2 border-[#B87333] rounded-sm shadow-xl flex items-center justify-center gap-1 relative">
-          <div className="absolute -top-1 left-3 right-3 h-1 bg-[#B87333] rounded" />
+        <div className="w-20 h-10 bg-gradient-to-b from-[#594024] to-[#2d1f10] border-2 border-[#274dad] rounded-sm shadow-xl flex items-center justify-center gap-1 relative">
+          <div className="absolute -top-1 left-3 right-3 h-1 bg-[#274dad] rounded" />
           {/* 2 bánh xe ròng rọc */}
           {[0, 1].map(i => (
             <div key={i} className="relative w-7 h-7">
               <div
-                className="w-full h-full rounded-full bg-gradient-to-br from-[#c8a060] to-[#6b3a1f] border-2 border-[#B87333] shadow-inner transition-transform duration-100"
+                className="w-full h-full rounded-full bg-gradient-to-br from-[#c8a060] to-[#6b3a1f] border-2 border-[#274dad] shadow-inner transition-transform duration-100"
                 style={{ transform: `rotate(${pulleyAngle + i * 90}deg)` }}
               >
                 {/* Nan hoa */}
@@ -65,13 +65,13 @@ const PulleyLift = ({ grades = [6, 7, 8, 9, 10, 11, 12], activeGrade, onSelect }
                 <div className="absolute inset-0 flex items-center justify-center rotate-45">
                   <div className="w-full h-[2px] bg-[#4a2c0a]/60" />
                 </div>
-                <div className="w-2 h-2 bg-[#0f1923] rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-[#B87333]" />
+                <div className="w-2 h-2 bg-[#0f1923] rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-[#274dad]" />
               </div>
             </div>
           ))}
         </div>
         {/* Hook nghiêng */}
-        <div className="w-3 h-4 border-2 border-b-0 border-[#8C5523] rounded-t-full" />
+        <div className="w-3 h-4 border-2 border-b-0 border-[#2099e9] rounded-t-full" />
       </div>
 
       {/* ─── ROPES + WEIGHT TAGS ─── */}
@@ -100,8 +100,8 @@ const PulleyLift = ({ grades = [6, 7, 8, 9, 10, 11, 12], activeGrade, onSelect }
               {/* Thân quả nặng kim loại */}
               <div className={`transition-all duration-300 ease-bounce flex flex-col items-center justify-center px-2 py-3 w-20 relative overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.8)]
                 ${isActive
-                  ? 'bg-gradient-to-b from-[#c8a060] to-[#8C5523] border-2 border-[#FFD700] scale-110 translate-y-1'
-                  : 'bg-gradient-to-b from-[#1e293b] to-[#0f172a] border border-[#475569] hover:border-[#B87333] hover:scale-105'
+                  ? 'bg-gradient-to-b from-[#c8a060] to-[#2099e9] border-2 border-[#FFD700] scale-110 translate-y-1'
+                  : 'bg-gradient-to-b from-[#1e293b] to-[#0f172a] border border-[#475569] hover:border-[#274dad] hover:scale-105'
                 } ${isAnimating ? 'animate-bounce' : ''}`}
               >
                 {/* Đinh tán góc */}
@@ -132,12 +132,12 @@ const PulleyLift = ({ grades = [6, 7, 8, 9, 10, 11, 12], activeGrade, onSelect }
 
       {/* ─── BOTTOM BLOCK (Lower Pulley Housing) ─── */}
       <div className="relative z-20 mb-4 flex flex-col items-center">
-        <div className="w-3 h-4 border-2 border-t-0 border-[#8C5523] rounded-b-full" />
-        <div className="w-20 h-8 bg-gradient-to-b from-[#2d1f10] to-[#594024] border-2 border-[#B87333] rounded-sm shadow-xl flex items-center justify-center gap-1">
+        <div className="w-3 h-4 border-2 border-t-0 border-[#2099e9] rounded-b-full" />
+        <div className="w-20 h-8 bg-gradient-to-b from-[#2d1f10] to-[#594024] border-2 border-[#274dad] rounded-sm shadow-xl flex items-center justify-center gap-1">
           {[0, 1].map(i => (
             <div key={i} className="relative w-5 h-5">
               <div
-                className="w-full h-full rounded-full bg-gradient-to-br from-[#B87333] to-[#4a2c0a] border border-[#FFD700]/50 shadow-inner transition-transform duration-100"
+                className="w-full h-full rounded-full bg-gradient-to-br from-[#274dad] to-[#4a2c0a] border border-[#FFD700]/50 shadow-inner transition-transform duration-100"
                 style={{ transform: `rotate(${-(pulleyAngle) + i * 90}deg)` }}
               >
                 <div className="absolute inset-0 flex items-center justify-center"><div className="w-full h-[1.5px] bg-black/40" /></div>
@@ -158,3 +158,4 @@ const PulleyLift = ({ grades = [6, 7, 8, 9, 10, 11, 12], activeGrade, onSelect }
 };
 
 export default PulleyLift;
+

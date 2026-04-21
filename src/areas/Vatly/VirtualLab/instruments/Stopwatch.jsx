@@ -119,7 +119,7 @@ const Stopwatch = ({
         ) : (
           <button
             onClick={stop}
-            className="flex items-center gap-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-white transition-colors"
+            className="flex items-center gap-1 px-4 py-2 bg-yellow-600 hover:bg-blue-500 rounded-lg text-white transition-colors"
           >
             <Pause size={16} />
             <span>Dừng</span>
@@ -164,3 +164,4 @@ const Stopwatch = ({
 };
 
 export default Stopwatch;
+

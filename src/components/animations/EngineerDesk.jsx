@@ -154,19 +154,19 @@ const EngineerDesk = ({ workshopData, onStartMachine, activeGrade }) => {
             <text x="510" y="490" fill="#FFD700" fontSize="14" textAnchor="middle" fontFamily="monospace">L₂</text>
 
             {/* ── Công thức ── */}
-            <rect x="540" y="80" width="220" height="70" rx="4" fill="#0a0f18" stroke="#B87333" strokeWidth="1.5" />
+            <rect x="540" y="80" width="220" height="70" rx="4" fill="#0a0f18" stroke="#274dad" strokeWidth="1.5" />
             <text x="650" y="108" fill="#FF8C00" fontSize="15" textAnchor="middle" fontFamily="monospace">F × L₂ = W × L₁</text>
             <text x="650" y="130" fill="#FFD700" fontSize="12" textAnchor="middle" fontFamily="monospace" opacity="0.7">Principle of Leverage</text>
             <text x="650" y="148" fill="#0ea5e9" fontSize="11" textAnchor="middle" fontFamily="monospace" opacity="0.6">— Archimedes, 287 BC</text>
 
             {/* Title */}
-            <text x="400" y="30" fill="#B87333" fontSize="13" textAnchor="middle" fontFamily="monospace" opacity="0.8" letterSpacing="3">SCHEMATIC 01: THE LEVER</text>
+            <text x="400" y="30" fill="#274dad" fontSize="13" textAnchor="middle" fontFamily="monospace" opacity="0.8" letterSpacing="3">SCHEMATIC 01: THE LEVER</text>
           </svg>
 
           {/* Magnifying Lens overlay */}
           {showLens && (
             <div
-              className="absolute pointer-events-none z-30 w-24 h-24 rounded-full overflow-hidden border-4 border-[#B87333] shadow-[0_0_20px_rgba(184,115,51,0.8),inset_0_0_10px_rgba(0,0,0,0.5)]"
+              className="absolute pointer-events-none z-30 w-24 h-24 rounded-full overflow-hidden border-4 border-[#274dad] shadow-[0_0_20px_rgba(184,115,51,0.8),inset_0_0_10px_rgba(0,0,0,0.5)]"
               style={{
                 left: lensPos.x - 48,
                 top: lensPos.y - 48,
@@ -187,17 +187,17 @@ const EngineerDesk = ({ workshopData, onStartMachine, activeGrade }) => {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_8px_red] animate-pulse flex-shrink-0" />
-              <span className="text-[#B87333] font-mono font-bold text-xs tracking-widest uppercase">Văn Phòng Vĩ Nhân</span>
+              <span className="text-[#274dad] font-mono font-bold text-xs tracking-widest uppercase">Văn Phòng Vĩ Nhân</span>
             </div>
-            <h1 className="text-4xl lg:text-5xl font-black text-white mb-2 drop-shadow-[2px_2px_0_#B87333] leading-tight">
+            <h1 className="text-4xl lg:text-5xl font-black text-white mb-2 drop-shadow-[2px_2px_0_#274dad] leading-tight">
               {workshopData?.field || 'Cơ Học Sơ Cấp'}
             </h1>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-[#B87333]/40 bg-[#8C5523]/10 rounded text-[#FFD700] text-xs font-mono mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-[#274dad]/40 bg-[#2099e9]/10 rounded text-[#FFD700] text-xs font-mono mb-3">
               ⚙ Lớp {activeGrade} · {workshopData?.name || 'Archimedes'}
             </div>
 
-            <div className="relative bg-[#000d1a] border-l-4 border-[#B87333] p-4 shadow-inner rounded-r">
-              <div className="absolute -top-3 -left-3 w-6 h-6 text-[#B87333] opacity-50 text-2xl leading-none">"</div>
+            <div className="relative bg-[#000d1a] border-l-4 border-[#274dad] p-4 shadow-inner rounded-r">
+              <div className="absolute -top-3 -left-3 w-6 h-6 text-[#274dad] opacity-50 text-2xl leading-none">"</div>
               <p className="text-base text-slate-300 italic leading-relaxed">
                 {workshopData?.quote || '"Hãy cho tôi một điểm tựa, tôi sẽ nhấc bổng Trái Đất."'}
               </p>
@@ -210,7 +210,7 @@ const EngineerDesk = ({ workshopData, onStartMachine, activeGrade }) => {
             <div ref={compassRef} className="flex flex-col items-center gap-1 cursor-pointer group" title="La bàn — xoay theo hướng chuột">
               <div className="relative w-14 h-14">
                 <svg viewBox="0 0 56 56" className="w-full h-full drop-shadow-[0_0_8px_rgba(184,115,51,0.5)]">
-                  <circle cx="28" cy="28" r="26" fill="#0a0f18" stroke="#B87333" strokeWidth="3" />
+                  <circle cx="28" cy="28" r="26" fill="#0a0f18" stroke="#274dad" strokeWidth="3" />
                   <circle cx="28" cy="28" r="20" fill="none" stroke="#334155" strokeWidth="1" strokeDasharray="4 2" />
                   {/* N S E W */}
                   <text x="28" y="10" textAnchor="middle" fill="#ef4444" fontSize="7" fontFamily="monospace" fontWeight="bold">N</text>
@@ -222,7 +222,7 @@ const EngineerDesk = ({ workshopData, onStartMachine, activeGrade }) => {
                     <polygon points="28,8 25,28 28,32 31,28" fill="#ef4444" />
                     <polygon points="28,48 25,28 28,24 31,28" fill="#e2e8f0" />
                   </g>
-                  <circle cx="28" cy="28" r="3" fill="#B87333" />
+                  <circle cx="28" cy="28" r="3" fill="#274dad" />
                 </svg>
               </div>
               <span className="text-[9px] text-[#475569] font-mono uppercase">La Bàn</span>
@@ -253,16 +253,16 @@ const EngineerDesk = ({ workshopData, onStartMachine, activeGrade }) => {
               <div className="relative w-14 h-14 flex items-center justify-center">
                 <svg viewBox="0 0 60 40" className="w-full h-auto drop-shadow-md">
                   {/* Thân thước */}
-                  <rect x="2" y="15" width="56" height="10" rx="2" fill="none" stroke="#B87333" strokeWidth="2" />
+                  <rect x="2" y="15" width="56" height="10" rx="2" fill="none" stroke="#274dad" strokeWidth="2" />
                   {/* Vạch chia */}
                   {[...Array(12)].map((_,i) => (
-                    <line key={i} x1={4 + i*5} y1="15" x2={4 + i*5} y2={i%4===0 ? 10 : 12} stroke="#B87333" strokeWidth="1" />
+                    <line key={i} x1={4 + i*5} y1="15" x2={4 + i*5} y2={i%4===0 ? 10 : 12} stroke="#274dad" strokeWidth="1" />
                   ))}
                   {/* Hàm đo */}
-                  <rect x="2" y="10" width="6" height="25" rx="1" fill="#8C5523" stroke="#B87333" strokeWidth="1.5" />
+                  <rect x="2" y="10" width="6" height="25" rx="1" fill="#2099e9" stroke="#274dad" strokeWidth="1.5" />
                   <rect x="28" y="10" width="5" height="22" rx="1" fill="#475569" stroke="#64748b" strokeWidth="1.5" />
                   {/* Đầu đo */}
-                  <line x1="2" y1="35" x2="8" y2="35" stroke="#B87333" strokeWidth="2" />
+                  <line x1="2" y1="35" x2="8" y2="35" stroke="#274dad" strokeWidth="2" />
                   <line x1="28" y1="32" x2="33" y2="32" stroke="#64748b" strokeWidth="2" />
                 </svg>
               </div>
@@ -284,3 +284,4 @@ const EngineerDesk = ({ workshopData, onStartMachine, activeGrade }) => {
 };
 
 export default EngineerDesk;
+
