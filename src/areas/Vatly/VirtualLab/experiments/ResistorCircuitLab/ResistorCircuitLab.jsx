@@ -481,7 +481,7 @@ const ResistorCircuitLab = () => {
                 <div>
                   <label className="block text-sm text-gray-300 mb-1">U (V)</label>
                   <input type="range" min="3" max="24" step="1" value={voltage}
-                    onChange={(e) => setVoltage(parseInt(e.target.value))} disabled={circuitOn} className="w-full accent-yellow-500" />
+                    onChange={(e) => setVoltage(parseInt(e.target.value))} disabled={circuitOn} className="w-full accent-blue-500" />
                   <div className="text-center text-lg font-mono text-yellow-400 param-value">{voltage} V</div>
                 </div>
                 <div>
@@ -566,7 +566,7 @@ const ResistorCircuitLab = () => {
             <p className="text-gray-300 text-center mb-6">{guideSteps[guideStep].content}</p>
             <div className="flex justify-center gap-2 mb-6">
               {guideSteps.map((_, i) => (
-                <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all ${i === guideStep ? 'bg-yellow-500 scale-125' : 'bg-gray-600'}`} />
+                <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all ${i === guideStep ? 'bg-blue-500 scale-125' : 'bg-gray-600'}`} />
               ))}
             </div>
             <div className="flex justify-between">
@@ -575,9 +575,9 @@ const ResistorCircuitLab = () => {
                 <ChevronLeft size={18} /> Trước
               </button>
               {guideStep === guideSteps.length - 1 ? (
-                <button onClick={() => setShowGuide(false)} className="px-5 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg shadow-lg shadow-yellow-600/30">Bắt đầu</button>
+                <button onClick={() => setShowGuide(false)} className="px-5 py-2 bg-yellow-600 hover:bg-blue-500 rounded-lg shadow-lg shadow-yellow-600/30">Bắt đầu</button>
               ) : (
-                <button onClick={() => setGuideStep(guideStep + 1)} className="flex items-center gap-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg">Tiếp <ChevronRight size={18} /></button>
+                <button onClick={() => setGuideStep(guideStep + 1)} className="flex items-center gap-1 px-4 py-2 bg-yellow-600 hover:bg-blue-500 rounded-lg">Tiếp <ChevronRight size={18} /></button>
               )}
             </div>
           </div>
@@ -616,3 +616,4 @@ const ResistorCircuitLab = () => {
 };
 
 export default ResistorCircuitLab;
+

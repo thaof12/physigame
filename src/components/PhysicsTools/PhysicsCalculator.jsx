@@ -388,10 +388,10 @@ const PhysicsCalculator = () => {
   }, [selectedCategory, selectedFormula]);
 
   return (
-    <div className="bg-[#FDFCF8] font-sans min-h-screen selection:bg-[#B87333]/20 selection:text-[#4A3728] relative overflow-hidden">
+    <div className="bg-[#FFFFFF] font-sans min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728] relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute inset-0 graph-grid opacity-[0.25] pointer-events-none" />
-      <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#B87333]/10" />
+      <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#274dad]/10" />
 
       {/* Global CSS for Terminal Effect */}
       <style>{`
@@ -406,7 +406,7 @@ const PhysicsCalculator = () => {
           to { width: 100% }
         }
         .terminal-text {
-            color: #D4AF37;
+            color: #44b5d7;
             text-shadow: 0 0 8px rgba(212,175,55,0.6);
             animation: crt-flicker 0.15s infinite;
         }
@@ -419,13 +419,13 @@ const PhysicsCalculator = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/physics-tools')}
-              className="group flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-[#E5E7EB] text-[#8C5523] shadow-sm hover:border-[#B87333]/30 hover:bg-[#F8F4EF] hover:shadow-md transition-all active:scale-95"
+              className="group flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-[#E5E7EB] text-[#2099e9] shadow-sm hover:border-[#274dad]/30 hover:bg-[#e4f2f0] hover:shadow-md transition-all active:scale-95"
             >
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </button>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-[#1E293B] tracking-tight flex items-center gap-3">
-                <Calculator className="w-8 h-8 text-[#B87333]" />
+                <Calculator className="w-8 h-8 text-[#274dad]" />
                 Máy Trạm Xử Lý Số Liệu
               </h1>
               <p className="text-slate-500 font-medium mt-1">
@@ -440,12 +440,12 @@ const PhysicsCalculator = () => {
           {/* Sidebar - Danh mục và công thức */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             <div className="bg-white rounded-[2rem] border border-[#E5E7EB] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] p-6 overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-[#F8F4EF] rounded-bl-[100px] flex items-start justify-end p-5">
-                <Power className="w-6 h-6 text-[#B87333]/20" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[#e4f2f0] rounded-bl-[100px] flex items-start justify-end p-5">
+                <Power className="w-6 h-6 text-[#274dad]/20" />
               </div>
 
               <h2 className="text-lg font-black text-[#1E293B] mb-6 flex items-center gap-2 relative z-10">
-                <span className="w-2 h-2 rounded-full bg-[#B87333]" />
+                <span className="w-2 h-2 rounded-full bg-[#274dad]" />
                 Bảng Công Tắc Logic
               </h2>
 
@@ -457,14 +457,14 @@ const PhysicsCalculator = () => {
                     onClick={() => handleCategoryChange(key)}
                     className={`relative p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 group
                       ${selectedCategory === key
-                        ? 'bg-[#F8F4EF] border-[#B87333] shadow-[inset_0_2px_5px_rgba(0,0,0,0.05)]'
-                        : 'bg-white border-[#E5E7EB] hover:border-[#B87333]/30'}`}
+                        ? 'bg-[#e4f2f0] border-[#274dad] shadow-[inset_0_2px_5px_rgba(0,0,0,0.05)]'
+                        : 'bg-white border-[#E5E7EB] hover:border-[#274dad]/30'}`}
                   >
                     {/* Simulated LED Indicator */}
                     <div className={`absolute top-2 right-2 w-1.5 h-1.5 rounded-full shadow-[0_0_5px] 
                       ${selectedCategory === key ? 'bg-green-400 shadow-green-400 animate-pulse' : 'bg-slate-300 shadow-transparent'}`} />
                     <div className="font-bold text-xs text-center leading-tight mt-1">
-                      <span className={selectedCategory === key ? 'text-[#8C5523]' : 'text-slate-500 group-hover:text-[#8C5523]'}>
+                      <span className={selectedCategory === key ? 'text-[#2099e9]' : 'text-slate-500 group-hover:text-[#2099e9]'}>
                         {category.name}
                       </span>
                     </div>
@@ -474,8 +474,8 @@ const PhysicsCalculator = () => {
 
               {/* Formulas */}
               {selectedCategory && (
-                <div className="space-y-3 relative z-10 p-4 bg-[#FDFCF8] rounded-2xl border border-[#E5E7EB]">
-                  <div className="text-[10px] font-black text-[#B87333] tracking-[0.1em] uppercase mb-4 flex items-center gap-2">
+                <div className="space-y-3 relative z-10 p-4 bg-[#FFFFFF] rounded-2xl border border-[#E5E7EB]">
+                  <div className="text-[10px] font-black text-[#274dad] tracking-[0.1em] uppercase mb-4 flex items-center gap-2">
                     <Terminal className="w-3 h-3" /> CHỌN CHƯƠNG TRÌNH:
                   </div>
                   {physicsFormulas[selectedCategory].formulas.map((formula) => (
@@ -484,12 +484,12 @@ const PhysicsCalculator = () => {
                       onClick={() => handleFormulaChange(formula)}
                       className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group flex items-center justify-between ${selectedFormula?.id === formula.id
                           ? 'bg-[#1E293B] text-white shadow-md'
-                          : 'bg-white text-slate-600 border border-[#E5E7EB] hover:border-[#B87333]/30 hover:bg-[#F8F4EF]'
+                          : 'bg-white text-slate-600 border border-[#E5E7EB] hover:border-[#274dad]/30 hover:bg-[#e4f2f0]'
                         }`}
                     >
-                      <span className={`group-hover:translate-x-1 transition-transform ${selectedFormula?.id === formula.id ? 'text-[#D4AF37]' : ''}`}>{formula.name}</span>
+                      <span className={`group-hover:translate-x-1 transition-transform ${selectedFormula?.id === formula.id ? 'text-[#44b5d7]' : ''}`}>{formula.name}</span>
                       {selectedFormula?.id === formula.id && (
-                        <div className="w-2 h-2 rounded-full bg-[#D4AF37] shadow-[0_0_8px_#D4AF37] animate-pulse" />
+                        <div className="w-2 h-2 rounded-full bg-[#44b5d7] shadow-[0_0_8px_#44b5d7] animate-pulse" />
                       )}
                     </button>
                   ))}
@@ -503,12 +503,12 @@ const PhysicsCalculator = () => {
             {selectedFormula ? (
               <div className="bg-white rounded-[2rem] border border-[#E5E7EB] shadow-[0_20px_40px_-15px_rgba(184,115,51,0.05)] p-8 sm:p-10 relative overflow-hidden group/calc">
 
-                <div className="absolute inset-0 opacity-0 group-hover/calc:opacity-100 transition-opacity duration-1000 border-2 border-[#B87333]/5 rounded-[2rem] pointer-events-none" />
+                <div className="absolute inset-0 opacity-0 group-hover/calc:opacity-100 transition-opacity duration-1000 border-2 border-[#274dad]/5 rounded-[2rem] pointer-events-none" />
 
                 {/* Formula Header Info */}
                 <div className="mb-8 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[#E5E7EB] pb-8">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-[#1E293B] border border-[#B87333]/20 text-[#D4AF37] font-black text-[10px] tracking-[0.2em] uppercase shadow-sm">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-[#1E293B] border border-[#274dad]/20 text-[#44b5d7] font-black text-[10px] tracking-[0.2em] uppercase shadow-sm">
                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                       Mạch đang mở
                     </div>
@@ -535,7 +535,7 @@ const PhysicsCalculator = () => {
                     {selectedFormula.variables.map((variable) => {
                       return (
                         <div key={variable.id} className="group">
-                          <label className="flex justify-between text-sm font-bold text-slate-700 mb-2 group-focus-within:text-[#B87333] transition-colors uppercase tracking-wider text-[11px]">
+                          <label className="flex justify-between text-sm font-bold text-slate-700 mb-2 group-focus-within:text-[#274dad] transition-colors uppercase tracking-wider text-[11px]">
                             <span>{variable.name}</span>
                             <span className="text-slate-400">[{variable.id}]</span>
                           </label>
@@ -547,9 +547,9 @@ const PhysicsCalculator = () => {
                               onChange={(e) => handleInputChange(variable.id, e.target.value)}
                               onKeyPress={(e) => e.key === 'Enter' && executeCalculation()}
                               placeholder={variable.default ? `Mặc định: ${variable.default}` : '0.00'}
-                              className="w-full bg-[#FDFCF8] border-2 border-[#E5E7EB] px-4 py-3.5 pr-16 rounded-xl font-mono text-lg font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#B87333]/20 focus:border-[#B87333] transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] placeholder:text-slate-300"
+                              className="w-full bg-[#FFFFFF] border-2 border-[#E5E7EB] px-4 py-3.5 pr-16 rounded-xl font-mono text-lg font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#274dad]/20 focus:border-[#274dad] transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] placeholder:text-slate-300"
                             />
-                            <span className="absolute right-4 font-black text-[#8C5523] text-sm bg-white border border-[#E5E7EB] px-2 py-1 rounded shadow-sm select-none">
+                            <span className="absolute right-4 font-black text-[#2099e9] text-sm bg-white border border-[#E5E7EB] px-2 py-1 rounded shadow-sm select-none">
                               {variable.unit}
                             </span>
                           </div>
@@ -571,7 +571,7 @@ const PhysicsCalculator = () => {
                   </button>
                   <button
                     onClick={handleReset}
-                    className="px-8 py-4 bg-white border-2 border-[#E5E7EB] hover:bg-[#F8F4EF] hover:border-[#B87333]/50 text-slate-600 hover:text-[#8C5523] rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm sm:text-base group"
+                    className="px-8 py-4 bg-white border-2 border-[#E5E7EB] hover:bg-[#e4f2f0] hover:border-[#274dad]/50 text-slate-600 hover:text-[#2099e9] rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm sm:text-base group"
                   >
                     <RefreshCw className="w-5 h-5 group-hover:-rotate-180 transition-transform duration-500" />
                     LÀM MỚI
@@ -587,13 +587,13 @@ const PhysicsCalculator = () => {
 
             {/* Instant Result Area */}
             {result !== null && selectedFormula && (
-              <div className="bg-[#0F172A] rounded-[2rem] shadow-2xl p-8 sm:p-10 relative overflow-hidden border border-[#B87333]/20">
-                <div className="absolute inset-0 bg-[#D4AF37]/5 pointer-events-none" />
+              <div className="bg-[#0F172A] rounded-[2rem] shadow-2xl p-8 sm:p-10 relative overflow-hidden border border-[#274dad]/20">
+                <div className="absolute inset-0 bg-[#44b5d7]/5 pointer-events-none" />
                 
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                   <div className="w-full">
                     <h4 className="text-[10px] font-black tracking-[0.2em] uppercase text-slate-400 mb-4 flex items-center gap-2">
-                       <Terminal className="w-4 h-4 text-[#D4AF37]" />
+                       <Terminal className="w-4 h-4 text-[#44b5d7]" />
                        Kết Quả Truy Xuất
                     </h4>
                     {result === false ? (
@@ -608,7 +608,7 @@ const PhysicsCalculator = () => {
                           return (
                             <div key={key} className="flex items-baseline gap-4">
                                 <span className="text-3xl font-mono text-slate-400 font-bold">{key} = </span>
-                                <span className="text-4xl sm:text-5xl font-black text-[#D4AF37] font-mono tracking-wider truncate">
+                                <span className="text-4xl sm:text-5xl font-black text-[#44b5d7] font-mono tracking-wider truncate">
                                     {displayValue}
                                 </span>
                                 <span className="text-xl font-mono text-slate-300 ml-2">{variable?.unit || ''}</span>
@@ -622,7 +622,7 @@ const PhysicsCalculator = () => {
                   {result !== false && (
                     <button
                       onClick={handleCopy}
-                      className="inline-flex items-center gap-2 px-6 py-4 bg-[#1E293B] hover:bg-[#334155] border-2 border-white/10 text-[#D4AF37] rounded-xl text-sm font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 shrink-0"
+                      className="inline-flex items-center gap-2 px-6 py-4 bg-[#1E293B] hover:bg-[#334155] border-2 border-white/10 text-[#44b5d7] rounded-xl text-sm font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 shrink-0"
                     >
                       {copied ? (
                         <>
@@ -648,3 +648,4 @@ const PhysicsCalculator = () => {
 };
 
 export default PhysicsCalculator;
+

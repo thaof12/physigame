@@ -120,14 +120,14 @@ const LectureClassSelector = () => {
         </div>
 
         {/* Add More Lessons Info */}
-        <div className="mt-12 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6">
+        <div className="mt-12 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-blue-200 dark:border-yellow-800 rounded-xl p-6">
           <div className="flex items-start gap-4">
             <div className="text-3xl">💡</div>
             <div>
-              <h3 className="font-bold text-yellow-900 dark:text-yellow-100 mb-2">
+              <h3 className="font-bold text-yellow-900 dark:text-blue-100 mb-2">
                 Bài giảng sẽ được cập nhật thường xuyên
               </h3>
-              <p className="text-yellow-800 dark:text-yellow-200 text-sm">
+              <p className="text-yellow-800 dark:text-blue-200 text-sm">
                 Chúng tôi liên tục bổ sung thêm bài giảng mới với nội dung phong phú để hỗ trợ quá trình học tập của bạn.
               </p>
             </div>
@@ -139,3 +139,4 @@ const LectureClassSelector = () => {
 };
 
 export default LectureClassSelector;
+

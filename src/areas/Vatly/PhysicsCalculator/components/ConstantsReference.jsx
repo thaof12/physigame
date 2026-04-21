@@ -152,7 +152,7 @@ const ConstantsReference = () => {
       )}
 
       {/* Ghi chú */}
-      <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm text-yellow-800">
+      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 text-sm text-yellow-800">
         💡 <strong>Ghi chú:</strong> Các giá trị được làm tròn. Click vào nút copy để sao chép giá trị chính xác.
       </div>
     </div>
@@ -160,3 +160,4 @@ const ConstantsReference = () => {
 };
 
 export default ConstantsReference;
+

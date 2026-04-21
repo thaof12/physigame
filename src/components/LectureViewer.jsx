@@ -57,20 +57,20 @@ const LectureViewer = () => {
   };
 
   if (!currentLesson) return (
-    <div className="min-h-screen bg-[#FDFCF8] flex items-center justify-center">
-      <div className="animate-pulse text-[#B87333] font-bold">Đang tải bài giảng...</div>
+    <div className="min-h-screen bg-[#FFFFFF] flex items-center justify-center">
+      <div className="animate-pulse text-[#274dad] font-bold">Đang tải bài giảng...</div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#FDFCF8] flex">
+    <div className="min-h-screen bg-[#FFFFFF] flex">
       {/* Sidebar - Desktop */}
       <aside className="w-80 h-screen sticky top-0 bg-white border-r border-slate-100 flex flex-col overflow-hidden shrink-0 hidden md:flex">
         {/* Sidebar Header */}
         <div className="p-6 border-b border-slate-50">
           <button 
             onClick={() => navigate(`/interactive-lectures`)}
-            className="flex items-center gap-2 text-slate-400 hover:text-[#B87333] mb-6 transition-colors text-sm font-bold"
+            className="flex items-center gap-2 text-slate-400 hover:text-[#274dad] mb-6 transition-colors text-sm font-bold"
           >
             <ArrowLeft className="w-4 h-4" /> QUAY LẠI
           </button>
@@ -86,10 +86,10 @@ const LectureViewer = () => {
           <div>
             <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
               <span>TIẾN ĐỘ HÀNH TRÌNH</span>
-              <span className="text-[#B87333]">3/12 MODULE</span>
+              <span className="text-[#274dad]">3/12 MODULE</span>
             </div>
             <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-              <div className="w-[25%] h-full bg-[#B87333]"></div>
+              <div className="w-[25%] h-full bg-[#274dad]"></div>
             </div>
           </div>
         </div>
@@ -105,10 +105,10 @@ const LectureViewer = () => {
                   onClick={() => toggleChapter(chId)}
                   className="w-full flex items-start gap-3 text-left group"
                 >
-                  <div className={`mt-1 flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold ${expandedChapters[chId] ? 'bg-amber-100 text-[#B87333] border border-amber-200' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
+                  <div className={`mt-1 flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold ${expandedChapters[chId] ? 'bg-blue-100 text-[#274dad] border border-blue-200' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
                     {parseInt(chId) + 1}
                   </div>
-                  <span className={`text-xs font-bold uppercase tracking-tight group-hover:text-[#B87333] transition-colors ${expandedChapters[chId] ? 'text-[#B87333]' : 'text-slate-600'}`}>
+                  <span className={`text-xs font-bold uppercase tracking-tight group-hover:text-[#274dad] transition-colors ${expandedChapters[chId] ? 'text-[#274dad]' : 'text-slate-600'}`}>
                     {chapter.title}
                   </span>
                   {expandedChapters[chId] ? <ChevronUp className="w-3 h-3 ml-auto text-slate-400" /> : <ChevronDown className="w-3 h-3 ml-auto text-slate-400" />}
@@ -120,13 +120,13 @@ const LectureViewer = () => {
                       <button
                         key={lesson.id}
                         onClick={() => navigate(`/interactive-lectures/physics/class${gradeNum}/${lesson.id}`)}
-                        className={`w-full flex items-center gap-3 p-2 rounded-xl text-left transition-all ${lesson.id === lectureId ? 'bg-amber-50 border border-amber-100 shadow-sm' : 'hover:bg-slate-50'}`}
+                        className={`w-full flex items-center gap-3 p-2 rounded-xl text-left transition-all ${lesson.id === lectureId ? 'bg-blue-50 border border-blue-100 shadow-sm' : 'hover:bg-slate-50'}`}
                       >
-                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${lesson.id === lectureId ? 'bg-[#B87333] text-white' : 'bg-slate-100 text-slate-400'}`}>
+                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${lesson.id === lectureId ? 'bg-[#274dad] text-white' : 'bg-slate-100 text-slate-400'}`}>
                           {lesson.id === lectureId ? <Play className="w-3 h-3 fill-current" /> : <span className="text-[10px] font-bold">{lesson.id.replace('b', '')}</span>}
                         </div>
                         <div className="flex-1 overflow-hidden">
-                          <div className={`text-[11px] font-bold truncate ${lesson.id === lectureId ? 'text-[#B87333]' : 'text-slate-600'}`}>
+                          <div className={`text-[11px] font-bold truncate ${lesson.id === lectureId ? 'text-[#274dad]' : 'text-slate-600'}`}>
                             {lesson.title}
                           </div>
                           <div className="flex items-center gap-2 text-[9px] text-slate-400 font-bold uppercase">
@@ -149,7 +149,7 @@ const LectureViewer = () => {
             <input 
               type="text" 
               placeholder="Tìm bài học..."
-              className="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs outline-none focus:border-amber-200 transition-all font-medium"
+              className="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs outline-none focus:border-blue-200 transition-all font-medium"
             />
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
           </div>
@@ -160,7 +160,7 @@ const LectureViewer = () => {
       <main className="flex-1 h-screen overflow-y-auto p-6 md:p-12">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Breadcrumb Tag */}
-          <div className="inline-block px-4 py-1.5 bg-[#B87333] text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-amber-900/20">
+          <div className="inline-block px-4 py-1.5 bg-[#274dad] text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-blue-900/20">
             VẬT LÝ LỚP {gradeNum}
           </div>
 
@@ -173,8 +173,8 @@ const LectureViewer = () => {
           <div className="bg-white rounded-[2.5rem] p-4 shadow-xl shadow-slate-200/50 border border-slate-50">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-[#B87333]" />
+                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-[#274dad]" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-slate-700">{currentLesson.title}</div>
@@ -182,7 +182,7 @@ const LectureViewer = () => {
                 </div>
               </div>
               <div className="text-xs font-bold text-slate-400">
-                Phát triển bởi <span className="text-[#B87333]">PhysiGame Team</span>
+                Phát triển bởi <span className="text-[#274dad]">PhysiGame Team</span>
               </div>
             </div>
 
@@ -202,15 +202,15 @@ const LectureViewer = () => {
 
           {/* Lesson Content - Theory */}
           <section className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl shadow-slate-200/50 border border-slate-50">
-            <h2 className="text-[#B87333] text-2xl font-black mb-6 flex items-center gap-3">
+            <h2 className="text-[#274dad] text-2xl font-black mb-6 flex items-center gap-3">
                Nội dung bài học
             </h2>
-            <div className="prose prose-slate max-w-none prose-h3:text-[#B87333] prose-h3:font-black prose-p:text-slate-600 prose-p:font-medium prose-li:text-slate-600 prose-li:font-medium">
+            <div className="prose prose-slate max-w-none prose-h3:text-[#274dad] prose-h3:font-black prose-p:text-slate-600 prose-p:font-medium prose-li:text-slate-600 prose-li:font-medium">
               <h3>1. {currentLesson.title}</h3>
               <p>{currentLesson.chapterDescription || 'Nội dung lý thuyết chi tiết đang được cập nhật cho bài học này. Vui lòng theo dõi video bài giảng để nắm bắt kiến thức đầy đủ.'}</p>
               
-              <div className="mt-8 p-6 bg-amber-50/50 rounded-3xl border border-amber-100/50">
-                <h4 className="text-[#8C5523] font-bold mb-4 flex items-center gap-2">
+              <div className="mt-8 p-6 bg-blue-50/50 rounded-3xl border border-blue-100/50">
+                <h4 className="text-[#2099e9] font-bold mb-4 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5" /> Tóm tắt kiến thức
                 </h4>
                 <ul className="space-y-3">
@@ -227,13 +227,13 @@ const LectureViewer = () => {
             <div className="flex bg-slate-50">
               <button 
                 onClick={() => setActiveTab('notes')}
-                className={`flex-1 py-5 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'notes' ? 'bg-[#B87333] text-white shadow-inner' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 py-5 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'notes' ? 'bg-[#274dad] text-white shadow-inner' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 <Edit3 className="w-5 h-5" /> Ghi chú
               </button>
               <button 
                 onClick={() => setActiveTab('qa')}
-                className={`flex-1 py-5 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'qa' ? 'bg-[#B87333] text-white shadow-inner' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`flex-1 py-5 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'qa' ? 'bg-[#274dad] text-white shadow-inner' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 <MessageSquare className="w-5 h-5" /> Hỏi đáp
               </button>
@@ -244,12 +244,12 @@ const LectureViewer = () => {
                 <div className="space-y-4">
                   <textarea 
                     placeholder="Ghi lại các kiến thức quan trọng của bạn ở đây..."
-                    className="w-full h-40 p-6 bg-slate-50 border border-slate-100 rounded-3xl resize-none outline-none focus:border-amber-200 transition-all font-medium text-slate-600"
+                    className="w-full h-40 p-6 bg-slate-50 border border-slate-100 rounded-3xl resize-none outline-none focus:border-blue-200 transition-all font-medium text-slate-600"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                   ></textarea>
                   <div className="flex justify-end">
-                    <button className="px-8 py-3 bg-[#B87333] text-white font-bold rounded-2xl shadow-lg shadow-amber-900/20 hover:-translate-y-1 transition-all">
+                    <button className="px-8 py-3 bg-[#274dad] text-white font-bold rounded-2xl shadow-lg shadow-blue-900/20 hover:-translate-y-1 transition-all">
                       Lưu ghi chú
                     </button>
                   </div>
@@ -269,7 +269,7 @@ const LectureViewer = () => {
       </main>
 
       {/* Floating Action Button for Support/Help */}
-      <button className="fixed bottom-8 right-8 w-16 h-16 bg-[#B87333] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50">
+      <button className="fixed bottom-8 right-8 w-16 h-16 bg-[#274dad] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50">
         <MessageSquare className="w-8 h-8" />
       </button>
     </div>
@@ -277,3 +277,5 @@ const LectureViewer = () => {
 };
 
 export default LectureViewer;
+
+

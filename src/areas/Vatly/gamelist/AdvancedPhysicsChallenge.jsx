@@ -14,7 +14,7 @@ const AdvancedPhysicsChallenge = () => {
       case 'easy':
         return 'bg-green-100 text-green-700';
       case 'medium':
-        return 'bg-yellow-100 text-yellow-700';
+        return 'bg-blue-100 text-yellow-700';
       case 'hard':
         return 'bg-red-100 text-red-700';
       default:
@@ -36,9 +36,9 @@ const AdvancedPhysicsChallenge = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-pink-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white">
+      <div className="bg-gradient-to-r from-cyan-500 via-red-500 to-pink-500 text-white">
         <div className="container mx-auto px-4 py-8">
           <button
             onClick={() => navigate('/program/physics/dashboard')}
@@ -149,7 +149,7 @@ const AdvancedPhysicsChallenge = () => {
                 </div>
 
                 {/* Play Button */}
-                <button className="w-full mt-4 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white py-3 rounded-xl font-medium transition-all transform group-hover:scale-105 shadow-md hover:shadow-lg">
+                <button className="w-full mt-4 bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white py-3 rounded-xl font-medium transition-all transform group-hover:scale-105 shadow-md hover:shadow-lg">
                   Chơi ngay →
                 </button>
               </div>
@@ -158,7 +158,7 @@ const AdvancedPhysicsChallenge = () => {
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-12 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl p-8 text-white text-center">
+        <div className="mt-12 bg-gradient-to-r from-cyan-500 to-pink-500 rounded-2xl p-8 text-white text-center">
           <h3 className="text-2xl font-bold mb-3">
             🎯 Thử thách bản thân với các game vật lý!
           </h3>
@@ -180,3 +180,4 @@ const AdvancedPhysicsChallenge = () => {
 };
 
 export default AdvancedPhysicsChallenge;
+

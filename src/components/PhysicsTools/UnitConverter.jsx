@@ -24,20 +24,20 @@ const MechanicalSelector = ({ options, value, onChange, label }) => {
     <div className="relative font-sans" ref={wrapperRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between bg-white border-2 border-[#E5E7EB] hover:border-[#B87333]/50 px-4 py-4 rounded-xl text-[#1E293B] font-bold transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] relative overflow-hidden group focus:outline-none"
+        className="w-full flex items-center justify-between bg-white border-2 border-[#E5E7EB] hover:border-[#274dad]/50 px-4 py-4 rounded-xl text-[#1E293B] font-bold transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] relative overflow-hidden group focus:outline-none"
       >
         {/* Subtle metallic reflection */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-[#F8F4EF] opacity-50 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-[#e4f2f0] opacity-50 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col items-start">
           <span className="text-[10px] text-slate-400 uppercase tracking-widest">{label}</span>
           <span className="text-lg">{selectedOption?.id} - {selectedOption?.name}</span>
         </div>
-        <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-500 relative z-10 ${isOpen ? 'rotate-180 text-[#B87333]' : 'group-hover:text-[#B87333]'}`} />
+        <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-500 relative z-10 ${isOpen ? 'rotate-180 text-[#274dad]' : 'group-hover:text-[#274dad]'}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#B87333]/30 rounded-xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.15)] z-50 overflow-hidden backdrop-blur-sm animate-fade-in-up">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#274dad]/30 rounded-xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.15)] z-50 overflow-hidden backdrop-blur-sm animate-fade-in-up">
           <div className="max-h-[250px] overflow-y-auto custom-scrollbar">
             {options.map((opt) => (
               <button
@@ -46,14 +46,14 @@ const MechanicalSelector = ({ options, value, onChange, label }) => {
                   onChange(opt.id);
                   setIsOpen(false);
                 }}
-                className={`w-full text-left px-5 py-3 hover:bg-[#F8F4EF] transition-colors border-b border-slate-100 last:border-0 flex items-center justify-between ${value === opt.id ? 'bg-[#F8F4EF]/50' : ''}`}
+                className={`w-full text-left px-5 py-3 hover:bg-[#e4f2f0] transition-colors border-b border-slate-100 last:border-0 flex items-center justify-between ${value === opt.id ? 'bg-[#e4f2f0]/50' : ''}`}
               >
                 <div className="flex flex-col">
-                  <span className={`font-bold ${value === opt.id ? 'text-[#8C5523]' : 'text-[#1E293B]'}`}>{opt.id}</span>
+                  <span className={`font-bold ${value === opt.id ? 'text-[#2099e9]' : 'text-[#1E293B]'}`}>{opt.id}</span>
                   <span className="text-xs text-slate-500">{opt.name}</span>
                 </div>
                 {value === opt.id && (
-                  <div className="w-2 h-2 rounded-full bg-[#B87333] shadow-[0_0_5px_#B87333] animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-[#274dad] shadow-[0_0_5px_#274dad] animate-pulse" />
                 )}
               </button>
             ))}
@@ -164,10 +164,10 @@ const UnitConverter = () => {
   };
 
   return (
-    <div className="bg-[#FDFCF8] font-sans min-h-screen selection:bg-[#B87333]/20 selection:text-[#4A3728] relative overflow-hidden">
+    <div className="bg-[#FFFFFF] font-sans min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728] relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute inset-0 graph-grid opacity-[0.25] pointer-events-none" />
-      <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#B87333]/10" />
+      <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#274dad]/10" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-8">
 
@@ -176,13 +176,13 @@ const UnitConverter = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/physics-tools')}
-              className="group flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-[#E5E7EB] text-[#8C5523] shadow-sm hover:border-[#B87333]/30 hover:bg-[#F8F4EF] hover:shadow-md transition-all active:scale-95"
+              className="group flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-[#E5E7EB] text-[#2099e9] shadow-sm hover:border-[#274dad]/30 hover:bg-[#e4f2f0] hover:shadow-md transition-all active:scale-95"
             >
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </button>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-[#1E293B] tracking-tight flex items-center gap-3">
-                <ArrowLeftRight className="w-8 h-8 text-[#B87333]" />
+                <ArrowLeftRight className="w-8 h-8 text-[#274dad]" />
                 Chuyển Đổi Đơn Vị
               </h1>
               <p className="text-slate-500 font-medium mt-1">
@@ -196,12 +196,12 @@ const UnitConverter = () => {
           {/* Sidebar - Chọn đại lượng */}
           <div className="lg:col-span-4 flex flex-col gap-6">
             <div className="bg-white rounded-[2rem] border border-[#E5E7EB] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-[#F8F4EF] rounded-bl-[100px] flex items-start justify-end p-5">
-                <Ruler className="w-6 h-6 text-[#B87333]/20" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-[#e4f2f0] rounded-bl-[100px] flex items-start justify-end p-5">
+                <Ruler className="w-6 h-6 text-[#274dad]/20" />
               </div>
 
               <h2 className="text-lg font-black text-[#1E293B] mb-6 flex items-center gap-2 relative z-10">
-                <span className="w-2 h-2 rounded-full bg-[#B87333]" />
+                <span className="w-2 h-2 rounded-full bg-[#274dad]" />
                 Danh mục Tham số
               </h2>
 
@@ -212,7 +212,7 @@ const UnitConverter = () => {
                     onClick={() => handleQuantityChange(key)}
                     className={`w-full text-left px-5 py-4 rounded-2xl transition-all duration-300 group flex items-center justify-between ${selectedQuantity === key
                         ? 'bg-[#1E293B] text-white shadow-lg border border-transparent'
-                        : 'bg-white text-slate-600 border border-[#E5E7EB] hover:border-[#B87333]/30 hover:bg-[#F8F4EF]'
+                        : 'bg-white text-slate-600 border border-[#E5E7EB] hover:border-[#274dad]/30 hover:bg-[#e4f2f0]'
                       }`}
                   >
                     <div>
@@ -222,7 +222,7 @@ const UnitConverter = () => {
                       </div>
                     </div>
                     {selectedQuantity === key && (
-                      <div className="w-2 h-2 rounded-full bg-[#D4AF37] shadow-[0_0_8px_#D4AF37] animate-pulse" />
+                      <div className="w-2 h-2 rounded-full bg-[#44b5d7] shadow-[0_0_8px_#44b5d7] animate-pulse" />
                     )}
                   </button>
                 ))}
@@ -235,13 +235,13 @@ const UnitConverter = () => {
             <div className="bg-white rounded-[2rem] border border-[#E5E7EB] shadow-[0_20px_40px_-15px_rgba(184,115,51,0.05)] p-8 sm:p-10 relative overflow-hidden group/conv">
 
               {/* Ambience border on hover */}
-              <div className="absolute inset-0 opacity-0 group-hover/conv:opacity-100 transition-opacity duration-1000 border-2 border-[#B87333]/5 rounded-[2rem] pointer-events-none" />
+              <div className="absolute inset-0 opacity-0 group-hover/conv:opacity-100 transition-opacity duration-1000 border-2 border-[#274dad]/5 rounded-[2rem] pointer-events-none" />
 
               <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-6 mb-8 relative z-10">
                 <h2 className="text-3xl font-black text-[#1E293B] tracking-tight">
                   {currentQuantity.name}
                 </h2>
-                <div className="px-3 py-1 bg-[#F8F4EF] border border-[#B87333]/20 rounded text-[#8C5523] text-xs font-bold uppercase tracking-wider">
+                <div className="px-3 py-1 bg-[#e4f2f0] border border-[#274dad]/20 rounded text-[#2099e9] text-xs font-bold uppercase tracking-wider">
                   {Object.keys(currentQuantity.units).length} Đơn vị
                 </div>
               </div>
@@ -249,8 +249,8 @@ const UnitConverter = () => {
               {/* Converter Interface */}
               <div className="space-y-8 relative z-10">
                 {/* From Unit */}
-                <div className="bg-[#FDFCF8] p-6 rounded-2xl border border-[#E5E7EB] group focus-within:border-[#B87333] transition-colors">
-                  <label className="block text-xs font-black text-slate-400 tracking-[0.1em] uppercase mb-4 group-focus-within:text-[#B87333] transition-colors">
+                <div className="bg-[#FFFFFF] p-6 rounded-2xl border border-[#E5E7EB] group focus-within:border-[#274dad] transition-colors">
+                  <label className="block text-xs font-black text-slate-400 tracking-[0.1em] uppercase mb-4 group-focus-within:text-[#274dad] transition-colors">
                     Nguồn đầu vào
                   </label>
                   <div className="grid grid-cols-[2fr_1fr] md:grid-cols-[3fr_2fr] gap-4">
@@ -262,12 +262,12 @@ const UnitConverter = () => {
                         setInputValue(e.target.value);
                       }}
                       placeholder="0.00"
-                      className="w-full bg-white border border-[#E5E7EB] px-4 py-4 rounded-xl font-mono text-2xl font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#B87333]/20 focus:border-[#B87333] transition-all shadow-sm placeholder:text-slate-300"
+                      className="w-full bg-white border border-[#E5E7EB] px-4 py-4 rounded-xl font-mono text-2xl font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#274dad]/20 focus:border-[#274dad] transition-all shadow-sm placeholder:text-slate-300"
                     />
                     <select
                       value={fromUnit}
                       onChange={(e) => setFromUnit(e.target.value)}
-                      className="w-full bg-white border border-[#E5E7EB] px-4 py-4 rounded-xl text-[#1E293B] font-semibold focus:outline-none focus:ring-2 focus:ring-[#B87333]/20 focus:border-[#B87333] transition-all shadow-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:calc(100%-1rem)_center]"
+                      className="w-full bg-white border border-[#E5E7EB] px-4 py-4 rounded-xl text-[#1E293B] font-semibold focus:outline-none focus:ring-2 focus:ring-[#274dad]/20 focus:border-[#274dad] transition-all shadow-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:calc(100%-1rem)_center]"
                     >
                       {Object.entries(currentQuantity.units).map(([unit, info]) => (
                         <option key={unit} value={unit}>
@@ -282,7 +282,7 @@ const UnitConverter = () => {
                 <div className="flex justify-center -my-12 relative z-20">
                   <button
                     onClick={handleSwapUnits}
-                    className="p-4 bg-white border-2 border-[#E5E7EB] hover:border-[#B87333] hover:bg-[#F8F4EF] hover:shadow-[0_0_15px_rgba(184,115,51,0.2)] text-[#8C5523] rounded-full transition-all hover:rotate-180 transform duration-500 shadow-sm"
+                    className="p-4 bg-white border-2 border-[#E5E7EB] hover:border-[#274dad] hover:bg-[#e4f2f0] hover:shadow-[0_0_15px_rgba(184,115,51,0.2)] text-[#2099e9] rounded-full transition-all hover:rotate-180 transform duration-500 shadow-sm"
                     title="Hoán đổi chiều dài"
                   >
                     <Repeat className="w-5 h-5" />
@@ -298,14 +298,14 @@ const UnitConverter = () => {
                   </label>
                   <div className="grid grid-cols-[2fr_1fr] md:grid-cols-[3fr_2fr] gap-4 relative z-10">
                     <div className="w-full bg-white/5 border border-white/10 px-4 py-4 rounded-xl flex items-center shadow-inner">
-                      <span className={`font-mono text-2xl font-bold ${result !== null ? 'text-[#D4AF37]' : 'text-slate-600'}`}>
+                      <span className={`font-mono text-2xl font-bold ${result !== null ? 'text-[#44b5d7]' : 'text-slate-600'}`}>
                         {result !== null ? (Math.abs(result) > 10000 || Math.abs(result) < 0.0001 && result !== 0 ? result.toExponential(4) : result.toFixed(6)) : '0.00'}
                       </span>
                     </div>
                     <select
                       value={toUnit}
                       onChange={(e) => setToUnit(e.target.value)}
-                      className="w-full bg-white/10 border border-white/20 px-4 py-4 rounded-xl text-white font-semibold focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] transition-all shadow-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:calc(100%-1rem)_center]"
+                      className="w-full bg-white/10 border border-white/20 px-4 py-4 rounded-xl text-white font-semibold focus:outline-none focus:ring-2 focus:ring-[#44b5d7]/50 focus:border-[#44b5d7] transition-all shadow-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:calc(100%-1rem)_center]"
                     >
                       {Object.entries(currentQuantity.units).map(([unit, info]) => (
                         <option key={unit} value={unit} className="text-[#1E293B]">
@@ -320,7 +320,7 @@ const UnitConverter = () => {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <button
                     onClick={handleReset}
-                    className="flex-1 py-4 bg-white border border-[#E5E7EB] hover:bg-[#F8F4EF] hover:border-[#B87333]/30 text-slate-600 hover:text-[#8C5523] rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm sm:text-base group"
+                    className="flex-1 py-4 bg-white border border-[#E5E7EB] hover:bg-[#e4f2f0] hover:border-[#274dad]/30 text-slate-600 hover:text-[#2099e9] rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm sm:text-base group"
                   >
                     <RefreshCw className="w-5 h-5 group-hover:-rotate-180 transition-transform duration-500" />
                     Làm trống kết quả
@@ -330,17 +330,17 @@ const UnitConverter = () => {
                 {/* Quick Reference Table */}
                 <div className="mt-12 pt-8 border-t border-[#E5E7EB]">
                   <h3 className="text-lg font-black text-[#1E293B] mb-6 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-[#B87333]" />
+                    <BookOpen className="w-5 h-5 text-[#274dad]" />
                     Bảng Tham Khảo Định Mức
                   </h3>
                   <div className="overflow-x-auto rounded-xl border border-[#E5E7EB] shadow-sm">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-[#FDFCF8] border-b border-[#E5E7EB]">
+                        <tr className="bg-[#FFFFFF] border-b border-[#E5E7EB]">
                           <th className="px-6 py-4 text-left font-black text-slate-500 tracking-wider">Mã đơn vị</th>
                           <th className="px-6 py-4 text-left font-black text-slate-500 tracking-wider">Định danh</th>
                           <th className="px-6 py-4 text-right font-black text-slate-500 tracking-wider">
-                            Quy đổi sang <span className="text-[#B87333] px-1 bg-[#F8F4EF] rounded border border-[#B87333]/20">{currentQuantity.baseUnit}</span>
+                            Quy đổi sang <span className="text-[#274dad] px-1 bg-[#e4f2f0] rounded border border-[#274dad]/20">{currentQuantity.baseUnit}</span>
                           </th>
                         </tr>
                       </thead>
@@ -348,9 +348,9 @@ const UnitConverter = () => {
                         {Object.entries(currentQuantity.units).map(([unit, info]) => (
                           <tr
                             key={unit}
-                            className="hover:bg-[#F8F4EF] transition-colors"
+                            className="hover:bg-[#e4f2f0] transition-colors"
                           >
-                            <td className="px-6 py-3 font-mono font-bold text-[#8C5523] whitespace-nowrap">
+                            <td className="px-6 py-3 font-mono font-bold text-[#2099e9] whitespace-nowrap">
                               {unit}
                             </td>
                             <td className="px-6 py-3 font-medium text-slate-600">
@@ -379,3 +379,4 @@ const UnitConverter = () => {
 };
 
 export default UnitConverter;
+

@@ -45,12 +45,12 @@ const GoldenGyroscope = () => {
   return (
     <div className="relative flex items-center justify-center scale-110 group" style={{ perspective: '1200px' }}>
       {/* Background ambient glow */}
-      <div className="absolute w-[300px] h-[300px] rounded-full blur-[80px] opacity-20 pointer-events-none bg-gradient-to-tr from-[#D4AF37] via-[#B87333] to-transparent group-hover:opacity-40 transition-opacity duration-1000" />
+      <div className="absolute w-[300px] h-[300px] rounded-full blur-[80px] opacity-20 pointer-events-none bg-gradient-to-tr from-[#44b5d7] via-[#274dad] to-transparent group-hover:opacity-40 transition-opacity duration-1000" />
 
       <div className="relative w-72 h-72 transition-transform duration-1000 ease-out group-hover:scale-105" style={{ transformStyle: 'preserve-3d' }}>
 
         {/* Core Energy Sphere */}
-        <div ref={core} className="absolute inset-[38%] rounded-full bg-gradient-to-br from-[#FDFCF8] via-[#D4AF37] to-[#4A3728] shadow-[0_0_40px_rgba(212,175,55,0.7),inset_0_0_20px_rgba(255,255,255,0.9)] flex items-center justify-center after:content-[''] after:absolute after:inset-0 after:rounded-full after:border after:border-white/50 after:blur-[1px]" style={{ transformStyle: 'preserve-3d' }}>
+        <div ref={core} className="absolute inset-[38%] rounded-full bg-gradient-to-br from-[#FFFFFF] via-[#44b5d7] to-[#4A3728] shadow-[0_0_40px_rgba(212,175,55,0.7),inset_0_0_20px_rgba(255,255,255,0.9)] flex items-center justify-center after:content-[''] after:absolute after:inset-0 after:rounded-full after:border after:border-white/50 after:blur-[1px]" style={{ transformStyle: 'preserve-3d' }}>
           <Compass className="w-8 h-8 text-[#4A3728]/40 absolute z-10" />
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent rounded-full animate-pulse" />
         </div>
@@ -62,22 +62,22 @@ const GoldenGyroscope = () => {
             <circle cx="50" cy="50" r="48" stroke="url(#brassOuter)" strokeWidth="1" strokeDasharray="3 4" strokeLinecap="round" className="opacity-80" />
             {/* Inner track */}
             <circle cx="50" cy="50" r="45" stroke="#4A3728" strokeWidth="0.5" className="opacity-50" />
-            <circle cx="50" cy="50" r="49.5" stroke="#D4AF37" strokeWidth="0.25" className="opacity-60" />
+            <circle cx="50" cy="50" r="49.5" stroke="#44b5d7" strokeWidth="0.25" className="opacity-60" />
             {/* Tick marks representing degrees/measurement */}
             {[...Array(36)].map((_, i) => (
               <line
                 key={i}
                 x1="50" y1="2" x2="50" y2={i % 3 === 0 ? "6" : "4"}
                 transform={`rotate(${i * 10} 50 50)`}
-                stroke={i % 3 === 0 ? "#8C5523" : "#D4AF37"}
+                stroke={i % 3 === 0 ? "#2099e9" : "#44b5d7"}
                 strokeWidth={i % 3 === 0 ? "0.6" : "0.3"}
               />
             ))}
             <defs>
               <linearGradient id="brassOuter" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#D4AF37" />
+                <stop offset="0%" stopColor="#44b5d7" />
                 <stop offset="25%" stopColor="#FFF1B8" />
-                <stop offset="50%" stopColor="#8C5523" />
+                <stop offset="50%" stopColor="#2099e9" />
                 <stop offset="75%" stopColor="#FFF1B8" />
                 <stop offset="100%" stopColor="#4A3728" />
               </linearGradient>
@@ -94,19 +94,19 @@ const GoldenGyroscope = () => {
             {/* Planet/nodes along the middle ring */}
             <circle cx="50" cy="4" r="2.5" fill="url(#nodeGlow)" />
             <circle cx="50" cy="96" r="2.5" fill="url(#nodeGlow)" />
-            <circle cx="16" cy="16" r="1.5" fill="#B87333" />
-            <circle cx="84" cy="84" r="1.5" fill="#B87333" />
+            <circle cx="16" cy="16" r="1.5" fill="#274dad" />
+            <circle cx="84" cy="84" r="1.5" fill="#274dad" />
 
             <defs>
               <linearGradient id="brassMid" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#F8F4EF" />
-                <stop offset="40%" stopColor="#B87333" />
+                <stop offset="0%" stopColor="#e4f2f0" />
+                <stop offset="40%" stopColor="#274dad" />
                 <stop offset="100%" stopColor="#2A1B12" />
               </linearGradient>
               <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stopColor="#FFFFFF" />
-                <stop offset="50%" stopColor="#D4AF37" />
-                <stop offset="100%" stopColor="#8C5523" />
+                <stop offset="50%" stopColor="#44b5d7" />
+                <stop offset="100%" stopColor="#2099e9" />
               </radialGradient>
             </defs>
           </svg>
@@ -115,29 +115,29 @@ const GoldenGyroscope = () => {
         {/* Inner Tracking Ring with Data Lines */}
         <div ref={innerRing} className="absolute inset-12" style={{ transformStyle: 'preserve-3d' }}>
           <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="48" stroke="#D4AF37" strokeWidth="1" className="opacity-70" />
-            <circle cx="50" cy="50" r="40" stroke="#8C5523" strokeWidth="0.5" strokeDasharray="6 4" className="opacity-90" />
+            <circle cx="50" cy="50" r="48" stroke="#44b5d7" strokeWidth="1" className="opacity-70" />
+            <circle cx="50" cy="50" r="40" stroke="#2099e9" strokeWidth="0.5" strokeDasharray="6 4" className="opacity-90" />
 
             {/* Crosshairs */}
             <path d="M50 2 L50 98 M2 50 L98 50" stroke="url(#crosshair)" strokeWidth="0.5" className="opacity-60" />
             <defs>
               <linearGradient id="crosshair" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="transparent" />
-                <stop offset="40%" stopColor="#D4AF37" />
-                <stop offset="60%" stopColor="#D4AF37" />
+                <stop offset="40%" stopColor="#44b5d7" />
+                <stop offset="60%" stopColor="#44b5d7" />
                 <stop offset="100%" stopColor="transparent" />
               </linearGradient>
             </defs>
           </svg>
 
           {/* Orbital Electron / Tracker point */}
-          <div className="absolute top-0 left-1/2 w-3 h-3 -mt-1.5 -ml-1.5 rounded-full bg-white shadow-[0_0_15px_2px_#D4AF37]" style={{ transform: 'translateZ(10px)' }} />
-          <div className="absolute bottom-1/4 right-0 w-2 h-2 rounded-full bg-[#B87333] shadow-[0_0_10px_1px_#8C5523]" style={{ transform: 'translateZ(-10px)' }} />
+          <div className="absolute top-0 left-1/2 w-3 h-3 -mt-1.5 -ml-1.5 rounded-full bg-white shadow-[0_0_15px_2px_#44b5d7]" style={{ transform: 'translateZ(10px)' }} />
+          <div className="absolute bottom-1/4 right-0 w-2 h-2 rounded-full bg-[#274dad] shadow-[0_0_10px_1px_#2099e9]" style={{ transform: 'translateZ(-10px)' }} />
         </div>
       </div>
 
       {/* Decorative Floating Horizon Line */}
-      <div className="absolute top-1/2 left-[-20%] right-[-20%] h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent pointer-events-none -translate-y-1/2" />
+      <div className="absolute top-1/2 left-[-20%] right-[-20%] h-[1px] bg-gradient-to-r from-transparent via-[#44b5d7]/30 to-transparent pointer-events-none -translate-y-1/2" />
     </div>
   );
 };
@@ -177,21 +177,21 @@ const PhysicsHome = () => {
   };
 
   if (loading) return (
-    <div className="h-screen bg-[#FDFCF8] flex items-center justify-center">
+    <div className="h-screen bg-[#FFFFFF] flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-16 h-16 border-4 border-[#E5E7EB] border-t-[#B87333] rounded-full animate-spin" />
-        <p className="text-[#8C5523] font-black tracking-widest text-sm uppercase">Khởi động bộ máy...</p>
+        <div className="w-16 h-16 border-4 border-[#E5E7EB] border-t-[#274dad] rounded-full animate-spin" />
+        <p className="text-[#2099e9] font-black tracking-widest text-sm uppercase">Khởi động bộ máy...</p>
       </div>
     </div>
   );
 
   return (
-    <div className="bg-[#FDFCF8] font-sans overflow-x-hidden min-h-screen selection:bg-[#B87333]/20 selection:text-[#4A3728]">
+    <div className="bg-[#FFFFFF] font-sans overflow-x-hidden min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728]">
 
       {/* ══════════════════════════════════════════
           HERO — EUREKA BRANDING
           ══════════════════════════════════════════ */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#FDFCF8] pt-4 pb-12 px-4">
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#FFFFFF] pt-4 pb-12 px-4">
 
         {/* Academic Background - Formulas & Sketches */}
         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.12] select-none">
@@ -199,13 +199,13 @@ const PhysicsHome = () => {
           <div className="absolute inset-0 graph-grid" />
 
           {/* Floating Physics Sketches (Text-based for now) */}
-          <div className="absolute top-[15%] left-[10%] text-[100px] font-serif italic text-[#8C5523] rotate-[-15deg] opacity-40">F = ma</div>
-          <div className="absolute top-[20%] right-[15%] text-[80px] font-serif italic text-[#8C5523] rotate-[10deg] opacity-30">∇ × E = -∂B/∂t</div>
-          <div className="absolute bottom-[25%] left-[20%] text-[90px] font-serif italic text-[#8C5523] rotate-[5deg] opacity-25">PV = nRT</div>
-          <div className="absolute bottom-[15%] right-[10%] text-[110px] font-serif italic text-[#8C5523] rotate-[-10deg] opacity-35">λ = h/p</div>
+          <div className="absolute top-[15%] left-[10%] text-[100px] font-serif italic text-[#2099e9] rotate-[-15deg] opacity-40">F = ma</div>
+          <div className="absolute top-[20%] right-[15%] text-[80px] font-serif italic text-[#2099e9] rotate-[10deg] opacity-30">∇ × E = -∂B/∂t</div>
+          <div className="absolute bottom-[25%] left-[20%] text-[90px] font-serif italic text-[#2099e9] rotate-[5deg] opacity-25">PV = nRT</div>
+          <div className="absolute bottom-[15%] right-[10%] text-[110px] font-serif italic text-[#2099e9] rotate-[-10deg] opacity-35">λ = h/p</div>
 
           {/* Decorative Gradient Glows */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[160px] bg-gradient-to-tr from-[#B87333]/10 via-[#D4AF37]/5 to-transparent animate-pulse-slow" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[160px] bg-gradient-to-tr from-[#274dad]/10 via-[#44b5d7]/5 to-transparent animate-pulse-slow" />
         </div>
 
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
@@ -243,8 +243,8 @@ const PhysicsHome = () => {
         {/* Floating Background Particles */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-[20%] left-[15%] w-2 h-2 rounded-full bg-[#10B981] animate-float-slow opacity-20" />
-          <div className="absolute top-[40%] right-[20%] w-3 h-3 rounded-full bg-[#B87333] animate-float-medium opacity-15" />
-          <div className="absolute bottom-[30%] left-[25%] w-2 h-2 rounded-full bg-[#D4AF37] animate-float-fast opacity-20" />
+          <div className="absolute top-[40%] right-[20%] w-3 h-3 rounded-full bg-[#274dad] animate-float-medium opacity-15" />
+          <div className="absolute bottom-[30%] left-[25%] w-2 h-2 rounded-full bg-[#44b5d7] animate-float-fast opacity-20" />
           <div className="absolute bottom-[10%] right-[40%] w-4 h-4 rounded-full bg-[#10B981] animate-float-slow opacity-10" />
         </div>
       </section>
@@ -305,7 +305,7 @@ const PhysicsHome = () => {
         return (
           <section
             key={idx}
-            className={`py-20 sm:py-24 ${idx % 2 === 0 ? 'bg-white' : 'bg-[#FDFCF8]'} border-t border-[#E5E7EB]/60 overflow-hidden`}
+            className={`py-20 sm:py-24 ${idx % 2 === 0 ? 'bg-white' : 'bg-[#FFFFFF]'} border-t border-[#E5E7EB]/60 overflow-hidden`}
           >
             <div className="container mx-auto max-w-6xl px-4 sm:px-6">
               <div className={`flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-12 lg:gap-20`}>
@@ -359,3 +359,4 @@ const PhysicsHome = () => {
 };
 
 export default PhysicsHome;
+

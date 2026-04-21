@@ -114,9 +114,9 @@ const Profile = () => {
     if (level >= 50) return { name: 'Thống Soái Không Gian', icon: Crown, color: 'text-yellow-400', glow: 'shadow-[0_0_15px_rgba(250,204,21,0.6)]' };
     if (level >= 30) return { name: 'Đại Tá Ngân Hà', icon: Medal, color: 'text-cyan-400', glow: 'shadow-[0_0_15px_rgba(34,211,238,0.6)]' };
     if (level >= 20) return { name: 'Chỉ Huy Tinh Tú', icon: Shield, color: 'text-purple-400', glow: 'shadow-[0_0_15px_rgba(192,132,252,0.6)]' };
-    if (level >= 10) return { name: 'Tiên Phong', icon: Trophy, color: 'text-amber-500', glow: 'shadow-[0_0_15px_rgba(245,158,11,0.6)]' };
+    if (level >= 10) return { name: 'Tiên Phong', icon: Trophy, color: 'text-blue-500', glow: 'shadow-[0_0_15px_rgba(245,158,11,0.6)]' };
     if (level >= 5) return { name: 'Tân Binh Không Gian', icon: Award, color: 'text-slate-300', glow: 'shadow-[0_0_15px_rgba(203,213,225,0.6)]' };
-    return { name: 'Học Phiên Tập Sự', icon: Star, color: 'text-orange-500', glow: 'shadow-[0_0_15px_rgba(249,115,22,0.6)]' };
+    return { name: 'Học Phiên Tập Sự', icon: Star, color: 'text-cyan-500', glow: 'shadow-[0_0_15px_rgba(249,115,22,0.6)]' };
   }
 
   const rank = getRank(stats.level);
@@ -161,12 +161,12 @@ const Profile = () => {
   const RankIcon = rank.icon;
 
   return (
-    <div className="min-h-screen bg-[#FDFCF8] font-sans text-[#1E293B] overflow-x-hidden selection:bg-[#B87333]/20">
+    <div className="min-h-screen bg-[#FFFFFF] font-sans text-[#1E293B] overflow-x-hidden selection:bg-[#274dad]/20">
       
       {/* Background patterns */}
       <div className="fixed inset-0 graph-grid opacity-[0.15] pointer-events-none" />
-      <div className="fixed top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#B87333]/5" />
-      <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#D4AF37]/5" />
+      <div className="fixed top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#274dad]/5" />
+      <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#44b5d7]/5" />
 
       <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6 py-12 lg:py-16">
         
@@ -180,22 +180,22 @@ const Profile = () => {
             {/* User Info Card */}
             <div className="bg-white rounded-[2.5rem] border border-[#E5E7EB] shadow-[0_20px_50px_-15px_rgba(0,0,0,0.05)] p-8 text-center relative overflow-hidden group">
               {/* Decorative brass accent */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-gradient-to-r from-transparent via-[#B87333]/30 to-transparent" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-gradient-to-r from-transparent via-[#274dad]/30 to-transparent" />
               
               <div className="relative inline-block mb-6 pt-2">
-                <div className={`w-32 h-32 rounded-full p-1.5 bg-white border-2 border-[#E5E7EB] group-hover:border-[#B87333]/50 transition-colors duration-500 shadow-xl overflow-hidden`}>
-                  <div className="w-full h-full rounded-full bg-[#F8F4EF] flex items-center justify-center overflow-hidden border border-[#B87333]/10">
+                <div className={`w-32 h-32 rounded-full p-1.5 bg-white border-2 border-[#E5E7EB] group-hover:border-[#274dad]/50 transition-colors duration-500 shadow-xl overflow-hidden`}>
+                  <div className="w-full h-full rounded-full bg-[#e4f2f0] flex items-center justify-center overflow-hidden border border-[#274dad]/10">
                     {userData?.profile?.avatar ? (
                       <img src={userData.profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#8C5523] to-[#B87333]">
+                      <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#2099e9] to-[#274dad]">
                         {userData?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'ID'}
                       </span>
                     )}
                   </div>
                 </div>
                 <button 
-                  className="absolute bottom-1 right-1 w-9 h-9 bg-white rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#B87333] shadow-lg hover:bg-[#FDFCF8] transition-colors"
+                  className="absolute bottom-1 right-1 w-9 h-9 bg-white rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#274dad] shadow-lg hover:bg-[#FFFFFF] transition-colors"
                   title="Thay đổi ảnh đại diện"
                 >
                   <Camera className="w-4 h-4" />
@@ -206,7 +206,7 @@ const Profile = () => {
                 <h2 className="text-2xl font-black text-[#1E293B] tracking-tight truncate px-2">
                   {userData?.displayName || user?.email?.split('@')[0] || 'Unknown Cadet'}
                 </h2>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F8F4EF] text-[#8C5523] text-[10px] font-black tracking-widest uppercase border border-[#B87333]/10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e4f2f0] text-[#2099e9] text-[10px] font-black tracking-widest uppercase border border-[#274dad]/10">
                   <RankIcon className={`w-3 h-3 ${rank.color}`} /> {rank.name}
                 </div>
               </div>
@@ -214,7 +214,7 @@ const Profile = () => {
               {/* Login Streak */}
               <div className="mt-8 pt-8 border-t border-[#F1F5F9] flex items-center justify-center gap-6">
                 <div className="text-center group/streak">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#FFF7ED] text-orange-500 mb-2 border border-orange-100 group-hover/streak:scale-110 transition-transform">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#FFF7ED] text-cyan-500 mb-2 border border-cyan-100 group-hover/streak:scale-110 transition-transform">
                     <Flame className="w-6 h-6 animate-pulse" />
                   </div>
                   <div className="text-lg font-black text-[#1E293B] leading-none mb-1">{stats.currentStreak}</div>
@@ -235,7 +235,7 @@ const Profile = () => {
               {[
                 { id: 'info', label: 'Thông tin cá nhân', icon: Users, color: 'text-blue-500' },
                 { id: 'overview', label: 'Thống kê & Thành tựu', icon: TrendingUp, color: 'text-emerald-500' },
-                { id: 'achievements', label: 'Kho Huy hiệu', icon: Trophy, color: 'text-amber-500' },
+                { id: 'achievements', label: 'Kho Huy hiệu', icon: Trophy, color: 'text-blue-500' },
                 { id: 'activity', label: 'Nhật ký Hoạt động', icon: Clock, color: 'text-indigo-500' },
                 { id: 'pk', label: 'Lịch sử Đấu trường', icon: Swords, color: 'text-rose-500' },
               ].map((item) => (
@@ -244,7 +244,7 @@ const Profile = () => {
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl font-black text-sm transition-all text-left mb-1 group ${
                     activeTab === item.id 
-                      ? 'bg-[#FDFCF8] border border-[#B87333]/20 text-[#B87333] shadow-sm' 
+                      ? 'bg-[#FFFFFF] border border-[#274dad]/20 text-[#274dad] shadow-sm' 
                       : 'text-slate-500 hover:bg-[#F8F9FA] hover:text-[#1E293B]'
                   }`}
                 >
@@ -304,7 +304,7 @@ const Profile = () => {
                             type="text"
                             value={editForm.displayName}
                             onChange={(e) => setEditForm({...editForm, displayName: e.target.value})}
-                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#B87333]/50 focus:ring-4 focus:ring-[#B87333]/5 transition-all font-bold"
+                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-bold"
                           />
                         </div>
                         <div className="space-y-3">
@@ -324,7 +324,7 @@ const Profile = () => {
                           value={editForm.bio}
                           onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
                           rows={3}
-                          className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#B87333]/50 focus:ring-4 focus:ring-[#B87333]/5 transition-all font-medium"
+                          className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-medium"
                           placeholder="Mô tả hành trình khám phá vũ trụ của bạn..."
                         />
                       </div>
@@ -336,7 +336,7 @@ const Profile = () => {
                             type="text"
                             value={editForm.school}
                             onChange={(e) => setEditForm({...editForm, school: e.target.value})}
-                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#B87333]/50 focus:ring-4 focus:ring-[#B87333]/5 transition-all font-bold"
+                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-bold"
                           />
                         </div>
                         <div className="space-y-3">
@@ -344,7 +344,7 @@ const Profile = () => {
                           <select
                             value={editForm.grade}
                             onChange={(e) => setEditForm({...editForm, grade: e.target.value})}
-                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#B87333]/50 transition-all font-bold appearance-none"
+                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 transition-all font-bold appearance-none"
                           >
                              <option value="">Lựa chọn cấp bậc</option>
                              {[6,7,8,9,10,11,12].map(g => <option key={g} value={g}>Lớp {g}</option>)}
@@ -353,7 +353,7 @@ const Profile = () => {
                       </div>
 
                       <div className="flex gap-4 pt-4">
-                        <button onClick={handleSaveProfile} className="pg-btn-brass px-8 py-4 text-sm font-black shadow-lg shadow-[#B87333]/20">Đồng bộ dữ liệu</button>
+                        <button onClick={handleSaveProfile} className="pg-btn-brass px-8 py-4 text-sm font-black shadow-lg shadow-[#274dad]/20">Đồng bộ dữ liệu</button>
                         <button onClick={() => setIsEditing(false)} className="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-2xl transition-all text-sm">Hủy bỏ</button>
                       </div>
                     </div>
@@ -375,7 +375,7 @@ const Profile = () => {
                           </div>
                         </div>
                         <div className="flex items-start gap-6">
-                          <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center shrink-0 border border-amber-100 font-bold">3</div>
+                          <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center shrink-0 border border-blue-100 font-bold">3</div>
                           <div>
                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Trường học</h4>
                             <p className="text-xl font-bold text-[#1E293B]">{userData?.profile?.school || 'Chưa cập nhật'}</p>
@@ -416,15 +416,15 @@ const Profile = () => {
                 <div className="space-y-10">
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                     <StatCardAcademic icon={<BookOpen />} color="text-blue-500" value={`${stats.completedLessons}/${stats.totalLessons}`} label="Lượt khám phá" />
-                    <StatCardAcademic icon={<Flame />} color="text-orange-500" value={stats.currentStreak} label="Chuỗi ngày học" subtext={`Kỷ lục: ${stats.longestStreak}`} />
+                    <StatCardAcademic icon={<Flame />} color="text-cyan-500" value={stats.currentStreak} label="Chuỗi ngày học" subtext={`Kỷ lục: ${stats.longestStreak}`} />
                     <StatCardAcademic icon={<Swords />} color="text-rose-500" value={stats.pkWins} label="Chiến thắng PK" />
                     <StatCardAcademic icon={<Zap />} color="text-indigo-500" value={stats.totalXP.toLocaleString()} label="Tổng kinh nghiệm" />
                   </div>
 
                   <div className="bg-white rounded-[2rem] border border-[#E5E7EB] p-8 shadow-sm">
                     <div className="flex items-center gap-3 mb-10">
-                      <div className="p-2 bg-[#F8F4EF] rounded-xl border border-[#B87333]/10">
-                        <TrendingUp className="w-5 h-5 text-[#B87333]" />
+                      <div className="p-2 bg-[#e4f2f0] rounded-xl border border-[#274dad]/10">
+                        <TrendingUp className="w-5 h-5 text-[#274dad]" />
                       </div>
                       <h3 className="text-xl font-black text-[#1E293B]">Tiến độ Giải mã Khoa học</h3>
                     </div>
@@ -434,11 +434,11 @@ const Profile = () => {
                         <div key={idx} className="relative">
                           <div className="flex justify-between items-end mb-3">
                             <span className="font-black text-sm text-[#1E293B] uppercase tracking-tight">{lvl.name}</span>
-                            <span className="text-sm font-black text-[#B87333]">{lvl.percentage}% ({lvl.completed}/{lvl.total})</span>
+                            <span className="text-sm font-black text-[#274dad]">{lvl.percentage}% ({lvl.completed}/{lvl.total})</span>
                           </div>
                           <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                             <div 
-                              className={`h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-[#B87333] to-[#D4AF37] shadow-[0_0_10px_rgba(184,115,51,0.2)]`} 
+                              className={`h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-[#274dad] to-[#44b5d7] shadow-[0_0_10px_rgba(184,115,51,0.2)]`} 
                               style={{ width: `${lvl.percentage}%` }}
                             ></div>
                           </div>
@@ -460,14 +460,14 @@ const Profile = () => {
                           key={ach.id} 
                           className={`relative flex flex-col items-center text-center p-6 rounded-3xl border transition-all duration-500 ${
                             isUnlocked 
-                              ? 'bg-white border-[#B87333]/30 shadow-lg shadow-[#B87333]/5 hover:scale-105' 
+                              ? 'bg-white border-[#274dad]/30 shadow-lg shadow-[#274dad]/5 hover:scale-105' 
                               : 'bg-slate-50 border-slate-100 opacity-60'
                           }`}
                         >
                           {isUnlocked && <CheckCircle className="absolute top-3 right-3 w-5 h-5 text-emerald-500" />}
                           <div className={`w-16 h-16 mb-4 flex items-center justify-center rounded-2xl ${
                             isUnlocked 
-                              ? 'bg-[#FDFCF8] text-[#B87333] border-2 border-[#B87333]/10 shadow-[inner_0_0_10px_rgba(184,115,51,0.1)]' 
+                              ? 'bg-[#FFFFFF] text-[#274dad] border-2 border-[#274dad]/10 shadow-[inner_0_0_10px_rgba(184,115,51,0.1)]' 
                               : 'bg-slate-100 text-slate-300'
                           }`}>
                             {isUnlocked ? ach.icon : <Lock className="w-7 h-7" />}
@@ -493,11 +493,11 @@ const Profile = () => {
               {/* SECTION: ACTIVITY */}
               {activeTab === 'activity' && (
                 <div className="bg-white rounded-[2.5rem] border border-[#E5E7EB] p-8 sm:p-10 shadow-sm relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#B87333]/5 blur-[60px] rounded-full" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#274dad]/5 blur-[60px] rounded-full" />
                   <div className="space-y-6">
                     {recentActivity.length > 0 ? recentActivity.map((act, i) => (
-                      <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-6 p-6 bg-white rounded-2xl border border-slate-100 hover:border-[#B87333]/20 hover:shadow-md transition-all group">
-                        <div className="p-4 bg-[#F8F4EF] rounded-2xl text-[#B87333] transition-colors group-hover:bg-[#B87333] group-hover:text-white border border-[#B87333]/10">
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-6 p-6 bg-white rounded-2xl border border-slate-100 hover:border-[#274dad]/20 hover:shadow-md transition-all group">
+                        <div className="p-4 bg-[#e4f2f0] rounded-2xl text-[#274dad] transition-colors group-hover:bg-[#274dad] group-hover:text-white border border-[#274dad]/10">
                           {act.type === 'lesson' ? <BookOpen className="w-6 h-6" /> : act.type === 'achievement' ? <Trophy className="w-6 h-6" /> : <Swords className="w-6 h-6" />}
                         </div>
                         <div className="flex-1">
@@ -525,7 +525,7 @@ const Profile = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCardAcademic icon={<Swords />} color="text-rose-500" value={stats.pkWins + stats.pkLosses} label="Tổng trận PK" />
                     <StatCardAcademic icon={<Trophy />} color="text-emerald-500" value={stats.pkWins} label="Dành chiến thắng" />
-                    <StatCardAcademic icon={<Target />} color="text-orange-500" value={stats.pkWins + stats.pkLosses > 0 ? Math.round((stats.pkWins / (stats.pkWins + stats.pkLosses)) * 100) + '%' : '0%'} label="Tỷ lệ thắng" />
+                    <StatCardAcademic icon={<Target />} color="text-cyan-500" value={stats.pkWins + stats.pkLosses > 0 ? Math.round((stats.pkWins / (stats.pkWins + stats.pkLosses)) * 100) + '%' : '0%'} label="Tỷ lệ thắng" />
                     <StatCardAcademic icon={<TrendingUp />} color="text-purple-500" value={stats.pkRating} label="Xếp hạng Elo" />
                   </div>
                   <div className="bg-white rounded-[2rem] border border-[#E5E7EB] p-16 text-center shadow-sm">
@@ -547,8 +547,8 @@ const Profile = () => {
 };
 
 const StatCardAcademic = ({ icon, value, label, subtext, color }) => (
-  <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] hover:border-[#B87333]/20 shadow-sm transition-all group overflow-hidden relative">
-    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#B87333]/20 to-transparent" />
+  <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] hover:border-[#274dad]/20 shadow-sm transition-all group overflow-hidden relative">
+    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#274dad]/20 to-transparent" />
     <div className="flex items-center gap-3 mb-4">
       <div className={`p-2 rounded-xl bg-slate-50 border border-slate-100 ${color} group-hover:scale-110 transition-transform`}>
         {icon}
@@ -557,9 +557,11 @@ const StatCardAcademic = ({ icon, value, label, subtext, color }) => (
     <div>
       <div className="text-3xl font-black text-[#1E293B] tracking-tight">{value}</div>
       <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{label}</div>
-      {subtext && <div className="text-[10px] text-[#B87333] mt-2 font-bold">{subtext}</div>}
+      {subtext && <div className="text-[10px] text-[#274dad] mt-2 font-bold">{subtext}</div>}
     </div>
   </div>
 );
 
 export default Profile;
+
+

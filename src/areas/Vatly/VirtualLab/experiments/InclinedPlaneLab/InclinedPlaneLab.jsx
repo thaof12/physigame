@@ -314,7 +314,7 @@ const InclinedPlaneLab = () => {
                   <label className="block text-sm text-gray-300 mb-2">Góc nghiêng α (°)</label>
                   <input type="range" min="5" max="60" step="5"
                     value={angle} onChange={(e) => setAngle(parseInt(e.target.value))}
-                    disabled={isRunning} className="w-full accent-yellow-500" />
+                    disabled={isRunning} className="w-full accent-blue-500" />
                   <div className="text-center text-lg font-mono text-yellow-400 param-value">{angle}°</div>
                 </div>
                 <div>
@@ -426,7 +426,7 @@ const InclinedPlaneLab = () => {
             <div className="flex justify-center gap-2 mb-6">
               {guideSteps.map((_, i) => (
                 <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  i === guideStep ? 'bg-yellow-500 scale-125' : 'bg-gray-600'
+                  i === guideStep ? 'bg-blue-500 scale-125' : 'bg-gray-600'
                 }`} />
               ))}
             </div>
@@ -438,12 +438,12 @@ const InclinedPlaneLab = () => {
               </button>
               {guideStep === guideSteps.length - 1 ? (
                 <button onClick={() => setShowGuide(false)}
-                  className="px-5 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg transition-all shadow-lg shadow-yellow-600/30">
+                  className="px-5 py-2 bg-yellow-600 hover:bg-blue-500 rounded-lg transition-all shadow-lg shadow-yellow-600/30">
                   Bắt đầu
                 </button>
               ) : (
                 <button onClick={() => setGuideStep(guideStep + 1)}
-                  className="flex items-center gap-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg transition-all">
+                  className="flex items-center gap-1 px-4 py-2 bg-yellow-600 hover:bg-blue-500 rounded-lg transition-all">
                   Tiếp <ChevronRight size={18} />
                 </button>
               )}
@@ -495,3 +495,4 @@ const InclinedPlaneLab = () => {
 };
 
 export default InclinedPlaneLab;
+

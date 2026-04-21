@@ -39,7 +39,7 @@ const Header = () => {
               {/* Quest Button */}
               <button
                 onClick={() => setShowQuestModal(true)}
-                className="relative flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white font-semibold hover:shadow-lg hover:scale-105 transition-all"
+                className="relative flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-blue-400 to-cyan-500 text-white font-semibold hover:shadow-lg hover:scale-105 transition-all"
                 title="Nhiệm vụ"
               >
                 <Target size={18} />
@@ -100,3 +100,4 @@ const Header = () => {
 };
 
 export default Header;
+

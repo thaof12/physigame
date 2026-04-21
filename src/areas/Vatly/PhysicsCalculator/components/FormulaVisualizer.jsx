@@ -54,7 +54,7 @@ const FormulaVisualizer = ({ formula, highlightVariable }) => {
               key={variable.symbol}
               className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
                 highlightVariable === variable.symbol 
-                  ? 'bg-yellow-100 border border-yellow-300' 
+                  ? 'bg-blue-100 border border-yellow-300' 
                   : 'bg-white/70'
               }`}
             >
@@ -115,3 +115,4 @@ const FormulaVisualizer = ({ formula, highlightVariable }) => {
 };
 
 export default FormulaVisualizer;
+

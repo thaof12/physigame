@@ -669,14 +669,14 @@ const CalorimeterLab = () => {
                     <label className="block text-sm text-gray-300 mb-1">Khối lượng (g)</label>
                     <input type="range" min="50" max="200" step="10" value={sampleMass}
                       onChange={(e) => setSampleMass(parseInt(e.target.value))}
-                      disabled={experimentState !== 'setup'} className="w-full accent-orange-500" />
+                      disabled={experimentState !== 'setup'} className="w-full accent-cyan-500" />
                     <div className="text-center text-lg font-mono text-orange-400 param-value">{sampleMass} g</div>
                   </div>
                   <div>
                     <label className="block text-sm text-gray-300 mb-1">Nhiệt độ (°C)</label>
                     <input type="range" min="80" max="100" step="5" value={sampleTemp}
                       onChange={(e) => setSampleTemp(parseInt(e.target.value))}
-                      disabled={experimentState !== 'setup'} className="w-full accent-orange-500" />
+                      disabled={experimentState !== 'setup'} className="w-full accent-cyan-500" />
                     <div className="text-center text-lg font-mono text-orange-400 param-value">{sampleTemp}°C</div>
                   </div>
                 </div>
@@ -770,7 +770,7 @@ const CalorimeterLab = () => {
             <div className="flex justify-center gap-2 mb-6">
               {guideSteps.map((_, i) => (
                 <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  i === guideStep ? 'bg-orange-500 scale-125' : 'bg-gray-600'}`} />
+                  i === guideStep ? 'bg-cyan-500 scale-125' : 'bg-gray-600'}`} />
               ))}
             </div>
             <div className="flex justify-between">
@@ -780,12 +780,12 @@ const CalorimeterLab = () => {
               </button>
               {guideStep === guideSteps.length - 1 ? (
                 <button onClick={() => setShowGuide(false)}
-                  className="px-5 py-2 bg-orange-600 hover:bg-orange-500 rounded-lg transition-all shadow-lg shadow-orange-600/30">
+                  className="px-5 py-2 bg-orange-600 hover:bg-cyan-500 rounded-lg transition-all shadow-lg shadow-orange-600/30">
                   Bắt đầu
                 </button>
               ) : (
                 <button onClick={() => setGuideStep(guideStep + 1)}
-                  className="flex items-center gap-1 px-4 py-2 bg-orange-600 hover:bg-orange-500 rounded-lg transition-all">
+                  className="flex items-center gap-1 px-4 py-2 bg-orange-600 hover:bg-cyan-500 rounded-lg transition-all">
                   Tiếp <ChevronRight size={18} />
                 </button>
               )}
@@ -829,3 +829,4 @@ const CalorimeterLab = () => {
 };
 
 export default CalorimeterLab;
+

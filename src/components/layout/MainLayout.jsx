@@ -37,7 +37,7 @@ export default function MainLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#FDFCF8] text-slate-700">
+    <div className="flex flex-col min-h-screen bg-[#FFFFFF] text-slate-700">
       <GlobalHeader />
       <main className="flex-grow flex flex-col relative w-full overflow-hidden">
         {/* Subtle graph grid overlay */}
@@ -50,3 +50,4 @@ export default function MainLayout() {
     </div>
   );
 }
+
