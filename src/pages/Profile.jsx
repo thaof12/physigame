@@ -189,7 +189,7 @@ const Profile = () => {
                       <img src={userData.profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#2099e9] to-[#274dad]">
-                        {userData?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'ID'}
+                        {userData?.displayName?.[0]?.toUpperCase() || user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'ID'}
                       </span>
                     )}
                   </div>
@@ -204,7 +204,7 @@ const Profile = () => {
 
               <div className="space-y-1">
                 <h2 className="text-2xl font-black text-[#1E293B] tracking-tight truncate px-2">
-                  {userData?.displayName || user?.email?.split('@')[0] || 'Unknown Cadet'}
+                  {userData?.displayName || user?.displayName || user?.email?.split('@')[0] || 'Unknown Cadet'}
                 </h2>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e4f2f0] text-[#2099e9] text-[10px] font-black tracking-widest uppercase border border-[#274dad]/10">
                   <RankIcon className={`w-3 h-3 ${rank.color}`} /> {rank.name}

@@ -31,12 +31,14 @@ export const AuthProvider = ({ children }) => {
             if (response.data) {
               const userData = {
                 ...response.data,
+                email: response.data.email || session.user.email,
+                displayName: response.data.displayName || response.data.display_name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
                 firebaseUid: session.user.id,
                 uid: session.user.id
               };
               localStorage.setItem('user', JSON.stringify(userData));
               setUser(userData);
-              console.log('✅ User profile loaded');
+              console.log('✅ User profile loaded:', userData.email);
             }
           } catch (profileError) {
             console.warn('⚠️ Could not load profile, using basic data');
@@ -175,6 +177,8 @@ export const AuthProvider = ({ children }) => {
               // Ensure we don't accidentally wipe teacher status if API returned student but intent was teacher
               const finalUser = {
                 ...userData,
+                email: userData.email || session.user.email,
+                displayName: userData.displayName || userData.display_name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
                 role: isTeacherIntent ? 'teacher' : (userData.role || 'student'),
                 teacherStatus: isTeacherIntent ? 'pending' : (userData.teacherStatus || userData.teacher_status || 'verified'),
                 teacher_status: isTeacherIntent ? 'pending' : (userData.teacher_status || userData.teacherStatus || 'verified')
