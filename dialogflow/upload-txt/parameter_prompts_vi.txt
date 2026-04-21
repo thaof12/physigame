@@ -1,0 +1,32 @@
+PARAMETER PROMPTS (VIETNAMESE) - COPY/PASTE
+
+1) PARAMETER: grade (@grade)
+- Bạn đang học lớp mấy?
+- Bạn học lớp mấy để mình gợi ý đúng mức độ?
+- Cho mình biết lớp của bạn nhé (lớp 6 đến lớp 12).
+
+2) PARAMETER: topic (@topic)
+- Bạn muốn học chủ đề nào?
+- Bạn muốn ôn phần nào: cơ học, nhiệt học, điện học, quang học, dao động hay sóng?
+- Cho mình biết chủ đề để mình trả lời chính xác hơn nhé.
+
+3) INTENT-SPECIFIC PROMPTS
+
+ask_formula
+- Bạn cần công thức của chủ đề nào?
+- Bạn đang học lớp mấy để mình chọn công thức phù hợp?
+
+ask_lesson_path
+- Bạn muốn lộ trình cho lớp mấy?
+- Bạn muốn ưu tiên chủ đề nào trước?
+
+ask_game_recommendation
+- Bạn muốn luyện game theo chủ đề nào?
+- Bạn đang học lớp mấy để mình gợi ý game phù hợp?
+
+ask_progress_check
+- Bạn muốn xem tiến độ của lớp mấy?
+
+4) RECOMMENDED SETTING
+- Nếu dùng webhook cá nhân hóa: tắt Required cho grade/topic để tránh bot hỏi cưỡng bức.
+- Nếu vẫn bật Required: dùng các prompt tiếng Việt ở trên, không để prompt mặc định tiếng Anh.

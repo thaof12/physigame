@@ -1,0 +1,8 @@
+# Format: reference_value<TAB>synonym_1,synonym_2,...
+lop_6	lớp 6,lop 6,khối 6,khoi 6,grade 6,6
+lop_7	lớp 7,lop 7,khối 7,khoi 7,grade 7,7
+lop_8	lớp 8,lop 8,khối 8,khoi 8,grade 8,8
+lop_9	lớp 9,lop 9,khối 9,khoi 9,grade 9,9
+lop_10	lớp 10,lop 10,khối 10,khoi 10,grade 10,10
+lop_11	lớp 11,lop 11,khối 11,khoi 11,grade 11,11
+lop_12	lớp 12,lop 12,khối 12,khoi 12,grade 12,12

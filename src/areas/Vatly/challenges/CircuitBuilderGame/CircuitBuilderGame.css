@@ -1,0 +1,566 @@
+/* CircuitBuilderGame - Modern UI with Blue/Cyan Electric Theme */
+
+/* === Base Layout === */
+.cb-game {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0c4a6e 0%, #164e63 50%, #134e4a 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.cb-game::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(20, 184, 166, 0.12) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* === Header === */
+.cb-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(6, 182, 212, 0.3);
+  position: relative;
+  z-index: 10;
+}
+
+.cb-header.pk-mode {
+  background: linear-gradient(90deg, rgba(6, 182, 212, 0.3), rgba(20, 184, 166, 0.3));
+}
+
+.cb-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cb-back-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(6, 182, 212, 0.5);
+  transform: translateX(-3px);
+}
+
+.cb-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cb-title-icon {
+  width: 46px;
+  height: 46px;
+  background: linear-gradient(135deg, #06b6d4, #14b8a6);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4); }
+  50% { box-shadow: 0 4px 25px rgba(6, 182, 212, 0.6); }
+}
+
+.cb-title h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff, #a5f3fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.cb-reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+}
+
+.cb-reset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+}
+
+/* PK Mode Header Elements */
+.pk-timer, .pk-score {
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+/* === Game Content === */
+.cb-game-content {
+  display: flex;
+  gap: 20px;
+  padding: 20px 24px;
+  flex: 1;
+  position: relative;
+  z-index: 5;
+}
+
+/* === Toolbar === */
+.cb-toolbar {
+  width: 200px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cb-toolbar-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #67e8f9;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.cb-tool-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cb-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.cb-tool-btn:hover {
+  background: rgba(6, 182, 212, 0.2);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.cb-tool-btn.selected {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(20, 184, 166, 0.3));
+  border-color: #06b6d4;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+}
+
+.cb-tool-btn .tool-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(6, 182, 212, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #67e8f9;
+}
+
+.cb-tool-btn.selected .tool-icon {
+  background: rgba(6, 182, 212, 0.5);
+  color: white;
+}
+
+/* === Canvas === */
+.cb-canvas-wrapper {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.cb-canvas {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 12px;
+  cursor: crosshair;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* === Info Panel === */
+.cb-info-panel {
+  width: 260px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.cb-info-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #67e8f9;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.cb-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cb-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cb-info-item .info-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.cb-info-item .info-value {
+  color: #67e8f9;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.cb-bulb-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+  transition: all 0.3s ease;
+}
+
+.cb-bulb-status.on {
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.3), rgba(234, 179, 8, 0.2));
+  border: 1px solid #facc15;
+  color: #fef08a;
+  animation: bulb-glow 1s ease-in-out infinite alternate;
+}
+
+.cb-bulb-status.off {
+  background: rgba(100, 116, 139, 0.2);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  color: #94a3b8;
+}
+
+@keyframes bulb-glow {
+  from { box-shadow: 0 0 10px rgba(250, 204, 21, 0.3); }
+  to { box-shadow: 0 0 20px rgba(250, 204, 21, 0.5); }
+}
+
+.cb-no-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  gap: 12px;
+}
+
+.cb-no-info p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* === Tutorial Overlay === */
+.cb-tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.cb-tutorial-card {
+  background: linear-gradient(135deg, rgba(12, 74, 110, 0.95), rgba(22, 78, 99, 0.95));
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  border-radius: 24px;
+  padding: 40px 50px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 
+    0 25px 60px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(6, 182, 212, 0.2);
+  animation: tutorial-appear 0.4s ease-out;
+}
+
+@keyframes tutorial-appear {
+  from { 
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.cb-tutorial-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #06b6d4, #14b8a6);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(6, 182, 212, 0.4);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.cb-tutorial-card h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  background: linear-gradient(135deg, #fff, #67e8f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cb-tutorial-card > p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  margin: 0 0 28px 0;
+}
+
+.cb-tutorial-steps {
+  text-align: left;
+  margin-bottom: 28px;
+}
+
+.cb-tutorial-steps h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #67e8f9;
+  font-size: 1.1rem;
+  margin: 0 0 16px 0;
+}
+
+.cb-tutorial-steps ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cb-tutorial-steps li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+  border-left: 3px solid #06b6d4;
+  transition: all 0.3s ease;
+}
+
+.cb-tutorial-steps li:hover {
+  background: rgba(6, 182, 212, 0.15);
+  transform: translateX(5px);
+}
+
+.cb-step-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(6, 182, 212, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #67e8f9;
+  flex-shrink: 0;
+}
+
+.cb-physics-note {
+  background: rgba(20, 184, 166, 0.15);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 28px;
+  text-align: left;
+}
+
+.cb-physics-note p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cb-physics-note strong {
+  color: #5eead4;
+}
+
+.cb-start-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 40px;
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+}
+
+.cb-start-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(6, 182, 212, 0.5);
+}
+
+/* === Responsive === */
+@media (max-width: 1200px) {
+  .cb-game-content {
+    flex-direction: column;
+  }
+  
+  .cb-toolbar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .cb-toolbar-title {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .cb-tool-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  
+  .cb-tool-btn {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+  
+  .cb-info-panel {
+    width: 100%;
+  }
+  
+  .cb-info-content {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .cb-info-item {
+    flex: 1;
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cb-header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .cb-title h1 {
+    font-size: 1.3rem;
+  }
+  
+  .cb-back-btn, .cb-reset-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+  
+  .cb-game-content {
+    padding: 16px;
+  }
+  
+  .cb-tutorial-card {
+    padding: 28px;
+  }
+  
+  .cb-tutorial-card h2 {
+    font-size: 1.6rem;
+  }
+}

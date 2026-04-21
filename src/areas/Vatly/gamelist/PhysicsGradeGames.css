@@ -1,0 +1,148 @@
+.roadmap-line {
+  animation: drawRoad 1.2s ease-out both;
+  transform-origin: top;
+}
+
+.roadmap-connector {
+  position: absolute;
+  left: 2.9rem;
+  top: 1.6rem;
+  width: 1.15rem;
+  border-top: 2px dashed rgba(156, 163, 175, 0.7);
+}
+
+.chapter-fade {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: chapterReveal 0.5s ease-out forwards;
+}
+
+.roadmap-item {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: itemReveal 0.45s ease-out forwards;
+}
+
+.roadmap-card {
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+
+.roadmap-node {
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.roadmap-item:hover .roadmap-node {
+  transform: scale(1.05);
+}
+
+.current-node {
+  animation: currentPulse 1.8s ease-in-out infinite;
+}
+
+@media (min-width: 768px) {
+  .roadmap-line {
+    left: 50%;
+    margin-left: -2px;
+  }
+
+  .roadmap-node {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .roadmap-item.roadmap-left .roadmap-card {
+    width: calc(50% - 3.25rem);
+    margin-right: auto;
+  }
+
+  .roadmap-item.roadmap-right .roadmap-card {
+    width: calc(50% - 3.25rem);
+    margin-left: auto;
+  }
+
+  .roadmap-connector {
+    left: 50%;
+    width: 2.65rem;
+    top: 1.65rem;
+    border-top-style: solid;
+    border-top-color: rgba(156, 163, 175, 0.75);
+  }
+
+  .roadmap-item.roadmap-left .connector-left {
+    transform: translateX(-100%);
+    border-top-left-radius: 999px;
+    border-bottom-left-radius: 999px;
+    border-left: 2px solid rgba(156, 163, 175, 0.75);
+    border-bottom: 2px solid rgba(156, 163, 175, 0.75);
+    height: 1.3rem;
+  }
+
+  .roadmap-item.roadmap-right .connector-right {
+    border-top-right-radius: 999px;
+    border-bottom-right-radius: 999px;
+    border-right: 2px solid rgba(156, 163, 175, 0.75);
+    border-bottom: 2px solid rgba(156, 163, 175, 0.75);
+    height: 1.3rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .roadmap-item.roadmap-right .roadmap-card,
+  .roadmap-item.roadmap-left .roadmap-card {
+    width: 100%;
+  }
+
+  .roadmap-item .roadmap-connector {
+    border-top-style: dashed;
+  }
+}
+
+@keyframes drawRoad {
+  from {
+    transform: scaleY(0);
+    opacity: 0.25;
+  }
+
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes chapterReveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes itemReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes currentPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
+  }
+
+  70% {
+    box-shadow: 0 0 0 12px rgba(245, 158, 11, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}

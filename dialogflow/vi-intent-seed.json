@@ -1,0 +1,310 @@
+{
+  "version": "1.0",
+  "languageCode": "vi",
+  "notes": "Seed dữ liệu để train Dialogflow CX tiếng Việt. Có cả câu có dấu và không dấu.",
+  "entities": [
+    {
+      "name": "grade",
+      "synonyms": {
+        "lớp 6": ["6", "khối 6", "lop 6", "khoi 6", "grade 6"],
+        "lớp 7": ["7", "khối 7", "lop 7", "khoi 7", "grade 7"],
+        "lớp 8": ["8", "khối 8", "lop 8", "khoi 8", "grade 8"],
+        "lớp 9": ["9", "khối 9", "lop 9", "khoi 9", "grade 9"],
+        "lớp 10": ["10", "khối 10", "lop 10", "khoi 10", "grade 10"],
+        "lớp 11": ["11", "khối 11", "lop 11", "khoi 11", "grade 11"],
+        "lớp 12": ["12", "khối 12", "lop 12", "khoi 12", "grade 12"]
+      }
+    },
+    {
+      "name": "topic",
+      "synonyms": {
+        "cơ học": ["co hoc", "động học", "dong hoc", "động lực học", "dong luc hoc", "mechanics"],
+        "nhiệt học": ["nhiet hoc", "truyền nhiệt", "truyen nhiet", "năng lượng nhiệt", "nang luong nhiet", "thermodynamics"],
+        "điện học": ["dien hoc", "mạch điện", "mach dien", "định luật ôm", "dinh luat ohm", "ohm", "electricity"],
+        "quang học": ["quang hoc", "ánh sáng", "anh sang", "thấu kính", "thau kinh", "optics"],
+        "dao động": ["dao dong", "dao động điều hòa", "dao dong dieu hoa", "shm", "oscillation"],
+        "sóng": ["song", "sóng cơ", "song co", "giao thoa", "waves"]
+      }
+    }
+  ],
+  "intents": [
+    {
+      "displayName": "greet",
+      "webhookTag": "",
+      "parameters": [],
+      "trainingPhrases": [
+        "xin chào",
+        "chào bạn",
+        "hello",
+        "hi",
+        "alo",
+        "chào trợ lý",
+        "xin chào bot",
+        "chào ai",
+        "chào nhé",
+        "cho mình hỏi",
+        "mình chào bạn",
+        "xin chào bạn ơi",
+        "xin chao",
+        "chao ban"
+      ],
+      "responseTemplates": [
+        "Xin chào, mình là trợ lý Vật lý. Bạn muốn ôn lý thuyết, luyện bài tập hay tìm game?",
+        "Chào bạn, mình có thể gợi ý công thức, lộ trình học và game theo lớp của bạn."
+      ]
+    },
+    {
+      "displayName": "goodbye",
+      "webhookTag": "",
+      "parameters": [],
+      "trainingPhrases": [
+        "tạm biệt",
+        "bye",
+        "hẹn gặp lại",
+        "cảm ơn tạm biệt",
+        "thoát nhé",
+        "dừng tại đây",
+        "mình out đây",
+        "chào nhé",
+        "khi nào cần sẽ quay lại",
+        "kết thúc hỏi đáp",
+        "tam biet",
+        "hen gap lai"
+      ],
+      "responseTemplates": [
+        "Tạm biệt, khi cần ôn Vật lý thì quay lại nhé.",
+        "Hẹn gặp lại bạn. Chúc bạn học tốt."
+      ]
+    },
+    {
+      "displayName": "ask_formula",
+      "webhookTag": "cong_thuc",
+      "parameters": ["grade", "topic"],
+      "trainingPhrases": [
+        "công thức tính vận tốc là gì",
+        "cho mình công thức điện trở",
+        "công thức định luật ôm",
+        "công thức áp suất",
+        "công thức tính công suất",
+        "cho em xin công thức nhiệt lượng",
+        "lớp 8 công thức cơ học cơ bản",
+        "lớp 9 điện học công thức nào cần nhớ",
+        "nhắc lại công thức sóng",
+        "công thức dao động điều hòa",
+        "giải thích công thức khúc xạ ánh sáng",
+        "mình cần công thức điện học",
+        "công thức cơ học lớp 8",
+        "công thức vật lý để thi",
+        "cong thuc vat ly de thi",
+        "cong thuc dien hoc"
+      ],
+      "responseTemplates": [
+        "Bạn cho mình biết thêm lớp và chủ đề, mình sẽ trả công thức đúng kèm ví dụ nhanh.",
+        "Mình có thể tóm tắt công thức theo mức độ lớp của bạn để dễ nhớ hơn."
+      ]
+    },
+    {
+      "displayName": "ask_lesson_path",
+      "webhookTag": "goi_y_lo_trinh",
+      "parameters": ["grade", "topic"],
+      "trainingPhrases": [
+        "nên học bài nào trước",
+        "gợi ý lộ trình học vật lý",
+        "lớp 8 học từ đâu",
+        "cho em lộ trình lớp 9",
+        "học chương nào trước để dễ",
+        "ôn thi vật lý bắt đầu từ đâu",
+        "sắp xếp bài học cho mình",
+        "tôi học yếu, nên học sao",
+        "cần lộ trình 2 tuần",
+        "gợi ý bài học theo chủ đề điện học",
+        "mình nên học chương nào trước",
+        "lộ trình vật lý lớp 10",
+        "goi y lo trinh"
+      ],
+      "responseTemplates": [
+        "Mình sẽ đề xuất lộ trình theo lớp và chủ đề, bắt đầu từ nền tảng đến luyện tập.",
+        "Bạn cho mình biết lớp học hiện tại để sắp thứ tự bài học chính xác."
+      ]
+    },
+    {
+      "displayName": "ask_game_recommendation",
+      "webhookTag": "goi_y_game",
+      "parameters": ["grade", "topic"],
+      "trainingPhrases": [
+        "gợi ý game vật lý",
+        "game nào để luyện điện học",
+        "cho mình game lớp 8",
+        "nên chơi game gì để ôn bài",
+        "gợi ý virtual lab",
+        "tìm game về áp suất",
+        "có game về định luật ôm không",
+        "đề xuất game để luyện nhanh",
+        "muốn thực hành trên mô phỏng",
+        "bài này có game nào không",
+        "mình muốn chơi game vật lý",
+        "gợi ý game cho cơ học",
+        "goi y game vat ly"
+      ],
+      "responseTemplates": [
+        "Mình sẽ đề xuất game theo lớp và điểm yếu của bạn để luyện hiệu quả hơn.",
+        "Nếu bạn gửi lớp và chủ đề, mình có thể trả route game ngay."
+      ]
+    },
+    {
+      "displayName": "ask_topic_explain",
+      "webhookTag": "",
+      "parameters": ["topic", "grade"],
+      "trainingPhrases": [
+        "giải thích cơ học dễ hiểu",
+        "nhiệt học là gì",
+        "điện học có gì khó",
+        "quang học dễ nhớ như nào",
+        "giải thích dao động cho người mới",
+        "sóng cơ là gì",
+        "tóm tắt chủ đề cơ học",
+        "giải thích đơn giản cho lớp 7",
+        "cho ví dụ thực tế về điện học",
+        "mình chưa hiểu nhiệt học",
+        "giải thích quang học dễ hiểu",
+        "giai thich co hoc"
+      ],
+      "responseTemplates": [
+        "Mình sẽ giải thích ngắn gọn, có ví dụ đời sống và câu hỏi tự kiểm tra.",
+        "Bạn muốn mức độ dễ, vừa hay nâng cao?"
+      ]
+    },
+    {
+      "displayName": "ask_chapter_summary",
+      "webhookTag": "",
+      "parameters": ["grade", "topic"],
+      "trainingPhrases": [
+        "tóm tắt chương này",
+        "tổng hợp kiến thức chương 1",
+        "summary bài vừa học",
+        "nhắc lại ý chính",
+        "cho bản tóm tắt nhanh",
+        "chương này có gì quan trọng",
+        "điểm cần nhớ để kiểm tra",
+        "mình cần mindmap chương này",
+        "tóm tắt vật lý lớp 8",
+        "tóm lược nội dung cơ học",
+        "tom tat chuong nay"
+      ],
+      "responseTemplates": [
+        "Mình có thể tóm tắt theo 3 phần: khái niệm, công thức, dạng bài tập thường gặp.",
+        "Bạn cần tóm tắt theo chương hay theo một bài cụ thể?"
+      ]
+    },
+    {
+      "displayName": "ask_practice_question",
+      "webhookTag": "",
+      "parameters": ["topic", "grade"],
+      "trainingPhrases": [
+        "ra cho mình 5 câu trắc nghiệm",
+        "cho bài tập tự luyện",
+        "tạo đề luyện tập cơ học",
+        "cho câu hỏi để ôn thi",
+        "bài tập điện học mức độ vừa",
+        "cho em 3 câu dễ",
+        "luyện nhanh 10 phút",
+        "mình muốn luyện câu hỏi",
+        "tạo quiz vật lý lớp 9",
+        "cho bài tập có đáp án",
+        "tao quiz vat ly lop 9"
+      ],
+      "responseTemplates": [
+        "Mình có thể tạo bộ câu hỏi theo mức độ và chấm điểm từng câu cho bạn.",
+        "Bạn muốn trắc nghiệm 4 đáp án hay tự luận ngắn?"
+      ]
+    },
+    {
+      "displayName": "ask_quiz_review",
+      "webhookTag": "",
+      "parameters": ["topic", "grade"],
+      "trainingPhrases": [
+        "tại sao em sai câu này",
+        "giải thích đáp án đúng",
+        "review bài kiểm tra giúp mình",
+        "chỉ lỗi sai của tôi",
+        "phân tích câu sai",
+        "vì sao đáp án b đúng",
+        "mình sai ở đâu",
+        "mình cần chữa bài",
+        "sửa lỗi trắc nghiệm",
+        "xem lại bài quiz",
+        "tai sao em sai"
+      ],
+      "responseTemplates": [
+        "Mình sẽ phân tích lý do đúng sai và đưa mẹo tránh lặp lại lỗi này.",
+        "Bạn gửi câu hỏi và đáp án bạn đã chọn, mình sửa từng bước."
+      ]
+    },
+    {
+      "displayName": "ask_progress_check",
+      "webhookTag": "goi_y_lo_trinh",
+      "parameters": ["grade"],
+      "trainingPhrases": [
+        "xem tiến độ học của tôi",
+        "mình đã học được bao nhiêu",
+        "kiểm tra mức độ tiến bộ",
+        "thống kê điểm quiz của mình",
+        "tôi đang yếu chương nào",
+        "xem chương mạnh và chương yếu",
+        "báo cáo học tập",
+        "mình học tới đâu rồi",
+        "check progress",
+        "xem kết quả gần đây",
+        "xem tien do hoc"
+      ],
+      "responseTemplates": [
+        "Mình có thể đọc tiến độ game và bài học để gợi ý bước tiếp theo.",
+        "Nếu đã liên kết userEmail, mình sẽ trả thống kê cá nhân ngay."
+      ]
+    },
+    {
+      "displayName": "smalltalk_thanks",
+      "webhookTag": "",
+      "parameters": [],
+      "trainingPhrases": [
+        "cảm ơn",
+        "thanks",
+        "thank you",
+        "cảm ơn bạn nhiều",
+        "hay quá cảm ơn",
+        "ok cảm ơn",
+        "xịn quá cảm ơn",
+        "mình cảm ơn nhé",
+        "cảm ơn trợ lý",
+        "được rồi cảm ơn",
+        "cam on"
+      ],
+      "responseTemplates": [
+        "Rất vui được hỗ trợ bạn. Cần gì thì gọi mình nhé.",
+        "Không có gì. Mình sẵn sàng giúp bạn ôn Vật lý tiếp."
+      ]
+    },
+    {
+      "displayName": "fallback_recover",
+      "webhookTag": "",
+      "parameters": [],
+      "trainingPhrases": [
+        "",
+        "không hiểu",
+        "bạn nói rõ hơn",
+        "giúp tôi với",
+        "tôi bí rồi",
+        "không biết bắt đầu từ đâu",
+        "nói lại được không",
+        "mình chưa rõ",
+        "tôi cần hướng dẫn",
+        "help",
+        "khong hieu"
+      ],
+      "responseTemplates": [
+        "Mình có thể giúp theo 3 hướng: 1) công thức 2) lộ trình bài học 3) gợi ý game. Bạn chọn hướng nào?",
+        "Bạn có thể nói rõ hơn về lớp học và chủ đề để mình hỗ trợ đúng ý hơn."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "fundamentalConstants": [
+    {
+      "id": "c",
+      "name": "Tốc độ ánh sáng trong chân không",
+      "symbol": "c",
+      "value": 299792458,
+      "unit": "m/s",
+      "category": "Cơ bản",
+      "description": "Tốc độ truyền của ánh sáng và các sóng điện từ trong chân không"
+    },
+    {
+      "id": "G",
+      "name": "Hằng số hấp dẫn",
+      "symbol": "G",
+      "value": 6.67430e-11,
+      "unit": "N⋅m²/kg²",
+      "category": "Cơ bản",
+      "description": "Hằng số trong định luật vạn vật hấp dẫn Newton"
+    },
+    {
+      "id": "h",
+      "name": "Hằng số Planck",
+      "symbol": "h",
+      "value": 6.62607015e-34,
+      "unit": "J⋅s",
+      "category": "Lượng tử",
+      "description": "Hằng số cơ bản trong cơ học lượng tử"
+    },
+    {
+      "id": "hbar",
+      "name": "Hằng số Planck rút gọn",
+      "symbol": "ℏ",
+      "value": 1.054571817e-34,
+      "unit": "J⋅s",
+      "category": "Lượng tử",
+      "description": "h/(2π), thường dùng trong cơ học lượng tử"
+    },
+    {
+      "id": "k",
+      "name": "Hằng số Boltzmann",
+      "symbol": "k",
+      "value": 1.380649e-23,
+      "unit": "J/K",
+      "category": "Nhiệt động",
+      "description": "Liên hệ giữa nhiệt độ và năng lượng động học phân tử"
+    },
+    {
+      "id": "NA",
+      "name": "Số Avogadro",
+      "symbol": "NA",
+      "value": 6.02214076e23,
+      "unit": "mol⁻¹",
+      "category": "Hóa học",
+      "description": "Số hạt trong một mol chất"
+    },
+    {
+      "id": "R",
+      "name": "Hằng số khí lý tưởng",
+      "symbol": "R",
+      "value": 8.314462618,
+      "unit": "J/(mol⋅K)",
+      "category": "Nhiệt động",
+      "description": "Hằng số trong phương trình trạng thái khí lý tưởng"
+    },
+    {
+      "id": "e",
+      "name": "Điện tích nguyên tố",
+      "symbol": "e",
+      "value": 1.602176634e-19,
+      "unit": "C",
+      "category": "Điện từ",
+      "description": "Điện tích của một electron hoặc proton"
+    },
+    {
+      "id": "epsilon0",
+      "name": "Hằng số điện môi chân không",
+      "symbol": "ε₀",
+      "value": 8.8541878128e-12,
+      "unit": "F/m",
+      "category": "Điện từ",
+      "description": "Độ thẩm điện trong chân không"
+    },
+    {
+      "id": "mu0",
+      "name": "Hằng số từ thẩm chân không",
+      "symbol": "μ₀",
+      "value": 1.25663706212e-6,
+      "unit": "H/m",
+      "category": "Điện từ",
+      "description": "Độ từ thẩm trong chân không"
+    },
+    {
+      "id": "me",
+      "name": "Khối lượng electron",
+      "symbol": "mₑ",
+      "value": 9.1093837015e-31,
+      "unit": "kg",
+      "category": "Hạt cơ bản",
+      "description": "Khối lượng nghỉ của electron"
+    },
+    {
+      "id": "mp",
+      "name": "Khối lượng proton",
+      "symbol": "mₚ",
+      "value": 1.67262192369e-27,
+      "unit": "kg",
+      "category": "Hạt cơ bản",
+      "description": "Khối lượng nghỉ của proton"
+    },
+    {
+      "id": "mn",
+      "name": "Khối lượng neutron",
+      "symbol": "mₙ",
+      "value": 1.67492749804e-27,
+      "unit": "kg",
+      "category": "Hạt cơ bản",
+      "description": "Khối lượng nghỉ của neutron"
+    },
+    {
+      "id": "g",
+      "name": "Gia tốc trọng trường",
+      "symbol": "g",
+      "value": 9.80665,
+      "unit": "m/s²",
+      "category": "Cơ học",
+      "description": "Gia tốc trọng trường chuẩn trên bề mặt Trái Đất"
+    },
+    {
+      "id": "atm",
+      "name": "Áp suất khí quyển chuẩn",
+      "symbol": "atm",
+      "value": 101325,
+      "unit": "Pa",
+      "category": "Nhiệt động",
+      "description": "Áp suất khí quyển ở mực nước biển"
+    },
+    {
+      "id": "stefan",
+      "name": "Hằng số Stefan-Boltzmann",
+      "symbol": "σ",
+      "value": 5.670374419e-8,
+      "unit": "W/(m²⋅K⁴)",
+      "category": "Nhiệt động",
+      "description": "Hằng số trong định luật bức xạ vật đen"
+    }
+  ],
+  "derivedConstants": [
+    {
+      "id": "ke",
+      "name": "Hằng số Coulomb",
+      "symbol": "kₑ",
+      "value": 8.9875517923e9,
+      "unit": "N⋅m²/C²",
+      "category": "Điện từ",
+      "description": "Hằng số trong định luật Coulomb, = 1/(4πε₀)"
+    },
+    {
+      "id": "alpha",
+      "name": "Hằng số cấu trúc tinh tế",
+      "symbol": "α",
+      "value": 7.2973525693e-3,
+      "unit": "",
+      "category": "Lượng tử",
+      "description": "Hằng số không thứ nguyên trong điện động lực học lượng tử"
+    }
+  ]
+}
