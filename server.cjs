@@ -432,9 +432,13 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5002;
 
-server.listen(PORT, () => {
-  console.log(`✓ Server is running on port ${PORT}`);
-  console.log(`✓ Socket.io enabled for PK Battle`);
-  console.log(`✓ Database: Supabase (PostgreSQL)`);
-  console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`✓ Server is running on port ${PORT}`);
+    console.log(`✓ Socket.io enabled for PK Battle`);
+    console.log(`✓ Database: Supabase (PostgreSQL)`);
+    console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
+
+module.exports = app;
