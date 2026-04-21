@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Node modules
 node_modules/
 
@@ -15,6 +14,8 @@ backend/.env
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
+logs
+*.log
 
 # OS files
 .DS_Store
@@ -29,9 +30,6 @@ Thumbs.db
 # Dependency directories
 /.pnp
 .pnp.js
-
-# Mac
-*.DS_Store
 
 # Optional npm cache
 .npm
@@ -59,24 +57,18 @@ coverage/
 # Firebase
 .firebase/
 
-# Logs
-logs
-*.log
-npm-debug.log*
-
 # Lock files
-package-lock.json
-pnpm-lock.yaml
+# package-lock.json (Keep this if you want to track versions, but user screen shows it as untracked/problematic)
+# pnpm-lock.yaml
 
 # Certificates
 *.pem
 
 # JetBrains
-.idea/
 out/
 
 # Local envs
 local-*.env
-=======
-node_modules
->>>>>>> d7d3174 (new push)
+
+# AI / Gemini
+.gemini/

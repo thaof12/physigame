@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Target, User, Trophy } from 'lucide-react';
-import QuestModal from './Quest/QuestModal';
+import { LogOut, User, Trophy } from 'lucide-react';
 import Leaderboard from './Leaderboard/Leaderboard';
 
 const Header = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [showQuestModal, setShowQuestModal] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const handleLogout = async () => {
@@ -36,18 +34,6 @@ const Header = () => {
           
           {user && (
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Quest Button */}
-              <button
-                onClick={() => setShowQuestModal(true)}
-                className="relative flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white font-semibold hover:shadow-lg hover:scale-105 transition-all"
-                title="Nhiệm vụ"
-              >
-                <Target size={18} />
-                <span className="hidden sm:inline">Nhiệm vụ</span>
-                {/* Notification dot */}
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-              </button>
-
               {/* Leaderboard Button */}
               <button
                 onClick={() => setShowLeaderboard(true)}
@@ -83,12 +69,6 @@ const Header = () => {
           )}
         </div>
       </header>
-
-      {/* Quest Modal */}
-      <QuestModal 
-        isOpen={showQuestModal} 
-        onClose={() => setShowQuestModal(false)} 
-      />
 
       {/* Leaderboard Modal */}
       <Leaderboard 
