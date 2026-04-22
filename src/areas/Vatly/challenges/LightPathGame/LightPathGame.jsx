@@ -512,7 +512,7 @@ const LightPathGame = () => {
     <div className="lp-game">
       {/* Header */}
       <div className="lp-header">
-        <button onClick={() => navigate('/physics-games/grade/7')} className="lp-back-btn">
+        <button onClick={() => navigate('/advanced-physics-challenge')} className="lp-back-btn">
           <ArrowLeft size={20} />
           <span>Quay lại</span>
         </button>
@@ -720,7 +720,7 @@ const LightPathGame = () => {
                 <RefreshCw size={20} />
                 <span>Chơi Lại</span>
               </button>
-              <button onClick={() => navigate('/physics-games/grade/7')} className="lp-btn secondary">
+              <button onClick={() => navigate('/advanced-physics-challenge')} className="lp-btn secondary">
                 <Home size={20} />
                 <span>Về Trang Chủ</span>
               </button>
@@ -753,7 +753,7 @@ const LightPathGame = () => {
                 <RefreshCw size={20} />
                 <span>Thử Lại</span>
               </button>
-              <button onClick={() => navigate('/physics-games/grade/7')} className="lp-btn secondary">
+              <button onClick={() => navigate('/advanced-physics-challenge')} className="lp-btn secondary">
                 <Home size={20} />
                 <span>Về Trang Chủ</span>
               </button>

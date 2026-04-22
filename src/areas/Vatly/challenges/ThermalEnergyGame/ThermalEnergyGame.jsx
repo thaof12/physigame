@@ -440,7 +440,7 @@ const ThermalEnergyGame = () => {
 
       {/* Header */}
       <div className="te-header">
-        <button onClick={() => navigate('/physics-games/grade/6')} className="te-back-btn">
+        <button onClick={() => navigate('/advanced-physics-challenge')} className="te-back-btn">
           <ArrowLeft size={20} />
           <span>Quay lại</span>
         </button>
@@ -599,7 +599,7 @@ const ThermalEnergyGame = () => {
               <RotateCcw size={20} />
               Chơi lại
             </button>
-            <button onClick={() => navigate('/physics-games/grade/6')} className="te-menu-btn">
+            <button onClick={() => navigate('/advanced-physics-challenge')} className="te-menu-btn">
               Về danh sách
             </button>
           </div>

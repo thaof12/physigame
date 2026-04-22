@@ -29,8 +29,6 @@ import PhysicsClassDashboard from './areas/Vatly/pages/PhysicsClassDashboard';
 import PhysicsClasses from './areas/Vatly/pages/PhysicsClasses';
 import PhysicsLesson from './areas/Vatly/pages/PhysicsLesson';
 import AdvancedPhysicsChallenge from './areas/Vatly/gamelist/AdvancedPhysicsChallenge';
-import PhysicsGradeSelector from './areas/Vatly/gamelist/PhysicsGradeSelector';
-import PhysicsGradeGames from './areas/Vatly/gamelist/PhysicsGradeGames';
 
 // Physics challenge games
 import BalanceChallenge from './areas/Vatly/challenges/BalanceChallenge/BalanceChallenge';
@@ -146,11 +144,7 @@ const AppContent = () => {
           {/* Virtual Lab - Phòng thí nghiệm ảo */}
           <Route path="/vatly/virtual-lab" element={<ProtectedRoute><VirtualLabHome /></ProtectedRoute>} />
           
-          {/* Physics Games - New grade-based navigation */}
-          <Route path="/physics-games/grades" element={<ProtectedRoute><PhysicsGradeSelector /></ProtectedRoute>} />
-          <Route path="/physics-games/grade/:gradeId" element={<ProtectedRoute><PhysicsGradeGames /></ProtectedRoute>} />
-          
-          {/* Legacy route - redirect to grade selector */}
+          <Route path="/physics-games" element={<AdvancedPhysicsChallenge />} />
           <Route path="/advanced-physics-challenge" element={<AdvancedPhysicsChallenge />} />
         </Route>
 
@@ -177,9 +171,9 @@ const AppContent = () => {
         <Route path="/advanced-physics-challenge/light-reflection" element={<ProtectedRoute><LightReflectionGame /></ProtectedRoute>} />
         <Route path="/advanced-physics-challenge/mirror-lab" element={<ProtectedRoute><MirrorLabGame /></ProtectedRoute>} />
         <Route path="/advanced-physics-challenge/light-path" element={<ProtectedRoute><LightPathGame /></ProtectedRoute>} />
-        <Route path="/physics-games/grade/7/circuit-builder" element={<ProtectedRoute><CircuitBuilderGame /></ProtectedRoute>} />
-        <Route path="/physics-games/grade/8/race-tracker" element={<ProtectedRoute><RaceTracker /></ProtectedRoute>} />
-        <Route path="/physics-games/grade/8/force-arena" element={<ProtectedRoute><ForceArena /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/circuit-builder" element={<ProtectedRoute><CircuitBuilderGame /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/race-tracker" element={<ProtectedRoute><RaceTracker /></ProtectedRoute>} />
+        <Route path="/advanced-physics-challenge/force-arena" element={<ProtectedRoute><ForceArena /></ProtectedRoute>} />
         <Route path="/advanced-physics-challenge/force-world" element={<ProtectedRoute><ForceWorldGame /></ProtectedRoute>} />
 
 

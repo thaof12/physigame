@@ -456,7 +456,7 @@ const ForceWorldGame = () => {
 
       {/* Header */}
       <div className="fw-header">
-        <button className="fw-back-btn" onClick={() => navigate('/physics-games/grade/6')}>
+        <button className="fw-back-btn" onClick={() => navigate('/advanced-physics-challenge')}>
           <ArrowLeft size={20} />
           <span>Quay lại</span>
         </button>
@@ -629,7 +629,7 @@ const ForceWorldGame = () => {
                 <RotateCcw size={20} />
                 Chơi lại
               </button>
-              <button className="fw-home-btn" onClick={() => navigate('/physics-games/grade/6')}>
+              <button className="fw-home-btn" onClick={() => navigate('/advanced-physics-challenge')}>
                 Về danh sách game
               </button>
             </div>

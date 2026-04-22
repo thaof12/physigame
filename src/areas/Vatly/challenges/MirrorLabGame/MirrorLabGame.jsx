@@ -485,7 +485,7 @@ const MirrorLabGame = () => {
     <div className="ml-game">
       {/* Header */}
       <div className="ml-header">
-        <button onClick={() => navigate('/physics-games/grade/7')} className="ml-back-btn">
+        <button onClick={() => navigate('/advanced-physics-challenge')} className="ml-back-btn">
           <ArrowLeft size={20} />
           <span>Quay lại</span>
         </button>
@@ -772,7 +772,7 @@ const MirrorLabGame = () => {
                 <RefreshCw size={20} />
                 <span>Chơi Lại</span>
               </button>
-              <button onClick={() => navigate('/physics-games/grade/7')} className="ml-btn secondary">
+              <button onClick={() => navigate('/advanced-physics-challenge')} className="ml-btn secondary">
                 <Home size={20} />
                 <span>Về Trang Chủ</span>
               </button>
