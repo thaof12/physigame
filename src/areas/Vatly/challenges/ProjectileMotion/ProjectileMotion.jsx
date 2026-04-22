@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PROJECTILE_MOTION_DATA } from '../../data/games';
-import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../data/gameIntroData';
 import './ProjectileMotion.css';
 
 const ProjectileMotion = () => {
-  const [showIntro, setShowIntro] = useState(true);
   const [currentLevel, setCurrentLevel] = useState(0);
   const [currentPuzzle, setCurrentPuzzle] = useState(0);
   const [angle, setAngle] = useState(45);
@@ -720,10 +717,6 @@ const ProjectileMotion = () => {
     resetPuzzle();
   };
 
-  // Hiển thị intro nếu chưa bắt đầu
-  if (showIntro) {
-    return <GameIntro gameInfo={GAME_INTRO_DATA['lop10-1']} onStart={() => setShowIntro(false)} />;
-  }
 
   if (!level || !puzzle) {
     return <div className="projectile-loading">Đang tải...</div>;

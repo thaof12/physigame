@@ -1,7 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Atom, Home, Wrench, BookOpen, FlaskConical, Trophy, LogOut, Globe, Menu, X, Rocket, GraduationCap } from 'lucide-react';
+import { 
+  Atom, 
+  Home, 
+  Wrench, 
+  BookOpen, 
+  FlaskConical, 
+  Trophy, 
+  LogOut, 
+  Globe, 
+  Menu, 
+  X, 
+  Rocket, 
+  GraduationCap,
+  ChevronDown,
+  Gamepad2,
+  Swords,
+  Compass,
+  Library
+} from 'lucide-react';
 
 import EurekaPremiumLogo from '../ui/EurekaPremiumLogo';
 
@@ -10,6 +28,7 @@ const GlobalHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   const handleLogout = async () => {
     try { await logout(); navigate('/login'); }
@@ -17,21 +36,50 @@ const GlobalHeader = () => {
   };
 
   const navLinks = [
-    { name: 'TRANG CHỦ', path: '/program/physics/dashboard', icon: Home },
-    { name: 'LỚP HỌC', path: '/physics-classes', icon: GraduationCap },
-    { name: 'KHO TÀNG', path: '/physics-tools', icon: Wrench },
-    { name: 'BÀI GIẢNG', path: '/interactive-lectures', icon: BookOpen },
-    { name: 'THÍ NGHIỆM', path: '/vatly/virtual-lab', icon: FlaskConical },
-    { name: 'THỬ THÁCH', path: '/advanced-physics-challenge', icon: Trophy },
+    { 
+      name: 'HÀNH TRÌNH', 
+      icon: Compass,
+      children: [
+        { name: 'LỚP HỌC', path: '/physics-classes', icon: GraduationCap },
+        { name: 'BÀI GIẢNG', path: '/interactive-lectures', icon: BookOpen },
+      ]
+    },
+    { 
+      name: 'KHO TÀNG', 
+      icon: Library,
+      children: [
+        { name: 'CÔNG CỤ', path: '/physics-tools', icon: Wrench },
+      ]
+    },
+    { 
+      name: 'THỬ THÁCH', 
+      icon: Trophy,
+      children: [
+        { name: 'TRÒ CHƠI', path: '/advanced-physics-challenge', icon: Gamepad2 },
+        { name: 'THÍ NGHIỆM', path: '/vatly/virtual-lab', icon: FlaskConical },
+        { name: 'ĐẤU TRƯỜNG', path: '/pk-battle', icon: Swords },
+      ]
+    },
   ];
 
   const isActive = (path) => {
-    if (path === '/' && location.pathname !== '/') return false;
+    if (!path) return false;
     return location.pathname.startsWith(path);
   };
 
+  const isParentActive = (children) => {
+    return children.some(child => isActive(child.path));
+  };
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = () => setActiveDropdown(null);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
+
   return (
-    <header className="sticky top-4 z-50 w-[98%] max-w-7xl mx-auto transition-all duration-300">
+    <header className="sticky top-4 z-40 w-[98%] max-w-7xl mx-auto transition-all duration-300">
       <div className="glass-panel rounded-2xl border border-white/60 shadow-[0_12px_40px_rgba(184,115,51,0.12)] px-6 sm:px-8 h-20 py-2 flex items-center justify-between gap-8">
 
         {/* Brand & Logo (Left) */}
@@ -41,44 +89,82 @@ const GlobalHeader = () => {
           </Link>
         </div>
 
-        {/* Main Navigation (Grouped) */}
-        <nav className="hidden lg:flex flex-1 items-center justify-start gap-1">
+        {/* Main Navigation (Grouped with Dropdowns) */}
+        <nav className="hidden lg:flex flex-1 items-center justify-start gap-2">
           {navLinks.map((link) => {
             const Icon = link.icon;
-            const active = isActive(link.path);
+            const hasChildren = link.children && link.children.length > 0;
+            const parentActive = hasChildren && isParentActive(link.children);
+
             return (
-              <button
-                key={link.name}
-                onClick={() => {
-                  if (!user) {
-                    navigate('/login');
-                  } else {
-                    navigate(link.path);
-                  }
-                }}
-                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl font-bold text-[13px] whitespace-nowrap shrink-0 transition-all duration-300 ${active
-                  ? 'bg-[#274dad] text-white shadow-[0_4px_12px_rgba(184,115,51,0.3)]'
-                  : 'text-slate-500 hover:bg-white hover:text-[#274dad] hover:shadow-sm'
-                  }`}
+              <div 
+                key={link.name} 
+                className="relative group h-full flex items-center"
+                onMouseEnter={() => setActiveDropdown(link.name)}
+                onMouseLeave={() => setActiveDropdown(null)}
               >
-                <Icon className="w-4 h-4" />
-                {link.name}
-              </button>
+                <button
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-[13px] tracking-wide transition-all duration-300 ${
+                    parentActive 
+                    ? 'bg-[#274dad] text-white shadow-[0_4px_12px_rgba(39,77,173,0.3)]' 
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-[#274dad]'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {link.name}
+                  {hasChildren && <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${activeDropdown === link.name ? 'rotate-180' : ''}`} />}
+                </button>
+
+                {/* Dropdown Menu */}
+                {hasChildren && (
+                  <div className={`absolute top-full left-0 pt-2 transition-all duration-300 ${
+                    activeDropdown === link.name ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'
+                  }`}>
+                    <div className="bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-2 min-w-[200px] overflow-hidden">
+                      {link.children.map((child) => {
+                        const ChildIcon = child.icon;
+                        const active = isActive(child.path);
+                        return (
+                          <button
+                            key={child.name}
+                            onClick={() => {
+                              if (!user) navigate('/login');
+                              else navigate(child.path);
+                              setActiveDropdown(null);
+                            }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                              active 
+                              ? 'bg-[#274dad]/10 text-[#274dad]' 
+                              : 'text-slate-600 hover:bg-slate-50 hover:text-[#274dad]'
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                              active ? 'bg-[#274dad] text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-white'
+                            }`}>
+                              <ChildIcon className="w-4 h-4" />
+                            </div>
+                            {child.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
 
-        {/* Right Actions Area (User Profile + Menu) */}
+        {/* Right Actions Area */}
         <div className="flex items-center gap-2 sm:gap-4 ml-auto">
-          {/* Language / VI (Hidden on small mobile) */}
+          {/* Language / VI */}
           <button className="hidden sm:flex items-center gap-2 text-slate-500 hover:text-[#274dad] font-bold text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/50 border border-slate-100 transition-all">
             <Globe className="w-3.5 h-3.5" /> <span>VI</span>
           </button>
 
-          {/* Desktop-only divider */}
           <div className="hidden lg:block h-10 w-px bg-slate-200 mx-1" />
 
-          {/* Auth/Profile Section */}
+          {/* Auth Section */}
           <div className="flex items-center">
             {user ? (
               <div className="flex items-center gap-2 sm:gap-3">
@@ -124,29 +210,60 @@ const GlobalHeader = () => {
         </div>
       </div>
 
-      {/* Mobile Dropdown */}
+      {/* Mobile Dropdown (Updated for nesting) */}
       {mobileMenuOpen && (
-        <div className="md:hidden mt-2 bg-white/95 backdrop-blur-lg rounded-2xl border border-slate-100 shadow-2xl overflow-hidden animate-fade-in">
+        <div className="lg:hidden mt-2 bg-white/95 backdrop-blur-lg rounded-2xl border border-slate-100 shadow-2xl overflow-hidden animate-fade-in max-h-[80vh] overflow-y-auto">
           <div className="px-3 py-3 space-y-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const active = isActive(link.path);
+              const hasChildren = link.children && link.children.length > 0;
+              
               return (
-                <button
-                  key={link.name}
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    if (!user) {
-                      navigate('/login');
-                    } else {
-                      navigate(link.path);
-                    }
-                  }}
-                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-black text-sm transition-all ${active ? 'bg-[#274dad] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
-                    }`}
-                >
-                  <Icon className="w-5 h-5" /> {link.name}
-                </button>
+                <div key={link.name} className="flex flex-col">
+                  {hasChildren ? (
+                    <>
+                      <div className="flex items-center justify-between px-4 py-3.5 rounded-xl text-slate-400 font-black text-xs uppercase tracking-widest bg-slate-50/50 mb-1">
+                        <div className="flex items-center gap-3">
+                          <Icon className="w-4 h-4" /> {link.name}
+                        </div>
+                      </div>
+                      <div className="pl-4 space-y-1 mb-2">
+                        {link.children.map((child) => {
+                          const ChildIcon = child.icon;
+                          const active = isActive(child.path);
+                          return (
+                            <button
+                              key={child.name}
+                              onClick={() => {
+                                setMobileMenuOpen(false);
+                                if (!user) navigate('/login');
+                                else navigate(child.path);
+                              }}
+                              className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                                active ? 'bg-[#274dad] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
+                              }`}
+                            >
+                              <ChildIcon className="w-5 h-5" /> {child.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        if (!user) navigate('/login');
+                        else navigate(link.path);
+                      }}
+                      className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-black text-sm transition-all ${
+                        isActive(link.path) ? 'bg-[#274dad] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" /> {link.name}
+                    </button>
+                  )}
+                </div>
               );
             })}
           </div>

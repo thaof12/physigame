@@ -1,8 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 // Sửa đường dẫn: ra 3 cấp, vào 'data', lấy 'games' (bỏ .js)
 import { GAME_DATA, checkPuzzleResult } from '../../data/games';
-import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../data/gameIntroData';
 
 // Sửa đường dẫn: Import file CSS từ thư mục styles
 import './BalanceChallenge.css';
@@ -110,7 +108,6 @@ const LeverMark = ({ distance }) => {
 // --- Component Game Chính ---
 const BalanceChallenge = () => {
   // Lấy dữ liệu từ file games.js (giờ là GAME_DATA)
-  const [showIntro, setShowIntro] = useState(true);
   const [levelIndex, setLevelIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -218,10 +215,6 @@ const BalanceChallenge = () => {
   // Tính góc nghiêng
   const rotationAngle = feedback ? feedback.angle : 0;
 
-  // Hiển thị intro nếu chưa bắt đầu
-  if (showIntro) {
-    return <GameIntro gameInfo={GAME_INTRO_DATA['lop6-1']} onStart={() => setShowIntro(false)} />;
-  }
 
   return (
     <div className="game-container">
