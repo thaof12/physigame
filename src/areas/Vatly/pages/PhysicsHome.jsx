@@ -288,7 +288,7 @@ const PhysicsHome = () => {
           desc: 'Phiêu lưu qua các chương trình học theo hình thức game nhập vai. Thu thập thành tựu, mở khóa cấp độ mới và ghi danh bảng vàng cùng cộng đồng học tập.',
           cta: 'Bắt đầu hành trình',
           img: utilJourney,
-          path: '/game-journey',
+          path: '/interactive-lectures',
           accentColor: '#8B5CF6',
         },
         {

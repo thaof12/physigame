@@ -140,7 +140,7 @@ export const useGameCompletion = ({
   // Quay về game journey
   const goToJourney = useCallback(() => {
     setShowCompletionModal(false);
-    navigate('/game-journey');
+    navigate('/interactive-lectures');
   }, [navigate]);
 
   // Chơi lại game

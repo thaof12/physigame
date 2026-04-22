@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { GameProgressProvider } from './contexts/GameProgressContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Home from './pages/Home';
-import GameJourney from './pages/GameJourney';
+
 import "./index.css";
 
 // Physics Tools Hub
@@ -115,7 +115,7 @@ const AppContent = () => {
           <Route path="/program/physics" element={<PhysicsHome />} />
           <Route path="/program/physics/dashboard" element={<Navigate to="/program/physics" replace />} />
           <Route path="/physics-classes" element={<ProtectedRoute><PhysicsClasses /></ProtectedRoute>} />
-          <Route path="/game-journey" element={<ProtectedRoute><GameJourney /></ProtectedRoute>} />
+
 
           {/* PK Battle Routes */}
           <Route path="/pk-battle" element={<ProtectedRoute><PKLobby /></ProtectedRoute>} />
