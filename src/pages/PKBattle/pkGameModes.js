@@ -13,24 +13,24 @@ export const pkChallengeGames = {
   // Lớp 6
   grade6: [
     {
-      id: 'measurement-challenge',
-      name: 'Đo Lường Nhanh',
-      component: 'MeasurementGame',
-      icon: '📏',
-      duration: 60, // giây
-      description: 'Đo đạc chính xác các đại lượng vật lý',
+      id: 'water-lab',
+      name: 'Thí Nghiệm Nước',
+      component: 'WaterLab',
+      icon: '💧',
+      duration: 60,
+      description: 'Khám phá áp suất và tính chất của nước',
       difficulty: 'easy',
-      topic: 'do-luong'
+      topic: 'nhiet-hoc'
     },
     {
-      id: 'mass-balance',
-      name: 'Cân Bằng Khối Lượng',
-      component: 'MassBalanceGame',
-      icon: '⚖️',
+      id: 'force-world',
+      name: 'Thế Giới Lực',
+      component: 'ForceWorldGame',
+      icon: '🌍',
       duration: 90,
-      description: 'Cân bằng các vật trên cân đĩa',
+      description: 'Khám phá các loại lực trong tự nhiên',
       difficulty: 'easy',
-      topic: 'khoi-luong'
+      topic: 'co-hoc'
     }
   ],
 
@@ -57,23 +57,23 @@ export const pkChallengeGames = {
       topic: 'quang-hoc'
     },
     {
-      id: 'wave-frequency',
-      name: 'Tần Số Sóng Âm',
-      component: 'WaveFrequencyGame',
-      icon: '🔊',
+      id: 'light-path',
+      name: 'Đường Đi Ánh Sáng',
+      component: 'LightPathGame',
+      icon: '✨',
       duration: 60,
-      description: 'Nhận biết tần số âm thanh',
+      description: 'Khám phá sự truyền sáng',
       difficulty: 'easy',
-      topic: 'am-hoc'
+      topic: 'quang-hoc'
     },
     {
-      id: 'electric-charge',
-      name: 'Điện Tích & Tĩnh Điện',
-      component: 'ElectricChargeLab',
-      icon: '⚡',
-      duration: 90,
-      description: 'Khám phá lực tương tác điện',
-      difficulty: 'medium',
+      id: 'circuit-builder',
+      name: 'Xây Dựng Mạch Điện',
+      component: 'CircuitBuilderGame',
+      icon: '🔌',
+      duration: 120,
+      description: 'Lắp ráp mạch điện cơ bản',
+      difficulty: 'hard',
       topic: 'dien-hoc'
     }
   ],
@@ -92,7 +92,7 @@ export const pkChallengeGames = {
     },
     {
       id: 'force-arena',
-      name: 'Đấu Trường Lực',
+      name: 'Võ Đài Lực',
       component: 'ForceArena',
       icon: '💪',
       duration: 90,
@@ -101,83 +101,29 @@ export const pkChallengeGames = {
       topic: 'co-hoc'
     },
     {
-      id: 'pressure-master',
-      name: 'Bậc Thầy Áp Suất',
-      component: 'PressureMaster',
-      icon: '🎯',
-      duration: 60,
-      description: 'Tính toán áp suất nhanh',
-      difficulty: 'medium',
-      topic: 'co-hoc'
-    },
-    {
-      id: 'archimedes-challenge',
-      name: 'Thử Thách Ác-si-mét',
-      component: 'ArchimedesChallenge',
-      icon: '🚿',
-      duration: 90,
-      description: 'Lực đẩy Ác-si-mét',
-      difficulty: 'hard',
-      topic: 'co-hoc'
-    },
-    {
-      id: 'thermometer-game',
-      name: 'Nhiệt Kế Thần Tốc',
-      component: 'ThermometerGame',
+      id: 'boiling-game',
+      name: 'Sự Sôi',
+      component: 'BoilingGame',
       icon: '🌡️',
-      duration: 45,
-      description: 'Đọc nhiệt độ chính xác',
-      difficulty: 'easy',
+      duration: 60,
+      description: 'Tìm hiểu về nhiệt độ và sự sôi',
+      difficulty: 'medium',
       topic: 'nhiet-hoc'
     },
     {
-      id: 'heat-transfer',
-      name: 'Truyền Nhiệt',
-      component: 'HeatTransferGame',
+      id: 'thermal-energy',
+      name: 'Năng Lượng Nhiệt',
+      component: 'ThermalEnergyGame',
       icon: '🔥',
       duration: 60,
-      description: 'Dự đoán sự truyền nhiệt',
+      description: 'Sự truyền nhiệt và nội năng',
       difficulty: 'medium',
       topic: 'nhiet-hoc'
     }
   ],
 
-  // Lớp 9
+  // Lớp 9 - 12 (Simplified)
   grade9: [
-    {
-      id: 'ohm-law-circuit',
-      name: 'Mạch Điện Ohm',
-      component: 'OhmLawCircuitLab',
-      icon: '🔌',
-      duration: 90,
-      description: 'Tính toán theo định luật Ohm',
-      difficulty: 'medium',
-      topic: 'dien-hoc'
-    },
-    {
-      id: 'circuit-builder',
-      name: 'Lắp Mạch Điện',
-      component: 'CircuitBuilderGame',
-      icon: '🔋',
-      duration: 120,
-      description: 'Xây dựng mạch điện đúng yêu cầu',
-      difficulty: 'hard',
-      topic: 'dien-hoc'
-    },
-    {
-      id: 'lens-optics',
-      name: 'Thấu Kính Quang Học',
-      component: 'LensOpticsChallenge',
-      icon: '🔍',
-      duration: 90,
-      description: 'Xác định ảnh qua thấu kính',
-      difficulty: 'hard',
-      topic: 'quang-hoc'
-    }
-  ],
-
-  // Lớp 10
-  grade10: [
     {
       id: 'projectile-motion',
       name: 'Chuyển Động Ném',
@@ -187,107 +133,26 @@ export const pkChallengeGames = {
       description: 'Dự đoán quỹ đạo ném xiên',
       difficulty: 'hard',
       topic: 'co-hoc'
-    },
+    }
+  ],
+
+  grade10: [
     {
-      id: 'energy-lab',
-      name: 'Phòng Thí Nghiệm Năng Lượng',
-      component: 'EnergyLab',
-      icon: '⚡',
+      id: 'balance-challenge',
+      name: 'Thử Thách Cân Bằng',
+      component: 'BalanceChallenge',
+      icon: '⚖️',
       duration: 90,
-      description: 'Chuyển đổi năng lượng',
-      difficulty: 'medium',
+      description: 'Trạng thái cân bằng của vật thể',
+      difficulty: 'hard',
       topic: 'co-hoc'
-    },
-    {
-      id: 'gas-laws',
-      name: 'Định Luật Chất Khí',
-      component: 'GasLawsExplorer',
-      icon: '💨',
-      duration: 90,
-      description: 'Khám phá các định luật khí',
-      difficulty: 'hard',
-      topic: 'nhiet-hoc'
     }
   ],
 
-  // Lớp 11
-  grade11: [
-    {
-      id: 'electric-field',
-      name: 'Trường Điện',
-      component: 'ElectricFieldVisualizer',
-      icon: '⚡',
-      duration: 90,
-      description: 'Vẽ đường sức điện trường',
-      difficulty: 'hard',
-      topic: 'dien-tu'
-    },
-    {
-      id: 'capacitor-circuit',
-      name: 'Mạch Tụ Điện',
-      component: 'CapacitorCircuitLab',
-      icon: '🔋',
-      duration: 90,
-      description: 'Tính điện dung tương đương',
-      difficulty: 'hard',
-      topic: 'dien-tu'
-    },
-    {
-      id: 'magnetic-field',
-      name: 'Từ Trường',
-      component: 'MagneticFieldExplorer',
-      icon: '🧲',
-      duration: 90,
-      description: 'Khám phá từ trường',
-      difficulty: 'hard',
-      topic: 'dien-tu'
-    }
-  ],
-
-  // Lớp 12
-  grade12: [
-    {
-      id: 'simple-harmonic',
-      name: 'Dao Động Điều Hòa',
-      component: 'SimpleHarmonicMotionLab',
-      icon: '🔄',
-      duration: 90,
-      description: 'Phân tích dao động',
-      difficulty: 'hard',
-      topic: 'dao-dong'
-    },
-    {
-      id: 'wave-interference',
-      name: 'Giao Thoa Sóng',
-      component: 'WaveInterferenceStudio',
-      icon: '🌊',
-      duration: 90,
-      description: 'Tìm vân giao thoa',
-      difficulty: 'hard',
-      topic: 'song'
-    },
-    {
-      id: 'ac-circuit',
-      name: 'Mạch Điện Xoay Chiều',
-      component: 'ACCircuitSimulator',
-      icon: '〰️',
-      duration: 120,
-      description: 'Phân tích mạch RLC',
-      difficulty: 'expert',
-      topic: 'dien-tu'
-    },
-    {
-      id: 'photoelectric',
-      name: 'Hiệu Ứng Quang Điện',
-      component: 'PhotoelectricEffectLab',
-      icon: '☀️',
-      duration: 90,
-      description: 'Khám phá hiệu ứng quang điện',
-      difficulty: 'expert',
-      topic: 'luong-tu'
-    }
-  ]
+  grade11: [],
+  grade12: []
 };
+
 
 // ==================== CHẾ ĐỘ GAME ====================
 export const pkGameModeConfig = {

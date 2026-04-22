@@ -1,8 +1,6 @@
 // WaterLab.jsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { WATER_LAB_DATA } from '../../data/waterLabData';
-import GameIntro from '../GameIntro/GameIntro';
-import { GAME_INTRO_DATA } from '../../data/gameIntroData';
 import './WaterLab.css';
 
 // --- Hằng số Vật lý ---
@@ -19,7 +17,6 @@ const MAX_TIME_BONUS = 500;
 const EFFICIENCY_BONUS = 300;
 
 const WaterLab = () => {
-  const [showIntro, setShowIntro] = useState(true);
   const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
   const [levelData, setLevelData] = useState(WATER_LAB_DATA[0]);
   const [gameState, setGameState] = useState(WATER_LAB_DATA[0]?.initialState || {
@@ -201,10 +198,6 @@ const WaterLab = () => {
   // Màu sắc của thanh nhiệt (từ lạnh sang nóng)
   const sliderColor = `linear-gradient(90deg, var(--cold-color) 0%, #FFF 33%, var(--heat-color) 100%)`;
 
-  // Hiển thị intro nếu chưa bắt đầu
-  if (showIntro) {
-    return <GameIntro gameInfo={GAME_INTRO_DATA['lop6-4']} onStart={() => setShowIntro(false)} />;
-  }
 
   return (
     <div className="water-lab-container">

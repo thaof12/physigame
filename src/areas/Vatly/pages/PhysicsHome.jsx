@@ -227,7 +227,7 @@ const PhysicsHome = () => {
           <div className="flex flex-wrap justify-center gap-6 animate-fade-in-up animation-delay-300">
             <button
               onClick={() => handleAction(`/physics-class/${activeGrade}`)}
-              className="px-14 py-5 rounded-full bg-[#82C91E] text-white font-black text-xl shadow-[0_15px_30px_-10px_rgba(130,201,30,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(130,201,30,0.6)] hover:-translate-y-1 active:scale-95 transition-all"
+              className="px-14 py-5 rounded-full bg-[#274dad] text-white font-black text-xl shadow-[0_15px_30px_-10px_rgba(39,77,173,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(39,77,173,0.6)] hover:-translate-y-1 active:scale-95 transition-all"
             >
               Vào Lớp Học &rarr;
             </button>

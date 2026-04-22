@@ -42,7 +42,7 @@ export default function MainLayout() {
       <main className="flex-grow flex flex-col relative w-full overflow-hidden">
         {/* Subtle graph grid overlay */}
         <div className="absolute inset-0 pointer-events-none z-0 graph-grid opacity-[0.2]" />
-        <div className="relative z-10 flex-grow flex flex-col">
+        <div className="relative flex-grow flex flex-col">
           <Outlet />
         </div>
       </main>
