@@ -137,7 +137,7 @@ const LightReflectionGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit
     if (isPKMode && onExit) {
       onExit();
     } else {
-      navigate('/physics-games/grade/7');
+      navigate('/advanced-physics-challenge');
     }
   };
 
@@ -689,7 +689,7 @@ const LightReflectionGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit
                 <RotateCcw size={20} />
                 <span>Chơi Lại</span>
               </button>
-              <button onClick={() => navigate('/physics-games/grade/7')} className="lr-btn secondary">
+              <button onClick={() => navigate('/advanced-physics-challenge')} className="lr-btn secondary">
                 <Home size={20} />
                 <span>Về Trang Chủ</span>
               </button>
@@ -720,7 +720,7 @@ const LightReflectionGame = ({ isPKMode = false, pkTimeLimit, onComplete, onExit
                 <RotateCcw size={20} />
                 <span>Chơi Lại</span>
               </button>
-              <button onClick={() => navigate('/physics-games/grade/7')} className="lr-btn secondary">
+              <button onClick={() => navigate('/advanced-physics-challenge')} className="lr-btn secondary">
                 <Home size={20} />
                 <span>Về Trang Chủ</span>
               </button>

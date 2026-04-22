@@ -95,7 +95,7 @@ const AdvancedPhysicsChallenge = () => {
       title: 'Xây dựng mạch điện',
       description: 'Tự tay thiết kế và lắp ráp các mạch điện từ cơ bản đến phức tạp',
       icon: '🔌',
-      path: '/physics-games/grade/7/circuit-builder',
+      path: '/advanced-physics-challenge/circuit-builder',
       color: 'from-yellow-500 to-amber-600',
       tag: 'Điện học'
     },
@@ -104,7 +104,7 @@ const AdvancedPhysicsChallenge = () => {
       title: 'Đua xe tốc độ',
       description: 'Thử thách về vận tốc, gia tốc và quãng đường trên đường đua',
       icon: '🏎️',
-      path: '/physics-games/grade/8/race-tracker',
+      path: '/advanced-physics-challenge/race-tracker',
       color: 'from-red-600 to-rose-700',
       tag: 'Động lực học'
     },
@@ -113,7 +113,7 @@ const AdvancedPhysicsChallenge = () => {
       title: 'Võ đài lực học',
       description: 'Sử dụng kiến thức về lực để chiến thắng trong các trận đấu kịch tính',
       icon: '🏟️',
-      path: '/physics-games/grade/8/force-arena',
+      path: '/advanced-physics-challenge/force-arena',
       color: 'from-stone-600 to-neutral-800',
       tag: 'Cơ học'
     },
