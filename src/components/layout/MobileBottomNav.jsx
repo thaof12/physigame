@@ -31,7 +31,6 @@ const MobileBottomNav = () => {
   const navItems = [
     { label: 'Trang chủ', path: '/program/physics/dashboard', icon: Home },
     { label: 'Lớp học', path: '/physics-classes', icon: GraduationCap },
-    { label: 'Thử thách', path: '/game-journey', icon: Trophy },
     { label: 'Công cụ', path: '/physics-tools', icon: Wrench },
     { label: 'Hồ sơ', path: '/profile', icon: User }
   ];

@@ -22,7 +22,6 @@ const GlobalHeader = () => {
     { name: 'KHO TÀNG', path: '/physics-tools', icon: Wrench },
     { name: 'BÀI GIẢNG', path: '/interactive-lectures', icon: BookOpen },
     { name: 'THÍ NGHIỆM', path: '/vatly/virtual-lab', icon: FlaskConical },
-    { name: 'THỬ THÁCH', path: '/advanced-physics-challenge', icon: Trophy },
   ];
 
   const isActive = (path) => {

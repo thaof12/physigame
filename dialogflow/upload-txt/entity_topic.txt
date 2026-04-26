@@ -1,7 +1,0 @@
-# Format: reference_value<TAB>synonym_1,synonym_2,...
-co_hoc	cơ học,co hoc,động học,dong hoc,động lực học,dong luc hoc,mechanics
-nhiet_hoc	nhiệt học,nhiet hoc,truyền nhiệt,truyen nhiet,năng lượng nhiệt,nang luong nhiet,thermodynamics
-dien_hoc	điện học,dien hoc,mạch điện,mach dien,định luật ôm,dinh luat ohm,ohm,electricity
-quang_hoc	quang học,quang hoc,ánh sáng,anh sang,thấu kính,thau kinh,optics
-dao_dong	dao động,dao dong,dao động điều hòa,dao dong dieu hoa,shm,oscillation
-song	sóng,song,sóng cơ,song co,giao thoa,waves

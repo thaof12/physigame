@@ -72,7 +72,6 @@ app.use('/api/game-results', require('./routes/gameResults.cjs'));
 app.use('/api/lesson-completions', require('./routes/lessonCompletions.cjs'));
 app.use('/api/study-progress', require('./routes/StudyProgress.cjs'));
 app.use('/api/games-progress', require('./routes/GamesProgress.cjs'));
-app.use('/api/chatbot', require('./routes/chatbotWebhook.cjs'));
 
 // Health check
 app.get('/api/health', (req, res) => {
