@@ -27,6 +27,12 @@ import PhysicsHome from './areas/Vatly/pages/PhysicsHome';
 import PhysicsClassDashboard from './areas/Vatly/pages/PhysicsClassDashboard';
 import PhysicsClasses from './areas/Vatly/pages/PhysicsClasses';
 import PhysicsLesson from './areas/Vatly/pages/PhysicsLesson';
+<<<<<<< HEAD
+=======
+import PhysicsGradeSelector from './areas/Vatly/gamelist/PhysicsGradeSelector';
+import PhysicsGradeGames from './areas/Vatly/gamelist/PhysicsGradeGames';
+
+>>>>>>> a23e90905c7a45d2b974092849eb87b25617b4a9
 // Physics challenge games
 import BalanceChallenge from './areas/Vatly/challenges/BalanceChallenge/BalanceChallenge';
 import ColorMaster from './areas/Vatly/challenges/ColorMaster/ColorMaster';
@@ -215,7 +221,30 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const AppContent = () => {
+<<<<<<< HEAD
   useLocation();
+=======
+  const location = useLocation();
+  const navigate = useNavigate();
+  const hideChatbot =
+    location.pathname === '/login' ||
+    location.pathname === '/register' ||
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/teacher') ||
+    location.pathname.startsWith('/pk-battle/room/');
+
+  const isGradeGamePlayRoute = /^\/physics-games\/grade\/\d+\/.+/.test(location.pathname);
+  const showGameBackButton = isGradeGamePlayRoute;
+
+  const handleGameBack = () => {
+    const hasHistory = window.history.state && window.history.state.idx > 0;
+    if (hasHistory) {
+      navigate(-1);
+      return;
+    }
+    navigate('/physics-games/grades');
+  };
+>>>>>>> a23e90905c7a45d2b974092849eb87b25617b4a9
 
   return (
     <div className="min-h-screen">
@@ -234,6 +263,11 @@ const AppContent = () => {
           <Route path="/program/physics" element={<PhysicsHome />} />
           <Route path="/program/physics/dashboard" element={<Navigate to="/program/physics" replace />} />
           <Route path="/physics-classes" element={<ProtectedRoute><PhysicsClasses /></ProtectedRoute>} />
+<<<<<<< HEAD
+=======
+          <Route path="/game-journey" element={<Navigate to="/physics-classes" replace />} />
+
+>>>>>>> a23e90905c7a45d2b974092849eb87b25617b4a9
           {/* PK Battle Routes */}
           <Route path="/pk-battle" element={<ProtectedRoute><PKLobby /></ProtectedRoute>} />
           <Route path="/pk-battle/matchmaking" element={<ProtectedRoute><PKMatchmaking /></ProtectedRoute>} />
@@ -261,7 +295,16 @@ const AppContent = () => {
           {/* Virtual Lab - Phòng thí nghiệm ảo */}
           <Route path="/vatly/virtual-lab" element={<ProtectedRoute><VirtualLabHome /></ProtectedRoute>} />
           
+<<<<<<< HEAD
           {/* Physics Games navigation removed from shell */}
+=======
+          {/* Physics Games - New grade-based navigation */}
+          <Route path="/physics-games/grades" element={<Navigate to="/physics-classes" replace />} />
+          <Route path="/physics-games/grade/:gradeId" element={<Navigate to="/physics-classes" replace />} />
+          
+          {/* Legacy route - redirect to grade selector */}
+          <Route path="/advanced-physics-challenge" element={<Navigate to="/physics-classes" replace />} />
+>>>>>>> a23e90905c7a45d2b974092849eb87b25617b4a9
         </Route>
 
         {/* PK Battle Room (Keep fullscreen) */}
@@ -278,8 +321,13 @@ const AppContent = () => {
         <Route path="/vatly/virtual-lab/resistor-circuit" element={<ProtectedRoute><ResistorCircuitLab /></ProtectedRoute>} />
         <Route path="/vatly/virtual-lab/light-interference" element={<ProtectedRoute><LightInterferenceLab /></ProtectedRoute>} />
 
+<<<<<<< HEAD
 
         {/* Game routes removed */}
+=======
+      {/* Disable all game pages */}
+      <Route path="/physics-games/*" element={<Navigate to="/physics-classes" replace />} />
+>>>>>>> a23e90905c7a45d2b974092849eb87b25617b4a9
 
         {/* Admin Panel Routes */}
         <Route path="/admin/login" element={

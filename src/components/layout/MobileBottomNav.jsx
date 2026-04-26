@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Home, GraduationCap, Trophy, Wrench, User } from 'lucide-react';
+import { Home, GraduationCap, Wrench, User } from 'lucide-react';
 
 const MobileBottomNav = () => {
   const { user } = useAuth();
@@ -44,7 +44,7 @@ const MobileBottomNav = () => {
 
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-8px_24px_rgba(15,23,42,0.08)] pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-      <div className="grid grid-cols-5 gap-1 px-2 pt-2">
+      <div className="grid grid-cols-4 gap-1 px-2 pt-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Atom, Home, Wrench, BookOpen, FlaskConical, Trophy, LogOut, Globe, Menu, X, Rocket, GraduationCap } from 'lucide-react';
+import { Atom, Home, Wrench, BookOpen, FlaskConical, LogOut, Globe, Menu, X, Rocket, GraduationCap } from 'lucide-react';
 
 import EurekaPremiumLogo from '../ui/EurekaPremiumLogo';
 
