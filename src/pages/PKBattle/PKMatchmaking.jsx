@@ -21,7 +21,8 @@ const PKMatchmaking = () => {
 
   useEffect(() => {
     // Connect to socket
-    socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+    const serverUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin);
+    socketRef.current = io(serverUrl, {
       transports: ['websocket', 'polling']
     });
 

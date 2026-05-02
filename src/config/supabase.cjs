@@ -9,7 +9,7 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ Missing Supabase configuration!');
   console.error('   Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env');
-  process.exit(1);
+  throw new Error('Missing Supabase environment variables');
 }
 
 // Service role client - bypasses RLS, use only on backend
