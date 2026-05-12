@@ -79,13 +79,13 @@ const GlobalHeader = () => {
   }, []);
 
   return (
-    <header className="sticky top-4 z-40 w-[98%] max-w-7xl mx-auto transition-all duration-300">
-      <div className="glass-panel rounded-2xl border border-white/60 shadow-[0_12px_40px_rgba(184,115,51,0.12)] px-6 sm:px-8 h-20 py-2 flex items-center justify-between gap-8">
+    <header className="absolute top-0 z-50 w-full bg-transparent">
+      <div className="w-full max-w-7xl mx-auto px-6 sm:px-10 h-24 flex items-center justify-between gap-8">
 
         {/* Brand & Logo (Left) */}
         <div className="flex-none">
           <Link to="/" className="flex items-center group cursor-pointer transition-transform duration-500 hover:scale-105">
-            <EurekaPremiumLogo className="h-12 sm:h-16" />
+            <span className="font-premium-serif text-3xl font-bold text-slate-900 italic tracking-tight">Eureka</span>
           </Link>
         </div>
 

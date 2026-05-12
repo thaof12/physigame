@@ -4,17 +4,17 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ChevronRight, Swords, FlaskConical, BookOpen,
   CircuitBoard, Target, Shield, TrendingUp, Microscope, Compass, CheckCircle2, Play, Map,
-  Sparkles, GraduationCap, School, Users
+  Sparkles, GraduationCap, School, Users, Magnet, Zap, Activity
 } from 'lucide-react';
-import physicsBanner from '../../../assets/images/physics_banner.png';
-import heroMaster from '../../../assets/images/hero_master.png';
-import utilLab from '../../../assets/images/util_lab.png';
-import utilArena from '../../../assets/images/util_arena.png';
-import utilJourney from '../../../assets/images/util_journey.png';
-import utilLectures from '../../../assets/images/util_lectures.png';
+
+// Feature Images
+import utilLab from '../../../assets/images/feature_lab.png';
+import utilArena from '../../../assets/images/feature_arena.png';
+import utilJourney from '../../../assets/images/feature_journey.jpg';
+import utilLectures from '../../../assets/images/feature_lectures.jpg';
 
 /* ────────────────────────────────────────────
-   CON QUAY HỒI CHUYỂN (ASTROLABE PROFESSION)
+   CON QUAY HỒI CHUYỂN (GOLDEN GYROSCOPE)
    ──────────────────────────────────────────── */
 const GoldenGyroscope = () => {
   const outerRing = useRef(null);
@@ -44,319 +44,280 @@ const GoldenGyroscope = () => {
 
   return (
     <div className="relative flex items-center justify-center scale-110 group" style={{ perspective: '1200px' }}>
-      {/* Background ambient glow */}
       <div className="absolute w-[300px] h-[300px] rounded-full blur-[80px] opacity-20 pointer-events-none bg-gradient-to-tr from-[#44b5d7] via-[#274dad] to-transparent group-hover:opacity-40 transition-opacity duration-1000" />
-
       <div className="relative w-72 h-72 transition-transform duration-1000 ease-out group-hover:scale-105" style={{ transformStyle: 'preserve-3d' }}>
-
-        {/* Core Energy Sphere */}
         <div ref={core} className="absolute inset-[38%] rounded-full bg-gradient-to-br from-[#FFFFFF] via-[#44b5d7] to-[#4A3728] shadow-[0_0_40px_rgba(212,175,55,0.7),inset_0_0_20px_rgba(255,255,255,0.9)] flex items-center justify-center after:content-[''] after:absolute after:inset-0 after:rounded-full after:border after:border-white/50 after:blur-[1px]" style={{ transformStyle: 'preserve-3d' }}>
           <Compass className="w-8 h-8 text-[#4A3728]/40 absolute z-10" />
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent rounded-full animate-pulse" />
         </div>
-
-        {/* Outer Ring & Degree Ticks */}
         <div ref={outerRing} className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <svg className="w-full h-full drop-shadow-[0_10px_20px_rgba(184,115,51,0.2)]" viewBox="0 0 100 100" fill="none">
-            {/* Outer track */}
+          <svg className="w-full h-full drop-shadow-[0_10px_20px_rgba(184,115,51,0.25)]" viewBox="0 0 100 100" fill="none">
             <circle cx="50" cy="50" r="48" stroke="url(#brassOuter)" strokeWidth="1" strokeDasharray="3 4" strokeLinecap="round" className="opacity-80" />
-            {/* Inner track */}
             <circle cx="50" cy="50" r="45" stroke="#4A3728" strokeWidth="0.5" className="opacity-50" />
             <circle cx="50" cy="50" r="49.5" stroke="#44b5d7" strokeWidth="0.25" className="opacity-60" />
-            {/* Tick marks representing degrees/measurement */}
             {[...Array(36)].map((_, i) => (
-              <line
-                key={i}
-                x1="50" y1="2" x2="50" y2={i % 3 === 0 ? "6" : "4"}
-                transform={`rotate(${i * 10} 50 50)`}
-                stroke={i % 3 === 0 ? "#2099e9" : "#44b5d7"}
-                strokeWidth={i % 3 === 0 ? "0.6" : "0.3"}
-              />
+              <line key={i} x1="50" y1="2" x2="50" y2={i % 3 === 0 ? "6" : "4"} transform={`rotate(${i * 10} 50 50)`} stroke={i % 3 === 0 ? "#2099e9" : "#44b5d7"} strokeWidth={i % 3 === 0 ? "0.6" : "0.3"} />
             ))}
             <defs>
               <linearGradient id="brassOuter" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#44b5d7" />
-                <stop offset="25%" stopColor="#FFF1B8" />
-                <stop offset="50%" stopColor="#2099e9" />
-                <stop offset="75%" stopColor="#FFF1B8" />
-                <stop offset="100%" stopColor="#4A3728" />
+                <stop offset="0%" stopColor="#44b5d7" /><stop offset="25%" stopColor="#FFF1B8" /><stop offset="50%" stopColor="#2099e9" /><stop offset="75%" stopColor="#FFF1B8" /><stop offset="100%" stopColor="#4A3728" />
               </linearGradient>
             </defs>
           </svg>
         </div>
-
-        {/* Middle Ring with Satellite Nodes */}
         <div ref={midRing} className="absolute inset-5" style={{ transformStyle: 'preserve-3d' }}>
           <svg className="w-full h-full drop-shadow-[0_0_15px_rgba(184,115,51,0.3)]" viewBox="0 0 100 100" fill="none">
             <circle cx="50" cy="50" r="46" stroke="url(#brassMid)" strokeWidth="2.5" className="opacity-90" />
             <circle cx="50" cy="50" r="46" stroke="#FFFFFF" strokeWidth="0.5" strokeDasharray="1 10" className="opacity-50" />
-
-            {/* Planet/nodes along the middle ring */}
-            <circle cx="50" cy="4" r="2.5" fill="url(#nodeGlow)" />
-            <circle cx="50" cy="96" r="2.5" fill="url(#nodeGlow)" />
-            <circle cx="16" cy="16" r="1.5" fill="#274dad" />
-            <circle cx="84" cy="84" r="1.5" fill="#274dad" />
-
+            <circle cx="50" cy="4" r="2.5" fill="url(#nodeGlow)" /><circle cx="50" cy="96" r="2.5" fill="url(#nodeGlow)" />
             <defs>
               <linearGradient id="brassMid" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#e4f2f0" />
-                <stop offset="40%" stopColor="#274dad" />
-                <stop offset="100%" stopColor="#2A1B12" />
+                <stop offset="0%" stopColor="#e4f2f0" /><stop offset="40%" stopColor="#274dad" /><stop offset="100%" stopColor="#2A1B12" />
               </linearGradient>
               <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#FFFFFF" />
-                <stop offset="50%" stopColor="#44b5d7" />
-                <stop offset="100%" stopColor="#2099e9" />
+                <stop offset="0%" stopColor="#FFFFFF" /><stop offset="50%" stopColor="#44b5d7" /><stop offset="100%" stopColor="#2099e9" />
               </radialGradient>
             </defs>
           </svg>
         </div>
-
-        {/* Inner Tracking Ring with Data Lines */}
         <div ref={innerRing} className="absolute inset-12" style={{ transformStyle: 'preserve-3d' }}>
           <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
             <circle cx="50" cy="50" r="48" stroke="#44b5d7" strokeWidth="1" className="opacity-70" />
             <circle cx="50" cy="50" r="40" stroke="#2099e9" strokeWidth="0.5" strokeDasharray="6 4" className="opacity-90" />
-
-            {/* Crosshairs */}
             <path d="M50 2 L50 98 M2 50 L98 50" stroke="url(#crosshair)" strokeWidth="0.5" className="opacity-60" />
             <defs>
               <linearGradient id="crosshair" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="transparent" />
-                <stop offset="40%" stopColor="#44b5d7" />
-                <stop offset="60%" stopColor="#44b5d7" />
-                <stop offset="100%" stopColor="transparent" />
+                <stop offset="0%" stopColor="transparent" /><stop offset="40%" stopColor="#44b5d7" /><stop offset="60%" stopColor="#44b5d7" /><stop offset="100%" stopColor="transparent" />
               </linearGradient>
             </defs>
           </svg>
-
-          {/* Orbital Electron / Tracker point */}
           <div className="absolute top-0 left-1/2 w-3 h-3 -mt-1.5 -ml-1.5 rounded-full bg-white shadow-[0_0_15px_2px_#44b5d7]" style={{ transform: 'translateZ(10px)' }} />
-          <div className="absolute bottom-1/4 right-0 w-2 h-2 rounded-full bg-[#274dad] shadow-[0_0_10px_1px_#2099e9]" style={{ transform: 'translateZ(-10px)' }} />
         </div>
       </div>
-
-      {/* Decorative Floating Horizon Line */}
       <div className="absolute top-1/2 left-[-20%] right-[-20%] h-[1px] bg-gradient-to-r from-transparent via-[#44b5d7]/30 to-transparent pointer-events-none -translate-y-1/2" />
     </div>
   );
 };
 
-
-
 /* ────────────────────────────────────────────
-   MAIN
-   ──────────────────────────────────────────── */
-import EurekaPremiumLogo from '../../../components/ui/EurekaPremiumLogo';
-
-/* ────────────────────────────────────────────
-   MAIN
+   MAIN COMPONENT
    ──────────────────────────────────────────── */
 const PhysicsHome = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [grades, setGrades] = useState([]);
   const [activeGrade, setActive] = useState(10);
 
   useEffect(() => {
-    const init = async () => {
-      setGrades([6, 7, 8, 9, 10, 11, 12].map(g => ({ grade: g })));
-      setActive(user?.profile?.grade ?? 10);
-      setTimeout(() => setLoading(false), 600);
-    };
-    init();
+    setActive(user?.profile?.grade ?? 10);
+    setTimeout(() => setLoading(false), 600);
   }, [user]);
 
   const handleAction = (path) => {
-    if (!user) {
-      navigate('/login');
-    } else {
-      navigate(path);
-    }
+    if (!user) navigate('/login');
+    else navigate(path);
   };
 
   if (loading) return (
     <div className="h-screen bg-[#FFFFFF] flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-16 h-16 border-4 border-[#E5E7EB] border-t-[#274dad] rounded-full animate-spin" />
-        <p className="text-[#2099e9] font-black tracking-widest text-sm uppercase">Khởi động bộ máy...</p>
-      </div>
+      <div className="w-16 h-16 border-4 border-[#E5E7EB] border-t-[#274dad] rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="bg-[#FFFFFF] font-sans overflow-x-hidden min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728]">
-
-      {/* ══════════════════════════════════════════
-          HERO — EUREKA BRANDING
-          ══════════════════════════════════════════ */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#FFFFFF] pt-4 pb-12 px-4">
-
-        {/* Academic Background - Formulas & Sketches */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.12] select-none">
-          {/* Subtle Grid */}
-          <div className="absolute inset-0 graph-grid" />
-
-          {/* Floating Physics Sketches (Text-based for now) */}
-          <div className="absolute top-[15%] left-[10%] text-[100px] font-serif italic text-[#2099e9] rotate-[-15deg] opacity-40">F = ma</div>
-          <div className="absolute top-[20%] right-[15%] text-[80px] font-serif italic text-[#2099e9] rotate-[10deg] opacity-30">∇ × E = -∂B/∂t</div>
-          <div className="absolute bottom-[25%] left-[20%] text-[90px] font-serif italic text-[#2099e9] rotate-[5deg] opacity-25">PV = nRT</div>
-          <div className="absolute bottom-[15%] right-[10%] text-[110px] font-serif italic text-[#2099e9] rotate-[-10deg] opacity-35">λ = h/p</div>
-
-          {/* Decorative Gradient Glows */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[160px] bg-gradient-to-tr from-[#274dad]/10 via-[#44b5d7]/5 to-transparent animate-pulse-slow" />
+    <div className="bg-[#FFFFFF] font-sans overflow-x-hidden min-h-screen">
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white pt-32 pb-32 px-6">
+        <div className="absolute inset-0 z-0">
+           <div className="absolute top-[-10%] left-[-5%] w-[60%] h-[60%] bg-indigo-50/30 rounded-full blur-[120px]" />
+           <div className="absolute inset-0 physics-field-grid opacity-20" />
         </div>
 
-        <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
-
-          {/* Header Row: Logo + Brand Group (Visual Parity) */}
-          <div className="flex flex-col items-center justify-center mb-[-6rem] animate-fade-in-up transition-all hover:scale-105 duration-1000">
-            <EurekaPremiumLogo className="h-64 sm:h-80 md:h-[28rem]" />
+        <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center text-center">
+          
+          {/* Scientific Badge */}
+          <div className="mb-12">
+             <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-slate-900 text-white shadow-2xl">
+                <Sparkles size={14} className="text-indigo-400" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Next Gen Physics Lab</span>
+             </div>
           </div>
 
-          {/* Description Row: Centered Heading */}
-          <div className="max-w-4xl text-center mb-20 animate-fade-in-up animation-delay-200">
-            <h2 className="text-2xl sm:text-3xl lg:text-[2.25rem] font-black text-[#374151] leading-[1.3]">
-              Nền tảng học thuật Vật lý số 1 kết hợp <br />
-              mô phỏng tương tác và thi đấu trực tuyến.
-            </h2>
-          </div>
+          <h1 className="font-premium-serif text-[15vw] sm:text-[12rem] font-bold text-slate-900 italic leading-none tracking-tighter mb-4 select-none">
+            Eureka
+          </h1>
+          
+          <p className="text-xl md:text-2xl font-medium text-slate-400 tracking-tight leading-relaxed max-w-3xl mb-16">
+            Kiến tạo tương lai qua <span className="text-indigo-600 font-black">Vật lý mô phỏng</span>. <br />
+            Trải nghiệm học tập chuẩn mực trong hệ sinh thái 3D đỉnh cao.
+          </p>
 
-          {/* Action Row: Centered Buttons (Pill style matching reference) */}
-          <div className="flex flex-wrap justify-center gap-6 animate-fade-in-up animation-delay-300">
+          <div className="flex flex-col sm:flex-row items-center gap-6">
             <button
               onClick={() => handleAction(`/physics-class/${activeGrade}`)}
-              className="px-14 py-5 rounded-full bg-[#274dad] text-white font-black text-xl shadow-[0_15px_30px_-10px_rgba(39,77,173,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(39,77,173,0.6)] hover:-translate-y-1 active:scale-95 transition-all"
+              className="group relative px-12 py-6 rounded-full bg-slate-900 text-white font-black text-xs uppercase tracking-[0.3em] overflow-hidden shadow-2xl transition-all hover:scale-105 active:scale-95"
             >
-              Vào Lớp Học &rarr;
+              <div className="relative z-10 flex items-center gap-4">
+                 BẮT ĐẦU NGAY
+                 <ChevronRight size={16} />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
+            
             <button
               onClick={() => handleAction('/vatly/virtual-lab')}
-              className="px-14 py-5 rounded-full bg-white text-[#1E293B] font-black text-xl shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] hover:-translate-y-1 active:scale-95 transition-all border border-slate-100"
+              className="px-12 py-6 rounded-full bg-white text-slate-900 font-black text-xs uppercase tracking-[0.3em] border border-slate-100 hover:bg-slate-50 transition-all shadow-lg hover:shadow-xl active:scale-95"
             >
-              Vào Phòng Lab
+              PHÒNG LAB ẢO
             </button>
           </div>
-        </div>
 
-        {/* Floating Background Particles */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[20%] left-[15%] w-2 h-2 rounded-full bg-[#10B981] animate-float-slow opacity-20" />
-          <div className="absolute top-[40%] right-[20%] w-3 h-3 rounded-full bg-[#274dad] animate-float-medium opacity-15" />
-          <div className="absolute bottom-[30%] left-[25%] w-2 h-2 rounded-full bg-[#44b5d7] animate-float-fast opacity-20" />
-          <div className="absolute bottom-[10%] right-[40%] w-4 h-4 rounded-full bg-[#10B981] animate-float-slow opacity-10" />
+          {/* Fundamental Constants */}
+          <div className="absolute bottom-12 flex items-center gap-12 opacity-30">
+             <div className="physics-annotation">c = 299,792,458 m/s</div>
+             <div className="physics-annotation">G = 6.674×10⁻¹¹</div>
+             <div className="physics-annotation">h = 6.626×10⁻³⁴</div>
+          </div>
         </div>
       </section>
 
-
-
-      {/* ══════════════════════════════════════════
-          FEATURE BANNERS — Split Layout
-          ══════════════════════════════════════════ */}
-      {[
-        {
-          title: 'Lộ trình học tập',
-          highlight: 'Trực tuyến bài bản',
-          desc: 'Từ kiến thức cơ bản của Vật lý 6 đến các chuyên đề nâng cao của Vật lý 12. Nội dung được số hóa thành các bài học tương tác tinh tiến, rèn giữa cả lý thuyết và bài tập.',
-          cta: 'Khám phá Lớp học',
-          img: physicsBanner,
-          path: `/physics-classes`,
-          accentColor: '#10B981',
-        },
-        {
-          title: 'Phòng thí nghiệm',
-          highlight: 'Ảo 3D tương tác',
-          desc: 'Mô phỏng đồ họa 3D chân thực, chuẩn xác. Thực hành các thí nghiệm Vật lý kinh điển ngay trên trình duyệt với giao diện trực quan và kết quả thời gian thực.',
-          cta: 'Vào phòng Lab',
-          img: utilLab,
-          path: '/vatly/virtual-lab',
-          accentColor: '#3B82F6',
-        },
-        {
-          title: 'Đấu trường',
-          highlight: 'PK trực tuyến',
-          desc: 'Sân chơi trí tuệ, mài giũa tư duy. Thi đấu online theo thời gian thực với bạn bè hoặc đối thủ ngẫu nhiên, chinh phục bảng xếp hạng toàn quốc.',
-          cta: 'Tham gia ngay',
-          img: utilArena,
-          path: '/pk-battle',
-          accentColor: '#EF4444',
-        },
-        {
-          title: 'Hành trình',
-          highlight: 'Chinh phục kiến thức',
-          desc: 'Phiêu lưu qua các chương trình học theo hình thức game nhập vai. Thu thập thành tựu, mở khóa cấp độ mới và ghi danh bảng vàng cùng cộng đồng học tập.',
-          cta: 'Bắt đầu hành trình',
-          img: utilJourney,
-          path: '/interactive-lectures',
-          accentColor: '#8B5CF6',
-        },
-        {
-          title: 'Bài giảng tương tác',
-          highlight: 'Trực quan & sinh động',
-          desc: 'Lý thuyết được trình bày qua các slide tương tác, video minh họa và câu hỏi kiểm tra ngay trong bài. Học mọi lúc, mọi nơi với nội dung chuẩn chương trình.',
-          cta: 'Xem bài giảng',
-          img: utilLectures,
-          path: '/interactive-lectures',
-          accentColor: '#6366F1',
-        },
-      ].map((feature, idx) => {
-        const isReversed = idx % 2 !== 0;
-        return (
-          <section
-            key={idx}
-            className={`py-20 sm:py-24 ${idx % 2 === 0 ? 'bg-white' : 'bg-[#FFFFFF]'} border-t border-[#E5E7EB]/60 overflow-hidden`}
-          >
-            <div className="container mx-auto max-w-6xl px-4 sm:px-6">
-              <div className={`flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-12 lg:gap-20`}>
-
-                {/* Text Side */}
-                <div className="w-full lg:w-1/2 space-y-6">
-                  <h2 className="text-3xl sm:text-[2.5rem] font-black text-[#1E293B] leading-[1.15] tracking-tight">
-                    {feature.title}<br />
-                    <span style={{ color: feature.accentColor }}>{feature.highlight}</span>
-                  </h2>
-                  <p className="text-slate-500 font-medium leading-relaxed text-[15px] max-w-lg">
-                    {feature.desc}
-                  </p>
-                  <button
-                    onClick={() => handleAction(feature.path)}
-                    className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-[#1E293B] text-white font-black text-sm hover:bg-[#0F172A] transition-colors shadow-lg hover:shadow-xl active:scale-[0.97]"
-                  >
-                    {feature.cta}
-                    <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-                      <ChevronRight className="w-4 h-4" />
-                    </span>
-                  </button>
-                </div>
-
-                {/* Image Side */}
-                <div className="w-full lg:w-1/2 flex justify-center">
-                  <div className="relative w-full max-w-md">
-                    <div
-                      className="absolute -inset-4 rounded-[2rem] opacity-20 blur-[40px] pointer-events-none"
-                      style={{ background: feature.accentColor }}
-                    />
-                    <div className="relative rounded-[1.5rem] overflow-hidden shadow-[0_20px_50px_-15px_rgba(0,0,0,0.15)] border-4 border-white group">
-                      <img
-                        src={feature.img}
-                        alt={feature.title}
-                        className="w-full h-auto aspect-[4/3] object-cover transform group-hover:scale-105 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-tr from-black/5 via-transparent to-white/10 pointer-events-none" />
-                    </div>
+      {/* Bento Feature Grid */}
+      <section className="py-32 bg-white px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-24">
+             <div className="physics-annotation text-indigo-600 tracking-[0.4em] mb-4 uppercase text-[10px]">Platform Features</div>
+             <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter">Tương tác với <span className="text-indigo-600">Vật lý</span> theo cách hoàn toàn mới.</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 auto-rows-[30rem]">
+            {/* Virtual Lab */}
+            <div className="md:col-span-2 relative rounded-[3rem] bg-slate-900 overflow-hidden group cursor-pointer hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] transition-all duration-700" onClick={() => handleAction('/vatly/virtual-lab')}>
+               <img src={utilLab} alt="Virtual Lab" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[2s] ease-out" />
+               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+               <div className="relative h-full p-12 flex flex-col justify-between z-10">
+                  <div className="flex justify-between items-start">
+                     <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-2xl border border-white/20 flex items-center justify-center text-white shadow-xl"><Microscope size={32} /></div>
+                     <div className="physics-annotation text-white/50 tracking-[0.3em]">SCIENTIFIC PRECISION</div>
                   </div>
-                </div>
-
-              </div>
+                  <div className="space-y-4">
+                     <h3 className="text-5xl font-black text-white tracking-tighter">Phòng thí nghiệm Ảo</h3>
+                     <p className="text-white/60 font-medium max-w-md text-lg leading-relaxed">Môi trường giả lập 3D với độ trễ bằng không và độ chính xác tuyệt đối trong từng phép tính.</p>
+                  </div>
+               </div>
             </div>
-          </section>
-        );
-      })}
 
+            {/* Arena */}
+            <div className="relative rounded-[3rem] bg-slate-100 overflow-hidden group cursor-pointer hover:shadow-2xl transition-all duration-700" onClick={() => handleAction('/pk-battle')}>
+               <img src={utilArena} alt="Arena" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-[2s] ease-out" />
+               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
+               <div className="relative h-full p-10 flex flex-col justify-between z-10">
+                  <div className="flex justify-between items-start">
+                     <div className="w-14 h-14 rounded-2xl bg-red-500 text-white flex items-center justify-center shadow-lg"><Swords size={28} /></div>
+                     <div className="physics-annotation text-white/70">LIVE PK</div>
+                  </div>
+                  <div className="space-y-4">
+                     <h3 className="text-3xl font-black text-white tracking-tight">Đấu trường</h3>
+                     <p className="text-white/80 text-sm font-medium leading-relaxed">Thi đấu đối kháng thời gian thực. Chinh phục bảng xếp hạng và chứng minh tư duy vật lý sắc bén.</p>
+                  </div>
+               </div>
+            </div>
+
+            {/* Learning Path */}
+            <div className="relative rounded-[3rem] bg-white border border-slate-100 overflow-hidden group cursor-pointer hover:shadow-2xl transition-all duration-700" onClick={() => handleAction('/physics-classes')}>
+               <img src={utilJourney} alt="Learning Path" className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-110 transition-transform duration-[2s] ease-out" />
+               <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-transparent to-transparent" />
+               <div className="relative h-full p-10 flex flex-col justify-between z-10">
+                  <div className="flex justify-between items-start">
+                     <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg"><GraduationCap size={28} /></div>
+                     <div className="physics-annotation text-slate-400">CURRICULUM</div>
+                  </div>
+                  <div className="space-y-4 pt-12">
+                     <h3 className="text-3xl font-black text-slate-900 tracking-tight">Lộ trình học</h3>
+                     <p className="text-slate-600 text-sm font-medium leading-relaxed">Chương trình cá nhân hóa từ lớp 6 đến lớp 12 theo chuẩn giáo dục hiện đại và toàn diện.</p>
+                  </div>
+               </div>
+            </div>
+
+            {/* Lectures */}
+            <div className="md:col-span-2 relative rounded-[3rem] bg-indigo-600 overflow-hidden group cursor-pointer hover:shadow-2xl transition-all duration-700" onClick={() => handleAction('/interactive-lectures')}>
+               <img src={utilLectures} alt="Interactive Lectures" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-[2s] ease-out" />
+               <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 via-indigo-900/40 to-transparent" />
+               <div className="relative h-full p-12 flex items-center z-10">
+                  <div className="flex-1 space-y-6">
+                     <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-3xl flex items-center justify-center text-white border border-white/30 shadow-2xl group-hover:scale-110 transition-transform duration-500">
+                        <Play fill="currentColor" size={24} className="ml-1" />
+                     </div>
+                     <h3 className="text-5xl font-black text-white tracking-tighter">Bài giảng Tương tác</h3>
+                     <p className="text-white/70 font-medium max-w-md text-lg leading-relaxed">Hình ảnh hóa các định luật phức tạp thông qua các câu chuyện thị giác sinh động và tương tác trực tiếp.</p>
+                  </div>
+                  <div className="hidden lg:block w-px h-1/2 bg-white/20 mx-12" />
+                  <div className="hidden lg:flex flex-col gap-8 text-white/40 font-black text-[10px] uppercase tracking-[0.4em]">
+                     <div className="hover:text-white transition-colors">Visual Storytelling</div>
+                     <div className="hover:text-white transition-colors">Real-time Data</div>
+                     <div className="hover:text-white transition-colors">Instant Feedback</div>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Engineering Precision Section */}
+      <section className="py-32 bg-[#F8FAFC] px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+           <div className="space-y-12">
+              <div className="flex items-center gap-4">
+                 <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-lg"><Zap size={20} /></div>
+                 <div className="physics-annotation text-indigo-600 tracking-[0.3em] uppercase text-[10px]">Advanced Dynamics</div>
+              </div>
+              <h2 className="text-6xl font-black text-slate-900 tracking-tighter">Kỹ thuật <br /><span className="text-slate-300 italic font-premium-serif">chính xác tuyệt đối.</span></h2>
+              <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-lg">Chúng tôi xây dựng nền tảng dựa trên những tiêu chuẩn tính toán vật lý khắt khe nhất, đảm bảo tính đúng đắn của mọi thí nghiệm.</p>
+              <div className="grid grid-cols-2 gap-10">
+                 <div><div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2">Calculation Error</div><div className="text-3xl font-black text-emerald-500">0.001%</div></div>
+                 <div><div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2">Physics Refresh Rate</div><div className="text-3xl font-black text-indigo-600">120Hz</div></div>
+              </div>
+           </div>
+           <div className="bg-white rounded-[3rem] p-12 shadow-2xl border border-slate-50 relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-slate-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+              <div className="relative space-y-10">
+                 <div className="flex justify-between items-center">
+                    <div><h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Physics Core Engine</h4><div className="physics-annotation text-indigo-500">BUILD V2.4.0 ALPHA</div></div>
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400"><Activity size={20} /></div>
+                 </div>
+                 <div className="aspect-video bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#4338ca10_0%,transparent_70%)] animate-pulse" />
+                    <div className="relative flex flex-col items-center gap-6">
+                       <div className="w-20 h-20 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin flex items-center justify-center"><Magnet className="text-indigo-600" /></div>
+                       <div className="text-center">
+                          <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Magnetic Flux</div>
+                          <div className="text-4xl font-black text-slate-900 tracking-tighter">9.81 m/s²</div>
+                       </div>
+                    </div>
+                    <div className="absolute top-4 left-4 physics-annotation text-slate-400 opacity-50">COORDINATE: X=42.0, Y=88.2</div>
+                 </div>
+              </div>
+           </div>
+        </div>
+      </section>
+
+      {/* Final Call to Action */}
+      <section className="py-32 px-6">
+        <div className="max-w-5xl mx-auto bg-slate-900 rounded-[3rem] p-16 md:p-32 text-center relative overflow-hidden shadow-2xl">
+           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#4338ca44_0%,transparent_60%)]" />
+           <div className="relative z-10 space-y-12">
+              <div className="physics-annotation text-indigo-400 tracking-[0.5em] uppercase text-[10px]">Khai mở tiềm năng</div>
+              <h2 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-none">Sẵn sàng <br /> bắt đầu?</h2>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                 <button onClick={() => handleAction('/register')} className="w-full sm:w-auto px-16 py-6 rounded-2xl bg-white text-slate-900 font-black text-xs uppercase tracking-[0.3em] hover:scale-105 transition-all">BẮT ĐẦU NGAY</button>
+                 <button onClick={() => handleAction('/interactive-lectures')} className="w-full sm:w-auto px-16 py-6 rounded-2xl bg-slate-800 text-white font-black text-xs uppercase tracking-[0.3em] border border-slate-700 hover:bg-slate-700 transition-all">XEM DEMO</button>
+              </div>
+              <div className="flex justify-center gap-12 opacity-40 pt-8 border-t border-white/5">
+                 <div className="physics-annotation text-white text-[10px]">E = MC²</div><div className="physics-annotation text-white text-[10px]">F = G(M1M2/R²)</div><div className="physics-annotation text-white text-[10px]">ΔS ≥ 0</div>
+              </div>
+           </div>
+        </div>
+      </section>
     </div>
   );
 };
 
 export default PhysicsHome;
-
