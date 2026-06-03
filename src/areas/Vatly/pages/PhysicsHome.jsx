@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronRight, Swords, FlaskConical, BookOpen,
   CircuitBoard, Target, Shield, TrendingUp, Microscope, Compass, CheckCircle2, Play, Map,
@@ -104,6 +105,7 @@ const GoldenGyroscope = () => {
    MAIN COMPONENT
    ──────────────────────────────────────────── */
 const PhysicsHome = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -142,8 +144,8 @@ const PhysicsHome = () => {
           </h1>
           
           <p className="text-xl md:text-2xl font-medium text-slate-400 tracking-tight leading-relaxed max-w-3xl mb-16">
-            Kiến tạo tương lai qua <span className="text-indigo-600 font-black">Vật lý mô phỏng</span>. <br />
-            Trải nghiệm học tập chuẩn mực trong hệ sinh thái 3D đỉnh cao.
+            {t('home.slogan_1')} <span className="text-indigo-600 font-black">{t('home.slogan_highlight')}</span>. <br />
+            {t('home.slogan_2')}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -152,7 +154,7 @@ const PhysicsHome = () => {
               className="group relative px-12 py-6 rounded-full bg-slate-900 text-white font-black text-xs uppercase tracking-[0.3em] overflow-hidden shadow-2xl transition-all hover:scale-105 active:scale-95"
             >
               <div className="relative z-10 flex items-center gap-4">
-                 BẮT ĐẦU NGAY
+                 {t('home.start_now')}
                  <ChevronRight size={16} />
               </div>
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -162,7 +164,7 @@ const PhysicsHome = () => {
               onClick={() => handleAction('/vatly/virtual-lab')}
               className="px-12 py-6 rounded-full bg-white text-slate-900 font-black text-xs uppercase tracking-[0.3em] border border-slate-100 hover:bg-slate-50 transition-all shadow-lg hover:shadow-xl active:scale-95"
             >
-              PHÒNG LAB ẢO
+              {t('home.virtual_lab')}
             </button>
           </div>
 
@@ -179,8 +181,8 @@ const PhysicsHome = () => {
       <section className="py-32 bg-white px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24">
-             <div className="physics-annotation text-indigo-600 tracking-[0.4em] mb-4 uppercase text-[10px]">Platform Features</div>
-             <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter">Tương tác với <span className="text-indigo-600">Vật lý</span> theo cách hoàn toàn mới.</h2>
+             <div className="physics-annotation text-indigo-600 tracking-[0.4em] mb-4 uppercase text-[10px]">{t('home.features')}</div>
+             <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter">{t('home.features_title')} <span className="text-indigo-600">{t('home.features_title_highlight')}</span> {t('home.features_title_2')}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 auto-rows-[30rem]">
             {/* Virtual Lab */}
@@ -190,11 +192,11 @@ const PhysicsHome = () => {
                <div className="relative h-full p-12 flex flex-col justify-between z-10">
                   <div className="flex justify-between items-start">
                      <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-2xl border border-white/20 flex items-center justify-center text-white shadow-xl"><Microscope size={32} /></div>
-                     <div className="physics-annotation text-white/50 tracking-[0.3em]">SCIENTIFIC PRECISION</div>
+                     <div className="physics-annotation text-white/50 tracking-[0.3em]">{t('home.lab_tag')}</div>
                   </div>
                   <div className="space-y-4">
-                     <h3 className="text-5xl font-black text-white tracking-tighter">Phòng thí nghiệm Ảo</h3>
-                     <p className="text-white/60 font-medium max-w-md text-lg leading-relaxed">Môi trường giả lập 3D với độ trễ bằng không và độ chính xác tuyệt đối trong từng phép tính.</p>
+                     <h3 className="text-5xl font-black text-white tracking-tighter">{t('home.lab_title')}</h3>
+                     <p className="text-white/60 font-medium max-w-md text-lg leading-relaxed">{t('home.lab_desc')}</p>
                   </div>
                </div>
             </div>
@@ -206,11 +208,11 @@ const PhysicsHome = () => {
                <div className="relative h-full p-10 flex flex-col justify-between z-10">
                   <div className="flex justify-between items-start">
                      <div className="w-14 h-14 rounded-2xl bg-red-500 text-white flex items-center justify-center shadow-lg"><Swords size={28} /></div>
-                     <div className="physics-annotation text-white/70">LIVE PK</div>
+                     <div className="physics-annotation text-white/70">{t('home.arena_tag')}</div>
                   </div>
                   <div className="space-y-4">
-                     <h3 className="text-3xl font-black text-white tracking-tight">Đấu trường</h3>
-                     <p className="text-white/80 text-sm font-medium leading-relaxed">Thi đấu đối kháng thời gian thực. Chinh phục bảng xếp hạng và chứng minh tư duy vật lý sắc bén.</p>
+                     <h3 className="text-3xl font-black text-white tracking-tight">{t('home.arena_title')}</h3>
+                     <p className="text-white/80 text-sm font-medium leading-relaxed">{t('home.arena_desc')}</p>
                   </div>
                </div>
             </div>
@@ -222,11 +224,11 @@ const PhysicsHome = () => {
                <div className="relative h-full p-10 flex flex-col justify-between z-10">
                   <div className="flex justify-between items-start">
                      <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg"><GraduationCap size={28} /></div>
-                     <div className="physics-annotation text-slate-400">CURRICULUM</div>
+                     <div className="physics-annotation text-slate-400">{t('home.curriculum_tag')}</div>
                   </div>
                   <div className="space-y-4 pt-12">
-                     <h3 className="text-3xl font-black text-slate-900 tracking-tight">Lộ trình học</h3>
-                     <p className="text-slate-600 text-sm font-medium leading-relaxed">Chương trình cá nhân hóa từ lớp 6 đến lớp 12 theo chuẩn giáo dục hiện đại và toàn diện.</p>
+                     <h3 className="text-3xl font-black text-slate-900 tracking-tight">{t('home.curriculum_title')}</h3>
+                     <p className="text-slate-600 text-sm font-medium leading-relaxed">{t('home.curriculum_desc')}</p>
                   </div>
                </div>
             </div>
@@ -240,8 +242,8 @@ const PhysicsHome = () => {
                      <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-3xl flex items-center justify-center text-white border border-white/30 shadow-2xl group-hover:scale-110 transition-transform duration-500">
                         <Play fill="currentColor" size={24} className="ml-1" />
                      </div>
-                     <h3 className="text-5xl font-black text-white tracking-tighter">Bài giảng Tương tác</h3>
-                     <p className="text-white/70 font-medium max-w-md text-lg leading-relaxed">Hình ảnh hóa các định luật phức tạp thông qua các câu chuyện thị giác sinh động và tương tác trực tiếp.</p>
+                     <h3 className="text-5xl font-black text-white tracking-tighter">{t('home.lecture_title')}</h3>
+                     <p className="text-white/70 font-medium max-w-md text-lg leading-relaxed">{t('home.lecture_desc')}</p>
                   </div>
                   <div className="hidden lg:block w-px h-1/2 bg-white/20 mx-12" />
                   <div className="hidden lg:flex flex-col gap-8 text-white/40 font-black text-[10px] uppercase tracking-[0.4em]">
@@ -264,35 +266,35 @@ const PhysicsHome = () => {
         <div className="container mx-auto px-4 relative z-20 pointer-events-none">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-              Bẻ cong <br />
+              {t('home.bend_limits')} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">
-                mọi giới hạn
+                {t('home.bend_limits_highlight')}
               </span>
             </h2>
             <p className="text-xl md:text-2xl text-indigo-100/70 mb-16 font-light max-w-2xl mx-auto drop-shadow-md">
-              Không gian học tập nơi kiến thức không còn là những dòng chữ khô khan. Tương tác với môi trường, kiểm chứng định luật và khai phá tư duy đa chiều.
+              {t('home.bend_limits_desc')}
             </p>
             
             <div className="grid md:grid-cols-3 gap-8 text-center pointer-events-none">
                <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
                  <Orbit className="w-10 h-10 text-indigo-400 mx-auto mb-4" />
-                 <div className="text-2xl font-black text-white mb-2">Mô phỏng 3D</div>
-                 <div className="text-sm font-medium text-indigo-200/60">Tương tác vật lý thực tế</div>
+                 <div className="text-2xl font-black text-white mb-2">{t('home.3d_sim')}</div>
+                 <div className="text-sm font-medium text-indigo-200/60">{t('home.3d_sim_desc')}</div>
                </div>
                
                <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transform md:-translate-y-4">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
                  <Cpu className="w-10 h-10 text-purple-400 mx-auto mb-4" />
-                 <div className="text-2xl font-black text-white mb-2">Trợ lý AI</div>
-                 <div className="text-sm font-medium text-purple-200/60">Hỗ trợ giải đáp 24/7</div>
+                 <div className="text-2xl font-black text-white mb-2">{t('home.ai_assistant')}</div>
+                 <div className="text-sm font-medium text-purple-200/60">{t('home.ai_assistant_desc')}</div>
                </div>
 
                <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
                  <Zap className="w-10 h-10 text-cyan-400 mx-auto mb-4" />
-                 <div className="text-2xl font-black text-white mb-2">120Hz Core</div>
-                 <div className="text-sm font-medium text-cyan-200/60">Tính toán chính xác tuyệt đối</div>
+                 <div className="text-2xl font-black text-white mb-2">{t('home.120hz_core')}</div>
+                 <div className="text-sm font-medium text-cyan-200/60">{t('home.120hz_core_desc')}</div>
                </div>
             </div>
           </div>
@@ -307,11 +309,11 @@ const PhysicsHome = () => {
         <div className="max-w-5xl mx-auto bg-slate-900 rounded-[3rem] p-16 md:p-32 text-center relative overflow-hidden shadow-2xl">
            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#4338ca44_0%,transparent_60%)]" />
            <div className="relative z-10 space-y-12">
-              <div className="physics-annotation text-indigo-400 tracking-[0.5em] uppercase text-[10px]">Khai mở tiềm năng</div>
-              <h2 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-none">Sẵn sàng <br /> bắt đầu?</h2>
+              <div className="physics-annotation text-indigo-400 tracking-[0.5em] uppercase text-[10px]">{t('home.unlock_potential')}</div>
+              <h2 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-none">{t('home.ready_to_start')} <br /> {t('home.ready_to_start_2')}</h2>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                 <button onClick={() => handleAction('/register')} className="w-full sm:w-auto px-16 py-6 rounded-2xl bg-white text-slate-900 font-black text-xs uppercase tracking-[0.3em] hover:scale-105 transition-all">BẮT ĐẦU NGAY</button>
-                 <button onClick={() => handleAction('/interactive-lectures')} className="w-full sm:w-auto px-16 py-6 rounded-2xl bg-slate-800 text-white font-black text-xs uppercase tracking-[0.3em] border border-slate-700 hover:bg-slate-700 transition-all">XEM DEMO</button>
+                 <button onClick={() => handleAction('/register')} className="w-full sm:w-auto px-16 py-6 rounded-2xl bg-white text-slate-900 font-black text-xs uppercase tracking-[0.3em] hover:scale-105 transition-all">{t('home.start_now')}</button>
+                 <button onClick={() => handleAction('/interactive-lectures')} className="w-full sm:w-auto px-16 py-6 rounded-2xl bg-slate-800 text-white font-black text-xs uppercase tracking-[0.3em] border border-slate-700 hover:bg-slate-700 transition-all">{t('home.watch_demo')}</button>
               </div>
               <div className="flex justify-center gap-12 opacity-40 pt-8 border-t border-white/5">
                  <div className="physics-annotation text-white text-[10px]">E = MC²</div><div className="physics-annotation text-white text-[10px]">F = G(M1M2/R²)</div><div className="physics-annotation text-white text-[10px]">ΔS ≥ 0</div>

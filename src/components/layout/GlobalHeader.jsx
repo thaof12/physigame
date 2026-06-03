@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
   Atom, 
@@ -24,11 +25,17 @@ import {
 import EurekaPremiumLogo from '../ui/EurekaPremiumLogo';
 
 const GlobalHeader = () => {
+  const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+
+  const toggleLanguage = () => {
+    const nextLang = i18n.language === 'vi' ? 'en' : 'vi';
+    i18n.changeLanguage(nextLang);
+  };
 
   const handleLogout = async () => {
     try { await logout(); navigate('/login'); }
@@ -37,27 +44,27 @@ const GlobalHeader = () => {
 
   const navLinks = [
     { 
-      name: 'HÀNH TRÌNH', 
+      name: t('header.journey'), 
       icon: Compass,
       children: [
-        { name: 'LỚP HỌC', path: '/physics-classes', icon: GraduationCap },
-        { name: 'BÀI GIẢNG', path: '/interactive-lectures', icon: BookOpen },
+        { name: t('header.classes'), path: '/physics-classes', icon: GraduationCap },
+        { name: t('header.lectures'), path: '/interactive-lectures', icon: BookOpen },
       ]
     },
     { 
-      name: 'KHO TÀNG', 
+      name: t('header.treasure'), 
       icon: Library,
       children: [
-        { name: 'CÔNG CỤ', path: '/physics-tools', icon: Wrench },
+        { name: t('header.tools'), path: '/physics-tools', icon: Wrench },
       ]
     },
     { 
-      name: 'THỬ THÁCH', 
+      name: t('header.challenge'), 
       icon: Trophy,
       children: [
-        { name: 'TRÒ CHƠI', path: '/advanced-physics-challenge', icon: Gamepad2 },
-        { name: 'THÍ NGHIỆM', path: '/vatly/virtual-lab', icon: FlaskConical },
-        { name: 'ĐẤU TRƯỜNG', path: '/pk-battle', icon: Swords },
+        { name: t('header.games'), path: '/advanced-physics-challenge', icon: Gamepad2 },
+        { name: t('header.lab'), path: '/vatly/virtual-lab', icon: FlaskConical },
+        { name: t('header.arena'), path: '/pk-battle', icon: Swords },
       ]
     },
   ];
@@ -157,9 +164,9 @@ const GlobalHeader = () => {
 
         {/* Right Actions Area */}
         <div className="flex items-center gap-2 sm:gap-4 ml-auto">
-          {/* Language / VI */}
-          <button className="hidden sm:flex items-center gap-2 text-slate-500 hover:text-[#274dad] font-bold text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/50 border border-slate-100 transition-all">
-            <Globe className="w-3.5 h-3.5" /> <span>VI</span>
+          {/* Language Toggle */}
+          <button onClick={toggleLanguage} className="hidden sm:flex items-center gap-2 text-slate-500 hover:text-[#274dad] font-bold text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/50 border border-slate-100 transition-all cursor-pointer">
+            <Globe className="w-3.5 h-3.5" /> <span>{i18n.language === 'vi' ? 'EN' : 'VI'}</span>
           </button>
 
           <div className="hidden lg:block h-10 w-px bg-slate-200 mx-1" />
@@ -193,12 +200,12 @@ const GlobalHeader = () => {
             ) : (
               <div className="flex items-center gap-1 sm:gap-2">
                 <Link to="/login" className="text-slate-500 font-bold hover:text-[#2099e9] px-3 py-2 transition-colors text-xs sm:text-sm">
-                  Đăng nhập
+                  {t('header.login')}
                 </Link>
                 <Link to="/register"
                   className="hidden sm:flex items-center gap-2 px-4 sm:px-6 py-2 sm:2.5 text-xs sm:text-sm font-black text-white bg-gradient-to-r from-[#274dad] to-[#4A3728] rounded-xl shadow-[0_8px_20px_rgba(184,115,51,0.25)] hover:shadow-[0_12px_25px_rgba(184,115,51,0.35)] hover:-translate-y-0.5 transition-all active:scale-95 active:translate-y-0"
                 >
-                  Đăng ký <Rocket className="w-4 h-4" />
+                  {t('header.register')} <Rocket className="w-4 h-4" />
                 </Link>
               </div>
             )}

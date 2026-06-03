@@ -1,0 +1,57 @@
+{
+  "header": {
+    "journey": "HÀNH TRÌNH",
+    "classes": "LỚP HỌC",
+    "lectures": "BÀI GIẢNG",
+    "treasure": "KHO TÀNG",
+    "tools": "CÔNG CỤ",
+    "challenge": "THỬ THÁCH",
+    "games": "TRÒ CHƠI",
+    "lab": "THÍ NGHIỆM",
+    "arena": "ĐẤU TRƯỜNG",
+    "login": "Đăng nhập",
+    "register": "Đăng ký"
+  },
+  "home": {
+    "slogan_1": "Kiến tạo tương lai qua",
+    "slogan_highlight": "Vật lý mô phỏng",
+    "slogan_2": "Trải nghiệm học tập chuẩn mực trong hệ sinh thái 3D đỉnh cao.",
+    "start_now": "BẮT ĐẦU NGAY",
+    "virtual_lab": "PHÒNG LAB ẢO",
+    "features": "Platform Features",
+    "features_title": "Tương tác với",
+    "features_title_highlight": "Vật lý",
+    "features_title_2": "theo cách hoàn toàn mới.",
+    
+    "lab_tag": "SCIENTIFIC PRECISION",
+    "lab_title": "Phòng thí nghiệm Ảo",
+    "lab_desc": "Môi trường giả lập 3D với độ trễ bằng không và độ chính xác tuyệt đối trong từng phép tính.",
+    
+    "arena_tag": "LIVE PK",
+    "arena_title": "Đấu trường",
+    "arena_desc": "Thi đấu đối kháng thời gian thực. Chinh phục bảng xếp hạng và chứng minh tư duy vật lý sắc bén.",
+    
+    "curriculum_tag": "CURRICULUM",
+    "curriculum_title": "Lộ trình học",
+    "curriculum_desc": "Chương trình cá nhân hóa từ lớp 6 đến lớp 12 theo chuẩn giáo dục hiện đại và toàn diện.",
+    
+    "lecture_title": "Bài giảng Tương tác",
+    "lecture_desc": "Hình ảnh hóa các định luật phức tạp thông qua các câu chuyện thị giác sinh động và tương tác trực tiếp.",
+    
+    "bend_limits": "Bẻ cong",
+    "bend_limits_highlight": "mọi giới hạn",
+    "bend_limits_desc": "Không gian học tập nơi kiến thức không còn là những dòng chữ khô khan. Tương tác với môi trường, kiểm chứng định luật và khai phá tư duy đa chiều.",
+    
+    "3d_sim": "Mô phỏng 3D",
+    "3d_sim_desc": "Tương tác vật lý thực tế",
+    "ai_assistant": "Trợ lý AI",
+    "ai_assistant_desc": "Hỗ trợ giải đáp 24/7",
+    "120hz_core": "120Hz Core",
+    "120hz_core_desc": "Tính toán chính xác tuyệt đối",
+    
+    "unlock_potential": "Khai mở tiềm năng",
+    "ready_to_start": "Sẵn sàng",
+    "ready_to_start_2": "bắt đầu?",
+    "watch_demo": "XEM DEMO"
+  }
+}

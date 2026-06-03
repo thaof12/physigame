@@ -23,6 +23,12 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import MainLayout from './components/layout/MainLayout';
 
+// Support Pages
+import UserGuide from './pages/support/UserGuide';
+import FAQ from './pages/support/FAQ';
+import PrivacyPolicy from './pages/support/PrivacyPolicy';
+import TermsOfService from './pages/support/TermsOfService';
+
 // Physics area
 import PhysicsHome from './areas/Vatly/pages/PhysicsHome';
 import PhysicsClassDashboard from './areas/Vatly/pages/PhysicsClassDashboard';
@@ -146,6 +152,12 @@ const AppContent = () => {
           
           <Route path="/physics-games" element={<AdvancedPhysicsChallenge />} />
           <Route path="/advanced-physics-challenge" element={<AdvancedPhysicsChallenge />} />
+
+          {/* Support Pages */}
+          <Route path="/support/guide" element={<UserGuide />} />
+          <Route path="/support/faq" element={<FAQ />} />
+          <Route path="/support/privacy" element={<PrivacyPolicy />} />
+          <Route path="/support/terms" element={<TermsOfService />} />
         </Route>
 
         {/* PK Battle Room (Keep fullscreen) */}

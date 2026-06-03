@@ -14,8 +14,8 @@ const GlobalFooter = () => {
           {/* Brand */}
           <div className="space-y-6">
             <Link to="/" className="inline-block">
-              <span className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-br from-[#274dad] via-[#2099e9] to-[#4A3728] tracking-tighter">
-                PhysiGame
+              <span className="font-premium-serif text-5xl font-bold text-slate-900 italic tracking-tighter select-none">
+                Eureka
               </span>
             </Link>
             <p className="text-slate-500 font-medium leading-relaxed text-sm max-w-xs">
@@ -63,13 +63,13 @@ const GlobalFooter = () => {
             </h4>
             <ul className="space-y-4">
               {[
-                'Hướng dẫn sử dụng',
-                'Câu hỏi thường gặp',
-                'Chính sách bảo mật',
-                'Điều khoản dịch vụ',
-              ].map(label => (
+                { label: 'Hướng dẫn sử dụng', path: '/support/guide' },
+                { label: 'Câu hỏi thường gặp (FAQ)', path: '/support/faq' },
+                { label: 'Chính sách bảo mật', path: '/support/privacy' },
+                { label: 'Điều khoản dịch vụ', path: '/support/terms' },
+              ].map(({ label, path }) => (
                 <li key={label}>
-                  <span className="text-slate-500 font-bold text-sm cursor-pointer hover:text-[#274dad] transition-colors">{label}</span>
+                  <Link to={path} className="text-slate-500 font-bold text-sm cursor-pointer hover:text-[#274dad] transition-colors">{label}</Link>
                 </li>
               ))}
             </ul>
@@ -85,12 +85,18 @@ const GlobalFooter = () => {
               {[
                 { Icon: Mail, title: 'Email', body: 'support@physigame.edu.vn' },
                 { Icon: Phone, title: 'Hotline', body: '(+84) 98 123 4567' },
-                { Icon: MapPin, title: 'Trụ sở chính', body: 'ĐH Nguyễn Tất Thành TP.HCM\n3F Nguyễn Hữu Thọ, Tân Hưng' },
-              ].map(({ Icon, title, body }) => (
+                { Icon: MapPin, title: 'Trụ sở chính', body: 'ĐH Nguyễn Tất Thành TP.HCM\n3F Nguyễn Hữu Thọ, Tân Hưng', link: 'https://maps.app.goo.gl/QacnXHUEdqjrLmd69' },
+              ].map(({ Icon, title, body, link }) => (
                 <li key={title} className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm text-[#274dad]">
-                    <Icon className="w-4 h-4" />
-                  </div>
+                  {link ? (
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm text-[#274dad] hover:bg-blue-50 hover:scale-105 hover:shadow-md transition-all cursor-pointer">
+                      <Icon className="w-4 h-4" />
+                    </a>
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm text-[#274dad]">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                  )}
                   <div>
                     <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{title}</div>
                     <div className="text-slate-600 font-bold text-sm leading-relaxed whitespace-pre-line">{body}</div>
@@ -104,7 +110,7 @@ const GlobalFooter = () => {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-slate-400 font-bold text-xs">
-            &copy; 2026 PhysiGame Universe. Built with passion for science.
+            &copy; 2026 Eureka Physics Lab. Built with passion for science.
           </p>
           <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse" />
