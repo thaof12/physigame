@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
@@ -73,6 +75,45 @@ app.use('/api/game-results', require('./routes/gameResults.cjs'));
 app.use('/api/lesson-completions', require('./routes/lessonCompletions.cjs'));
 app.use('/api/study-progress', require('./routes/StudyProgress.cjs'));
 app.use('/api/games-progress', require('./routes/GamesProgress.cjs'));
+
+// API Endpoints
+const SETTINGS_FILE = path.join(__dirname, 'settings.json');
+
+app.get('/api/settings', (req, res) => {
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) {
+      const data = fs.readFileSync(SETTINGS_FILE, 'utf8');
+      res.json(JSON.parse(data));
+    } else {
+      res.json({
+        siteName: 'Eureka',
+        siteDescription: 'Nền tảng học Vật lý tương tác',
+        maintenanceMode: false,
+        allowRegistration: true,
+        emailNotifications: true,
+        autoBackup: true,
+        backupFrequency: 'daily',
+        maxUploadSize: 10,
+        sessionTimeout: 30
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to read settings' });
+  }
+});
+
+app.post('/api/settings', (req, res) => {
+  try {
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(req.body, null, 2));
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to save settings' });
+  }
+});
+
+app.get('/', (req, res) => {
+  res.json({ status: 'OK', message: 'Server is running', database: 'Supabase' });
+});
 
 // Health check
 app.get('/api/health', (req, res) => {

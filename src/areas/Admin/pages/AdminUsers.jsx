@@ -170,79 +170,79 @@ const PendingTeachersTab = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div
           onClick={() => setTeacherFilter('pending')}
-          className={`bg-slate-900/50 backdrop-blur border rounded-xl p-4 cursor-pointer transition-all ${
-            teacherFilter === 'pending' ? 'border-blue-500/50 bg-blue-500/5' : 'border-slate-800/50 hover:border-slate-700/50'
+          className={`bg-white border-2 rounded-[1.5rem] p-5 cursor-pointer transition-all shadow-sm ${
+            teacherFilter === 'pending' ? 'border-indigo-400 bg-indigo-50/50 shadow-indigo-100' : 'border-slate-100 hover:border-indigo-200'
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-500/20 rounded-lg">
-              <Clock className="w-5 h-5 text-blue-400" />
+            <div className="p-2.5 bg-indigo-100 rounded-xl">
+              <Clock className="w-5 h-5 text-indigo-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{pendingTeachers.length}</p>
-              <p className="text-xs text-slate-400">Chờ duyệt</p>
+              <p className="text-2xl font-black text-slate-900">{pendingTeachers.length}</p>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Chờ duyệt</p>
             </div>
           </div>
         </div>
         <div
           onClick={() => setTeacherFilter('verified')}
-          className={`bg-slate-900/50 backdrop-blur border rounded-xl p-4 cursor-pointer transition-all ${
-            teacherFilter === 'verified' ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-slate-800/50 hover:border-slate-700/50'
+          className={`bg-white border-2 rounded-[1.5rem] p-5 cursor-pointer transition-all shadow-sm ${
+            teacherFilter === 'verified' ? 'border-emerald-400 bg-emerald-50/50 shadow-emerald-100' : 'border-slate-100 hover:border-emerald-200'
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-500/20 rounded-lg">
-              <UserCheck className="w-5 h-5 text-emerald-400" />
+            <div className="p-2.5 bg-emerald-100 rounded-xl">
+              <UserCheck className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-black text-slate-900">
                 {allTeachers.filter(t => t.teacherStatus === 'verified').length}
               </p>
-              <p className="text-xs text-slate-400">Đã duyệt</p>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Đã duyệt</p>
             </div>
           </div>
         </div>
         <div
           onClick={() => setTeacherFilter('rejected')}
-          className={`bg-slate-900/50 backdrop-blur border rounded-xl p-4 cursor-pointer transition-all ${
-            teacherFilter === 'rejected' ? 'border-red-500/50 bg-red-500/5' : 'border-slate-800/50 hover:border-slate-700/50'
+          className={`bg-white border-2 rounded-[1.5rem] p-5 cursor-pointer transition-all shadow-sm ${
+            teacherFilter === 'rejected' ? 'border-rose-400 bg-rose-50/50 shadow-rose-100' : 'border-slate-100 hover:border-rose-200'
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-red-500/20 rounded-lg">
-              <UserX className="w-5 h-5 text-red-400" />
+            <div className="p-2.5 bg-rose-100 rounded-xl">
+              <UserX className="w-5 h-5 text-rose-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-black text-slate-900">
                 {allTeachers.filter(t => t.teacherStatus === 'rejected').length}
               </p>
-              <p className="text-xs text-slate-400">Đã từ chối</p>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Đã từ chối</p>
             </div>
           </div>
         </div>
         <div
           onClick={() => setTeacherFilter('all')}
-          className={`bg-slate-900/50 backdrop-blur border rounded-xl p-4 cursor-pointer transition-all ${
-            teacherFilter === 'all' ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800/50 hover:border-slate-700/50'
+          className={`bg-white border-2 rounded-[1.5rem] p-5 cursor-pointer transition-all shadow-sm ${
+            teacherFilter === 'all' ? 'border-violet-400 bg-violet-50/50 shadow-violet-100' : 'border-slate-100 hover:border-violet-200'
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-500/20 rounded-lg">
-              <GraduationCap className="w-5 h-5 text-indigo-400" />
+            <div className="p-2.5 bg-violet-100 rounded-xl">
+              <GraduationCap className="w-5 h-5 text-violet-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{allTeachers.length}</p>
-              <p className="text-xs text-slate-400">Tổng giáo viên</p>
+              <p className="text-2xl font-black text-slate-900">{allTeachers.length}</p>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Tổng giáo viên</p>
             </div>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-          <AlertCircle className="w-5 h-5 text-red-400" />
-          <p className="text-sm text-red-400">{error}</p>
-          <button onClick={() => setError('')} className="ml-auto text-red-400 hover:text-red-300">
+        <div className="flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 rounded-2xl">
+          <AlertCircle className="w-5 h-5 text-rose-500" />
+          <p className="text-sm font-bold text-rose-600">{error}</p>
+          <button onClick={() => setError('')} className="ml-auto text-rose-400 hover:text-rose-600">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -250,7 +250,7 @@ const PendingTeachersTab = () => {
 
       {/* Refresh */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-base font-black text-slate-900">
           {teacherFilter === 'pending' ? 'Giáo viên chờ duyệt' :
            teacherFilter === 'verified' ? 'Giáo viên đã duyệt' :
            teacherFilter === 'rejected' ? 'Giáo viên bị từ chối' :
@@ -259,26 +259,26 @@ const PendingTeachersTab = () => {
         <button
           onClick={fetchTeachers}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-xl text-slate-400 hover:text-white transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-all font-black text-sm shadow-sm"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          <span className="text-sm">Làm mới</span>
+          <span>Làm mới</span>
         </button>
       </div>
 
       {/* Teachers list */}
       {loading ? (
-        <div className="bg-slate-900/50 border border-slate-800/50 rounded-2xl p-12 text-center">
-          <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400">Đang tải...</p>
+        <div className="bg-white border border-slate-100 rounded-[2rem] p-16 text-center shadow-sm">
+          <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-400 font-bold text-sm">Đang tải dữ liệu...</p>
         </div>
       ) : filteredTeachers.length === 0 ? (
-        <div className="bg-slate-900/50 border border-slate-800/50 rounded-2xl p-12 text-center">
-          <GraduationCap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <p className="text-slate-400">
-            {teacherFilter === 'pending'
-              ? 'Không có giáo viên nào đang chờ duyệt'
-              : 'Không có dữ liệu'}
+        <div className="bg-white border border-slate-100 rounded-[2rem] p-16 text-center shadow-sm">
+          <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <GraduationCap className="w-8 h-8 text-slate-300" />
+          </div>
+          <p className="text-slate-500 font-black">
+            {teacherFilter === 'pending' ? 'Không có giáo viên nào đang chờ duyệt' : 'Không có dữ liệu'}
           </p>
         </div>
       ) : (
@@ -286,56 +286,36 @@ const PendingTeachersTab = () => {
           {filteredTeachers.map((teacher) => (
             <div
               key={teacher._id}
-              className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5 hover:border-slate-700/50 transition-all"
+              className="bg-white border border-slate-100 rounded-[2rem] p-6 hover:border-indigo-200 hover:shadow-md transition-all shadow-sm"
             >
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 {/* Teacher info */}
                 <div className="flex items-start gap-4 flex-1">
-                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-orange-600 rounded-2xl flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-7 h-7 text-white" />
+                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
+                    <span className="text-white font-black text-lg">{(teacher.displayName || teacher.username || 'G')[0].toUpperCase()}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="text-white font-medium">{teacher.displayName || teacher.username}</h4>
-                      <span className={`px-2 py-0.5 rounded-lg text-xs font-medium ${
-                        teacher.teacherStatus === 'pending' ? 'bg-blue-500/20 text-blue-400' :
-                        teacher.teacherStatus === 'verified' ? 'bg-emerald-500/20 text-emerald-400' :
-                        'bg-red-500/20 text-red-400'
+                      <h4 className="font-black text-slate-900">{teacher.displayName || teacher.username}</h4>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                        teacher.teacherStatus === 'pending' ? 'bg-indigo-100 text-indigo-600' :
+                        teacher.teacherStatus === 'verified' ? 'bg-emerald-100 text-emerald-600' :
+                        'bg-rose-100 text-rose-600'
                       }`}>
                         {teacher.teacherStatus === 'pending' ? 'Chờ duyệt' :
                          teacher.teacherStatus === 'verified' ? 'Đã duyệt' : 'Từ chối'}
                       </span>
                     </div>
-
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-400">
-                      <span className="flex items-center gap-1">
-                        <Mail className="w-3.5 h-3.5" />
-                        {teacher.email}
-                      </span>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-bold text-slate-400">
+                      <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" />{teacher.email}</span>
                       {teacher.teacherProfile?.school && (
-                        <span className="flex items-center gap-1">
-                          <Building className="w-3.5 h-3.5" />
-                          {teacher.teacherProfile.school}
-                        </span>
+                        <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5" />{teacher.teacherProfile.school}</span>
                       )}
                       {teacher.teacherProfile?.subject && (
-                        <span className="flex items-center gap-1">
-                          <BookOpen className="w-3.5 h-3.5" />
-                          {teacher.teacherProfile.subject}
-                        </span>
-                      )}
-                      {teacher.teacherProfile?.teachingGrades?.length > 0 && (
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3.5 h-3.5" />
-                          Lớp {teacher.teacherProfile.teachingGrades.join(', ')}
-                        </span>
+                        <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />{teacher.teacherProfile.subject}</span>
                       )}
                     </div>
-
-                    <p className="text-xs text-slate-500 mt-1">
-                      Đăng ký: {formatDate(teacher.teacherProfile?.appliedAt || teacher.createdAt)}
-                      {teacher.teacherProfile?.verifiedAt && ` • Duyệt: ${formatDate(teacher.teacherProfile.verifiedAt)}`}
-                    </p>
+                    <p className="text-xs text-slate-300 mt-1">Đăng ký: {formatDate(teacher.teacherProfile?.appliedAt || teacher.createdAt)}</p>
                   </div>
                 </div>
 
@@ -345,19 +325,19 @@ const PendingTeachersTab = () => {
                     <button
                       onClick={() => handleVerify(teacher._id)}
                       disabled={actionLoading === teacher._id}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
                     >
                       {actionLoading === teacher._id ? (
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       ) : (
                         <CheckCircle className="w-4 h-4" />
                       )}
-                      Duyệt
+                      Phê duyệt
                     </button>
                     <button
                       onClick={() => setRejectModal(teacher._id)}
                       disabled={actionLoading === teacher._id}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-white border border-rose-200 text-rose-500 hover:bg-rose-50 rounded-xl font-black text-xs uppercase tracking-widest transition-all disabled:opacity-50"
                     >
                       <XCircle className="w-4 h-4" />
                       Từ chối
@@ -365,21 +345,19 @@ const PendingTeachersTab = () => {
                   </div>
                 )}
                 {teacher.teacherStatus === 'verified' && (
-                  <div className="flex items-center gap-2 text-emerald-400">
-                    <CheckCircle className="w-5 h-5" />
-                    <span className="text-sm font-medium">Đã xác minh</span>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl">
+                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    <span className="text-sm font-black text-emerald-600">Đã xác minh</span>
                   </div>
                 )}
                 {teacher.teacherStatus === 'rejected' && (
                   <div className="flex flex-col items-end gap-1">
-                    <div className="flex items-center gap-2 text-red-400">
-                      <XCircle className="w-5 h-5" />
-                      <span className="text-sm font-medium">Đã từ chối</span>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 rounded-xl">
+                      <XCircle className="w-5 h-5 text-rose-500" />
+                      <span className="text-sm font-black text-rose-600">Đã từ chối</span>
                     </div>
                     {teacher.teacherProfile?.rejectionReason && (
-                      <p className="text-xs text-slate-500 max-w-xs text-right">
-                        Lý do: {teacher.teacherProfile.rejectionReason}
-                      </p>
+                      <p className="text-xs text-slate-400 max-w-xs text-right mt-1">Lý do: {teacher.teacherProfile.rejectionReason}</p>
                     )}
                   </div>
                 )}

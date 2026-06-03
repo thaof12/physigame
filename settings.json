@@ -1,0 +1,11 @@
+{
+  "siteName": "Eureka",
+  "siteDescription": "Nền tảng học Vật lý tương tác",
+  "maintenanceMode": false,
+  "allowRegistration": true,
+  "emailNotifications": true,
+  "autoBackup": true,
+  "backupFrequency": "daily",
+  "maxUploadSize": 10,
+  "sessionTimeout": 2
+}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, User, Sparkles, ArrowRight } from 'lucide-react';
+import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, User, Sparkles, ArrowRight, ShieldAlert } from 'lucide-react';
 import EurekaPremiumLogo from '../components/ui/EurekaPremiumLogo';
 
 const Register = () => {
@@ -17,6 +17,22 @@ const Register = () => {
   const [selectedRole, setSelectedRole] = useState('student');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [allowRegistration, setAllowRegistration] = useState(true);
+
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('http://localhost:5002/api/settings');
+        const settings = await response.json();
+        if (settings.allowRegistration === false) {
+          setAllowRegistration(false);
+        }
+      } catch (e) {
+        console.error('Failed to fetch settings in Register', e);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -151,6 +167,18 @@ const Register = () => {
               <h2 className="text-3xl font-black text-slate-900 mb-2">Tạo tài khoản</h2>
               <p className="text-slate-500 font-medium">Thiết lập hồ sơ học thuật của bạn</p>
             </div>
+
+            {!allowRegistration ? (
+              <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-200">
+                <ShieldAlert className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <h3 className="text-lg font-black text-slate-800 mb-2">Đăng ký tạm đóng</h3>
+                <p className="text-slate-500 font-medium text-sm">Hệ thống đang tạm ngừng tiếp nhận tài khoản mới. Vui lòng quay lại sau.</p>
+                <div className="mt-8">
+                  <Link to="/" className="text-blue-600 font-bold hover:underline">Quay về Trang chủ</Link>
+                </div>
+              </div>
+            ) : (
+              <>
 
             {error && (
               <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-bold flex items-center gap-3 animate-shake">
@@ -302,6 +330,8 @@ const Register = () => {
                 Đăng nhập ngay
               </Link>
             </p>
+            </>
+            )}
             
           </div>
         </div>

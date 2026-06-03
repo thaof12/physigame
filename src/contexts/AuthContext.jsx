@@ -389,6 +389,69 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Inactivity Auto-Logout
+  useEffect(() => {
+    if (!user) return;
+    const isStudent = !['admin', 'super_admin', 'teacher'].includes(user.role);
+    if (!isStudent) return;
+
+    let timeoutId;
+    let activityTimer;
+    let timeoutMinutes = 30;
+
+    const setupTimer = async () => {
+      try {
+        const response = await fetch('http://localhost:5002/api/settings');
+        const settings = await response.json();
+        if (settings.sessionTimeout) {
+          timeoutMinutes = Number(settings.sessionTimeout);
+          console.log(`[Auth] Cập nhật thời gian hết hạn phiên từ máy chủ: ${timeoutMinutes} phút`);
+        }
+      } catch (e) {
+        console.error('Failed to fetch session timeout', e);
+      }
+      resetTimer();
+    };
+
+    const resetTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      console.log(`[Auth] Bắt đầu đếm ngược ${timeoutMinutes} phút không hoạt động...`);
+      timeoutId = setTimeout(async () => {
+         console.log(`[Auth] Đã quá ${timeoutMinutes} phút không hoạt động. Thực hiện đăng xuất!`);
+         try {
+           await logout();
+         } catch (err) {
+           console.error("Supabase logout error, forcing local logout", err);
+           localStorage.removeItem('token');
+           localStorage.removeItem('user');
+           setUser(null);
+         } finally {
+           alert('Phiên làm việc của bạn đã hết hạn do không có hoạt động. Vui lòng đăng nhập lại.');
+           window.location.href = '/login';
+         }
+      }, timeoutMinutes * 60 * 1000);
+    };
+
+    const handleActivity = () => {
+      if (activityTimer) return;
+      activityTimer = setTimeout(() => {
+        resetTimer();
+        activityTimer = null;
+      }, 10000); // 10s throttle
+    };
+
+    setupTimer();
+    window.addEventListener('mousedown', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (activityTimer) clearTimeout(activityTimer);
+      window.removeEventListener('mousedown', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+    };
+  }, [user ? 'logged_in' : 'logged_out']);
+
   const refreshUser = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();

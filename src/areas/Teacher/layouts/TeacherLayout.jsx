@@ -123,7 +123,7 @@ const TeacherLayout = () => {
 
       {/* Sidebar */}
       <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50
+        fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 z-50
         ${sidebarCollapsed ? 'w-24' : 'w-72'}
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         bg-white border-r border-[#85e4fb]/30
@@ -139,13 +139,6 @@ const TeacherLayout = () => {
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
           )}
-
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full bg-[#e4f2f0] text-[#2099e9] hover:bg-[#2099e9] hover:text-white transition-all shadow-sm translate-x-10"
-          >
-            {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
 
           {/* Mobile close button */}
           <button
@@ -170,7 +163,7 @@ const TeacherLayout = () => {
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 px-4 py-2 space-y-1.5 overflow-hidden">
           {menuItems.map((item) => {
             const IconComponent = item.icon;
             const active = isActive(item.path);

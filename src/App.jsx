@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Wrench } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { GameProgressProvider } from './contexts/GameProgressContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -103,18 +105,69 @@ const ProtectedRoute = ({ children }) => {
 
 const AppContent = () => {
   const location = useLocation();
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('http://localhost:5002/api/settings');
+        const settings = await response.json();
+        
+        // Cập nhật tiêu đề và mô tả website
+        if (settings.siteName) {
+          document.title = settings.siteName;
+        }
+        if (settings.siteDescription) {
+          let metaDesc = document.querySelector('meta[name="description"]');
+          if (!metaDesc) {
+            metaDesc = document.createElement('meta');
+            metaDesc.name = "description";
+            document.head.appendChild(metaDesc);
+          }
+          metaDesc.content = settings.siteDescription;
+        }
+
+        if (settings.maintenanceMode) {
+          setMaintenanceMode(true);
+        }
+      } catch (e) {
+        console.error('Failed to fetch settings in App', e);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  if (maintenanceMode && !isAdminRoute) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center font-sans">
+        <div className="w-24 h-24 mb-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-blue-500/20">
+          <Wrench className="w-12 h-12" />
+        </div>
+        <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">Hệ thống đang bảo trì</h1>
+        <p className="text-slate-500 text-lg font-medium max-w-md mx-auto mb-8 leading-relaxed">
+          Chúng tôi đang tiến hành một số thay đổi nhằm nâng cấp hệ thống để mang lại trải nghiệm sử dụng tốt hơn. Xin lỗi vì sự bất tiện này.
+        </p>
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-white border border-slate-200 rounded-full shadow-sm text-sm font-bold text-slate-500 uppercase tracking-widest">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          Đang cập nhật...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+
         {/* Core Pages with Global Layout */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<PhysicsHome />} />
           <Route path="/home" element={<Home />} />
-          
+
           {/* Protected Routes */}
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/placement-test/:programId?" element={<ProtectedRoute><PlacementTest /></ProtectedRoute>} />
@@ -131,25 +184,25 @@ const AppContent = () => {
           {/* Physics Routes */}
           <Route path="/physics-class/:classId" element={<ProtectedRoute><PhysicsClassDashboard /></ProtectedRoute>} />
           <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<ProtectedRoute><PhysicsLesson /></ProtectedRoute>} />
-          
+
           {/* Physics Tools Hub */}
           <Route path="/physics-tools" element={<ProtectedRoute><PhysicsToolsHub /></ProtectedRoute>} />
           <Route path="/physics-tools/calculator" element={<ProtectedRoute><PhysicsCalculator /></ProtectedRoute>} />
           <Route path="/physics-tools/constants" element={<ProtectedRoute><ConstantsReference /></ProtectedRoute>} />
           <Route path="/physics-tools/converter" element={<ProtectedRoute><UnitConverter /></ProtectedRoute>} />
-          
+
           {/* Interactive Lecture Hub Routes */}
           <Route path="/interactive-lectures" element={<ProtectedRoute><InteractiveLectureHub /></ProtectedRoute>} />
           <Route path="/interactive-lectures/:subject" element={<ProtectedRoute><LectureGradeSelector /></ProtectedRoute>} />
           <Route path="/interactive-lectures/:subject/:grade" element={<ProtectedRoute><LectureClassSelector /></ProtectedRoute>} />
           <Route path="/interactive-lectures/:subject/:grade/:lectureId" element={<ProtectedRoute><LectureViewer /></ProtectedRoute>} />
-          
+
           {/* Legacy Physics Calculator - redirect to new hub */}
           <Route path="/physics-calculator" element={<PhysicsToolsHub />} />
-          
+
           {/* Virtual Lab - Phòng thí nghiệm ảo */}
           <Route path="/vatly/virtual-lab" element={<ProtectedRoute><VirtualLabHome /></ProtectedRoute>} />
-          
+
           <Route path="/physics-games" element={<AdvancedPhysicsChallenge />} />
           <Route path="/advanced-physics-challenge" element={<AdvancedPhysicsChallenge />} />
 
