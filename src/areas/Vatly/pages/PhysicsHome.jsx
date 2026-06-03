@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ChevronRight, Swords, FlaskConical, BookOpen,
   CircuitBoard, Target, Shield, TrendingUp, Microscope, Compass, CheckCircle2, Play, Map,
-  Sparkles, GraduationCap, School, Users, Magnet, Zap, Activity
+  Sparkles, GraduationCap, School, Users, Magnet, Zap, Activity, Orbit, Cpu
 } from 'lucide-react';
+import SpacetimeGrid from '../../../components/animations/SpacetimeGrid';
 
 // Feature Images
 import utilLab from '../../../assets/images/feature_lab.png';
@@ -135,13 +136,6 @@ const PhysicsHome = () => {
 
         <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center text-center">
           
-          {/* Scientific Badge */}
-          <div className="mb-12">
-             <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-slate-900 text-white shadow-2xl">
-                <Sparkles size={14} className="text-indigo-400" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Next Gen Physics Lab</span>
-             </div>
-          </div>
 
           <h1 className="font-premium-serif text-[15vw] sm:text-[12rem] font-bold text-slate-900 italic leading-none tracking-tighter mb-4 select-none">
             Eureka
@@ -261,42 +255,51 @@ const PhysicsHome = () => {
         </div>
       </section>
 
-      {/* Engineering Precision Section */}
-      <section className="py-32 bg-[#F8FAFC] px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-           <div className="space-y-12">
-              <div className="flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-lg"><Zap size={20} /></div>
-                 <div className="physics-annotation text-indigo-600 tracking-[0.3em] uppercase text-[10px]">Advanced Dynamics</div>
-              </div>
-              <h2 className="text-6xl font-black text-slate-900 tracking-tighter">Kỹ thuật <br /><span className="text-slate-300 italic font-premium-serif">chính xác tuyệt đối.</span></h2>
-              <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-lg">Chúng tôi xây dựng nền tảng dựa trên những tiêu chuẩn tính toán vật lý khắt khe nhất, đảm bảo tính đúng đắn của mọi thí nghiệm.</p>
-              <div className="grid grid-cols-2 gap-10">
-                 <div><div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2">Calculation Error</div><div className="text-3xl font-black text-emerald-500">0.001%</div></div>
-                 <div><div className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-2">Physics Refresh Rate</div><div className="text-3xl font-black text-indigo-600">120Hz</div></div>
-              </div>
-           </div>
-           <div className="bg-white rounded-[3rem] p-12 shadow-2xl border border-slate-50 relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-slate-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-              <div className="relative space-y-10">
-                 <div className="flex justify-between items-center">
-                    <div><h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Physics Core Engine</h4><div className="physics-annotation text-indigo-500">BUILD V2.4.0 ALPHA</div></div>
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400"><Activity size={20} /></div>
-                 </div>
-                 <div className="aspect-video bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#4338ca10_0%,transparent_70%)] animate-pulse" />
-                    <div className="relative flex flex-col items-center gap-6">
-                       <div className="w-20 h-20 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin flex items-center justify-center"><Magnet className="text-indigo-600" /></div>
-                       <div className="text-center">
-                          <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Magnetic Flux</div>
-                          <div className="text-4xl font-black text-slate-900 tracking-tighter">9.81 m/s²</div>
-                       </div>
-                    </div>
-                    <div className="absolute top-4 left-4 physics-annotation text-slate-400 opacity-50">COORDINATE: X=42.0, Y=88.2</div>
-                 </div>
-              </div>
-           </div>
+      {/* Spacetime Grid Feature Section */}
+      <section className="relative z-10 bg-slate-950 overflow-hidden min-h-[700px] flex items-center py-24">
+        {/* Interactive Spacetime Canvas */}
+        <SpacetimeGrid />
+        
+        {/* Foreground Content */}
+        <div className="container mx-auto px-4 relative z-20 pointer-events-none">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+              Bẻ cong <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">
+                mọi giới hạn
+              </span>
+            </h2>
+            <p className="text-xl md:text-2xl text-indigo-100/70 mb-16 font-light max-w-2xl mx-auto drop-shadow-md">
+              Không gian học tập nơi kiến thức không còn là những dòng chữ khô khan. Tương tác với môi trường, kiểm chứng định luật và khai phá tư duy đa chiều.
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-8 text-center pointer-events-none">
+               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                 <Orbit className="w-10 h-10 text-indigo-400 mx-auto mb-4" />
+                 <div className="text-2xl font-black text-white mb-2">Mô phỏng 3D</div>
+                 <div className="text-sm font-medium text-indigo-200/60">Tương tác vật lý thực tế</div>
+               </div>
+               
+               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transform md:-translate-y-4">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                 <Cpu className="w-10 h-10 text-purple-400 mx-auto mb-4" />
+                 <div className="text-2xl font-black text-white mb-2">Trợ lý AI</div>
+                 <div className="text-sm font-medium text-purple-200/60">Hỗ trợ giải đáp 24/7</div>
+               </div>
+
+               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                 <Zap className="w-10 h-10 text-cyan-400 mx-auto mb-4" />
+                 <div className="text-2xl font-black text-white mb-2">120Hz Core</div>
+                 <div className="text-sm font-medium text-cyan-200/60">Tính toán chính xác tuyệt đối</div>
+               </div>
+            </div>
+          </div>
         </div>
+        
+        {/* Gradient transition to white/slate-900 at the bottom to flow smoothly to CTA */}
+        <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-b from-transparent to-white pointer-events-none"></div>
       </section>
 
       {/* Final Call to Action */}

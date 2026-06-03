@@ -331,7 +331,7 @@ router.get('/profile/:userId', async (req, res) => {
 // Update user profile
 router.put('/profile/:userId', async (req, res) => {
   try {
-    const { displayName, bio, school, grade } = req.body;
+    const { displayName, bio, school, grade, avatar } = req.body;
     const user = await User.findByAnyId(req.params.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -344,6 +344,7 @@ router.put('/profile/:userId', async (req, res) => {
     if (bio !== undefined) profile.bio = bio;
     if (school !== undefined) profile.school = school;
     if (grade !== undefined) profile.grade = grade;
+    if (avatar !== undefined) profile.avatar = avatar;
     updates.profile = profile;
 
     const updated = await User.update(user.id, updates);
@@ -400,7 +401,23 @@ router.post('/submit-physics-lesson', async (req, res) => {
     const xpGained = score * 10;
     const newXp = (user.xp || 0) + xpGained;
 
-    await User.update(user.id, { programs, xp: newXp });
+    if (completed) {
+      User.addRecentActivity(user, {
+        type: 'lesson',
+        title: 'Hoàn thành bài học',
+        detail: `Bài học ${lessonId} (Chương ${chapterId}) - Lớp ${classId}`,
+        xp: xpGained
+      });
+    } else {
+      User.addRecentActivity(user, {
+        type: 'lesson',
+        title: 'Khám phá bài học',
+        detail: `Bài học ${lessonId} (Chương ${chapterId}) - Lớp ${classId}`,
+        xp: xpGained
+      });
+    }
+
+    await User.update(user.id, { programs, xp: newXp, profile: user.profile });
 
     res.json({
       success: true, message: 'Progress saved successfully',

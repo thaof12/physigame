@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, Lightbulb, ShieldCheck, ArrowRight } from 'lucide-react';
-import EurekaPremiumLogo from '../components/ui/EurekaPremiumLogo';
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -59,22 +59,22 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex font-sans bg-[#e4f2f0] items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+    <div className="min-h-screen flex font-sans bg-gray-100 items-center justify-center p-4 sm:p-8 relative overflow-hidden">
 
       {/* Background Decor */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#85e4fb]/20 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#2099e9]/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-black/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-black/5 blur-[120px] rounded-full pointer-events-none"></div>
       <div className="absolute inset-0 graph-grid pointer-events-none z-0 opacity-10"></div>
 
       {/* Container */}
       <div className="w-full max-w-6xl rounded-[2.5rem] bg-white border border-white/50 overflow-hidden flex flex-col md:flex-row shadow-[0_25px_80px_-15px_rgba(32,153,233,0.15)] relative z-10 transition-all duration-500">
 
         {/* LEFT SIDE: Visuals & Value Proposition */}
-        <div className="hidden md:flex flex-col md:w-5/12 lg:w-1/2 relative bg-gradient-to-br from-[#2099e9] to-[#274dad] overflow-hidden p-10 lg:p-14">
+        <div className="hidden md:flex flex-col md:w-5/12 lg:w-1/2 relative bg-slate-950 overflow-hidden p-10 lg:p-14">
 
           {/* Decorative shapes */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#85e4fb]/10 rounded-full -ml-10 -mb-10 blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-10 -mb-10 blur-2xl"></div>
 
           <Link to="/" className="relative z-10 flex items-center gap-2 mb-16 group w-fit">
             <div className="p-2 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 group-hover:bg-white/20 transition-all">
@@ -84,13 +84,13 @@ const Login = () => {
           </Link>
 
           <div className="relative z-10 flex flex-col h-full justify-center">
-            <div className="mb-10 p-4 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 w-fit">
-              <EurekaPremiumLogo textColor="white" className="h-12" />
+            <div className="mb-10">
+              <span className="font-premium-serif text-4xl font-bold text-white italic tracking-tight">Eureka</span>
             </div>
 
             <h1 className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight tracking-tight">
               Khám Phá <br />
-              <span className="text-[#85e4fb]">
+              <span className="text-gray-300">
                 Bí Mật Vũ Trụ
               </span>
             </h1>
@@ -105,11 +105,11 @@ const Login = () => {
                 { title: 'Chứng nhận uy tín', desc: 'Đánh giá năng lực theo chuẩn giáo dục hiện đại.' }
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group">
-                  <div className="mt-1 bg-[#85e4fb] p-1.5 rounded-lg shrink-0 shadow-[0_0_15px_rgba(133,228,251,0.5)]">
-                    <CheckCircle2 className="w-4 h-4 text-[#274dad]" />
+                  <div className="mt-1 bg-white/10 p-1.5 rounded-lg shrink-0 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                    <CheckCircle2 className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-white font-bold text-base group-hover:text-[#85e4fb] transition-colors">{item.title}</h3>
+                    <h3 className="text-white font-bold text-base group-hover:text-gray-300 transition-colors">{item.title}</h3>
                     <p className="text-white/50 text-sm mt-0.5">{item.desc}</p>
                   </div>
                 </div>
@@ -125,11 +125,11 @@ const Login = () => {
 
             <div className="text-center mb-10">
               <div className="md:hidden flex justify-center mb-6">
-                <EurekaPremiumLogo className="h-10" />
+                <span className="font-premium-serif text-3xl font-bold text-slate-900 italic tracking-tight">Eureka</span>
               </div>
 
-              <h2 className="text-3xl font-black text-[#274dad] mb-3">Chào mừng trở lại</h2>
-              <p className="text-slate-400 font-medium">Bắt đầu hành trình khám phá mới hôm nay</p>
+              <h2 className="text-3xl font-black text-slate-900 mb-3">Chào mừng trở lại</h2>
+              <p className="text-slate-500 font-medium">Bắt đầu hành trình khám phá mới hôm nay</p>
             </div>
 
             {/* Error Message */}
@@ -144,10 +144,10 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Input */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#274dad] ml-1">Email Học Viện</label>
+                <label className="text-sm font-bold text-slate-800 ml-1">Email Học Viện</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-300 group-focus-within:text-[#2099e9] transition-colors" />
+                    <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-black transition-colors" />
                   </div>
                   <input
                     type="email"
@@ -155,7 +155,7 @@ const Login = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#e4f2f0]/30 border-2 border-transparent text-[#274dad] placeholder-slate-400 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:bg-white focus:border-[#2099e9] focus:ring-4 focus:ring-[#2099e9]/5 transition-all font-bold"
+                    className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold"
                     placeholder="name@university.edu"
                   />
                 </div>
@@ -164,12 +164,12 @@ const Login = () => {
               {/* Password Input */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center ml-1">
-                  <label className="text-sm font-bold text-[#274dad]">Mật mã Bảo mật</label>
-                  <a href="#" className="text-xs font-bold text-[#2099e9] hover:text-[#274dad] transition-colors">Quên?</a>
+                  <label className="text-sm font-bold text-slate-800">Mật mã Bảo mật</label>
+                  <a href="#" className="text-xs font-bold text-gray-500 hover:text-black transition-colors">Quên?</a>
                 </div>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-300 group-focus-within:text-[#2099e9] transition-colors" />
+                    <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-black transition-colors" />
                   </div>
                   <input
                     type="password"
@@ -177,7 +177,7 @@ const Login = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#e4f2f0]/30 border-2 border-transparent text-[#274dad] placeholder-slate-400 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:bg-white focus:border-[#2099e9] focus:ring-4 focus:ring-[#2099e9]/5 transition-all font-bold"
+                    className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold"
                     placeholder="••••••••••••"
                   />
                 </div>
@@ -185,18 +185,18 @@ const Login = () => {
 
               <div className="flex items-center justify-between py-1">
                 <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className="relative flex items-center justify-center w-6 h-6 border-2 border-slate-200 rounded-lg bg-white group-hover:border-[#2099e9] transition-all peer-checked:bg-[#2099e9]">
+                  <div className="relative flex items-center justify-center w-6 h-6 border-2 border-slate-300 rounded-lg bg-white group-hover:border-black transition-all peer-checked:border-black">
                     <input type="checkbox" className="peer opacity-0 absolute inset-0 cursor-pointer" />
-                    <div className="w-2.5 h-2.5 bg-[#2099e9] rounded-sm opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                    <div className="w-2.5 h-2.5 bg-black rounded-sm opacity-0 peer-checked:opacity-100 transition-opacity"></div>
                   </div>
-                  <span className="text-sm font-bold text-slate-500 group-hover:text-[#274dad] transition-colors">Duy trì đăng nhập</span>
+                  <span className="text-sm font-bold text-slate-500 group-hover:text-black transition-colors">Duy trì đăng nhập</span>
                 </label>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full relative group overflow-hidden bg-[#2099e9] text-white rounded-2xl py-4 font-black text-lg transition-all hover:bg-[#274dad] hover:shadow-[0_15px_30px_rgba(32,153,233,0.3)] active:scale-[0.98] mt-4 overflow-hidden"
+                className="w-full relative group overflow-hidden bg-black text-white rounded-2xl py-4 font-black text-lg transition-all hover:-translate-y-0.5 hover:bg-slate-800 active:scale-95 shadow-xl hover:shadow-2xl mt-4"
               >
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 <span className="relative flex justify-center items-center gap-3">
@@ -219,15 +219,15 @@ const Login = () => {
               type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="mt-8 w-full flex items-center justify-center gap-4 py-4 bg-white text-[#274dad] font-bold rounded-2xl hover:bg-[#e4f2f0]/30 border-2 border-slate-100 hover:border-[#2099e9]/30 transition-all active:scale-[0.98] shadow-sm"
+              className="mt-8 w-full flex items-center justify-center gap-4 py-4 bg-white text-black font-bold rounded-2xl hover:bg-gray-50 border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-[0.98] shadow-sm"
             >
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
               <span>Đăng nhập qua Google (SSO)</span>
             </button>
 
-            <p className="mt-10 text-center text-slate-400 font-bold">
+            <p className="mt-10 text-center text-slate-500 font-bold">
               Bạn là lính mới?{' '}
-              <Link to="/register" className="text-[#2099e9] hover:text-[#274dad] underline underline-offset-4 decoration-2">
+              <Link to="/register" className="text-black hover:text-gray-600 underline underline-offset-4 decoration-2">
                 Gia nhập ngay
               </Link>
             </p>

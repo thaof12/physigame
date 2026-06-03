@@ -171,16 +171,19 @@ const GlobalHeader = () => {
                 <Link to="/profile"
                   className="group flex items-center gap-2 sm:gap-3 bg-white hover:bg-[#FFFFFF] rounded-2xl p-1 pr-2 sm:pr-4 cursor-pointer transition-all border border-slate-100 shadow-sm hover:shadow-md hover:border-[#274dad]/20"
                 >
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-[#274dad] to-[#4A3728] rounded-xl flex items-center justify-center shadow-inner">
-                    <span className="text-white font-bold text-xs sm:text-sm">
-                      {user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
+                  {user?.profile?.avatar ? (
+                    <img src={user.profile.avatar} alt="Avatar" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover shadow-inner border border-slate-200" />
+                  ) : (
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-[#274dad] to-[#4A3728] rounded-xl flex items-center justify-center shadow-inner">
+                      <span className="text-white font-bold text-xs sm:text-sm">
+                        {user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
                   <div className="hidden sm:flex flex-col">
-                    <span className="text-xs font-black text-slate-700 leading-tight">
+                    <span className="text-xs font-black text-slate-700 leading-tight mt-1">
                       {user?.displayName || user?.email?.split('@')[0]}
                     </span>
-                    <span className="text-[10px] text-[#274dad] font-black uppercase tracking-[0.15em] leading-none mt-0.5">Explorer</span>
                   </div>
                 </Link>
                 <button onClick={handleLogout} className="p-2 sm:p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">

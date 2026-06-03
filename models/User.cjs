@@ -264,6 +264,28 @@ const User = {
 
   getAllPhysicsGameProgress(user) {
     return user.physics_game_progress || {};
+  },
+
+  addRecentActivity(user, activityData) {
+    if (!user) return user;
+    
+    const profile = user.profile || {};
+    let recentActivity = profile.recentActivity || [];
+    
+    // Add new activity at the beginning
+    recentActivity.unshift({
+      ...activityData,
+      time: new Date().toISOString()
+    });
+    
+    // Limit to 50 items
+    if (recentActivity.length > 50) {
+      recentActivity = recentActivity.slice(0, 50);
+    }
+    
+    profile.recentActivity = recentActivity;
+    user.profile = profile;
+    return user;
   }
 };
 

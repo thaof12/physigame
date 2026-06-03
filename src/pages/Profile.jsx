@@ -1,16 +1,17 @@
 import { useAuth } from '../contexts/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../config/api';
 import { 
   Trophy, Star, Flame, Target, Zap, Clock, 
   BookOpen, Award, Medal, Crown, Shield, 
   TrendingUp, Calendar, Edit3, Camera, ChevronRight,
-  Swords, Users, CheckCircle, Lock, Hexagon
+  Swords, Users, CheckCircle, Lock, Hexagon, LogOut
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, logout, setUser } = useAuth();
+  const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [questData, setQuestData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,6 +24,7 @@ const Profile = () => {
     school: '',
     grade: ''
   });
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -59,7 +61,7 @@ const Profile = () => {
     };
 
     fetchUserProfile();
-  }, [user]);
+  }, [user?.uid]);
 
   const handleSaveProfile = async () => {
     try {
@@ -80,26 +82,126 @@ const Profile = () => {
     }
   };
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn một file hình ảnh hợp lệ.');
+      return;
+    }
+
+    try {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      img.onload = async () => {
+        URL.revokeObjectURL(objectUrl);
+        
+        // Resize parameters
+        const MAX_WIDTH = 200;
+        const MAX_HEIGHT = 200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress to JPEG format with 0.8 quality
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+        try {
+          await api.put(`/users/profile/${user.uid}`, { avatar: compressedBase64 });
+          
+          const updatedProfile = { avatar: compressedBase64 };
+          
+          setUserData(prev => ({
+            ...prev,
+            profile: {
+              ...prev?.profile,
+              ...updatedProfile
+            }
+          }));
+          
+          // Cập nhật AuthContext để thay đổi hiển thị trên header ngay lập tức
+          setUser(prev => ({
+            ...prev,
+            profile: {
+              ...prev?.profile,
+              ...updatedProfile
+            }
+          }));
+        } catch (apiErr) {
+          console.error('Error uploading avatar:', apiErr);
+          alert('Đã có lỗi xảy ra khi lưu ảnh lên máy chủ. Vui lòng thử lại sau.');
+        }
+      };
+
+      img.src = objectUrl;
+    } catch (err) {
+      console.error('Error preparing avatar:', err);
+      alert('Đã có lỗi xảy ra khi xử lý ảnh. Vui lòng chọn ảnh khác.');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+  };
+
+  const aggregateProgress = (programs) => {
+    let completedLessonIds = [];
+    let totalPoints = 0;
+    if (Array.isArray(programs)) {
+      programs.forEach(p => {
+        if (p.progress) {
+          if (Array.isArray(p.progress.completedLessons)) {
+             completedLessonIds = [...completedLessonIds, ...p.progress.completedLessons];
+          }
+          totalPoints += p.progress.totalScore || 0;
+        }
+      });
+    }
+    return { completedLessonIds, totalPoints };
+  };
+
+  const { completedLessonIds, totalPoints } = aggregateProgress(userData?.programs);
+
   const stats = userData ? {
     totalLessons: 36,
-    completedLessons: userData.progress?.completedLessons?.length || 0,
-    totalPoints: userData.progress?.totalPoints || 0,
-    currentStreak: questData?.loginStreak?.current || userData.progress?.currentStreak || 0,
-    longestStreak: questData?.loginStreak?.longest || userData.progress?.longestStreak || 0,
-    averageScore: userData.progress?.completedLessons?.length > 0
-      ? Math.round(
-          userData.progress.completedLessons.reduce((sum, lesson) => sum + (lesson.score || 0), 0) /
-          userData.progress.completedLessons.length
-        ) : 0,
-    totalXP: userData?.xp || 0,
-    level: userData?.level || 1,
-    pkWins: userData?.pkStats?.wins || 0,
-    pkLosses: userData?.pkStats?.losses || 0,
-    pkRating: userData?.pkStats?.rating || 1000,
+    completedLessons: completedLessonIds.length,
+    totalPoints: totalPoints,
+    currentStreak: questData?.loginStreak?.current || userData.profile?.currentStreak || 0,
+    longestStreak: questData?.loginStreak?.longest || userData.profile?.longestStreak || 0,
+    averageScore: completedLessonIds.length > 0 ? Math.round(totalPoints / completedLessonIds.length) : 0,
+    totalXP: userData.xp || 0,
+    level: userData.level || 1,
+    pkWins: userData.profile?.pkStats?.wins || 0,
+    pkLosses: userData.profile?.pkStats?.losses || 0,
+    pkRating: userData.profile?.pkStats?.rating || 1000,
     achievementsUnlocked: questData?.achievements?.filter(a => a.unlockedAt)?.length || 0,
     totalAchievements: questData?.achievements?.length || 12,
   } : {
-    totalLessons: 0, completedLessons: 0, totalPoints: 0, currentStreak: 0, longestStreak: 0,
+    totalLessons: 36, completedLessons: 0, totalPoints: 0, currentStreak: 0, longestStreak: 0,
     averageScore: 0, totalXP: 0, level: 1, pkWins: 0, pkLosses: 0, pkRating: 1000,
     achievementsUnlocked: 0, totalAchievements: 12
   };
@@ -121,15 +223,25 @@ const Profile = () => {
 
   const rank = getRank(stats.level);
 
-  function calculateProgressByLevel(completedLessons) {
+  function calculateProgressByLevel(completedLessonIdsList) {
     const levels = [
       { name: 'Cấp độ Cơ bản', chapters: [1, 2, 3, 4], color: 'from-green-400 to-emerald-500', total: 12 },
       { name: 'Cấp độ Trung cấp', chapters: [5, 6, 7, 8], color: 'from-blue-400 to-cyan-500', total: 12 },
       { name: 'Cấp độ Nâng cao', chapters: [9, 10, 11, 12], color: 'from-purple-400 to-indigo-500', total: 12 },
     ];
 
+    // Phân bổ ngẫu nhiên dựa trên số lượng hoàn thành thực tế nếu lessonId không chứa chapter
+    let remainingCompleted = completedLessonIdsList.length;
+
     return levels.map(level => {
-      const completed = completedLessons.filter(lesson => level.chapters.includes(lesson.chapterId)).length;
+      let completed = 0;
+      if (remainingCompleted > level.total) {
+        completed = level.total;
+        remainingCompleted -= level.total;
+      } else {
+        completed = remainingCompleted;
+        remainingCompleted = 0;
+      }
       const percentage = level.total > 0 ? Math.round((completed / level.total) * 100) : 0;
       return { ...level, completed, percentage };
     });
@@ -144,16 +256,25 @@ const Profile = () => {
     { id: 'streak_14', title: 'Kiên Trì', icon: <TrendingUp/>, description: '14 ngày học liên tục', unlockedAt: stats.currentStreak >= 14 ? new Date() : null },
   ];
 
-  const recentActivity = userData?.recentActivity || [
-    { type: 'lesson', title: 'Vượt qua bài kiểm tra', detail: 'Chương 2: Động lực học', time: '2 giờ trước', xp: 50 },
-    { type: 'achievement', title: 'Mở khóa Huy Chương', detail: 'Chiến Binh Không Gian', time: '1 ngày trước', xp: 100 },
-    { type: 'pk', title: 'Chiến thắng Đấu Trường PK', detail: 'vs. Đối thủ ngẫu nhiên', time: '2 ngày trước', xp: 30 },
-  ];
+  const getRelativeTime = (isoString) => {
+    if (!isoString) return 'Vừa xong';
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return 'Vừa xong';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
+    return `${Math.floor(diffInSeconds / 2592000)} tháng trước`;
+  };
+
+  const recentActivity = userData?.profile?.recentActivity || [];
 
   if (loading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-[#020617]">
-         <div className="w-16 h-16 border-t-2 border-cyan-500 rounded-full animate-spin"></div>
+      <div className="h-screen w-full flex items-center justify-center bg-white">
+         <div className="w-16 h-16 border-t-4 border-[#274dad] border-r-4 border-r-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -168,7 +289,7 @@ const Profile = () => {
       <div className="fixed top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#274dad]/5" />
       <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#44b5d7]/5" />
 
-      <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6 py-12 lg:py-16">
+      <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6 pt-24 lg:pt-32 pb-12 lg:pb-16">
         
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           
@@ -194,7 +315,15 @@ const Profile = () => {
                     )}
                   </div>
                 </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleAvatarChange} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
                 <button 
+                  onClick={() => fileInputRef.current?.click()}
                   className="absolute bottom-1 right-1 w-9 h-9 bg-white rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#274dad] shadow-lg hover:bg-[#FFFFFF] transition-colors"
                   title="Thay đổi ảnh đại diện"
                 >
@@ -254,8 +383,11 @@ const Profile = () => {
                 </button>
               ))}
               <div className="mt-2 pt-2 border-t border-[#F1F5F9]">
-                <button className="w-full flex items-center gap-4 px-5 py-4 rounded-xl font-black text-sm text-rose-500 hover:bg-rose-50 transition-all">
-                  <CheckCircle className="w-5 h-5" />
+                <button 
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-4 px-5 py-4 rounded-xl font-black text-sm text-rose-500 hover:bg-rose-50 transition-all"
+                >
+                  <LogOut className="w-5 h-5" />
                   <span>Đăng xuất</span>
                 </button>
               </div>
@@ -430,7 +562,7 @@ const Profile = () => {
                     </div>
                     
                     <div className="space-y-10">
-                      {calculateProgressByLevel(userData?.progress?.completedLessons || []).map((lvl, idx) => (
+                      {calculateProgressByLevel(completedLessonIds).map((lvl, idx) => (
                         <div key={idx} className="relative">
                           <div className="flex justify-between items-end mb-3">
                             <span className="font-black text-sm text-[#1E293B] uppercase tracking-tight">{lvl.name}</span>
@@ -506,7 +638,7 @@ const Profile = () => {
                         </div>
                         <div className="sm:text-right flex sm:flex-col justify-between items-center sm:items-end gap-1">
                           <span className="text-emerald-600 font-black text-xl">+{act.xp} XP</span>
-                          <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{act.time}</span>
+                          <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{getRelativeTime(act.time)}</span>
                         </div>
                       </div>
                     )) : (

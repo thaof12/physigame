@@ -1,8 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Atom, Activity, Magnet, Orbit, Cpu, Zap } from 'lucide-react';
 import Button from '../components/ui/Button';
 import SolarSystemBackground from '../components/animations/SolarSystemBackground';
 import AuthorSignature from '../components/ui/AuthorSignature';
+import SpacetimeGrid from '../components/animations/SpacetimeGrid';
 
 const ProgramSelection = () => {
   const { user } = useAuth();
@@ -160,65 +162,88 @@ const ProgramSelection = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 border-t border-white/10 bg-black/40 backdrop-blur-sm relative z-10">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-400 to-emerald-300">
-            Tại sao chọn nền tảng của chúng tôi?
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-blue-500/20 border border-blue-500/30 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl shadow-[0_0_15px_rgba(59,130,246,0.3)] group-hover:scale-110 group-hover:bg-blue-500/30 transition-all duration-500">
-                🎯
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-blue-100 tracking-wide">Học theo cấp độ</h3>
-              <p className="text-blue-200/60 font-light px-4">
-                Nội dung được phân chia theo từng lớp học, phù hợp với trình độ của bạn
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-purple-500/20 border border-purple-500/30 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl shadow-[0_0_15px_rgba(168,85,247,0.3)] group-hover:scale-110 group-hover:bg-purple-500/30 transition-all duration-500">
-                📊
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-purple-100 tracking-wide">Theo dõi tiến độ</h3>
-              <p className="text-purple-200/60 font-light px-4">
-                Hệ thống đánh giá và thống kê giúp bạn nắm rõ quá trình học tập
-              </p>
-            </div>
-            <div className="text-center group">
-              <div className="w-20 h-20 bg-emerald-500/20 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl shadow-[0_0_15px_rgba(16,185,129,0.3)] group-hover:scale-110 group-hover:bg-emerald-500/30 transition-all duration-500">
-                🏆
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-emerald-100 tracking-wide">Gamification</h3>
-              <p className="text-emerald-200/60 font-light px-4">
-                Hệ thống điểm, sao và thành tích giúp việc học trở nên thú vị hơn
-              </p>
+      {/* Spacetime Grid Feature Section */}
+      <section className="relative z-10 bg-slate-950 overflow-hidden min-h-[700px] flex items-center py-24">
+        {/* Interactive Spacetime Canvas */}
+        <SpacetimeGrid />
+        
+        {/* Foreground Content */}
+        <div className="container mx-auto px-4 relative z-20 pointer-events-none">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+              Bẻ cong <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">
+                mọi giới hạn
+              </span>
+            </h2>
+            <p className="text-xl md:text-2xl text-indigo-100/70 mb-16 font-light max-w-2xl mx-auto drop-shadow-md">
+              Không gian học tập nơi kiến thức không còn là những dòng chữ khô khan. Tương tác với môi trường, kiểm chứng định luật và khai phá tư duy đa chiều.
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-8 text-center pointer-events-none">
+               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                 <Orbit className="w-10 h-10 text-indigo-400 mx-auto mb-4" />
+                 <div className="text-2xl font-black text-white mb-2">Mô phỏng 3D</div>
+                 <div className="text-sm font-medium text-indigo-200/60">Tương tác vật lý thực tế</div>
+               </div>
+               
+               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transform md:-translate-y-4">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                 <Cpu className="w-10 h-10 text-purple-400 mx-auto mb-4" />
+                 <div className="text-2xl font-black text-white mb-2">Trợ lý AI</div>
+                 <div className="text-sm font-medium text-purple-200/60">Hỗ trợ giải đáp 24/7</div>
+               </div>
+
+               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                 <Zap className="w-10 h-10 text-cyan-400 mx-auto mb-4" />
+                 <div className="text-2xl font-black text-white mb-2">120Hz Core</div>
+                 <div className="text-sm font-medium text-cyan-200/60">Tính toán chính xác tuyệt đối</div>
+               </div>
             </div>
           </div>
         </div>
+        
+        {/* Gradient transition to white at the bottom so it flows smoothly to the CTA */}
+        <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-b from-transparent to-white pointer-events-none"></div>
       </section>
 
-      {/* CTA for login/register if not logged in */}
+      {/* CTA Section */}
       {!user && (
-        <section className="relative z-10 py-24 bg-gradient-to-t from-black/80 to-transparent">
-          <div className="container mx-auto text-center px-4">
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-white drop-shadow-md">
-              Bạn chưa đăng nhập?
-            </h2>
-            <p className="text-xl text-cyan-100/80 mb-10 max-w-2xl mx-auto font-light">
-              Hãy đăng nhập hoặc tạo tài khoản để trải nghiệm không gian vật lý thực tế ảo tuyệt đỉnh này
-            </p>
-            <div className="flex justify-center gap-6 flex-wrap">
-              <Link to="/login">
-                <Button className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-10 py-4 rounded-full font-bold tracking-wide hover:bg-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300">
-                  ĐĂNG NHẬP
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-0 px-10 py-4 rounded-full font-bold tracking-wide shadow-[0_0_15px_rgba(34,211,238,0.5)] hover:shadow-[0_0_25px_rgba(34,211,238,0.8)] hover:scale-105 transition-all duration-300">
-                  ĐĂNG KÝ NGAY
-                </Button>
-              </Link>
+        <section className="py-24 bg-white relative z-10 px-4">
+          <div className="container mx-auto max-w-5xl">
+            <div className="bg-slate-950 rounded-[3rem] p-16 md:p-24 text-center relative overflow-hidden shadow-2xl">
+              
+              {/* Subtle background glow */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none"></div>
+
+              <div className="relative z-10">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-6">Khám phá tiềm năng</div>
+                <h2 className="text-5xl md:text-7xl font-black text-white mb-12 tracking-tight leading-[1.1]">
+                  Sẵn sàng <br />
+                  bắt đầu?
+                </h2>
+                
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                  <Link to="/register">
+                    <Button className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 hover:scale-105 transition-all duration-300 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl border-none">
+                      Bắt đầu ngay
+                    </Button>
+                  </Link>
+                  <Link to="/login">
+                    <Button className="w-full sm:w-auto bg-slate-800 text-white hover:bg-slate-700 hover:scale-105 transition-all duration-300 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm border border-slate-700">
+                      Xem Demo
+                    </Button>
+                  </Link>
+                </div>
+                
+                <div className="mt-16 flex justify-center gap-12 text-slate-600 font-mono text-xs opacity-50">
+                   <span>F = ma</span>
+                   <span>E = mc²</span>
+                   <span>ΔS &gt; 0</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>

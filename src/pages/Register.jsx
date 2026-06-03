@@ -81,21 +81,21 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex font-sans bg-[#e4f2f0] items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+    <div className="min-h-screen flex font-sans bg-gray-100 items-center justify-center p-4 sm:p-8 relative overflow-hidden">
       
       {/* Background Decor */}
-      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#85e4fb]/20 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#2099e9]/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-black/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-black/5 blur-[120px] rounded-full pointer-events-none"></div>
       <div className="absolute inset-0 graph-grid pointer-events-none z-0 opacity-10"></div>
 
       {/* Container */}
-      <div className="w-full max-w-6xl rounded-[2.5rem] bg-white border border-white/50 overflow-hidden flex flex-col md:flex-row shadow-[0_25px_80px_-15px_rgba(32,153,233,0.15)] relative z-10 transition-all duration-500">
+      <div className="w-full max-w-6xl rounded-[2.5rem] bg-white border border-white/50 overflow-hidden flex flex-col md:flex-row shadow-[0_25px_80px_-15px_rgba(0,0,0,0.1)] relative z-10 transition-all duration-500">
         
         {/* LEFT SIDE: Visuals & Value Proposition */}
-        <div className="hidden md:flex flex-col md:w-5/12 lg:w-1/2 relative bg-gradient-to-br from-[#274dad] to-[#2099e9] overflow-hidden p-10 lg:p-14 order-2 md:order-1">
+        <div className="hidden md:flex flex-col md:w-5/12 lg:w-1/2 relative bg-slate-950 overflow-hidden p-10 lg:p-14 order-2 md:order-1">
           
           <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -ml-20 -mt-20 blur-3xl"></div>
-          <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#85e4fb]/10 rounded-full -mr-10 -mb-10 blur-2xl"></div>
+          <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-10 -mb-10 blur-2xl"></div>
 
           <Link to="/" className="relative z-10 flex items-center gap-2 mb-10 group w-fit">
             <div className="p-2 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 group-hover:bg-white/20 transition-all">
@@ -105,13 +105,13 @@ const Register = () => {
           </Link>
 
           <div className="relative z-10 flex flex-col h-full justify-center">
-            <div className="mb-10 p-4 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 w-fit">
-              <Sparkles className="w-8 h-8 text-[#85e4fb] animate-pulse" />
+            <div className="mb-10">
+              <span className="font-premium-serif text-4xl font-bold text-white italic tracking-tight">Eureka</span>
             </div>
 
             <h1 className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight tracking-tight">
               Bắt Đầu <br/>
-              <span className="text-[#85e4fb]">
+              <span className="text-gray-300">
                 Kỷ Nguyên Tri Thức
               </span>
             </h1>
@@ -126,11 +126,11 @@ const Register = () => {
                 { title: 'Công nghệ AI', desc: 'Trợ lý học tập thông minh hỗ trợ 24/7.' }
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group">
-                   <div className="mt-1 bg-[#85e4fb] p-1.5 rounded-lg shrink-0 shadow-[0_0_15px_rgba(133,228,251,0.5)]">
-                    <CheckCircle2 className="w-4 h-4 text-[#274dad]" />
+                   <div className="mt-1 bg-white/10 p-1.5 rounded-lg shrink-0 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                    <CheckCircle2 className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-white font-bold text-base group-hover:text-[#85e4fb] transition-colors">{item.title}</h3>
+                    <h3 className="text-white font-bold text-base group-hover:text-gray-300 transition-colors">{item.title}</h3>
                     <p className="text-white/50 text-sm mt-0.5">{item.desc}</p>
                   </div>
                 </div>
@@ -146,10 +146,10 @@ const Register = () => {
             
             <div className="text-center mb-10">
               <div className="md:hidden flex justify-center mb-6">
-                <EurekaPremiumLogo className="h-10" />
+                <span className="font-premium-serif text-3xl font-bold text-slate-900 italic tracking-tight">Eureka</span>
               </div>
-              <h2 className="text-3xl font-black text-[#274dad] mb-2">Tạo tài khoản</h2>
-              <p className="text-slate-400 font-medium">Thiết lập hồ sơ học thuật của bạn</p>
+              <h2 className="text-3xl font-black text-slate-900 mb-2">Tạo tài khoản</h2>
+              <p className="text-slate-500 font-medium">Thiết lập hồ sơ học thuật của bạn</p>
             </div>
 
             {error && (
@@ -162,14 +162,14 @@ const Register = () => {
             {/* Role Selection - MANDATORY */}
             <div className="mb-8 space-y-4">
               <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Bạn là ai?</label>
-              <div className="flex p-1.5 bg-[#e4f2f0] border border-slate-100 rounded-2xl">
+              <div className="flex p-1.5 bg-gray-100 border border-slate-200 rounded-2xl">
                 <button
                   type="button"
                   onClick={() => setSelectedRole('student')}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-black transition-all duration-300 ${
                     selectedRole === 'student'
-                      ? 'bg-white text-[#2099e9] shadow-lg shadow-blue-500/5'
-                      : 'text-slate-500 hover:text-[#274dad]'
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-slate-500 hover:text-black'
                   }`}
                 >
                   <BookOpen className="w-4 h-4" /> Học viên
@@ -179,8 +179,8 @@ const Register = () => {
                   onClick={() => setSelectedRole('teacher')}
                   className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-black transition-all duration-300 ${
                     selectedRole === 'teacher'
-                      ? 'bg-white text-[#2099e9] shadow-lg shadow-blue-500/5'
-                      : 'text-slate-500 hover:text-[#274dad]'
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-slate-500 hover:text-black'
                   }`}
                 >
                   <GraduationCap className="w-4 h-4" /> Giảng viên
@@ -191,10 +191,10 @@ const Register = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#274dad] pl-1">Họ và tên</label>
+                <label className="text-xs font-bold text-slate-800 pl-1">Họ và tên</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <User className="h-4 w-4 text-slate-300 group-focus-within:text-[#2099e9] transition-colors" />
+                    <User className="h-4 w-4 text-slate-400 group-focus-within:text-black transition-colors" />
                   </div>
                   <input
                     type="text"
@@ -202,17 +202,17 @@ const Register = () => {
                     value={formData.username}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#e4f2f0]/30 border-2 border-transparent text-[#274dad] placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-4 focus:outline-none focus:bg-white focus:border-[#2099e9] focus:ring-4 focus:ring-[#2099e9]/5 transition-all font-bold text-sm"
+                    className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold text-sm"
                     placeholder="Nguyễn Văn A"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#274dad] pl-1">Email</label>
+                <label className="text-xs font-bold text-slate-800 pl-1">Email</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-slate-300 group-focus-within:text-[#2099e9] transition-colors" />
+                    <Mail className="h-4 w-4 text-slate-400 group-focus-within:text-black transition-colors" />
                   </div>
                   <input
                     type="email"
@@ -220,7 +220,7 @@ const Register = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#e4f2f0]/30 border-2 border-transparent text-[#274dad] placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-4 focus:outline-none focus:bg-white focus:border-[#2099e9] focus:ring-4 focus:ring-[#2099e9]/5 transition-all font-bold text-sm"
+                    className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold text-sm"
                     placeholder="name@example.com"
                   />
                 </div>
@@ -228,10 +228,10 @@ const Register = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#274dad] pl-1">Mật khẩu</label>
+                  <label className="text-xs font-bold text-slate-800 pl-1">Mật khẩu</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 text-slate-300 group-focus-within:text-[#2099e9] transition-colors" />
+                      <Lock className="h-4 w-4 text-slate-400 group-focus-within:text-black transition-colors" />
                     </div>
                     <input
                       type="password"
@@ -239,17 +239,17 @@ const Register = () => {
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      className="w-full bg-[#e4f2f0]/30 border-2 border-transparent text-[#274dad] placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-3 focus:outline-none focus:bg-white focus:border-[#2099e9] focus:ring-4 focus:ring-[#2099e9]/5 transition-all font-bold text-sm"
+                      className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-3 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold text-sm"
                       placeholder="••••••••"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-[#274dad] pl-1">Xác nhận</label>
+                  <label className="text-xs font-bold text-slate-800 pl-1">Xác nhận</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 text-slate-300 group-focus-within:text-[#2099e9] transition-colors" />
+                      <Lock className="h-4 w-4 text-slate-400 group-focus-within:text-black transition-colors" />
                     </div>
                     <input
                       type="password"
@@ -257,7 +257,7 @@ const Register = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       required
-                      className="w-full bg-[#e4f2f0]/30 border-2 border-transparent text-[#274dad] placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-3 focus:outline-none focus:bg-white focus:border-[#2099e9] focus:ring-4 focus:ring-[#2099e9]/5 transition-all font-bold text-sm"
+                      className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-3 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold text-sm"
                       placeholder="••••••••"
                     />
                   </div>
@@ -267,7 +267,7 @@ const Register = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full relative group overflow-hidden bg-[#2099e9] text-white rounded-2xl py-4 font-black text-base transition-all hover:bg-[#274dad] hover:shadow-[0_15px_30px_rgba(32,153,233,0.3)] active:scale-[0.98] mt-4"
+                className="w-full relative group overflow-hidden bg-black text-white rounded-2xl py-4 font-black text-base transition-all hover:-translate-y-0.5 hover:bg-slate-800 active:scale-95 shadow-xl hover:shadow-2xl mt-4"
               >
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 <span className="relative flex justify-center items-center gap-3">
@@ -290,15 +290,15 @@ const Register = () => {
               type="button"
               onClick={handleGoogleRegister}
               disabled={loading}
-              className="mt-6 w-full flex items-center justify-center gap-4 py-3.5 bg-white text-[#274dad] font-bold rounded-2xl hover:bg-[#e4f2f0]/30 border-2 border-slate-100 hover:border-[#2099e9]/30 transition-all active:scale-[0.98] text-sm shadow-sm"
+              className="mt-6 w-full flex items-center justify-center gap-4 py-3.5 bg-white text-black font-bold rounded-2xl hover:bg-gray-50 border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-[0.98] text-sm shadow-sm"
             >
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
               <span>Đăng ký qua Google (Dành cho {selectedRole === 'student' ? 'Học viên' : 'Giảng viên'})</span>
             </button>
 
-            <p className="mt-8 text-center text-slate-400 font-bold text-sm">
+            <p className="mt-8 text-center text-slate-500 font-bold text-sm">
               Đã thuộc về Học viện?{' '}
-              <Link to="/login" className="text-[#2099e9] hover:text-[#274dad] underline underline-offset-4 decoration-2">
+              <Link to="/login" className="text-black hover:text-gray-600 underline underline-offset-4 decoration-2">
                 Đăng nhập ngay
               </Link>
             </p>
