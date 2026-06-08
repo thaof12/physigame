@@ -1,381 +1,373 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  Users,
-  BookOpen,
-  FileQuestion,
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  Clock,
-  Award,
-  ArrowUpRight,
-  ArrowDownRight,
-  MoreHorizontal,
-  Calendar,
-  Filter,
-  Download,
-  RefreshCw,
-  GraduationCap,
-  Beaker,
-  Atom,
-  ChevronRight,
-  Eye,
-  MousePointer,
-  Target,
-  Zap
+  Mail, Users, BookOpen, FileQuestion, Activity,
+  Download, RefreshCw, GraduationCap, Atom,
+  CheckCircle, XCircle, AlertCircle, Zap,
+  TrendingUp, UserX, UserCheck, ArrowUpRight
 } from 'lucide-react';
+import { supabase } from '../../../config/supabase';
+import api from '../../../config/api';
+import { sendTeacherStatusEmail } from '../../../services/emailService';
+import { lectureData } from '../../../data/lectureData';
 
-// Mock data - Replace with real API calls
-const mockStats = {
-  totalUsers: 1248,
-  userGrowth: 12.5,
-  totalLessons: 156,
-  lessonCompletion: 78.3,
-  totalExercises: 432,
-  exerciseUsage: 85.2,
-  activeToday: 342,
-  avgSessionTime: 28
+// ─── Count lessons from lectureData ──────────────────────────────────────────
+const countLessons = () => {
+  let total = 0;
+  if (lectureData?.physics) {
+    Object.values(lectureData.physics).forEach(grade => {
+      Object.values(grade).forEach(chapter => {
+        total += chapter.lessons?.length || 0;
+      });
+    });
+  }
+  return total;
 };
 
-const mockRecentUsers = [
-  { id: 1, name: 'Nguyễn Văn A', email: 'nguyenvana@gmail.com', role: 'student', joinDate: '2025-03-15' },
-  { id: 2, name: 'Trần Thị B', email: 'tranthib@gmail.com', role: 'student', joinDate: '2025-03-14' },
-  { id: 3, name: 'Lê Minh C', email: 'leminhc@gmail.com', role: 'teacher', joinDate: '2025-03-14' },
-  { id: 4, name: 'Phạm Hồng D', email: 'phamhongd@gmail.com', role: 'student', joinDate: '2025-03-13' },
-  { id: 5, name: 'Hoàng Văn E', email: 'hoangvane@gmail.com', role: 'student', joinDate: '2025-03-12' }
-];
-
-const mockPopularLessons = [
-  { id: 1, title: 'Chuyển động thẳng đều', subject: 'Vật lý 10', views: 1520, completion: 92 },
-  { id: 2, title: 'Định luật Ôm', subject: 'Vật lý 9', views: 1380, completion: 88 },
-  { id: 4, title: 'Lực đẩy Archimedes', subject: 'Vật lý 8', views: 1180, completion: 82 },
-  { id: 5, title: 'Điện tích và dòng điện', subject: 'Vật lý 7', views: 1050, completion: 79 }
-];
-
-const mockActivityData = [
-  { day: 'T2', users: 120, lessons: 45 },
-  { day: 'T3', users: 145, lessons: 52 },
-  { day: 'T4', users: 138, lessons: 48 },
-  { day: 'T5', users: 165, lessons: 61 },
-  { day: 'T6', users: 180, lessons: 72 },
-  { day: 'T7', users: 210, lessons: 85 },
-  { day: 'CN', users: 185, lessons: 68 }
-];
-
-const StatCard = ({ title, value, change, changeType, icon: Icon, color }) => (
-  <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5 hover:border-slate-700/50 transition-all">
-    <div className="flex items-start justify-between mb-4">
-      <div className={`p-3 rounded-xl bg-gradient-to-br ${color}`}>
-        <Icon className="w-5 h-5 text-white" />
+const StatCard = ({ title, value, sub, icon: Icon, color }) => (
+  <div className="bg-white rounded-[2rem] p-7 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-all">
+    <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-full -mr-10 -mt-10 blur-2xl" />
+    <div className="relative z-10">
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 shadow-lg ${color}`}>
+        <Icon className="w-6 h-6 text-white" />
       </div>
-      <div className={`flex items-center gap-1 text-sm font-medium ${changeType === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
-        {changeType === 'up' ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-        <span>{change}%</span>
-      </div>
+      <p className="text-3xl font-black text-slate-900 mb-1">{value}</p>
+      <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{title}</p>
+      {sub && <p className="text-xs text-slate-300 mt-1">{sub}</p>}
     </div>
-    <p className="text-3xl font-bold text-white mb-1">{value.toLocaleString()}</p>
-    <p className="text-sm text-slate-400">{title}</p>
   </div>
 );
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
-  const [stats, setStats] = useState(mockStats);
-  const [recentUsers, setRecentUsers] = useState(mockRecentUsers);
-  const [popularLessons, setPopularLessons] = useState(mockPopularLessons);
-  const [activityData, setActivityData] = useState(mockActivityData);
-  const [timeRange, setTimeRange] = useState('7d');
-  const [loading, setLoading] = useState(false);
+  const [realStats, setRealStats] = useState(null);
+  const [pendingTeachers, setPendingTeachers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
+  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState('');
 
-  const refreshData = () => {
+  useEffect(() => {
+    fetchAll();
+  }, []);
+
+  const fetchAll = async () => {
     setLoading(true);
-    setTimeout(() => setLoading(false), 1000);
+    try {
+      const [usersRes, studentsRes, teachersRes, pendingRes, newUsersRes] = await Promise.all([
+        supabase.from('users').select('*', { count: 'exact', head: true }),
+        supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'student'),
+        supabase.from('users').select('*', { count: 'exact', head: true }).eq('role', 'teacher'),
+        supabase.from('users').select('id, display_name, username, email, teacher_status, created_at')
+          .eq('role', 'teacher').eq('teacher_status', 'pending'),
+        supabase.from('users').select('id')
+          .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+      ]);
+
+      const totalLessons = countLessons();
+
+      setRealStats({
+        totalUsers: usersRes.count || 0,
+        students: studentsRes.count || 0,
+        teachers: teachersRes.count || 0,
+        pendingTeachers: pendingRes.data?.length || 0,
+        newUsers30d: newUsersRes.data?.length || 0,
+        totalLessons,
+      });
+
+      setPendingTeachers((pendingRes.data || []).map(t => ({
+        id: t.id,
+        name: t.display_name || t.username || 'Giáo viên',
+        email: t.email || '—',
+        subject: 'Vật lý',
+        school: 'Chưa cập nhật',
+        joinDate: new Date(t.created_at).toLocaleDateString('vi-VN'),
+        originalData: t,
+      })));
+    } catch (err) {
+      console.error('fetchAll error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const maxUsers = Math.max(...activityData.map(d => d.users));
+  const handleApprove = async (teacher) => {
+    setActionLoading(teacher.id);
+    try {
+      const response = await api.post(`/users/verify-teacher/${teacher.id}`);
+      if (!response.data.success) throw new Error(response.data.message);
+      await sendTeacherStatusEmail(teacher.email, teacher.name, 'verified');
+      await fetchAll();
+    } catch (err) {
+      console.error('Approval failed:', err);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const openRejectModal = (teacher) => {
+    setSelectedTeacher(teacher);
+    setRejectionReason('');
+    setRejectionModalOpen(true);
+  };
+
+  const handleRejectSubmit = async () => {
+    if (!selectedTeacher) return;
+    setActionLoading(selectedTeacher.id);
+    setRejectionModalOpen(false);
+    try {
+      const response = await api.post(`/users/reject-teacher/${selectedTeacher.id}`, { reason: rejectionReason });
+      if (!response.data.success) throw new Error(response.data.message);
+      await sendTeacherStatusEmail(selectedTeacher.email, selectedTeacher.name, 'rejected', rejectionReason);
+      await fetchAll();
+    } catch (err) {
+      console.error('Rejection failed:', err);
+    } finally {
+      setActionLoading(null);
+      setSelectedTeacher(null);
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!realStats) return;
+    const rows = [
+      ['Báo cáo tổng quan Eureka', new Date().toLocaleDateString('vi-VN')],
+      [],
+      ['Chỉ số', 'Giá trị'],
+      ['Tổng người dùng', realStats.totalUsers],
+      ['Học sinh', realStats.students],
+      ['Giáo viên', realStats.teachers],
+      ['GV chờ duyệt', realStats.pendingTeachers],
+      ['Người dùng mới (30 ngày)', realStats.newUsers30d],
+      ['Tổng bài giảng', realStats.totalLessons],
+    ];
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `eureka_report_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (loading || !realStats) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+          <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Đang tải dữ liệu...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400 text-sm mt-1">Tổng quan hệ thống PhysiGame</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black text-slate-900">Ban Điều Hành</h1>
+          <p className="text-slate-500 font-bold text-sm">Dữ liệu thực tế • Cập nhật mỗi lần tải trang</p>
         </div>
         <div className="flex items-center gap-3">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500/50"
-          >
-            <option value="7d">7 ngày qua</option>
-            <option value="30d">30 ngày qua</option>
-            <option value="90d">90 ngày qua</option>
-          </select>
           <button
-            onClick={refreshData}
-            className={`flex items-center gap-2 px-4 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-xl text-slate-400 hover:text-white transition-colors ${loading ? 'animate-pulse' : ''}`}
+            onClick={fetchAll}
+            className={`p-3 bg-white rounded-2xl text-slate-500 border border-slate-200 shadow-sm hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all ${loading ? 'animate-spin' : ''}`}
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline text-sm">Làm mới</span>
+            <RefreshCw className="w-5 h-5" />
           </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl text-white text-sm font-medium hover:from-indigo-500 hover:to-violet-500 transition-all">
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Xuất báo cáo</span>
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-[1.25rem] text-white text-sm font-black shadow-xl shadow-indigo-500/20 hover:brightness-110 transition-all uppercase tracking-widest"
+          >
+            <Download className="w-5 h-5" />
+            Tải Báo Cáo
           </button>
         </div>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Tổng người dùng"
-          value={stats.totalUsers}
-          change={stats.userGrowth}
-          changeType="up"
-          icon={Users}
-          color="from-indigo-500 to-violet-600"
-        />
-        <StatCard
-          title="Bài học"
-          value={stats.totalLessons}
-          change={stats.lessonCompletion}
-          changeType="up"
-          icon={BookOpen}
-          color="from-emerald-500 to-teal-600"
-        />
-        <StatCard
-          title="Bài tập"
-          value={stats.totalExercises}
-          change={stats.exerciseUsage}
-          changeType="up"
-          icon={FileQuestion}
-          color="from-amber-500 to-orange-600"
-        />
-        <StatCard
-          title="Hoạt động hôm nay"
-          value={stats.activeToday}
-          change={8.2}
-          changeType="up"
-          icon={Activity}
-          color="from-rose-500 to-pink-600"
-        />
+      {/* Real Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
+        <StatCard title="Tổng người dùng" value={realStats.totalUsers} icon={Users} color="bg-gradient-to-br from-indigo-500 to-violet-600" sub="Tất cả tài khoản" />
+        <StatCard title="Học sinh" value={realStats.students} icon={BookOpen} color="bg-gradient-to-br from-emerald-500 to-teal-600" sub="Đang học tập" />
+        <StatCard title="Giáo viên" value={realStats.teachers} icon={GraduationCap} color="bg-gradient-to-br from-blue-500 to-cyan-600" sub="Đã đăng ký" />
+        <StatCard title="Chờ duyệt" value={realStats.pendingTeachers} icon={UserX} color="bg-gradient-to-br from-amber-500 to-orange-600" sub="GV chờ phê duyệt" />
+        <StatCard title="Mới (30 ngày)" value={realStats.newUsers30d} icon={TrendingUp} color="bg-gradient-to-br from-rose-500 to-pink-600" sub="Đăng ký gần đây" />
+        <StatCard title="Bài giảng" value={realStats.totalLessons} icon={FileQuestion} color="bg-gradient-to-br from-slate-600 to-slate-800" sub="Từ kho nội dung" />
       </div>
 
-      {/* Charts & Activity */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Activity Chart */}
-        <div className="lg:col-span-2 bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-semibold text-white">Hoạt động tuần này</h3>
-              <p className="text-sm text-slate-400">Người dùng và bài học được truy cập</p>
-            </div>
-            <button className="text-slate-400 hover:text-white transition-colors">
-              <MoreHorizontal className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Simple bar chart visualization */}
-          <div className="flex items-end justify-between h-48 gap-2">
-            {activityData.map((item, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full flex flex-col items-center gap-1 h-40 justify-end">
-                  <div
-                    className="w-full max-w-10 bg-gradient-to-t from-indigo-600 to-violet-500 rounded-t-lg transition-all hover:from-indigo-500 hover:to-violet-400"
-                    style={{ height: `${(item.users / maxUsers) * 100}%` }}
-                    title={`${item.users} người dùng`}
-                  ></div>
-                </div>
-                <span className="text-xs text-slate-500 font-medium">{item.day}</span>
+      {/* Main Content */}
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Teacher Approvals */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-xl font-black text-slate-900">Duyệt Hồ Sơ Giảng Viên</h3>
+                <p className="text-slate-400 text-xs font-bold mt-1">
+                  {pendingTeachers.length > 0 ? `${pendingTeachers.length} yêu cầu đang chờ xử lý` : 'Không có yêu cầu mới'}
+                </p>
               </div>
-            ))}
-          </div>
-
-          <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-slate-800/50">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gradient-to-r from-indigo-600 to-violet-500 rounded"></div>
-              <span className="text-sm text-slate-400">Người dùng hoạt động</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick stats */}
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <h3 className="text-lg font-semibold text-white mb-4">Thống kê nhanh</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-500/20 rounded-lg">
-                  <Clock className="w-4 h-4 text-indigo-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Thời gian TB</p>
-                  <p className="text-xs text-slate-500">Mỗi phiên học</p>
-                </div>
+              <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+                <GraduationCap className="w-6 h-6" />
               </div>
-              <p className="text-lg font-bold text-white">{stats.avgSessionTime}p</p>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/20 rounded-lg">
-                  <Target className="w-4 h-4 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Hoàn thành</p>
-                  <p className="text-xs text-slate-500">Tỷ lệ bài học</p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">{stats.lessonCompletion}%</p>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-500/20 rounded-lg">
-                  <Zap className="w-4 h-4 text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Sử dụng bài tập</p>
-                  <p className="text-xs text-slate-500">Tỷ lệ hoàn thành</p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">{stats.exerciseUsage}%</p>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-rose-500/20 rounded-lg">
-                  <Award className="w-4 h-4 text-rose-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Giáo viên</p>
-                  <p className="text-xs text-slate-500">Trên hệ thống</p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">24</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tables */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Recent Users */}
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Người dùng mới</h3>
-            <button
-              onClick={() => navigate('/admin/users')}
-              className="flex items-center gap-1 text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
-              <span>Xem tất cả</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {recentUsers.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    user.role === 'teacher'
-                      ? 'bg-gradient-to-br from-amber-500 to-orange-600'
-                      : 'bg-gradient-to-br from-indigo-500 to-violet-600'
-                  }`}>
-                    {user.role === 'teacher' ? (
-                      <GraduationCap className="w-5 h-5 text-white" />
-                    ) : (
-                      <span className="text-white font-bold text-sm">{user.name[0]}</span>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{user.name}</p>
-                    <p className="text-xs text-slate-500">{user.email}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className={`inline-block px-2 py-1 rounded-lg text-xs font-medium ${
-                    user.role === 'teacher'
-                      ? 'bg-amber-500/20 text-amber-400'
-                      : 'bg-indigo-500/20 text-indigo-400'
-                  }`}>
-                    {user.role === 'teacher' ? 'Giáo viên' : 'Học sinh'}
-                  </span>
-                  <p className="text-xs text-slate-500 mt-1">{user.joinDate}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Popular Lessons */}
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Bài học phổ biến</h3>
-            <button
-              onClick={() => navigate('/admin/lessons')}
-              className="flex items-center gap-1 text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
-              <span>Xem tất cả</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {popularLessons.map((lesson, index) => (
-              <div
-                key={lesson.id}
-                className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-700/50 flex items-center justify-center">
-                    <span className="text-sm font-bold text-slate-400">#{index + 1}</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{lesson.title}</p>
-                    <p className="text-xs text-slate-500">{lesson.subject}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center gap-1 text-slate-400">
-                    <Eye className="w-3 h-3" />
-                    <span className="text-xs">{lesson.views.toLocaleString()}</span>
-                  </div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
-                        style={{ width: `${lesson.completion}%` }}
-                      ></div>
+            {pendingTeachers.length > 0 ? (
+              <div className="space-y-4">
+                {pendingTeachers.map((teacher) => (
+                  <div key={teacher.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-indigo-200 transition-all group">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                          <span className="text-white font-black text-lg">{teacher.name[0].toUpperCase()}</span>
+                        </div>
+                        <div>
+                          <h4 className="font-black text-slate-900">{teacher.name}</h4>
+                          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 mt-1">
+                            <Mail className="w-3.5 h-3.5" />
+                            <span>{teacher.email}</span>
+                          </div>
+                          <p className="text-xs text-slate-300 mt-0.5">Đăng ký: {teacher.joinDate}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleApprove(teacher)}
+                          disabled={actionLoading === teacher.id}
+                          className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl font-black text-xs hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/20 disabled:opacity-50"
+                        >
+                          {actionLoading === teacher.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                          PHÊ DUYỆT
+                        </button>
+                        <button
+                          onClick={() => openRejectModal(teacher)}
+                          disabled={actionLoading === teacher.id}
+                          className="flex items-center gap-2 px-4 py-2 bg-white text-rose-500 border border-rose-100 rounded-xl font-black text-xs hover:bg-rose-50 transition-all disabled:opacity-50"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          TỪ CHỐI
+                        </button>
+                      </div>
                     </div>
-                    <span className="text-xs text-emerald-400">{lesson.completion}%</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-16 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-10 h-10 text-emerald-500" />
+                </div>
+                <p className="text-lg font-black text-slate-800">Tất cả hồ sơ đã được xử lý</p>
+                <p className="text-slate-400 font-bold text-sm max-w-xs">Hệ thống đang hoạt động bình thường</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Tỉ lệ người dùng */}
+          <div className="bg-white rounded-[3rem] p-8 shadow-sm border border-slate-100">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-base font-black text-slate-900">Phân loại tài khoản</h3>
+              <Atom className="w-5 h-5 text-indigo-500" />
+            </div>
+            <div className="space-y-5">
+              {[
+                { label: 'Học sinh', value: realStats.students, total: realStats.totalUsers, color: 'bg-gradient-to-r from-emerald-500 to-teal-500', text: 'text-emerald-600' },
+                { label: 'Giáo viên', value: realStats.teachers, total: realStats.totalUsers, color: 'bg-gradient-to-r from-blue-500 to-cyan-500', text: 'text-blue-600' },
+              ].map((item, i) => {
+                const pct = realStats.totalUsers > 0 ? Math.round((item.value / realStats.totalUsers) * 100) : 0;
+                return (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{item.label}</span>
+                      <span className={`text-xs font-black ${item.text}`}>{item.value} ({pct}%)</span>
+                    </div>
+                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className={`h-full ${item.color} rounded-full transition-all duration-1000`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Pending alert */}
+          {realStats.pendingTeachers > 0 && (
+            <div className="p-6 bg-amber-50 border border-amber-200 rounded-[2rem] flex items-center gap-4">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+                <UserX className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="font-black text-amber-800 text-sm">Cần phê duyệt</p>
+                <p className="text-amber-600 text-xs font-bold">{realStats.pendingTeachers} giáo viên đang chờ xác nhận</p>
+              </div>
+            </div>
+          )}
+
+          {/* System Status */}
+          <div className="bg-white rounded-[3rem] p-8 shadow-sm border border-slate-100">
+            <h3 className="text-base font-black text-slate-900 mb-6">Trạng thái hệ thống</h3>
+            <div className="space-y-5">
+              {[
+                { label: 'Server Backend', status: 'Online', pct: 100, color: 'bg-emerald-500', textColor: 'text-emerald-600' },
+                { label: 'Supabase DB', status: 'Kết nối', pct: 100, color: 'bg-emerald-500', textColor: 'text-emerald-600' },
+                { label: 'Socket.io', status: 'Active', pct: 100, color: 'bg-blue-500', textColor: 'text-blue-600' },
+              ].map((item, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex justify-between text-xs font-black uppercase tracking-widest text-slate-400">
+                    <span>{item.label}</span>
+                    <span className={item.textColor}>{item.status}</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.pct}%` }} />
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-        <h3 className="text-lg font-semibold text-white mb-4">Trạng thái hệ thống</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="flex items-center gap-4 p-4 bg-slate-800/30 rounded-xl">
-            <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl">
-              <Atom className="w-6 h-6 text-white" />
+      {/* Rejection Modal */}
+      {rejectionModalOpen && selectedTeacher && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden">
+            <div className="bg-gradient-to-br from-indigo-600 to-slate-900 p-8 text-white">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl font-black">Từ Chối Hồ Sơ</h3>
+                <button onClick={() => setRejectionModalOpen(false)} className="p-2 hover:bg-white/10 rounded-xl transition-all">
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="font-bold opacity-70 text-sm">Gửi phản hồi cho: <span className="opacity-100 font-black">{selectedTeacher.name}</span></p>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-white">100%</p>
-              <p className="text-sm text-slate-400">Vật lý (Chuyên sâu)</p>
+            <div className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-black text-slate-800 flex items-center gap-2">
+                  <Mail className="w-4 h-4" /> Lý do từ chối (Tùy chọn)
+                </label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Nhập lý do để giúp giáo viên hoàn thiện hồ sơ..."
+                  className="w-full h-36 p-5 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl text-slate-700 font-bold placeholder:text-slate-300 transition-all outline-none resize-none"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setRejectionModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all">
+                  Hủy
+                </button>
+                <button onClick={handleRejectSubmit} className="flex-[2] py-4 bg-rose-500 text-white rounded-2xl font-black text-sm hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20">
+                  Xác nhận Từ Chối & Gửi Email
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

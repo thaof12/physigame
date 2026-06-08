@@ -1,219 +1,368 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   BarChart3,
-  TrendingUp,
-  TrendingDown,
   Users,
   BookOpen,
   FileQuestion,
   Clock,
-  Calendar,
   Download,
-  Filter,
   ArrowUpRight,
   ArrowDownRight,
   Activity,
   Target,
   Award,
   Atom,
-  Beaker
+  UserCheck,
+  UserX,
+  GraduationCap,
+  TrendingUp
 } from 'lucide-react';
+import { supabase } from '../../../config/supabase';
 
-const mockMonthlyData = [
-  { month: 'T1', users: 850, lessons: 12500, exercises: 28000 },
-  { month: 'T2', users: 920, lessons: 14200, exercises: 31500 },
-  { month: 'T3', users: 1050, lessons: 16800, exercises: 38200 },
-];
-
-const mockTopPerformers = [
-  { id: 1, name: 'Nguyễn Văn A', score: 98, lessons: 52, exercises: 145 },
-  { id: 2, name: 'Trần Thị B', score: 96, lessons: 48, exercises: 138 },
-  { id: 3, name: 'Lê Minh C', score: 95, lessons: 45, exercises: 132 },
-  { id: 4, name: 'Phạm Hồng D', score: 94, lessons: 43, exercises: 128 },
-  { id: 5, name: 'Hoàng Văn E', score: 93, lessons: 41, exercises: 125 },
-];
+const MONTHS_VI = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
 
 const AdminStatistics = () => {
   const [timeRange, setTimeRange] = useState('30d');
+  const [loading, setLoading] = useState(true);
 
-  const overviewStats = [
-    { label: 'Người dùng mới', value: 342, change: 12.5, up: true, icon: Users, color: 'from-indigo-500 to-violet-600' },
-    { label: 'Bài học được xem', value: '18.5K', change: 8.3, up: true, icon: BookOpen, color: 'from-emerald-500 to-teal-600' },
-    { label: 'Bài tập hoàn thành', value: '42.3K', change: 15.2, up: true, icon: FileQuestion, color: 'from-amber-500 to-orange-600' },
-    { label: 'Thời gian học TB', value: '32 phút', change: 3.1, up: false, icon: Clock, color: 'from-rose-500 to-pink-600' }
-  ];
+  const [overview, setOverview] = useState({
+    totalUsers: 0,
+    newUsers: 0,
+    students: 0,
+    teachers: 0,
+    pendingTeachers: 0,
+  });
+  const [monthlyData, setMonthlyData] = useState([]);
+  const [topStudents, setTopStudents] = useState([]);
+  const [roleBreakdown, setRoleBreakdown] = useState({ student: 0, teacher: 0, admin: 0 });
 
-  const subjectStats = [
-    { subject: 'Vật lý', icon: Atom, color: 'from-cyan-500 to-blue-600', users: 1248, lessons: 156, exercises: 432, completion: 78 }
-  ];
+  useEffect(() => {
+    fetchAll();
+  }, [timeRange]);
+
+  const getDaysAgo = (range) => {
+    const map = { '7d': 7, '30d': 30, '90d': 90, '1y': 365 };
+    return map[range] || 30;
+  };
+
+  const fetchAll = async () => {
+    setLoading(true);
+    try {
+      const days = getDaysAgo(timeRange);
+      const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+      // 1. Tổng số users + phân role
+      const { data: allUsers, error: allErr } = await supabase
+        .from('users')
+        .select('id, display_name, username, xp, level, created_at, role, teacher_status');
+
+      if (allErr) throw allErr;
+
+      const students = allUsers.filter(u => u.role === 'student');
+      const teachers = allUsers.filter(u => u.role === 'teacher');
+      const pendingTeachers = teachers.filter(u => u.teacher_status === 'pending');
+      const newUsers = allUsers.filter(u => new Date(u.created_at) >= new Date(since));
+
+      setOverview({
+        totalUsers: allUsers.length,
+        newUsers: newUsers.length,
+        students: students.length,
+        teachers: teachers.length,
+        pendingTeachers: pendingTeachers.length,
+      });
+
+      setRoleBreakdown({
+        student: students.length,
+        teacher: teachers.length,
+        admin: allUsers.filter(u => u.role === 'admin').length,
+      });
+
+      // 2. Dữ liệu theo tháng (số user mới đăng ký)
+      const byMonth = {};
+      allUsers.forEach(u => {
+        const d = new Date(u.created_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (!byMonth[key]) byMonth[key] = { total: 0, students: 0, teachers: 0 };
+        byMonth[key].total++;
+        if (u.role === 'student') byMonth[key].students++;
+        if (u.role === 'teacher') byMonth[key].teachers++;
+      });
+
+      const sortedMonths = Object.entries(byMonth)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .slice(-6)
+        .map(([key, val]) => {
+          const [year, month] = key.split('-');
+          return {
+            label: `${MONTHS_VI[parseInt(month) - 1]}/${year.slice(2)}`,
+            ...val
+          };
+        });
+      setMonthlyData(sortedMonths);
+
+      // 3. Top học sinh theo XP
+      const topByXP = students
+        .sort((a, b) => (b.xp || 0) - (a.xp || 0))
+        .slice(0, 10)
+        .map((u, i) => ({
+          rank: i + 1,
+          id: u.id,
+          name: u.display_name || u.username || 'Học sinh',
+          xp: u.xp || 0,
+          level: u.level || 1,
+          joinDate: new Date(u.created_at).toLocaleDateString('vi-VN'),
+        }));
+      setTopStudents(topByXP);
+
+    } catch (err) {
+      console.error('Error fetching statistics:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExport = () => {
+    const rows = [
+      ['Thống kê hệ thống Eureka'],
+      [`Thời gian: ${new Date().toLocaleDateString('vi-VN')}`],
+      [],
+      ['Tổng quan'],
+      ['Tổng người dùng', overview.totalUsers],
+      ['Học sinh', overview.students],
+      ['Giáo viên', overview.teachers],
+      ['Giáo viên chờ duyệt', overview.pendingTeachers],
+      ['Người dùng mới', overview.newUsers],
+      [],
+      ['Bảng xếp hạng (theo XP)'],
+      ['Hạng', 'Tên', 'XP', 'Level', 'Ngày tham gia'],
+      ...topStudents.map(s => [s.rank, s.name, s.xp, s.level, s.joinDate]),
+    ];
+
+    const csv = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `eureka_stats_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const maxMonthly = Math.max(...monthlyData.map(d => d.total), 1);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+          <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Đang tải dữ liệu...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Thống kê</h1>
-          <p className="text-slate-400 text-sm mt-1">Phân tích dữ liệu hệ thống</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black text-slate-900">Thống kê hệ thống</h1>
+          <p className="text-slate-500 font-bold text-sm">Dữ liệu thực tế từ Supabase Database</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none"
+            className="bg-slate-50 border border-slate-200 rounded-2xl px-6 py-3 text-sm text-slate-700 focus:outline-none font-black uppercase tracking-widest"
           >
             <option value="7d">7 ngày qua</option>
             <option value="30d">30 ngày qua</option>
             <option value="90d">90 ngày qua</option>
             <option value="1y">1 năm qua</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl text-white text-sm font-medium">
-            <Download className="w-4 h-4" />
-            <span>Xuất báo cáo</span>
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-[1.25rem] text-white text-sm font-black shadow-xl shadow-indigo-500/20 hover:brightness-110 transition-all uppercase tracking-widest"
+          >
+            <Download className="w-5 h-5" />
+            <span>Xuất CSV</span>
           </button>
         </div>
       </div>
 
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {overviewStats.map((stat, index) => {
+      {/* Overview Stats — 5 cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        {[
+          { label: 'Tổng người dùng', value: overview.totalUsers, icon: Users, color: 'from-indigo-500 to-violet-600', note: 'Tất cả tài khoản' },
+          { label: 'Học sinh', value: overview.students, icon: BookOpen, color: 'from-emerald-500 to-teal-600', note: 'Đang học tập' },
+          { label: 'Giáo viên', value: overview.teachers, icon: GraduationCap, color: 'from-blue-500 to-cyan-600', note: 'Đã đăng ký' },
+          { label: 'Chờ phê duyệt', value: overview.pendingTeachers, icon: UserX, color: 'from-amber-500 to-orange-600', note: 'Giáo viên pending' },
+          { label: `Người dùng mới (${timeRange})`, value: overview.newUsers, icon: TrendingUp, color: 'from-rose-500 to-pink-600', note: 'Trong kỳ đã chọn' },
+        ].map((stat, i) => {
           const Icon = stat.icon;
           return (
-            <div key={index} className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.color}`}>
-                  <Icon className="w-5 h-5 text-white" />
+            <div key={i} className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-all">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-slate-50 rounded-full -mr-8 -mt-8 blur-2xl" />
+              <div className="relative z-10">
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4 shadow-lg`}>
+                  <Icon className="w-6 h-6 text-white" />
                 </div>
-                <div className={`flex items-center gap-1 text-sm font-medium ${stat.up ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {stat.up ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                  <span>{stat.change}%</span>
-                </div>
+                <p className="text-4xl font-black text-slate-900 mb-1">{stat.value}</p>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                <p className="text-xs text-slate-300 mt-1">{stat.note}</p>
               </div>
-              <p className="text-3xl font-bold text-white mb-1">{stat.value}</p>
-              <p className="text-sm text-slate-400">{stat.label}</p>
             </div>
           );
         })}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Monthly Trend */}
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <h3 className="text-lg font-semibold text-white mb-4">Xu hướng theo tháng</h3>
-          <div className="space-y-4">
-            {mockMonthlyData.map((data, index) => (
-              <div key={index} className="flex items-center gap-4">
-                <span className="text-sm text-slate-400 w-8">{data.month}</span>
-                <div className="flex-1 flex items-center gap-2">
-                  <div className="flex-1 h-4 bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
-                      style={{ width: `${(data.users / 1200) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs text-slate-400 w-16">{data.users} users</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-slate-800/50">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gradient-to-r from-indigo-500 to-violet-500 rounded"></div>
-              <span className="text-xs text-slate-400">Người dùng</span>
+      {/* Charts */}
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Monthly registrations */}
+        <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-xl font-black text-slate-900">Đăng ký theo tháng</h3>
+              <p className="text-slate-400 text-xs font-bold mt-1">Số người dùng mới tạo tài khoản</p>
             </div>
+            <Activity className="w-6 h-6 text-indigo-500" />
           </div>
+          {monthlyData.length === 0 ? (
+            <div className="text-center py-12 text-slate-400 font-bold">Chưa có dữ liệu</div>
+          ) : (
+            <div className="space-y-6">
+              {monthlyData.map((data, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between items-end">
+                    <span className="text-sm font-black text-slate-500 uppercase tracking-widest">{data.label}</span>
+                    <div className="flex items-center gap-3 text-xs font-black">
+                      <span className="text-emerald-500">{data.students} HS</span>
+                      <span className="text-blue-500">{data.teachers} GV</span>
+                    </div>
+                  </div>
+                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-1000"
+                      style={{ width: `${(data.total / maxMonthly) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Subject Distribution */}
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <h3 className="text-lg font-semibold text-white mb-4">Phân bố theo môn học</h3>
-          <div className="space-y-4">
-            {subjectStats.map((subject, index) => {
-              const Icon = subject.icon;
+        {/* Role breakdown */}
+        <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-xl font-black text-slate-900">Phân loại tài khoản</h3>
+              <p className="text-slate-400 text-xs font-bold mt-1">Tỉ lệ vai trò trong hệ thống</p>
+            </div>
+            <Target className="w-6 h-6 text-indigo-500" />
+          </div>
+          <div className="space-y-6">
+            {[
+              { label: 'Học sinh', value: roleBreakdown.student, total: overview.totalUsers, color: 'from-emerald-500 to-teal-500', textColor: 'text-emerald-600' },
+              { label: 'Giáo viên', value: roleBreakdown.teacher, total: overview.totalUsers, color: 'from-blue-500 to-cyan-500', textColor: 'text-blue-600' },
+              { label: 'Quản trị viên', value: roleBreakdown.admin, total: overview.totalUsers, color: 'from-violet-500 to-purple-500', textColor: 'text-violet-600' },
+            ].map((item, i) => {
+              const pct = overview.totalUsers > 0 ? Math.round((item.value / overview.totalUsers) * 100) : 0;
               return (
-                <div key={index} className="bg-slate-800/30 rounded-xl p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${subject.color}`}>
-                      <Icon className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="font-medium text-white">{subject.subject}</span>
+                <div key={i} className="space-y-2">
+                  <div className="flex justify-between items-end">
+                    <span className="text-sm font-black text-slate-500 uppercase tracking-widest">{item.label}</span>
+                    <span className={`text-sm font-black ${item.textColor}`}>{item.value} người ({pct}%)</span>
                   </div>
-                  <div className="grid grid-cols-4 gap-3">
-                    <div>
-                      <p className="text-lg font-bold text-white">{subject.users}</p>
-                      <p className="text-xs text-slate-500">Người dùng</p>
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-white">{subject.lessons}</p>
-                      <p className="text-xs text-slate-500">Bài học</p>
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-white">{subject.exercises}</p>
-                      <p className="text-xs text-slate-500">Bài tập</p>
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-emerald-400">{subject.completion}%</p>
-                      <p className="text-xs text-slate-500">Hoàn thành</p>
-                    </div>
+                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full bg-gradient-to-r ${item.color} rounded-full transition-all duration-1000`}
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
                 </div>
               );
             })}
+
+            {/* Pending teachers alert */}
+            {overview.pendingTeachers > 0 && (
+              <div className="mt-6 p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-4">
+                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+                  <UserX className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="font-black text-amber-800 text-sm">Cần phê duyệt</p>
+                  <p className="text-amber-600 text-xs font-bold">{overview.pendingTeachers} giáo viên đang chờ xác nhận tài khoản</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Top Performers */}
-      <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">Top học sinh xuất sắc</h3>
-          <button className="text-sm text-indigo-400 hover:text-indigo-300">Xem tất cả</button>
+      {/* Top Students by XP */}
+      <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h3 className="text-xl font-black text-slate-900">Bảng xếp hạng học sinh</h3>
+            <p className="text-slate-400 text-xs font-bold mt-1">Xếp hạng theo điểm XP tích lũy thực tế</p>
+          </div>
+          <Award className="w-6 h-6 text-indigo-500" />
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-800/50">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase">#</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Học sinh</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Điểm TB</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Bài học</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Bài tập</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/50">
-              {mockTopPerformers.map((student, index) => (
-                <tr key={student.id} className="hover:bg-slate-800/30">
-                  <td className="px-4 py-3">
-                    <span className={`w-6 h-6 flex items-center justify-center rounded-lg text-xs font-bold ${
-                      index === 0 ? 'bg-amber-500/20 text-amber-400' :
-                      index === 1 ? 'bg-slate-400/20 text-slate-300' :
-                      index === 2 ? 'bg-orange-500/20 text-orange-400' :
-                      'bg-slate-700/50 text-slate-400'
-                    }`}>
-                      {index + 1}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-xs">{student.name[0]}</span>
-                      </div>
-                      <span className="text-sm font-medium text-white">{student.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-emerald-400 font-semibold">{student.score}%</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-sm text-slate-400">{student.lessons}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-sm text-slate-400">{student.exercises}</span>
-                  </td>
+        {topStudents.length === 0 ? (
+          <div className="text-center py-12 text-slate-400 font-bold">Chưa có dữ liệu học sinh</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className="px-6 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Xếp hạng</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Học sinh</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">XP</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Level</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Ngày tham gia</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {topStudents.map((student) => (
+                  <tr key={student.id} className="hover:bg-slate-50 transition-colors group">
+                    <td className="px-6 py-5">
+                      <span className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-black shadow-sm ${
+                        student.rank === 1 ? 'bg-amber-50 text-amber-500 border border-amber-100' :
+                        student.rank === 2 ? 'bg-slate-50 text-slate-400 border border-slate-200' :
+                        student.rank === 3 ? 'bg-orange-50 text-orange-500 border border-orange-100' :
+                        'bg-white text-slate-300 border border-slate-100'
+                      }`}>
+                        {student.rank}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                          <span className="text-white font-black text-sm">{student.name[0].toUpperCase()}</span>
+                        </div>
+                        <span className="text-base font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{student.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className={`text-xl font-black ${student.xp > 0 ? 'text-emerald-500' : 'text-slate-300'}`}>
+                        {student.xp.toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-black">
+                        Lv.{student.level}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="text-sm font-bold text-slate-400">{student.joinDate}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

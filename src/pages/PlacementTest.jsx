@@ -441,13 +441,13 @@ const PlacementTest = () => {
             </div>
 
             {/* Assigned Grade */}
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 mb-6">
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl p-5 mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
                   {result.assignedGrade}
                 </div>
                 <div>
-                  <div className="text-sm text-amber-700 font-medium">Lớp học phù hợp</div>
+                  <div className="text-sm text-blue-700 font-medium">Lớp học phù hợp</div>
                   <div className="text-xl font-bold text-gray-800">Lớp {result.assignedGrade}</div>
                 </div>
               </div>
@@ -589,3 +589,4 @@ const PlacementTest = () => {
 };
 
 export default PlacementTest;
+

@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const { Server } = require('socket.io');
 require('dotenv').config();
 
@@ -24,8 +26,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Add COOP headers to prevent popup blocking
 app.use((req, res, next) => {
@@ -62,6 +64,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', require('./routes/auth.cjs'));
 app.use('/api/users', require('./routes/users.cjs'));
+app.use('/api/email', require('./routes/email.cjs'));
 app.use('/api/lessons', require('./routes/lessons.cjs'));
 app.use('/api/challenges', require('./routes/challenges.cjs'));
 app.use('/api/battles', require('./routes/battles.cjs'));
@@ -72,6 +75,45 @@ app.use('/api/game-results', require('./routes/gameResults.cjs'));
 app.use('/api/lesson-completions', require('./routes/lessonCompletions.cjs'));
 app.use('/api/study-progress', require('./routes/StudyProgress.cjs'));
 app.use('/api/games-progress', require('./routes/GamesProgress.cjs'));
+
+// API Endpoints
+const SETTINGS_FILE = path.join(__dirname, 'settings.json');
+
+app.get('/api/settings', (req, res) => {
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) {
+      const data = fs.readFileSync(SETTINGS_FILE, 'utf8');
+      res.json(JSON.parse(data));
+    } else {
+      res.json({
+        siteName: 'Eureka',
+        siteDescription: 'Nền tảng học Vật lý tương tác',
+        maintenanceMode: false,
+        allowRegistration: true,
+        emailNotifications: true,
+        autoBackup: true,
+        backupFrequency: 'daily',
+        maxUploadSize: 10,
+        sessionTimeout: 30
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to read settings' });
+  }
+});
+
+app.post('/api/settings', (req, res) => {
+  try {
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(req.body, null, 2));
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to save settings' });
+  }
+});
+
+app.get('/', (req, res) => {
+  res.json({ status: 'OK', message: 'Server is running', database: 'Supabase' });
+});
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -431,9 +473,13 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5002;
 
-server.listen(PORT, () => {
-  console.log(`✓ Server is running on port ${PORT}`);
-  console.log(`✓ Socket.io enabled for PK Battle`);
-  console.log(`✓ Database: Supabase (PostgreSQL)`);
-  console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`✓ Server is running on port ${PORT}`);
+    console.log(`✓ Socket.io enabled for PK Battle`);
+    console.log(`✓ Database: Supabase (PostgreSQL)`);
+    console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
+
+module.exports = app;

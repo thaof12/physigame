@@ -32,12 +32,12 @@ const MechanicalDoorTransition = ({ isActive, onComplete }) => {
     <div className="fixed inset-0 z-[9999] pointer-events-none flex overflow-hidden">
        {/* Cánh cửa Trái */}
        <div 
-         className={`w-1/2 h-full bg-[#111c27] flex items-center justify-end border-r-8 border-[#B87333]/80 transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] shadow-[0_0_50px_rgba(0,0,0,0.8)] ${isClosed ? 'translate-x-0' : '-translate-x-full'}`}
+         className={`w-1/2 h-full bg-[#111c27] flex items-center justify-end border-r-8 border-[#274dad]/80 transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] shadow-[0_0_50px_rgba(0,0,0,0.8)] ${isClosed ? 'translate-x-0' : '-translate-x-full'}`}
        >
           <div className="absolute top-1/2 -mt-10 right-0 translate-x-1/2 text-slate-500 opacity-50 flex items-center flex-col gap-2">
             <Settings className={`w-20 h-20 origin-center transition-transform duration-1000 ${isClosed ? 'rotate-[360deg]' : 'rotate-0'}`} />
           </div>
-          <div className="mr-8 text-[#B87333]/30 font-mono text-8xl font-black rotate-[-90deg] uppercase tracking-widest whitespace-nowrap opacity-20">
+          <div className="mr-8 text-[#274dad]/30 font-mono text-8xl font-black rotate-[-90deg] uppercase tracking-widest whitespace-nowrap opacity-20">
             SYSTEM
           </div>
        </div>
@@ -49,7 +49,7 @@ const MechanicalDoorTransition = ({ isActive, onComplete }) => {
           <div className="absolute top-1/2 -mt-10 left-0 -translate-x-1/2 text-slate-500/80 flex items-center flex-col gap-2">
              <Settings className={`w-16 h-16 origin-center transition-transform duration-1000 ${isClosed ? '-rotate-[360deg]' : 'rotate-0'}`} />
           </div>
-          <div className="ml-8 text-[#B87333]/30 font-mono text-8xl font-black rotate-90 uppercase tracking-widest whitespace-nowrap opacity-20">
+          <div className="ml-8 text-[#274dad]/30 font-mono text-8xl font-black rotate-90 uppercase tracking-widest whitespace-nowrap opacity-20">
             SECURE
           </div>
        </div>
@@ -65,3 +65,4 @@ const MechanicalDoorTransition = ({ isActive, onComplete }) => {
 };
 
 export default MechanicalDoorTransition;
+

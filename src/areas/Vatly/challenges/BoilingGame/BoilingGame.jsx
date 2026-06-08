@@ -635,7 +635,7 @@ const BoilingGame = () => {
 
       {/* Header */}
       <div className="bo-header">
-        <button onClick={() => navigate('/physics-games/grade/6')} className="bo-back-btn">
+        <button onClick={() => navigate('/advanced-physics-challenge')} className="bo-back-btn">
           <ArrowLeft size={20} />
           <span>Quay lại</span>
         </button>

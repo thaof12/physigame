@@ -44,7 +44,7 @@ const KnifeSwitch = ({ onActivate, label = 'KÍCH HOẠT', isActive = false }) =
         {/* Đế sứ trắng (Insulator base) */}
         <div className="absolute bottom-0 left-4 right-4 h-4 bg-gradient-to-b from-slate-200 to-slate-400 rounded-sm shadow-lg border border-slate-500" />
         <div className="absolute bottom-0 left-1 right-1 h-6 bg-gradient-to-b from-slate-100 to-slate-300 rounded shadow-xl border-2 border-slate-400 flex items-center justify-center">
-          <div className="w-4 h-2 bg-[#B87333] rounded-sm" />
+          <div className="w-4 h-2 bg-[#274dad] rounded-sm" />
         </div>
 
         {/* Tay đòn (Blade) */}
@@ -59,14 +59,14 @@ const KnifeSwitch = ({ onActivate, label = 'KÍCH HOẠT', isActive = false }) =
             <div className="absolute left-1/2 -translate-x-1/2 top-3 w-3 h-3 rounded-full bg-[#78716c] border border-[#57534e]" />
           </div>
           {/* Lưỡi đồng (Blade) */}
-          <div className="w-3 h-10 bg-gradient-to-b from-[#FFD700] via-[#B87333] to-[#8C5523] mx-auto shadow-[0_0_8px_rgba(184,115,51,0.5)] border-x border-[#FFD700]/30" />
+          <div className="w-3 h-10 bg-gradient-to-b from-[#FFD700] via-[#274dad] to-[#2099e9] mx-auto shadow-[0_0_8px_rgba(184,115,51,0.5)] border-x border-[#FFD700]/30" />
         </div>
 
         {/* Spacer */}
         <div className="h-24 w-28" />
 
         {/* Tiếp điểm đồng dưới (Contact clamp) */}
-        <div className="relative bottom-0 left-0 right-0 h-8 bg-gradient-to-b from-[#B87333] to-[#6b3a1f] rounded shadow-lg border border-[#FFD700]/30 flex items-center justify-center">
+        <div className="relative bottom-0 left-0 right-0 h-8 bg-gradient-to-b from-[#274dad] to-[#6b3a1f] rounded shadow-lg border border-[#FFD700]/30 flex items-center justify-center">
           <div className="w-2 h-6 bg-[#c8a060] rounded-sm shadow-inner" />
           <div className="absolute top-1 left-2 right-2 h-1 bg-[#FFD700]/30 rounded" />
         </div>
@@ -93,3 +93,4 @@ const KnifeSwitch = ({ onActivate, label = 'KÍCH HOẠT', isActive = false }) =
 };
 
 export default KnifeSwitch;
+

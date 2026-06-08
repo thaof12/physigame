@@ -109,9 +109,20 @@ router.post('/complete', async (req, res) => {
     await PhysicsGameProgress.saveProgress(user.id, user.email, parseInt(grade), completedGames, null);
 
     const xpGained = (result.stars || 0) * 20;
+    
+    // Add activity
+    User.addRecentActivity(user, {
+      type: 'game',
+      title: 'Hoàn thành thử thách',
+      detail: `Thử thách ${gameId} - Khối ${grade}`,
+      xp: xpGained
+    });
+
+    const updates = { profile: user.profile };
     if (xpGained > 0) {
-      await User.update(user.id, { xp: (user.xp || 0) + xpGained });
+      updates.xp = (user.xp || 0) + xpGained;
     }
+    await User.update(user.id, updates);
 
     res.json({
       success: true, message: 'Game completed successfully',

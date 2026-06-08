@@ -113,7 +113,7 @@ const StudentStats = () => {
           suffix="%"
           change={5}
           icon={Target}
-          color="from-amber-500 to-orange-600"
+          color="from-blue-500 to-orange-600"
         />
         <StatCard
           title="Thời gian học TB"
@@ -200,7 +200,7 @@ const StudentStats = () => {
                   <td className="py-3 px-4 text-center">
                     <span className={`text-sm font-medium ${
                       student.avgScore >= 85 ? 'text-emerald-400' :
-                      student.avgScore >= 70 ? 'text-amber-400' : 'text-red-400'
+                      student.avgScore >= 70 ? 'text-blue-400' : 'text-red-400'
                     }`}>
                       {student.avgScore}%
                     </span>
@@ -219,3 +219,4 @@ const StudentStats = () => {
 };
 
 export default StudentStats;
+

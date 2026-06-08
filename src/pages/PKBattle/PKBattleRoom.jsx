@@ -8,77 +8,25 @@ import './PKBattle.css';
 
 // Lazy load challenge games
 const challengeGameComponents = {
-  // Grade 6
-  'MeasurementGame': lazy(() => import('../../areas/Vatly/challenges/MeasurementGame/MeasurementGame')),
-  'MassBalanceGame': lazy(() => import('../../areas/Vatly/challenges/MassBalanceGame/MassBalanceGame')),
-  'WeightMassGame': lazy(() => import('../../areas/Vatly/challenges/WeightMassGame/WeightMassGame')),
+  // Mechanical & Motion
+  'ProjectileMotion': lazy(() => import('../../areas/Vatly/challenges/ProjectileMotion/ProjectileMotion')),
+  'BalanceChallenge': lazy(() => import('../../areas/Vatly/challenges/BalanceChallenge/BalanceChallenge')),
+  'ForceArena': lazy(() => import('../../areas/Vatly/challenges/ForceArena/ForceArena')),
+  'ForceWorldGame': lazy(() => import('../../areas/Vatly/challenges/ForceWorldGame/ForceWorldGame')),
+  'RaceTracker': lazy(() => import('../../areas/Vatly/challenges/RaceTracker/RaceTracker')),
   
-  // Grade 7
+  // Optics
   'LightReflectionGame': lazy(() => import('../../areas/Vatly/challenges/LightReflectionGame/LightReflectionGame')),
   'LightPathGame': lazy(() => import('../../areas/Vatly/challenges/LightPathGame/LightPathGame')),
   'MirrorLabGame': lazy(() => import('../../areas/Vatly/challenges/MirrorLabGame/MirrorLabGame')),
-  'SoundWaveExplorer': lazy(() => import('../../areas/Vatly/challenges/SoundWaveExplorer/SoundWaveExplorer')),
-  'EchoExplorerGame': lazy(() => import('../../areas/Vatly/challenges/EchoExplorerGame/EchoExplorerGame')),
-  'WaveFrequencyGame': lazy(() => import('../../areas/Vatly/challenges/WaveFrequencyGame/WaveFrequencyGame')),
   
-  // Grade 8
-  'MotionTracker': lazy(() => import('../../areas/Vatly/challenges/MotionTracker/MotionTracker')),
-  'RaceTracker': lazy(() => import('../../areas/Vatly/challenges/RaceTracker/RaceTracker')),
-  'ForceArena': lazy(() => import('../../areas/Vatly/challenges/ForceArena/ForceArena')),
-  'ForceWorldGame': lazy(() => import('../../areas/Vatly/challenges/ForceWorldGame/ForceWorldGame')),
-  'PressureMaster': lazy(() => import('../../areas/Vatly/challenges/PressureMaster/PressureMaster')),
-  'PressureChallengeGame': lazy(() => import('../../areas/Vatly/challenges/PressureChallengeGame/PressureChallengeGame')),
-  'ArchimedesChallenge': lazy(() => import('../../areas/Vatly/challenges/ArchimedesChallenge/ArchimedesChallenge')),
-  'SimpleMachineGame': lazy(() => import('../../areas/Vatly/challenges/SimpleMachineGame/SimpleMachineGame')),
-  'HeatTransferLabGrade8': lazy(() => import('../../areas/Vatly/challenges/HeatTransferLabGrade8/HeatTransferLabGrade8')),
-  'HeatTransferGame': lazy(() => import('../../areas/Vatly/challenges/HeatTransferGame/HeatTransferGame')),
-  'ThermometerGame': lazy(() => import('../../areas/Vatly/challenges/ThermometerGame/ThermometerGame')),
+  // Thermal
+  'BoilingGame': lazy(() => import('../../areas/Vatly/challenges/BoilingGame/BoilingGame')),
+  'ThermalEnergyGame': lazy(() => import('../../areas/Vatly/challenges/ThermalEnergyGame/ThermalEnergyGame')),
+  'WaterLab': lazy(() => import('../../areas/Vatly/challenges/WaterLab/WaterLab')),
   
-  // Grade 9
-  'OhmLawCircuitLab': lazy(() => import('../../areas/Vatly/challenges/OhmLawCircuitLab/OhmLawCircuitLab')),
+  // Electricity
   'CircuitBuilderGame': lazy(() => import('../../areas/Vatly/challenges/CircuitBuilderGame/CircuitBuilderGame')),
-  'CircuitBuilderPro': lazy(() => import('../../areas/Vatly/challenges/CircuitBuilderPro/CircuitBuilderPro')),
-  'ElectricChargeLab': lazy(() => import('../../areas/Vatly/challenges/ElectricChargeLab/ElectricChargeLab')),
-  'ElectricFieldVisualizer': lazy(() => import('../../areas/Vatly/challenges/ElectricFieldVisualizer/ElectricFieldVisualizer')),
-  'ElectromagneticLab': lazy(() => import('../../areas/Vatly/challenges/ElectromagneticLab/ElectromagneticLab')),
-  'LightRefractionLab': lazy(() => import('../../areas/Vatly/challenges/LightRefractionLab/LightRefractionLab')),
-  'LensOpticsChallenge': lazy(() => import('../../areas/Vatly/challenges/LensOpticsChallenge/LensOpticsChallenge')),
-  'ColorSpectrumStudio': lazy(() => import('../../areas/Vatly/challenges/ColorSpectrumStudio/ColorSpectrumStudio')),
-  'NuclearReactionChamber': lazy(() => import('../../areas/Vatly/challenges/NuclearReactionChamber/NuclearReactionChamber')),
-  
-  // Grade 10
-  'ProjectileMotion': lazy(() => import('../../areas/Vatly/challenges/ProjectileMotion/ProjectileMotion')),
-  'FreeFallLab': lazy(() => import('../../areas/Vatly/challenges/FreeFallLab/FreeFallLab')),
-  'NewtonsLawsArena': lazy(() => import('../../areas/Vatly/challenges/NewtonsLawsArena/NewtonsLawsArena')),
-  'FrictionTensionMaster': lazy(() => import('../../areas/Vatly/challenges/FrictionTensionMaster/FrictionTensionMaster')),
-  'BalanceChallenge': lazy(() => import('../../areas/Vatly/challenges/BalanceChallenge/BalanceChallenge')),
-  'EquilibriumChallenge': lazy(() => import('../../areas/Vatly/challenges/EquilibriumChallenge/EquilibriumChallenge')),
-  'MechanicalEnergyQuest': lazy(() => import('../../areas/Vatly/challenges/MechanicalEnergyQuest/MechanicalEnergyQuest')),
-  'EnergyConservationHero': lazy(() => import('../../areas/Vatly/challenges/EnergyConservationHero/EnergyConservationHero')),
-  'EnergyLab': lazy(() => import('../../areas/Vatly/challenges/EnergyLab/EnergyLab')),
-  'MolecularMotionStudio': lazy(() => import('../../areas/Vatly/challenges/MolecularMotionStudio/MolecularMotionStudio')),
-  'GasLawsExplorer': lazy(() => import('../../areas/Vatly/challenges/GasLawsExplorer/GasLawsExplorer')),
-  'ThermalExpansionGame': lazy(() => import('../../areas/Vatly/challenges/ThermalExpansionGame/ThermalExpansionGame')),
-  
-  // Grade 11
-  'StaticElectricity': lazy(() => import('../../areas/Vatly/challenges/StaticElectricity/StaticElectricity')),
-  'CapacitorCircuitLab': lazy(() => import('../../areas/Vatly/challenges/CapacitorCircuitLab/CapacitorCircuitLab')),
-  'DCCircuitMaster': lazy(() => import('../../areas/Vatly/challenges/DCCircuitMaster/DCCircuitMaster')),
-  'MagneticFieldExplorer': lazy(() => import('../../areas/Vatly/challenges/MagneticFieldExplorer/MagneticFieldExplorer')),
-  'ElectromagneticInductionLab': lazy(() => import('../../areas/Vatly/challenges/ElectromagneticInductionLab/ElectromagneticInductionLab')),
-  'SimpleHarmonicMotionLab': lazy(() => import('../../areas/Vatly/challenges/SimpleHarmonicMotionLab/SimpleHarmonicMotionLab')),
-  'WaveInterferenceStudio': lazy(() => import('../../areas/Vatly/challenges/WaveInterferenceStudio/WaveInterferenceStudio')),
-  'ResonanceArena': lazy(() => import('../../areas/Vatly/challenges/ResonanceArena/ResonanceArena')),
-  
-  // Grade 12
-  'OscillationEnergyMaster': lazy(() => import('../../areas/Vatly/challenges/OscillationEnergyMaster/OscillationEnergyMaster')),
-  'LCOscillatorLab': lazy(() => import('../../areas/Vatly/challenges/LCOscillatorLab/LCOscillatorLab')),
-  'ACCircuitSimulator': lazy(() => import('../../areas/Vatly/challenges/ACCircuitSimulator/ACCircuitSimulator')),
-  'ACGeneratorSimulator': lazy(() => import('../../areas/Vatly/challenges/ACGeneratorSimulator/ACGeneratorSimulator')),
-  'LightInterferenceSimulator': lazy(() => import('../../areas/Vatly/challenges/LightInterferenceSimulator/LightInterferenceSimulator')),
-  'SpectrumExplorer': lazy(() => import('../../areas/Vatly/challenges/SpectrumExplorer/SpectrumExplorer')),
-  'PhotoelectricEffectLab': lazy(() => import('../../areas/Vatly/challenges/PhotoelectricEffectLab/PhotoelectricEffectLab')),
-  'RadioactiveDecaySimulator': lazy(() => import('../../areas/Vatly/challenges/RadioactiveDecaySimulator/RadioactiveDecaySimulator'))
 };
 
 // Sample physics questions - In production, these would come from the server
@@ -236,7 +184,8 @@ const PKBattleRoom = () => {
 
   // Socket connection
   useEffect(() => {
-    socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+    const serverUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin);
+    socketRef.current = io(serverUrl, {
       transports: ['websocket', 'polling']
     });
 

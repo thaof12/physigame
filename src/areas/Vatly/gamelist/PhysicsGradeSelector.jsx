@@ -1,4 +1,3 @@
-import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Gamepad2, Star, Trophy, Zap, Orbit, BookOpen, Target, ChevronRight } from 'lucide-react';
 import { physicsGames } from '../data/physicsGames';
@@ -7,10 +6,7 @@ import { grade7Games } from '../data/grade7Games';
 import { grade8Games } from '../data/grade8Games';
 import { grade9Games } from '../data/grade9Games';
 import { grade10Games } from '../data/grade10Games';
-import { grade11Games } from '../data/grade11Games';
-import { grade12Games } from '../data/grade12Games';
 import SolarSystemBackground from '../../../components/animations/SolarSystemBackground';
-import { useGameProgress } from '../../../contexts/GameProgressContext';
 
 const gradeConfig = [
   {
@@ -30,8 +26,8 @@ const gradeConfig = [
   },
   {
     id: 9, name: 'Lớp 9', description: 'Điện từ & Sóng cơ',
-    color: 'from-amber-500 to-orange-500', glow: 'rgba(245,158,11,0.3)',
-    borderHover: 'hover:border-amber-500/50', icon: '🌊'
+    color: 'from-blue-500 to-cyan-500', glow: 'rgba(245,158,11,0.3)',
+    borderHover: 'hover:border-blue-500/50', icon: '🌊'
   },
   {
     id: 10, name: 'Lớp 10', description: 'Động học & Nhiệt động lực học',
@@ -51,52 +47,14 @@ const gradeConfig = [
 ];
 
 const getGameCount = (id) => {
-  const map = {
-    6: grade6Games,
-    7: grade7Games,
-    8: grade8Games,
-    9: grade9Games,
-    10: grade10Games,
-    11: grade11Games,
-    12: grade12Games,
-  };
+  const map = { 6: grade6Games, 7: grade7Games, 8: grade8Games, 9: grade9Games, 10: grade10Games };
   return map[id]?.length || 0;
 };
 
-const totalGames =
-  grade6Games.length +
-  grade7Games.length +
-  grade8Games.length +
-  grade9Games.length +
-  grade10Games.length +
-  grade11Games.length +
-  grade12Games.length;
+const totalGames = grade6Games.length + grade7Games.length + grade8Games.length + grade9Games.length + grade10Games.length;
 
 const PhysicsGradeSelector = () => {
   const navigate = useNavigate();
-  const { progressByGrade, loadGradeProgress } = useGameProgress();
-
-  const allGrades = [6, 7, 8, 9, 10, 11, 12];
-
-  useEffect(() => {
-    allGrades.forEach((grade) => {
-      loadGradeProgress(grade);
-    });
-  }, [loadGradeProgress]);
-
-  const totalCompletedGames = useMemo(() => {
-    return allGrades.reduce((sum, grade) => {
-      const completed = progressByGrade[grade]?.completed || [];
-      return sum + completed.length;
-    }, 0);
-  }, [progressByGrade]);
-
-  const getGradeProgress = (gradeId, gameCount) => {
-    const completed = progressByGrade[gradeId]?.completed || [];
-    const completedCount = completed.length;
-    const percent = gameCount > 0 ? Math.min(100, Math.round((completedCount / gameCount) * 100)) : 0;
-    return { completedCount, percent };
-  };
 
   return (
     <div className="min-h-screen relative bg-slate-950 font-sans pb-20">
@@ -140,7 +98,7 @@ const PhysicsGradeSelector = () => {
                 {[
                   { icon: BookOpen, value: '7', label: 'CẤP LỚP', color: 'text-blue-400' },
                   { icon: Gamepad2, value: totalGames.toString(), label: 'TỔNG GAME', color: 'text-purple-400' },
-                    { icon: Trophy, value: totalCompletedGames.toString(), label: 'HOÀN THÀNH', color: 'text-amber-400' },
+                  { icon: Trophy, value: '0', label: 'HOÀN THÀNH', color: 'text-blue-400' },
                 ].map((stat, i) => {
                   const Icon = stat.icon;
                   return (
@@ -170,7 +128,6 @@ const PhysicsGradeSelector = () => {
           {gradeConfig.map((grade, index) => {
             const gameCount = getGameCount(grade.id);
             const isAvailable = gameCount > 0;
-            const { completedCount, percent } = getGradeProgress(grade.id, gameCount);
 
             return (
               <div
@@ -205,8 +162,8 @@ const PhysicsGradeSelector = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2 text-sm">
                       <Gamepad2 className="w-4 h-4 text-slate-500" />
-                      <span className="font-bold text-white">{completedCount}/{gameCount}</span>
-                      <span className="text-slate-500">hoàn thành</span>
+                      <span className="font-bold text-white">{gameCount}</span>
+                      <span className="text-slate-500">game</span>
                     </div>
                     <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${
                       isAvailable
@@ -220,10 +177,10 @@ const PhysicsGradeSelector = () => {
                   {/* Progress bar */}
                   <div className="mb-4">
                     <div className="flex justify-between text-xs text-slate-500 mb-1.5">
-                      <span>Tiến độ</span><span>{percent}%</span>
+                      <span>Tiến độ</span><span>0%</span>
                     </div>
                     <div className="w-full bg-slate-800 rounded-full h-1.5">
-                      <div className={`bg-gradient-to-r ${grade.color} h-1.5 rounded-full`} style={{ width: `${percent}%` }} />
+                      <div className={`bg-gradient-to-r ${grade.color} h-1.5 rounded-full`} style={{ width: '0%' }} />
                     </div>
                   </div>
 
@@ -281,3 +238,4 @@ const PhysicsGradeSelector = () => {
 };
 
 export default PhysicsGradeSelector;
+

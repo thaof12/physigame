@@ -1,0 +1,57 @@
+{
+  "header": {
+    "journey": "JOURNEY",
+    "classes": "CLASSES",
+    "lectures": "LECTURES",
+    "treasure": "TREASURE",
+    "tools": "TOOLS",
+    "challenge": "CHALLENGE",
+    "games": "GAMES",
+    "lab": "LABORATORY",
+    "arena": "ARENA",
+    "login": "Login",
+    "register": "Register"
+  },
+  "home": {
+    "slogan_1": "Building the future through",
+    "slogan_highlight": "Simulated Physics",
+    "slogan_2": "A standard learning experience in a high-end 3D ecosystem.",
+    "start_now": "START NOW",
+    "virtual_lab": "VIRTUAL LAB",
+    "features": "Platform Features",
+    "features_title": "Interact with",
+    "features_title_highlight": "Physics",
+    "features_title_2": "in a completely new way.",
+    
+    "lab_tag": "SCIENTIFIC PRECISION",
+    "lab_title": "Virtual Laboratory",
+    "lab_desc": "3D simulation environment with zero latency and absolute precision in every calculation.",
+    
+    "arena_tag": "LIVE PK",
+    "arena_title": "Arena",
+    "arena_desc": "Real-time competitive matches. Conquer the leaderboards and prove your sharp physical mindset.",
+    
+    "curriculum_tag": "CURRICULUM",
+    "curriculum_title": "Learning Path",
+    "curriculum_desc": "Personalized curriculum from grade 6 to grade 12 following modern and comprehensive educational standards.",
+    
+    "lecture_title": "Interactive Lectures",
+    "lecture_desc": "Visualize complex laws through vivid visual storytelling and direct interactions.",
+    
+    "bend_limits": "Bend",
+    "bend_limits_highlight": "all limits",
+    "bend_limits_desc": "A learning space where knowledge is no longer dry text. Interact with the environment, verify laws, and explore multi-dimensional thinking.",
+    
+    "3d_sim": "3D Simulation",
+    "3d_sim_desc": "Realistic physics interaction",
+    "ai_assistant": "AI Assistant",
+    "ai_assistant_desc": "24/7 support & answers",
+    "120hz_core": "120Hz Core",
+    "120hz_core_desc": "Absolute computational precision",
+    
+    "unlock_potential": "Unlock your potential",
+    "ready_to_start": "Ready to",
+    "ready_to_start_2": "start?",
+    "watch_demo": "WATCH DEMO"
+  }
+}

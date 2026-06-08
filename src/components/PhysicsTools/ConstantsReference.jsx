@@ -78,10 +78,10 @@ const ConstantsReference = () => {
   }, [filteredConstants]);
 
   return (
-    <div className="bg-[#FDFCF8] font-sans min-h-screen selection:bg-[#B87333]/20 selection:text-[#4A3728] relative overflow-hidden perspective-1000">
+    <div className="bg-[#FFFFFF] font-sans min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728] relative overflow-hidden perspective-1000">
       {/* Background Ambience */}
       <div className="absolute inset-0 graph-grid opacity-[0.25] pointer-events-none" />
-      <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#B87333]/10" />
+      <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#274dad]/10" />
 
       {/* Global CSS for 3D and Radar Effects */}
       <style>{`
@@ -112,13 +112,13 @@ const ConstantsReference = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/physics-tools')}
-              className="group flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-[#E5E7EB] text-[#8C5523] shadow-sm hover:border-[#B87333]/30 hover:bg-[#F8F4EF] hover:shadow-md transition-all active:scale-95"
+              className="group flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-[#E5E7EB] text-[#2099e9] shadow-sm hover:border-[#274dad]/30 hover:bg-[#e4f2f0] hover:shadow-md transition-all active:scale-95"
             >
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </button>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-[#1E293B] tracking-tight flex items-center gap-3">
-                <BookOpen className="w-8 h-8 text-[#B87333]" />
+                <BookOpen className="w-8 h-8 text-[#274dad]" />
                 Tra Cứu Hằng Số Vật Lý
               </h1>
               <p className="text-slate-500 font-medium mt-1">
@@ -133,9 +133,9 @@ const ConstantsReference = () => {
           {/* Decorative Radar background (wrapped to keep corners clipped) */}
           <div className="absolute inset-0 overflow-hidden rounded-[2rem] pointer-events-none">
             <div className="absolute top-1/2 left-1/4 transform -translate-y-1/2 -translate-x-1/2 w-[300px] h-[300px] opacity-0 group-focus-within:opacity-100 transition-opacity duration-1000">
-              <div className="absolute inset-0 rounded-full border border-[#B87333]/20" />
-              <div className="absolute inset-[30px] rounded-full border border-[#B87333]/15" />
-              <div className="absolute inset-[60px] rounded-full border border-[#B87333]/10" />
+              <div className="absolute inset-0 rounded-full border border-[#274dad]/20" />
+              <div className="absolute inset-[30px] rounded-full border border-[#274dad]/15" />
+              <div className="absolute inset-[60px] rounded-full border border-[#274dad]/10" />
               <div className="absolute inset-0 radar-sweep" />
             </div>
           </div>
@@ -147,13 +147,13 @@ const ConstantsReference = () => {
                 <Search className="w-3 h-3" /> Tìm Kiếm Hằng Số
               </label>
               <div className="relative group-focus-within/search">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within/search:text-[#B87333] transition-colors" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within/search:text-[#274dad] transition-colors" />
                 <input
                   type="text"
                   placeholder="Khởi chạy dò tìm hằng số..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-[#F8F4EF]/50 backdrop-blur-sm border-2 border-[#E5E7EB] rounded-2xl focus:ring-4 focus:ring-[#B87333]/10 focus:border-[#B87333] text-[#1E293B] font-semibold text-lg transition-all placeholder:text-slate-400 shadow-inner"
+                  className="w-full pl-12 pr-4 py-4 bg-[#e4f2f0]/50 backdrop-blur-sm border-2 border-[#E5E7EB] rounded-2xl focus:ring-4 focus:ring-[#274dad]/10 focus:border-[#274dad] text-[#1E293B] font-semibold text-lg transition-all placeholder:text-slate-400 shadow-inner"
                 />
               </div>
             </div>
@@ -167,10 +167,10 @@ const ConstantsReference = () => {
                 <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 z-10" />
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`w-full pl-12 pr-4 py-4 bg-[#F8F4EF]/50 backdrop-blur-sm border-2 ${isDropdownOpen ? 'border-[#B87333] ring-4 ring-[#B87333]/10' : 'border-[#E5E7EB]'} rounded-2xl text-[#1E293B] font-semibold text-lg transition-all shadow-inner flex items-center justify-between outline-none`}
+                  className={`w-full pl-12 pr-4 py-4 bg-[#e4f2f0]/50 backdrop-blur-sm border-2 ${isDropdownOpen ? 'border-[#274dad] ring-4 ring-[#274dad]/10' : 'border-[#E5E7EB]'} rounded-2xl text-[#1E293B] font-semibold text-lg transition-all shadow-inner flex items-center justify-between outline-none`}
                 >
                   <span className="truncate">{selectedCategory === 'all' ? 'Tất cả danh mục' : selectedCategory}</span>
-                  <div className={`w-2 h-2 border-b-2 border-r-2 border-[#8C5523] transform origin-center transition-transform duration-300 ${isDropdownOpen ? '-rotate-135 -translate-y-1' : 'rotate-45'}`} />
+                  <div className={`w-2 h-2 border-b-2 border-r-2 border-[#2099e9] transform origin-center transition-transform duration-300 ${isDropdownOpen ? '-rotate-135 -translate-y-1' : 'rotate-45'}`} />
                 </button>
                 
                 {/* Custom Options List */}
@@ -184,7 +184,7 @@ const ConstantsReference = () => {
                            setSelectedCategory('all');
                            setIsDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-5 py-3 hover:bg-[#F8F4EF] hover:text-[#B87333] transition-colors font-medium ${selectedCategory === 'all' ? 'bg-[#FDFCF8] text-[#B87333]' : 'text-slate-600'}`}
+                        className={`w-full text-left px-5 py-3 hover:bg-[#e4f2f0] hover:text-[#274dad] transition-colors font-medium ${selectedCategory === 'all' ? 'bg-[#FFFFFF] text-[#274dad]' : 'text-slate-600'}`}
                      >
                         Tất cả danh mục
                      </button>
@@ -197,7 +197,7 @@ const ConstantsReference = () => {
                              setSelectedCategory(category);
                              setIsDropdownOpen(false);
                           }}
-                          className={`w-full text-left px-5 py-3 hover:bg-[#F8F4EF] hover:text-[#B87333] transition-colors font-medium ${selectedCategory === category ? 'bg-[#FDFCF8] text-[#B87333]' : 'text-slate-600'}`}
+                          className={`w-full text-left px-5 py-3 hover:bg-[#e4f2f0] hover:text-[#274dad] transition-colors font-medium ${selectedCategory === category ? 'bg-[#FFFFFF] text-[#274dad]' : 'text-slate-600'}`}
                         >
                           {category}
                         </button>
@@ -213,12 +213,12 @@ const ConstantsReference = () => {
             <span className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22C55E]" />
               <span className="text-slate-300">Tìm thấy:</span>
-              <strong className="text-[#D4AF37] text-lg font-mono">{filteredConstants.length}</strong> <span className="text-slate-400">hằng số</span>
+              <strong className="text-[#44b5d7] text-lg font-mono">{filteredConstants.length}</strong> <span className="text-slate-400">hằng số</span>
             </span>
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="text-[#D4AF37] hover:text-white px-4 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg shadow-sm border border-white/10 ml-auto transition-colors focus:ring-2 focus:ring-[#D4AF37]"
+                className="text-[#44b5d7] hover:text-white px-4 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg shadow-sm border border-white/10 ml-auto transition-colors focus:ring-2 focus:ring-[#44b5d7]"
               >
                 Hủy Bộ Lọc
               </button>
@@ -232,13 +232,13 @@ const ConstantsReference = () => {
             Object.entries(groupedConstants).map(([category, constants]) => (
               <div key={category} className="mb-8 relative z-10">
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="p-3 bg-[#1E293B] rounded-xl shadow-lg border border-[#B87333]/30 shrink-0">
-                    <Star className="w-6 h-6 text-[#D4AF37]" />
+                  <div className="p-3 bg-[#1E293B] rounded-xl shadow-lg border border-[#274dad]/30 shrink-0">
+                    <Star className="w-6 h-6 text-[#44b5d7]" />
                   </div>
                   <h2 className="text-2xl font-black text-[#1E293B] tracking-tight uppercase">
                     {category}
                   </h2>
-                  <div className="flex-1 h-[2px] bg-gradient-to-r from-[#B87333]/50 to-transparent ml-4" />
+                  <div className="flex-1 h-[2px] bg-gradient-to-r from-[#274dad]/50 to-transparent ml-4" />
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -272,7 +272,7 @@ const ConstantsReference = () => {
         {/* No results */}
         {filteredConstants.length === 0 && (
           <div className="bg-white rounded-[2rem] border-2 border-[#E5E7EB] p-16 text-center flex flex-col items-center justify-center relative overflow-hidden backdrop-blur-md">
-            <div className="absolute inset-0 bg-[#F8F4EF] opacity-50 graph-grid" />
+            <div className="absolute inset-0 bg-[#e4f2f0] opacity-50 graph-grid" />
             <Scan className="w-20 h-20 text-slate-300 mb-6 relative z-10" />
             <p className="text-2xl font-black text-[#1E293B] tracking-tight relative z-10">
               Không tìm thấy tín hiệu
@@ -288,14 +288,14 @@ const ConstantsReference = () => {
 // Component Card cho mỗi hằng số (3D Style)
 const ConstantCard = ({ constant, onCopy, copied, formatScientific }) => {
   return (
-    <div className="transform-style-3d tilt-card bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-[0_10px_20px_-10px_rgba(0,0,0,0.08)] p-6 border-y border-b-[#E5E7EB] border-t-white relative group flex flex-col h-full overflow-hidden before:absolute before:inset-0 before:border-2 before:border-transparent hover:before:border-[#B87333]/30 before:rounded-[1.5rem] before:transition-colors before:pointer-events-none">
+    <div className="transform-style-3d tilt-card bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-[0_10px_20px_-10px_rgba(0,0,0,0.08)] p-6 border-y border-b-[#E5E7EB] border-t-white relative group flex flex-col h-full overflow-hidden before:absolute before:inset-0 before:border-2 before:border-transparent hover:before:border-[#274dad]/30 before:rounded-[1.5rem] before:transition-colors before:pointer-events-none">
 
       {/* Decorative tag background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#B87333]/[0.05] to-transparent pointer-events-none rounded-[1.5rem] opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#274dad]/[0.05] to-transparent pointer-events-none rounded-[1.5rem] opacity-0 group-hover:opacity-100 transition-opacity" />
 
       <div className="flex items-start justify-between mb-6 relative z-10 transform translate-z-[20px]">
         <div className="flex-1 pr-4">
-          <span className="inline-block px-3 py-1 text-[10px] font-black tracking-widest uppercase bg-[#1E293B] border border-black/20 text-[#D4AF37] rounded-full mb-3 shadow-inner">
+          <span className="inline-block px-3 py-1 text-[10px] font-black tracking-widest uppercase bg-[#1E293B] border border-black/20 text-[#44b5d7] rounded-full mb-3 shadow-inner">
             {constant.category}
           </span>
           <h3 className="text-xl font-bold text-[#1E293B] leading-tight drop-shadow-sm">
@@ -310,27 +310,27 @@ const ConstantCard = ({ constant, onCopy, copied, formatScientific }) => {
           {copied ? (
             <Check className="w-5 h-5 text-green-500 group-hover:text-green-400" />
           ) : (
-            <Copy className="w-5 h-5 text-slate-400 group-hover:text-[#D4AF37]" />
+            <Copy className="w-5 h-5 text-slate-400 group-hover:text-[#44b5d7]" />
           )}
         </button>
       </div>
 
       <div className="flex-1 flex flex-col gap-4 relative z-10 transform translate-z-[10px]">
-        <div className="grid grid-cols-3 gap-0 bg-[#FDFCF8] border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-inner group-hover:border-[#B87333]/20 transition-colors">
+        <div className="grid grid-cols-3 gap-0 bg-[#FFFFFF] border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-inner group-hover:border-[#274dad]/20 transition-colors">
           {/* Symbol */}
           <div className="col-span-1 p-4 bg-white/50 border-r border-[#E5E7EB] flex flex-col items-center justify-center text-center">
             <p className="text-[9px] font-black tracking-[0.2em] text-slate-400 uppercase mb-2">Đinh danh</p>
-            <p className="text-3xl font-black text-[#8C5523] font-mono leading-none drop-shadow-sm">
+            <p className="text-3xl font-black text-[#2099e9] font-mono leading-none drop-shadow-sm">
               {constant.symbol}
             </p>
           </div>
 
           {/* Value (Digital terminal screen inside card) */}
           <div className="col-span-2 p-4 bg-[#0F172A] relative overflow-hidden flex flex-col justify-center">
-            <div className="absolute inset-0 bg-[#D4AF37]/5 pointer-events-none" />
+            <div className="absolute inset-0 bg-[#44b5d7]/5 pointer-events-none" />
             <p className="text-[9px] font-black tracking-[0.2em] text-slate-400 uppercase mb-2 relative z-10">Thông số kỹ trị</p>
             <div className="flex items-baseline gap-2 relative z-10 w-full overflow-hidden">
-              <p className="text-lg font-mono font-bold text-[#D4AF37] leading-tight truncate">
+              <p className="text-lg font-mono font-bold text-[#44b5d7] leading-tight truncate">
                 {formatScientific(constant.value)}
               </p>
             </div>
@@ -352,3 +352,4 @@ const ConstantCard = ({ constant, onCopy, copied, formatScientific }) => {
 };
 
 export default ConstantsReference;
+

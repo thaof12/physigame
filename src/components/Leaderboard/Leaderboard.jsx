@@ -58,7 +58,7 @@ const Leaderboard = ({ isOpen, onClose }) => {
       case 2:
         return <Medal className="w-6 h-6 text-gray-400 fill-gray-300" />;
       case 3:
-        return <Medal className="w-6 h-6 text-amber-600 fill-amber-500" />;
+        return <Medal className="w-6 h-6 text-blue-600 fill-blue-500" />;
       default:
         return <span className="w-6 h-6 flex items-center justify-center text-gray-500 font-bold">{rank}</span>;
     }
@@ -80,9 +80,9 @@ const Leaderboard = ({ isOpen, onClose }) => {
   const getValue = (item) => {
     switch (activeTab) {
       case 'xp':
-        return { value: item.xp?.toLocaleString(), label: 'XP', icon: <Star className="w-4 h-4 text-amber-500" /> };
+        return { value: item.xp?.toLocaleString(), label: 'XP', icon: <Star className="w-4 h-4 text-blue-500" /> };
       case 'streak':
-        return { value: item.streak, label: 'ngày', icon: <Flame className="w-4 h-4 text-orange-500" /> };
+        return { value: item.streak, label: 'ngày', icon: <Flame className="w-4 h-4 text-cyan-500" /> };
       case 'pk':
         return { value: item.pkRating, label: 'Rating', icon: <TrendingUp className="w-4 h-4 text-purple-500" /> };
       default:
@@ -255,3 +255,4 @@ const Leaderboard = ({ isOpen, onClose }) => {
 };
 
 export default Leaderboard;
+

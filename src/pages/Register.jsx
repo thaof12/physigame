@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, User, Navigation } from 'lucide-react';
+import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, User, Sparkles, ArrowRight, ShieldAlert } from 'lucide-react';
+import EurekaPremiumLogo from '../components/ui/EurekaPremiumLogo';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { register, setUser, loginWithGoogle } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   
   const [formData, setFormData] = useState({
     username: '',
@@ -16,6 +17,22 @@ const Register = () => {
   const [selectedRole, setSelectedRole] = useState('student');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [allowRegistration, setAllowRegistration] = useState(true);
+
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('http://localhost:5002/api/settings');
+        const settings = await response.json();
+        if (settings.allowRegistration === false) {
+          setAllowRegistration(false);
+        }
+      } catch (e) {
+        console.error('Failed to fetch settings in Register', e);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -40,10 +57,12 @@ const Register = () => {
   const handleGoogleRegister = async () => {
     setLoading(true);
     setError('');
+    console.log(`%c🎯 [Register] Intent to register as: ${selectedRole}`, 'color: #274dad; font-weight: bold');
     try {
-      await loginWithGoogle();
-      // Supabase will redirect back, auth state change handler will navigate
+      await loginWithGoogle(selectedRole);
+      // OAuth flow handles navigation
     } catch (err) {
+      console.error('❌ [Register] Google register error:', err);
       setError('Đăng ký bằng Google thất bại. Vui lòng thử lại.');
     } finally {
       setLoading(false);
@@ -58,10 +77,11 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const result = await register(
+      await register(
         formData.username,
         formData.email, 
-        formData.password
+        formData.password,
+        selectedRole
       );
       
       if (selectedRole === 'teacher') {
@@ -77,114 +97,132 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex font-sans bg-[#FDFCF8] items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+    <div className="min-h-screen flex font-sans bg-gray-100 items-center justify-center p-4 sm:p-8 relative overflow-hidden">
       
       {/* Background Decor */}
-      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#B87333]/10 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#0E7490]/10 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute inset-0 graph-grid pointer-events-none z-0 opacity-40"></div>
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-black/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-black/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute inset-0 graph-grid pointer-events-none z-0 opacity-10"></div>
 
       {/* Container */}
-      <div className="w-full max-w-6xl rounded-[2rem] bg-white border border-[#E5E7EB] overflow-hidden flex flex-col md:flex-row shadow-[0_20px_50px_-15px_rgba(184,115,51,0.12)] relative z-10 transition-all duration-500">
+      <div className="w-full max-w-6xl rounded-[2.5rem] bg-white border border-white/50 overflow-hidden flex flex-col md:flex-row shadow-[0_25px_80px_-15px_rgba(0,0,0,0.1)] relative z-10 transition-all duration-500">
         
         {/* LEFT SIDE: Visuals & Value Proposition */}
-        <div className="hidden md:flex flex-col md:w-5/12 lg:w-1/2 relative bg-[#F8F4EF] border-r border-[#E5E7EB] overflow-hidden p-10 lg:p-14">
+        <div className="hidden md:flex flex-col md:w-5/12 lg:w-1/2 relative bg-slate-950 overflow-hidden p-10 lg:p-14 order-2 md:order-1">
           
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent to-[#B87333]/5 pointer-events-none"></div>
+          <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -ml-20 -mt-20 blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-10 -mb-10 blur-2xl"></div>
 
           <Link to="/" className="relative z-10 flex items-center gap-2 mb-10 group w-fit">
-            <ChevronLeft className="w-5 h-5 text-slate-400 group-hover:text-[#B87333] transition-colors -ml-1" />
-            <span className="text-slate-500 font-semibold group-hover:text-[#B87333] transition-colors">Trở về</span>
+            <div className="p-2 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 group-hover:bg-white/20 transition-all">
+              <ChevronLeft className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-white/80 font-bold group-hover:text-white transition-colors">Về trang chủ</span>
           </Link>
 
           <div className="relative z-10 flex flex-col h-full justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#B87333] to-[#8C5523] rounded-2xl flex items-center justify-center mb-6 shadow-[0_8px_20px_rgba(184,115,51,0.3)]">
-              <Navigation className="w-8 h-8 text-white animate-pulse-soft" />
+            <div className="mb-10">
+              <span className="font-premium-serif text-4xl font-bold text-white italic tracking-tight">Eureka</span>
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-black text-[#1E293B] mb-4 leading-tight tracking-tight">
+            <h1 className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight tracking-tight">
               Bắt Đầu <br/>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#B87333] via-[#8C5523] to-[#4A3728]">
-                Hành Trình Học Thuật
+              <span className="text-gray-300">
+                Kỷ Nguyên Tri Thức
               </span>
             </h1>
-            <p className="text-slate-500 text-lg mb-8 max-w-sm leading-relaxed">
-              Tạo tài khoản và tham gia cùng hàng ngàn học viên, giáo viên trong nền tảng học tập tiên tiến nhất.
+            <p className="text-white/70 text-lg mb-10 max-w-sm leading-relaxed font-medium">
+              Gia nhập cộng đồng học tập đa chiều. Mở khóa tiềm năng vô hạn của bản thân thông qua vật lý hiện đại.
             </p>
 
-            <ul className="space-y-4">
+            <div className="space-y-6">
               {[
-                { title: 'Hệ thống báo cáo chuẩn xác', desc: 'Đánh giá năng lực liên tục, chi tiết.' },
-                { title: 'Kho học liệu khổng lồ', desc: 'Thư viện bài giảng, bài tập phong phú.' },
-                { title: 'Cộng đồng ưu tú', desc: 'Kết nối và trao đổi cùng chuyên gia.' }
+                { title: 'Tài nguyên vô tận', desc: 'Truy cập hàng nghìn bài giảng và thí nghiệm 3D.' },
+                { title: 'Đội ngũ chuyên gia', desc: 'Tương tác trực tiếp với những giảng viên hàng đầu.' },
+                { title: 'Công nghệ AI', desc: 'Trợ lý học tập thông minh hỗ trợ 24/7.' }
               ].map((item, idx) => (
-                <li key={idx} className="flex items-start gap-4 p-3 rounded-2xl hover:bg-white/60 transition-colors border border-transparent hover:border-[#E5E7EB]">
-                  <div className="mt-1 bg-[#B87333]/10 p-1.5 rounded-full border border-[#B87333]/20 shrink-0">
-                    <CheckCircle2 className="w-4 h-4 text-[#B87333]" />
+                <div key={idx} className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group">
+                   <div className="mt-1 bg-white/10 p-1.5 rounded-lg shrink-0 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                    <CheckCircle2 className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-[#1E293B] font-bold text-sm lg:text-base">{item.title}</h3>
-                    <p className="text-slate-500 text-sm mt-0.5">{item.desc}</p>
+                    <h3 className="text-white font-bold text-base group-hover:text-gray-300 transition-colors">{item.title}</h3>
+                    <p className="text-white/50 text-sm mt-0.5">{item.desc}</p>
                   </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </div>
 
         {/* RIGHT SIDE: Auth Form */}
-        <div className="w-full md:w-7/12 lg:w-1/2 bg-white flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
+        <div className="w-full md:w-7/12 lg:w-1/2 bg-white flex items-center justify-center p-6 sm:p-12 lg:p-16 relative order-1 md:order-2">
           
           <div className="w-full max-w-md relative z-10">
             
-            <div className="text-center mb-6">
-              <Link to="/" className="md:hidden flex items-center gap-1 text-slate-400 mb-4 justify-center text-sm font-medium">
-                <ChevronLeft className="w-4 h-4" /> Trở về
-              </Link>
-              <h2 className="text-3xl font-extrabold text-[#1E293B] mb-2">Đăng ký</h2>
-              <p className="text-slate-500 text-sm">Thiết lập hồ sơ học thuật của bạn</p>
+            <div className="text-center mb-10">
+              <div className="md:hidden flex justify-center mb-6">
+                <span className="font-premium-serif text-3xl font-bold text-slate-900 italic tracking-tight">Eureka</span>
+              </div>
+              <h2 className="text-3xl font-black text-slate-900 mb-2">Tạo tài khoản</h2>
+              <p className="text-slate-500 font-medium">Thiết lập hồ sơ học thuật của bạn</p>
             </div>
 
+            {!allowRegistration ? (
+              <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-200">
+                <ShieldAlert className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <h3 className="text-lg font-black text-slate-800 mb-2">Đăng ký tạm đóng</h3>
+                <p className="text-slate-500 font-medium text-sm">Hệ thống đang tạm ngừng tiếp nhận tài khoản mới. Vui lòng quay lại sau.</p>
+                <div className="mt-8">
+                  <Link to="/" className="text-blue-600 font-bold hover:underline">Quay về Trang chủ</Link>
+                </div>
+              </div>
+            ) : (
+              <>
+
             {error && (
-              <div className="mb-4 p-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-sm font-medium flex items-center gap-2 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+              <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-bold flex items-center gap-3 animate-shake">
+                <div className="w-1.5 h-6 bg-rose-500 rounded-full"></div>
                 {error}
               </div>
             )}
 
-            {/* Role Selection */}
-            <div className="mb-5 flex p-1 bg-[#F8F4EF] border border-[#E5E7EB] rounded-2xl">
-              <button
-                type="button"
-                onClick={() => setSelectedRole('student')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                  selectedRole === 'student'
-                    ? 'bg-white text-[#B87333] shadow-md border border-[#E5E7EB]/50'
-                    : 'text-slate-500 hover:text-[#1E293B] hover:bg-white/50'
-                }`}
-              >
-                <BookOpen className="w-4 h-4" /> Học viên
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedRole('teacher')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                  selectedRole === 'teacher'
-                    ? 'bg-white text-[#0E7490] shadow-md border border-[#E5E7EB]/50'
-                    : 'text-slate-500 hover:text-[#1E293B] hover:bg-white/50'
-                }`}
-              >
-                <GraduationCap className="w-4 h-4" /> Giảng viên
-              </button>
+            {/* Role Selection - MANDATORY */}
+            <div className="mb-8 space-y-4">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Bạn là ai?</label>
+              <div className="flex p-1.5 bg-gray-100 border border-slate-200 rounded-2xl">
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('student')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-black transition-all duration-300 ${
+                    selectedRole === 'student'
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-slate-500 hover:text-black'
+                  }`}
+                >
+                  <BookOpen className="w-4 h-4" /> Học viên
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('teacher')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-black transition-all duration-300 ${
+                    selectedRole === 'teacher'
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-slate-500 hover:text-black'
+                  }`}
+                >
+                  <GraduationCap className="w-4 h-4" /> Giảng viên
+                </button>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-[#1E293B] pl-1">Họ và tên</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-800 pl-1">Họ và tên</label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-4 w-4 text-slate-400 group-focus-within:text-[#B87333] transition-colors" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <User className="h-4 w-4 text-slate-400 group-focus-within:text-black transition-colors" />
                   </div>
                   <input
                     type="text"
@@ -192,17 +230,17 @@ const Register = () => {
                     value={formData.username}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#FDFCF8] border-2 border-[#E5E7EB] text-[#1E293B] placeholder-slate-400 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#B87333] focus:ring-4 focus:ring-[#B87333]/10 transition-all font-medium text-sm"
-                    placeholder="Nhập họ và tên"
+                    className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold text-sm"
+                    placeholder="Nguyễn Văn A"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-[#1E293B] pl-1">Email</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-800 pl-1">Email</label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-slate-400 group-focus-within:text-[#B87333] transition-colors" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Mail className="h-4 w-4 text-slate-400 group-focus-within:text-black transition-colors" />
                   </div>
                   <input
                     type="email"
@@ -210,18 +248,18 @@ const Register = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full bg-[#FDFCF8] border-2 border-[#E5E7EB] text-[#1E293B] placeholder-slate-400 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#B87333] focus:ring-4 focus:ring-[#B87333]/10 transition-all font-medium text-sm"
-                    placeholder="Nhập địa chỉ email"
+                    className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold text-sm"
+                    placeholder="name@example.com"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#1E293B] pl-1">Mật khẩu</label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-800 pl-1">Mật khẩu</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 text-slate-400 group-focus-within:text-[#B87333] transition-colors" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="h-4 w-4 text-slate-400 group-focus-within:text-black transition-colors" />
                     </div>
                     <input
                       type="password"
@@ -229,17 +267,17 @@ const Register = () => {
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      className="w-full bg-[#FDFCF8] border-2 border-[#E5E7EB] text-[#1E293B] placeholder-slate-400 rounded-xl py-3 pl-9 pr-3 focus:outline-none focus:border-[#B87333] focus:ring-4 focus:ring-[#B87333]/10 transition-all font-medium text-sm"
-                      placeholder="Ít nhất 6 ký tự"
+                      className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-3 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold text-sm"
+                      placeholder="••••••••"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#1E293B] pl-1">Xác nhận</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-800 pl-1">Xác nhận</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 text-slate-400 group-focus-within:text-[#B87333] transition-colors" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="h-4 w-4 text-slate-400 group-focus-within:text-black transition-colors" />
                     </div>
                     <input
                       type="password"
@@ -247,8 +285,8 @@ const Register = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       required
-                      className="w-full bg-[#FDFCF8] border-2 border-[#E5E7EB] text-[#1E293B] placeholder-slate-400 rounded-xl py-3 pl-9 pr-3 focus:outline-none focus:border-[#B87333] focus:ring-4 focus:ring-[#B87333]/10 transition-all font-medium text-sm"
-                      placeholder="Nhập lại"
+                      className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-3 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold text-sm"
+                      placeholder="••••••••"
                     />
                   </div>
                 </div>
@@ -257,43 +295,53 @@ const Register = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full relative group overflow-hidden bg-gradient-to-r from-[#B87333] to-[#8C5523] text-white rounded-xl py-3.5 font-black text-base transition-all hover:shadow-[0_8px_25px_rgba(184,115,51,0.3)] active:scale-[0.98] mt-2"
+                className="w-full relative group overflow-hidden bg-black text-white rounded-2xl py-4 font-black text-base transition-all hover:-translate-y-0.5 hover:bg-slate-800 active:scale-95 shadow-xl hover:shadow-2xl mt-4"
               >
-                <span className="relative flex justify-center items-center gap-2 group-hover:text-white transition-colors duration-300">
+                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                <span className="relative flex justify-center items-center gap-3">
                   {loading ? 'Đang khởi tạo...' : 'Tạo tài khoản'}
+                  {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /> }
                 </span>
               </button>
             </form>
 
-            <div className="mt-6 relative flex items-center justify-center">
+            <div className="mt-8 relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#E5E7EB]"></div>
+                <div className="w-full border-t border-slate-100"></div>
               </div>
-              <span className="relative px-4 text-xs font-bold text-slate-400 uppercase bg-white">Hoặc tiếp tục với</span>
+              <div className="relative flex justify-center text-[10px] uppercase font-black tracking-[0.2em] text-slate-400">
+                <span className="bg-white px-4 italic">Kích hoạt SSO</span>
+              </div>
             </div>
 
             <button
               type="button"
               onClick={handleGoogleRegister}
               disabled={loading}
-              className="mt-5 w-full flex items-center justify-center gap-3 py-3 bg-white text-[#1E293B] font-bold rounded-xl hover:bg-slate-50 border-2 border-[#E5E7EB] hover:border-slate-300 transition-all active:scale-[0.98] text-sm shadow-sm hover:shadow-md"
+              className="mt-6 w-full flex items-center justify-center gap-4 py-3.5 bg-white text-black font-bold rounded-2xl hover:bg-gray-50 border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-[0.98] text-sm shadow-sm"
             >
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
-              <span>Đăng ký với Google</span>
+              <span>Đăng ký qua Google (Dành cho {selectedRole === 'student' ? 'Học viên' : 'Giảng viên'})</span>
             </button>
 
-            <p className="mt-6 text-center text-slate-500 text-xs sm:text-sm font-medium">
-              Đã có tài khoản?{' '}
-              <Link to="/login" className="font-bold text-[#B87333] hover:text-[#8C5523] transition-colors">
+            <p className="mt-8 text-center text-slate-500 font-bold text-sm">
+              Đã thuộc về Học viện?{' '}
+              <Link to="/login" className="text-black hover:text-gray-600 underline underline-offset-4 decoration-2">
                 Đăng nhập ngay
               </Link>
             </p>
+            </>
+            )}
             
           </div>
         </div>
       </div>
+       <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-slate-400 text-xs font-bold tracking-widest uppercase opacity-50">
+        © 2026 PhysiGame Academy • Membership Portal
+      </p>
     </div>
   );
 };
 
 export default Register;
+

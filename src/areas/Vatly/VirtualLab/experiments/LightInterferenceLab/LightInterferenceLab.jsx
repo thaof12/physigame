@@ -627,7 +627,7 @@ const LightInterferenceLab = () => {
                     step="0.1"
                     value={screenDistance}
                     onChange={(e) => setScreenDistance(parseFloat(e.target.value))}
-                    className="w-full accent-yellow-500"
+                    className="w-full accent-blue-500"
                   />
                   <div className="text-center text-lg font-mono text-yellow-400">{screenDistance} m</div>
                 </div>
@@ -867,3 +867,4 @@ const LightInterferenceLab = () => {
 };
 
 export default LightInterferenceLab;
+

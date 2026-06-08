@@ -359,7 +359,7 @@ const FreeFallLabExperiment = () => {
                     value={dropHeight}
                     onChange={(e) => setDropHeight(parseFloat(e.target.value))}
                     disabled={experimentState !== 'setup'}
-                    className="w-full accent-yellow-500"
+                    className="w-full accent-blue-500"
                   />
                   <div className="text-center text-lg font-mono text-yellow-400 param-value">
                     {dropHeight.toFixed(1)} m
@@ -561,3 +561,4 @@ const FreeFallLabExperiment = () => {
 };
 
 export default FreeFallLabExperiment;
+

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const EurekaLogo = ({ className = "w-10 h-10", color = "#8C5523" }) => {
+const EurekaLogo = ({ className = "w-10 h-10", color = "#2099e9" }) => {
   return (
     <div className={`relative flex items-center justify-center ${className}`}>
       <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full transform hover:scale-110 transition-transform duration-700">
@@ -35,3 +35,4 @@ const EurekaLogo = ({ className = "w-10 h-10", color = "#8C5523" }) => {
 };
 
 export default EurekaLogo;
+

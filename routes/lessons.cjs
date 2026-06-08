@@ -85,38 +85,35 @@ router.get('/class/:classId/chapter/:chapterId', async (req, res) => {
   }
 });
 
-// Get specific lesson - loads from filesystem
+// Get specific lesson - Enhanced with DB primary and clean fallback
 router.get('/class/:classId/chapter/:chapterId/lesson/:lessonId', async (req, res) => {
   try {
     const { classId, chapterId, lessonId } = req.params;
     const subject = req.query.subject || 'physics';
+    const Lesson = require('../models/Lesson.cjs');
 
-    console.log(`📂 Loading lesson: subject=${subject}, class=${classId}, chapter=${chapterId}, lesson=${lessonId}`);
+    console.log(`📂 Fetching lesson: subject=${subject}, class=${classId}, chapter=${chapterId}, lesson=${lessonId}`);
 
-    try {
-      const basePath = subject === 'physics' ? 'Vatly' : 'Hoahoc';
-      const lessonFilePath = path.resolve(__dirname, '..', 'areas', basePath, `class${classId}`, 'index.cjs');
+    // Try DB first
+    const lessonData = await Lesson.findByClassChapterLesson(
+      parseInt(classId),
+      parseInt(chapterId),
+      parseInt(lessonId)
+    );
 
-      console.log(`📁 Loading from: ${lessonFilePath}`);
-      delete require.cache[require.resolve(lessonFilePath)];
-      const allLessonsForClass = require(lessonFilePath);
-
-      const lessonsInChapter = allLessonsForClass.filter(lesson => lesson.chapterId == chapterId);
-      const lessonData = lessonsInChapter[parseInt(lessonId, 10) - 1];
-
-      if (lessonData) {
-        console.log('✅ Loaded lesson from file system');
-        return res.json(lessonData);
-      } else {
-        return res.status(404).json({ message: 'Lesson not found' });
-      }
-    } catch (fileError) {
-      console.log(`⚠️ Could not load lessons for class ${classId}:`, fileError.message);
-      return res.status(500).json({ message: `Could not load lesson data for class ${classId}.` });
+    if (lessonData) {
+      console.log('✅ Found lesson in database');
+      return res.json(lessonData);
     }
+
+    // Attempt filesystem only if legacy mode might be relevant (optional, but keep it clean)
+    // Currently, it's safer to return 404 if not in DB to let frontend fallback trigger
+    console.log('⚠️ Lesson not found in DB, returning 404 for frontend fallback');
+    return res.status(404).json({ message: 'Lesson data not yet available in database.' });
+
   } catch (error) {
-    console.error('❌ Error fetching lesson:', error);
-    res.status(500).json({ message: error.message });
+    console.error('❌ Error in lesson route:', error);
+    res.status(500).json({ message: 'Internal server error processing lesson request.' });
   }
 });
 

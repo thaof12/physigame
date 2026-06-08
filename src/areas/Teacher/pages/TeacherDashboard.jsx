@@ -17,48 +17,52 @@ import {
   Download,
   PlusCircle,
   Zap,
-  Award
+  Award,
+  Search,
+  MoreVertical,
+  Bell,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 
-// Mock data - Replace with real API calls
 const mockStats = {
-  lessonsCreated: 12,
-  exercisesCreated: 45,
-  experimentsCreated: 5,
-  totalStudents: 156,
-  totalViews: 2340,
-  averageCompletion: 78.5
+  lessonsCreated: 24,
+  exercisesCreated: 156,
+  experimentsCreated: 8,
+  totalStudents: 1240,
+  totalViews: 15420,
+  averageCompletion: 84.5
 };
 
 const mockRecentActivity = [
-  { id: 1, type: 'lesson', title: 'Định luật Ôm', views: 45, date: '2 giờ trước' },
-  { id: 2, type: 'exercise', title: 'Bài tập điện học', submissions: 23, date: '5 giờ trước' },
-  { id: 3, type: 'experiment', title: 'TN Đo điện trở', views: 18, date: 'Hôm qua' },
-  { id: 4, type: 'lesson', title: 'Chuyển động thẳng đều', views: 67, date: '2 ngày trước' },
+  { id: 1, type: 'lesson', title: 'Định luật Vạn vật hấp dẫn', views: 124, date: '15 phút trước', status: 'active' },
+  { id: 2, type: 'exercise', title: 'Kiểm tra Chương: Cơ học', submissions: 45, date: '1 giờ trước', status: 'pending' },
+  { id: 3, type: 'experiment', title: 'Mô phỏng Chuyển động tròn', views: 89, date: '3 giờ trước', status: 'active' },
+  { id: 4, type: 'lesson', title: 'Nhiệt học đại cương', views: 256, date: 'Hôm qua', status: 'active' },
 ];
 
-const mockTopContent = [
-  { id: 1, title: 'Định luật Newton', type: 'Bài học', views: 520, completion: 92 },
-  { id: 2, title: 'Quiz Điện học', type: 'Bài tập', views: 380, completion: 85 },
-  { id: 3, title: 'TN Con lắc đơn', type: 'Thí nghiệm', views: 290, completion: 88 },
-  { id: 4, title: 'Lực đẩy Archimedes', type: 'Bài học', views: 245, completion: 79 },
+const mockNotifications = [
+  { id: 1, title: 'Báo cáo tuần mới', desc: 'Dữ liệu tuần qua đã sẵn sàng.', time: '10:00 AM' },
+  { id: 2, title: 'Học sinh phản hồi', desc: 'Có 5 câu hỏi mới về Bài tập Chương 2.', time: '09:30 AM' },
 ];
 
 const StatCard = ({ title, value, change, icon: Icon, color }) => (
-  <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5 hover:border-slate-700/50 transition-all">
-    <div className="flex items-start justify-between mb-4">
-      <div className={`p-3 rounded-xl bg-gradient-to-br ${color}`}>
-        <Icon className="w-5 h-5 text-white" />
+  <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl shadow-[#274dad]/5 border border-[#85e4fb]/10 hover:shadow-blue-500/10 transition-all group">
+    <div className="flex items-start justify-between mb-6">
+      <div className={`p-4 rounded-2xl ${color} shadow-lg shadow-blue-500/10 group-hover:scale-110 transition-transform`}>
+        <Icon className="w-6 h-6 text-white" />
       </div>
       {change && (
-        <div className="flex items-center gap-1 text-sm font-medium text-emerald-400">
-          <ArrowUpRight className="w-4 h-4" />
-          <span>{change}%</span>
+        <div className="flex items-center gap-1.5 px-3 py-1 bg-[#e4f2f0] rounded-full text-xs font-black text-[#2099e9]">
+          <TrendingUp className="w-3.5 h-3.5" />
+          <span>+{change}%</span>
         </div>
       )}
     </div>
-    <p className="text-3xl font-bold text-white mb-1">{value.toLocaleString()}</p>
-    <p className="text-sm text-slate-400">{title}</p>
+    <div className="space-y-1">
+      <p className="text-4xl font-black text-[#274dad]">{value.toLocaleString()}</p>
+      <p className="text-sm font-bold text-slate-400 tracking-tight">{title}</p>
+    </div>
   </div>
 );
 
@@ -66,8 +70,6 @@ const TeacherDashboard = () => {
   const navigate = useNavigate();
   const { teacher } = useTeacherAuth();
   const [stats, setStats] = useState(mockStats);
-  const [recentActivity, setRecentActivity] = useState(mockRecentActivity);
-  const [topContent, setTopContent] = useState(mockTopContent);
   const [loading, setLoading] = useState(false);
 
   const refreshData = () => {
@@ -75,258 +77,215 @@ const TeacherDashboard = () => {
     setTimeout(() => setLoading(false), 1000);
   };
 
-  const getActivityIcon = (type) => {
-    switch (type) {
-      case 'lesson': return BookOpen;
-      case 'exercise': return FileQuestion;
-      case 'experiment': return FlaskConical;
-      default: return BookOpen;
-    }
-  };
-
-  const getActivityColor = (type) => {
-    switch (type) {
-      case 'lesson': return 'from-blue-500 to-indigo-600';
-      case 'exercise': return 'from-amber-500 to-orange-600';
-      case 'experiment': return 'from-violet-500 to-purple-600';
-      default: return 'from-slate-500 to-slate-600';
-    }
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">
-            Xin chào, {teacher?.displayName || 'Giáo viên'}!
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Đây là tổng quan hoạt động của bạn trên PhysiGame
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={refreshData}
-            className={`flex items-center gap-2 px-4 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-xl text-slate-400 hover:text-white transition-colors ${loading ? 'animate-pulse' : ''}`}
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline text-sm">Làm mới</span>
-          </button>
-          <button
-            onClick={() => navigate('/teacher/create')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl text-white text-sm font-medium hover:from-emerald-500 hover:to-teal-500 transition-all"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">Tạo mới</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Bài học đã tạo"
-          value={stats.lessonsCreated}
-          change={12}
-          icon={BookOpen}
-          color="from-emerald-500 to-teal-600"
-        />
-        <StatCard
-          title="Bài tập đã tạo"
-          value={stats.exercisesCreated}
-          change={8}
-          icon={FileQuestion}
-          color="from-amber-500 to-orange-600"
-        />
-        <StatCard
-          title="Thí nghiệm đã tạo"
-          value={stats.experimentsCreated}
-          icon={FlaskConical}
-          color="from-violet-500 to-purple-600"
-        />
-        <StatCard
-          title="Học sinh sử dụng"
-          value={stats.totalStudents}
-          change={15}
-          icon={Users}
-          color="from-rose-500 to-pink-600"
-        />
-      </div>
-
-      {/* Quick Stats & Activity */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Activity Timeline */}
-        <div className="lg:col-span-2 bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-semibold text-white">Hoạt động gần đây</h3>
-              <p className="text-sm text-slate-400">Nội dung của bạn được truy cập</p>
+    <div className="space-y-10 pb-20">
+      
+      {/* Welcome Banner */}
+      <div className="relative overflow-hidden rounded-[3rem] bg-gradient-to-r from-[#2099e9] to-[#274dad] p-10 lg:p-14 shadow-2xl shadow-blue-900/20">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#85e4fb]/10 rounded-full -ml-20 -mb-20 blur-2xl"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="space-y-4 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[#85e4fb] text-xs font-black uppercase tracking-widest">
+              <Zap className="w-3.5 h-3.5" />
+              <span>Học viện đang hoạt động tốt</span>
             </div>
-            <button
-              onClick={() => navigate('/teacher/my-lessons')}
-              className="flex items-center gap-1 text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
-              <span>Xem tất cả</span>
-              <ChevronRight className="w-4 h-4" />
+            <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight">
+              Chào mừng, {teacher?.displayName?.split(' ')?.[0] || 'Giáo viên'}!
+            </h1>
+            <p className="text-white/70 text-lg max-w-xl font-medium">
+              Hôm nay là một ngày tuyệt vời để chia sẻ kiến thức vật lý. Hệ thống đã tự động cập nhật báo cáo mới nhất cho bạn.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+             <button 
+              onClick={refreshData}
+              className={`p-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white hover:bg-white/20 transition-all ${loading ? 'animate-spin' : ''}`}
+             >
+                <RefreshCw className="w-6 h-6" />
+             </button>
+             <button 
+              onClick={() => navigate('/teacher/create')}
+              className="px-8 py-4 bg-white text-[#274dad] rounded-2xl font-black text-lg shadow-xl shadow-black/10 hover:shadow-white/20 hover:-translate-y-1 transition-all flex items-center gap-3"
+             >
+                <PlusCircle className="w-6 h-6" />
+                Soạn Bài Giảng
+             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        <StatCard
+          title="Bài giảng Học viện"
+          value={stats.lessonsCreated}
+          change={15}
+          icon={BookOpen}
+          color="bg-[#2099e9]"
+        />
+        <StatCard
+          title="Số lượng Bài tập"
+          value={stats.exercisesCreated}
+          change={22}
+          icon={FileQuestion}
+          color="bg-[#44b5d7]"
+        />
+        <StatCard
+          title="Học sinh Theo dõi"
+          value={stats.totalStudents}
+          change={12}
+          icon={Users}
+          color="bg-[#274dad]"
+        />
+        <StatCard
+          title="Lượt xem Nội dung"
+          value={stats.totalViews}
+          change={42}
+          icon={Eye}
+          color="bg-[#85e4fb]"
+        />
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-8 lg:gap-10">
+        
+        {/* Main Activity Area */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* Activity List */}
+          <div className="bg-white rounded-[2.5rem] p-10 shadow-2xl shadow-[#274dad]/5 border border-[#85e4fb]/10">
+            <div className="flex items-center justify-between mb-10">
+              <div className="space-y-1">
+                <h3 className="text-2xl font-black text-[#274dad]">Hoạt động Gần đây</h3>
+                <p className="text-sm font-bold text-slate-400 italic">Luồng dữ liệu thời gian thực</p>
+              </div>
+              <button className="p-3 bg-[#e4f2f0] rounded-xl text-[#2099e9] hover:bg-[#2099e9] hover:text-white transition-all">
+                <MoreVertical className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {mockRecentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-center justify-between p-6 bg-[#e4f2f0]/30 hover:bg-[#e4f2f0]/60 rounded-3xl transition-all border-2 border-transparent hover:border-[#85e4fb]/30 group cursor-pointer">
+                  <div className="flex items-center gap-6">
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-white shadow-lg shadow-blue-500/5 ${
+                      activity.type === 'lesson' ? 'text-[#2099e9]' : 
+                      activity.type === 'exercise' ? 'text-[#44b5d7]' : 'text-[#85e4fb]'
+                    }`}>
+                      {activity.type === 'lesson' ? <BookOpen className="w-6 h-6" /> : 
+                       activity.type === 'exercise' ? <FileQuestion className="w-6 h-6" /> : <FlaskConical className="w-6 h-6" />}
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-black text-[#274dad] text-lg group-hover:text-[#2099e9] transition-colors">{activity.title}</h4>
+                      <div className="flex items-center gap-3 text-xs font-bold text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-3.5 h-3.5" />
+                          {activity.views || activity.submissions} {activity.views ? 'lượt xem' : 'nộp bài'}
+                        </span>
+                        <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          {activity.date}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                     <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                       activity.status === 'active' ? 'bg-[#2099e9]/10 text-[#2099e9]' : 'bg-blue-500/10 text-blue-500'
+                     }`}>
+                        {activity.status === 'active' ? 'Đã duyệt' : 'Chờ duyệt'}
+                     </span>
+                     <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#2099e9] transition-all" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <button className="w-full mt-10 py-5 bg-[#e4f2f0] text-[#274dad] rounded-2xl font-black text-sm hover:bg-[#2099e9] hover:text-white transition-all shadow-sm">
+               Xem Tất Cả Hoạt Động
             </button>
           </div>
 
-          <div className="space-y-3">
-            {recentActivity.map((item) => {
-              const Icon = getActivityIcon(item.type);
-              const colorClass = getActivityColor(item.type);
+        </div>
 
-              return (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${colorClass}`}>
-                      <Icon className="w-5 h-5 text-white" />
+        {/* Sidebar Widgets */}
+        <div className="space-y-8 lg:space-y-10">
+          
+          {/* Quick Stats Mini */}
+          <div className="bg-white rounded-[2.5rem] p-10 shadow-2xl shadow-[#274dad]/5 border border-[#85e4fb]/10">
+            <h3 className="text-xl font-black text-[#274dad] mb-8">Vật Lý Chỉ Số</h3>
+            <div className="space-y-8">
+              {[
+                { label: 'Tỷ lệ Hoàn thành', value: stats.averageCompletion + '%', icon: Target, color: 'text-[#2099e9]' },
+                { label: 'Chất lượng Giảng dạy', value: '4.9/5.0', icon: Award, color: 'text-[#85e4fb]' },
+                { label: 'Năng suất Tuần', value: 'Cao', icon: TrendingUp, color: 'text-[#44b5d7]' },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-[#e4f2f0] rounded-xl">
+                      <item.icon className={`w-5 h-5 ${item.color}`} />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">{item.title}</p>
-                      <p className="text-xs text-slate-500">
-                        {item.views ? `${item.views} lượt xem` : `${item.submissions} nộp bài`}
-                      </p>
+                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
+                      <p className="text-lg font-black text-[#274dad]">{item.value}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-xs">{item.date}</span>
-                  </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-          <h3 className="text-lg font-semibold text-white mb-4">Thống kê nhanh</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/20 rounded-lg">
-                  <Eye className="w-4 h-4 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Tổng lượt xem</p>
-                  <p className="text-xs text-slate-500">Tuần này</p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">{stats.totalViews.toLocaleString()}</p>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-500/20 rounded-lg">
-                  <Target className="w-4 h-4 text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Tỷ lệ hoàn thành</p>
-                  <p className="text-xs text-slate-500">Trung bình</p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">{stats.averageCompletion}%</p>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-violet-500/20 rounded-lg">
-                  <Zap className="w-4 h-4 text-violet-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Nội dung hoạt động</p>
-                  <p className="text-xs text-slate-500">Đang được sử dụng</p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">
-                {stats.lessonsCreated + stats.exercisesCreated + stats.experimentsCreated}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-rose-500/20 rounded-lg">
-                  <Award className="w-4 h-4 text-rose-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-white">Đánh giá</p>
-                  <p className="text-xs text-slate-500">Từ học sinh</p>
-                </div>
-              </div>
-              <p className="text-lg font-bold text-white">4.8/5</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Top Content */}
-      <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">Nội dung nổi bật</h3>
-          <button className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 hover:text-white bg-slate-800/50 rounded-lg transition-colors">
-            <Download className="w-4 h-4" />
-            Xuất báo cáo
-          </button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-800/50">
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Nội dung</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Loại</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-slate-400">Lượt xem</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-slate-400">Hoàn thành</th>
-              </tr>
-            </thead>
-            <tbody>
-              {topContent.map((item, index) => (
-                <tr
-                  key={item.id}
-                  className="border-b border-slate-800/30 hover:bg-slate-800/30 transition-colors cursor-pointer"
-                >
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-slate-500">#{index + 1}</span>
-                      <span className="text-sm text-white">{item.title}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className={`inline-block px-2 py-1 rounded-lg text-xs font-medium ${
-                      item.type === 'Bài học' ? 'bg-emerald-500/20 text-emerald-400' :
-                      item.type === 'Bài tập' ? 'bg-amber-500/20 text-amber-400' :
-                      'bg-violet-500/20 text-violet-400'
-                    }`}>
-                      {item.type}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <span className="text-sm text-white">{item.views.toLocaleString()}</span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <div className="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
-                          style={{ width: `${item.completion}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-emerald-400">{item.completion}%</span>
-                    </div>
-                  </td>
-                </tr>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <div className="bg-[#274dad] rounded-[2.5rem] p-10 shadow-2xl shadow-blue-900/10 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xl font-black">Thông báo Mới</h3>
+                <Bell className="w-6 h-6 text-[#85e4fb]" />
+              </div>
+              
+              <div className="space-y-6">
+                {mockNotifications.map((notif) => (
+                  <div key={notif.id} className="p-5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 hover:bg-white/20 transition-all cursor-pointer group">
+                    <p className="text-[10px] font-black text-[#85e4fb] uppercase tracking-widest mb-1">{notif.time}</p>
+                    <h4 className="font-bold text-sm mb-1 group-hover:text-[#85e4fb] transition-colors">{notif.title}</h4>
+                    <p className="text-xs text-white/60 leading-relaxed">{notif.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Calendar Placeholder */}
+          <div className="bg-white rounded-[2.5rem] p-10 shadow-2xl shadow-[#274dad]/5 border border-[#85e4fb]/10">
+             <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xl font-black text-[#274dad]">Lịch Học Thuật</h3>
+                <Calendar className="w-6 h-6 text-[#2099e9]" />
+             </div>
+             <div className="flex flex-col items-center justify-center py-10 space-y-4 border-2 border-dashed border-[#e4f2f0] rounded-[2rem]">
+                <div className="w-16 h-16 bg-[#e4f2f0] rounded-full flex items-center justify-center">
+                    <AlertCircle className="w-8 h-8 text-[#274dad]/20" />
+                </div>
+                <p className="text-sm font-bold text-slate-400">Không có sự kiện sắp tới</p>
+                <button className="px-6 py-2 bg-[#2099e9] text-white rounded-xl font-black text-xs hover:bg-[#274dad] transition-all">
+                  Thêm Sự Kiện
+                </button>
+             </div>
+          </div>
+
         </div>
+
       </div>
+
     </div>
   );
 };
 
 export default TeacherDashboard;
+
+

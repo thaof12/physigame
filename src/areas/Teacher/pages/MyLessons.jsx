@@ -181,7 +181,7 @@ const MyLessons = () => {
                     <span className={`inline-block px-2 py-1 rounded-lg text-xs font-medium ${
                       lesson.status === 'published'
                         ? 'bg-emerald-500/20 text-emerald-400'
-                        : 'bg-amber-500/20 text-amber-400'
+                        : 'bg-blue-500/20 text-blue-400'
                     }`}>
                       {lesson.status === 'published' ? 'Đã xuất bản' : 'Bản nháp'}
                     </span>
@@ -223,3 +223,5 @@ const MyLessons = () => {
 };
 
 export default MyLessons;
+
+

@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700;1,900&family=Montserrat:wght@900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital,wght@0,400;1,400&family=Playfair+Display:ital,wght@1,700;1,900&family=Montserrat:wght@900&display=swap');
+
+.font-premium-serif {
+  font-family: 'Instrument Serif', serif;
+}
 
 @tailwind base;
 @tailwind components;
@@ -10,25 +14,26 @@
 
 :root {
   /* Surface */
-  --pg-ivory:       #FDFCF8;
-  --pg-cream:       #FEFBF6;
+  --pg-ivory:       #FFFFFF;
+  --pg-cream:       #e4f2f0;
   --pg-white:       #FFFFFF;
-  --pg-warm-gray:   #F8F4EF;
+  --pg-warm-gray:   #F8FAFC;
+  --pg-ice:         #e4f2f0;
 
-  /* Brand — Brass / Copper / Gold */
-  --pg-brass:       #B87333;
-  --pg-copper:      #8C5523;
-  --pg-walnut:      #4A3728;
-  --pg-gold:        #D4AF37;
-  --pg-gold-light:  #F9F1DC;
+  /* Brand — Modern Blue Scientific */
+  --pg-brass:       #274dad;
+  --pg-copper:      #2099e9;
+  --pg-walnut:      #2a4095;
+  --pg-gold:        #44b5d7;
+  --pg-gold-light:  #85e4fb;
 
   /* Functional Accents */
-  --pg-cyan:        #0E7490;
+  --pg-cyan:        #44b5d7;
   --pg-emerald:     #10B981;
   --pg-rose:        #F43F5E;
-  --pg-indigo:      #6366F1;
-  --pg-amber:       #F59E0B;
-  --pg-sky:         #0EA5E9;
+  --pg-indigo:      #274dad;
+  --pg-amber:       #2099e9;
+  --pg-sky:         #85e4fb;
 
   /* Text */
   --pg-text:        #334155;
@@ -36,13 +41,13 @@
   --pg-text-muted:  #64748B;
   --pg-text-light:  #94A3B8;
 
-  /* Borders & Shadows - More subtle and premium */
-  --pg-border:      #E5E7EB;
+  /* Borders & Shadows - Updated for Blue Theme */
+  --pg-border:      #E2E8F0;
   --pg-border-light:#F1F5F9;
-  --pg-shadow-sm:   0 2px 4px rgba(0,0,0,0.02);
-  --pg-shadow:      0 10px 30px -10px rgba(184,115,51,0.08);
-  --pg-shadow-lg:   0 20px 50px -15px rgba(184,115,51,0.12);
-  --pg-shadow-premium: 0 40px 80px -20px rgba(184,115,51,0.15);
+  --pg-shadow-sm:   0 2px 4px rgba(39,77,173,0.02);
+  --pg-shadow:      0 10px 30px -10px rgba(39,77,173,0.08);
+  --pg-shadow-lg:   0 20px 50px -15px rgba(39,77,173,0.12);
+  --pg-shadow-premium: 0 40px 80px -20px rgba(39,77,173,0.15);
 
   /* Legacy compat */
   --bg: var(--pg-ivory);
@@ -52,11 +57,11 @@
   --primary: var(--pg-brass);
   --accent: var(--pg-copper);
   --glass-bg: rgba(255,255,255,0.7);
-  --glass-border: rgba(184,115,51,0.12);
+  --glass-border: rgba(39,77,173,0.12);
   --shadow: var(--pg-shadow);
   --input-bg: #FFFFFF;
   --input-text: #1E293B;
-  --input-border: #E5E7EB;
+  --input-border: #E2E8F0;
   --input-placeholder: #94A3B8;
 }
 
@@ -69,30 +74,6 @@ html, body, #root {
 
 html {
   scroll-behavior: smooth;
-}
-
-/* Mobile game/canvas ergonomics */
-.game-surface {
-  overscroll-behavior: contain;
-}
-
-@media (max-width: 1024px) {
-  .game-surface {
-    touch-action: manipulation;
-  }
-
-  .game-surface canvas {
-    max-width: 100% !important;
-    height: auto !important;
-    touch-action: none;
-    -webkit-user-select: none;
-    user-select: none;
-  }
-
-  .game-surface button,
-  .game-surface [role='button'] {
-    min-height: 44px;
-  }
 }
 
 @layer base {
@@ -129,7 +110,7 @@ html {
   }
 
   .input-field {
-    @apply w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-600 transition-all font-medium;
+    @apply w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-600 transition-all font-medium;
     background: var(--input-bg);
     color: var(--input-text);
     border-color: var(--input-border);
@@ -138,8 +119,8 @@ html {
   /* Graph Grid Utility */
   .graph-grid {
     background-image: 
-      linear-gradient(rgba(184, 115, 51, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(184, 115, 51, 0.05) 1px, transparent 1px);
+      linear-gradient(rgba(39, 77, 173, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(39, 77, 173, 0.05) 1px, transparent 1px);
     background-size: 20px 20px;
   }
 
@@ -150,10 +131,10 @@ html {
 
   /* Premium Card */
   .card-premium {
-    @apply rounded-[2rem] bg-white border border-slate-100 shadow-[0_20px_50px_-12px_rgba(184,115,51,0.08)] transition-all duration-500;
+    @apply rounded-[2rem] bg-white border border-slate-100 shadow-[0_20px_50px_-12px_rgba(39,77,173,0.08)] transition-all duration-500;
   }
   .card-premium:hover {
-    @apply shadow-[0_30px_70px_-15px_rgba(184,115,51,0.15)] -translate-y-2;
+    @apply shadow-[0_30px_70px_-15px_rgba(39,77,173,0.15)] -translate-y-2;
   }
 
   /* Brass button */
@@ -163,15 +144,15 @@ html {
     font-weight: 800;
     border-radius: 1rem;
     padding: 1rem 2rem;
-    box-shadow: 0 4px 0 rgba(74,55,40,0.4), 0 10px 25px rgba(184,115,51,0.2);
+    box-shadow: 0 4px 0 rgba(39,55,140,0.4), 0 10px 25px rgba(39,77,173,0.2);
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   .pg-btn-brass:hover {
-    box-shadow: 0 2px 0 rgba(74,55,40,0.4), 0 15px 35px rgba(184,115,51,0.3);
+    box-shadow: 0 2px 0 rgba(39,55,140,0.4), 0 15px 35px rgba(39,77,173,0.3);
     transform: translateY(-2px);
   }
   .pg-btn-brass:active {
-    box-shadow: 0 0 0 rgba(74,55,40,0.4);
+    box-shadow: 0 0 0 rgba(39,55,140,0.4);
     transform: translateY(2px);
   }
 }
@@ -210,9 +191,25 @@ html {
   .animate-spin-slow-reverse {
     animation: spin-slow-reverse 35s linear infinite;
   }
+  .animate-station-enter {
+    animation: stationEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* ═══════════════ KEYFRAMES ═══════════════ */
+
+@keyframes stationEnter {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 
 @keyframes float-slow {
   0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
@@ -258,8 +255,8 @@ html {
 }
 
 @keyframes gyro-glow {
-  0%, 100% { filter: drop-shadow(0 0 8px rgba(184,115,51,0.3)); }
-  50%      { filter: drop-shadow(0 0 20px rgba(184,115,51,0.6)); }
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(39,77,173,0.3)); }
+  50%      { filter: drop-shadow(0 0 20px rgba(39,77,173,0.6)); }
 }
 
 @keyframes spin-slow {
@@ -277,16 +274,6 @@ html {
   scroll-behavior: smooth;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .game-surface *,
-  .game-surface *::before,
-  .game-surface *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
 /* Custom scrollbar for webkit */
 ::-webkit-scrollbar {
   width: 8px;
@@ -300,4 +287,23 @@ html {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--pg-brass);
+}
+
+
+/* Physics Field Pattern */
+.physics-field-grid {
+  background-image: radial-gradient(circle at 2px 2px, rgba(39, 77, 173, 0.08) 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+.physics-wave-bg {
+  background: radial-gradient(circle at 50% 50%, rgba(39, 77, 173, 0.03) 0%, transparent 70%);
+}
+
+.physics-annotation {
+  font-family: monospace;
+  font-size: 10px;
+  color: #CBD5E1;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
 }

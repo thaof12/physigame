@@ -480,7 +480,7 @@ const OhmLawLab = () => {
                   <div className="flex items-center gap-3">
                     <button onClick={() => setVoltage(v => Math.max(1, v - 1))} className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg"><Minus size={16} /></button>
                     <input type="range" min="1" max="12" step="0.5" value={voltage}
-                      onChange={(e) => setVoltage(parseFloat(e.target.value))} className="flex-1 accent-yellow-500" />
+                      onChange={(e) => setVoltage(parseFloat(e.target.value))} className="flex-1 accent-blue-500" />
                     <button onClick={() => setVoltage(v => Math.min(12, v + 1))} className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg"><Plus size={16} /></button>
                   </div>
                   <div className="text-center text-xl font-mono text-yellow-400 mt-1 param-value">{voltage.toFixed(1)} V</div>
@@ -575,7 +575,7 @@ const OhmLawLab = () => {
             <p className="text-gray-300 text-center mb-6">{guideSteps[guideStep].content}</p>
             <div className="flex justify-center gap-2 mb-6">
               {guideSteps.map((_, i) => (
-                <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all ${i === guideStep ? 'bg-yellow-500 scale-125' : 'bg-gray-600'}`} />
+                <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all ${i === guideStep ? 'bg-blue-500 scale-125' : 'bg-gray-600'}`} />
               ))}
             </div>
             <div className="flex justify-between">
@@ -584,9 +584,9 @@ const OhmLawLab = () => {
                 <ChevronLeft size={18} /> Trước
               </button>
               {guideStep === guideSteps.length - 1 ? (
-                <button onClick={() => setShowGuide(false)} className="px-5 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg shadow-lg shadow-yellow-600/30">Bắt đầu</button>
+                <button onClick={() => setShowGuide(false)} className="px-5 py-2 bg-yellow-600 hover:bg-blue-500 rounded-lg shadow-lg shadow-yellow-600/30">Bắt đầu</button>
               ) : (
-                <button onClick={() => setGuideStep(guideStep + 1)} className="flex items-center gap-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg">Tiếp <ChevronRight size={18} /></button>
+                <button onClick={() => setGuideStep(guideStep + 1)} className="flex items-center gap-1 px-4 py-2 bg-yellow-600 hover:bg-blue-500 rounded-lg">Tiếp <ChevronRight size={18} /></button>
               )}
             </div>
           </div>
@@ -626,3 +626,4 @@ const OhmLawLab = () => {
 };
 
 export default OhmLawLab;
+

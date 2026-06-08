@@ -60,24 +60,24 @@ const GameHUDWrapper = ({
   const accentColor = type === 'lab' ? 'border-emerald-500/20' : 'border-purple-500/20';
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 font-sans game-hud-root">
+    <div className="flex flex-col min-h-screen bg-slate-950 font-sans">
 
       {/* ── TOP HUD BAR ── */}
       <header className={`sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl border-b ${accentColor} shadow-2xl`}>
-        <div className="max-w-screen-2xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="max-w-screen-2xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
 
           {/* LEFT: back + breadcumb */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <button
               onClick={handleBack}
-              className="group flex items-center gap-2 text-slate-400 hover:text-white transition-colors bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl border border-slate-700 flex-shrink-0"
+              className="group flex items-center gap-2 text-slate-400 hover:text-white transition-colors bg-slate-800 hover:bg-slate-700 p-2 rounded-xl border border-slate-700 flex-shrink-0"
               title={backLabel}
             >
               <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
             </button>
 
             {/* Breadcrumb */}
-            <nav className="hidden sm:flex items-center gap-1.5 text-sm overflow-hidden">
+            <nav className="flex items-center gap-1.5 text-sm overflow-hidden">
               <button
                 onClick={() => navigate('/program/physics')}
                 className="text-slate-500 hover:text-slate-300 transition-colors flex-shrink-0"
@@ -117,7 +117,7 @@ const GameHUDWrapper = ({
             {infoText && (
               <button
                 onClick={() => setShowInfo(true)}
-                className="flex items-center gap-2 px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 rounded-xl transition-all text-sm font-medium"
+                className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 rounded-xl transition-all text-sm font-medium"
                 title="Hướng dẫn"
               >
                 <BookOpen className="w-4 h-4" />
@@ -133,24 +133,17 @@ const GameHUDWrapper = ({
             </button>
           </div>
         </div>
-
-        <div className="sm:hidden px-3 pb-2">
-          <p className="text-white font-bold text-sm truncate">{title}</p>
-          {subtitle && <p className="text-slate-500 text-xs truncate">{subtitle}</p>}
-        </div>
       </header>
 
       {/* ── GAME / LAB CANVAS AREA ── */}
-      <main className="flex-1 relative overflow-hidden game-surface pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <main className="flex-1 relative overflow-hidden">
         {/* Subtle top glow line matching type */}
         <div
           className={`absolute top-0 left-0 right-0 h-px ${
             type === 'lab' ? 'bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent' : 'bg-gradient-to-r from-transparent via-purple-500/50 to-transparent'
           }`}
         />
-        <div className="h-full w-full">
-          {children}
-        </div>
+        {children}
       </main>
 
       {/* ── INFO MODAL ── */}

@@ -72,7 +72,7 @@ const MyExercises = () => {
         </div>
         <button
           onClick={() => navigate('/teacher/create?type=exercise')}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl text-white text-sm font-medium hover:from-amber-400 hover:to-orange-500 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-orange-600 rounded-xl text-white text-sm font-medium hover:from-blue-400 hover:to-cyan-500 transition-all"
         >
           <Plus className="w-4 h-4" />
           Tạo bài tập mới
@@ -88,13 +88,13 @@ const MyExercises = () => {
             placeholder="Tìm kiếm bài tập..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+            className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50"
           />
         </div>
         <select
           value={filterGrade}
           onChange={(e) => setFilterGrade(e.target.value)}
-          className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50"
+          className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500/50"
         >
           <option value="all">Tất cả lớp</option>
           {[6, 7, 8, 9, 10, 11, 12].map(grade => (
@@ -111,7 +111,7 @@ const MyExercises = () => {
             className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5 hover:border-slate-700/50 transition-all"
           >
             <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-orange-600 rounded-xl flex items-center justify-center">
                 <FileQuestion className="w-6 h-6 text-white" />
               </div>
               <span className={`px-2 py-1 rounded-lg text-xs font-medium ${
@@ -166,7 +166,7 @@ const MyExercises = () => {
           <p className="text-slate-400">Không tìm thấy bài tập nào</p>
           <button
             onClick={() => navigate('/teacher/create?type=exercise')}
-            className="mt-4 text-amber-400 hover:text-amber-300 text-sm"
+            className="mt-4 text-blue-400 hover:text-blue-300 text-sm"
           >
             + Tạo bài tập đầu tiên
           </button>
@@ -177,3 +177,4 @@ const MyExercises = () => {
 };
 
 export default MyExercises;
+
