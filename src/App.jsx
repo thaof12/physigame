@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { GameProgressProvider } from './contexts/GameProgressContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Home from './pages/Home';
+import DifyChatbot from './components/AIChatbot/DifyChatbot';
 
 import "./index.css";
 
@@ -277,6 +278,7 @@ const AppContent = () => {
           <Route path="create" element={<TeacherDashboard />} />
         </Route>
       </Routes>
+      <DifyChatbot />
     </div>
   )
 }
