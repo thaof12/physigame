@@ -466,7 +466,7 @@ const LensOpticsLab = () => {
             <div className="relative">
               <canvas
                 ref={canvasRef}
-                className="w-full"
+                className="w-full lens-optics-canvas"
                 style={{ height: '400px' }}
               />
 

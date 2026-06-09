@@ -74,7 +74,6 @@ import LightInterferenceLab from './areas/Vatly/VirtualLab/experiments/LightInte
 // Admin Panel
 import { AdminAuthProvider } from './areas/Admin/contexts/AdminAuthContext';
 import AdminLayout from './areas/Admin/layouts/AdminLayout';
-import AdminLogin from './areas/Admin/pages/AdminLogin';
 import AdminDashboard from './areas/Admin/pages/AdminDashboard';
 import AdminUsers from './areas/Admin/pages/AdminUsers';
 import AdminLessons from './areas/Admin/pages/AdminLessons';
@@ -241,6 +240,9 @@ const AppContent = () => {
         <Route path="/advanced-physics-challenge/force-arena" element={<ProtectedRoute><ForceArena /></ProtectedRoute>} />
         <Route path="/advanced-physics-challenge/force-world" element={<ProtectedRoute><ForceWorldGame /></ProtectedRoute>} />
 
+
+
+        <Route path="/admin/login" element={<Navigate to="/login" replace />} />
 
         <Route path="/admin" element={
           <AdminAuthProvider>

@@ -175,6 +175,25 @@ const PKBattleRoom = () => {
   // Challenge game state
   const [challengeStarted, setChallengeStarted] = useState(false);
 
+  // Ref to hold latest state for socket event closures
+  const latestStateRef = useRef({
+    opponent,
+    myAnswers,
+    myScore,
+    opponentScore,
+    user
+  });
+
+  useEffect(() => {
+    latestStateRef.current = {
+      opponent,
+      myAnswers,
+      myScore,
+      opponentScore,
+      user
+    };
+  }, [opponent, myAnswers, myScore, opponentScore, user]);
+
   // Get current round (either from new rounds system or legacy questions)
   const currentRound = rounds.length > 0 ? rounds[currentRoundIndex] : null;
   const currentQuestion = currentRound?.type === 'quiz' ? currentRound : questions[currentRoundIndex];
@@ -184,7 +203,7 @@ const PKBattleRoom = () => {
 
   // Socket connection
   useEffect(() => {
-    const serverUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin);
+    const serverUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5002' : window.location.origin);
     socketRef.current = io(serverUrl, {
       transports: ['websocket', 'polling']
     });
@@ -256,26 +275,51 @@ const PKBattleRoom = () => {
       setGameStatus('countdown');
     });
 
-    socket.on('pk:opponent-answered', () => {
+    socket.on('pk:opponent-answered', (data) => {
       setOpponentAnswered(true);
+      if (data && typeof data.opponentScore === 'number') {
+        setOpponentScore(data.opponentScore);
+      }
     });
 
-    socket.on('pk:question-result', (data) => {
-      setOpponentScore(data.opponentScore);
+    socket.on('pk:player-left', (data) => {
+      console.log('Opponent left:', data?.displayName);
+      setOpponent(prev => prev ? { ...prev, disconnected: true } : null);
     });
 
     socket.on('pk:game-end', (data) => {
+      console.log('pk:game-end received:', data);
+      
+      const { opponent: currentOpponent, myAnswers: currentMyAnswers, user: currentUser } = latestStateRef.current;
+      
+      const opponentUid = currentOpponent?.firebaseUid;
+      const finalOpponentScore = data.scores[opponentUid] || 0;
+      const finalMyScore = data.scores[currentUser?.uid] || 0;
+      
+      let finalWinner = 'draw';
+      if (data.winner === currentUser?.uid) {
+        finalWinner = 'me';
+      } else if (data.winner === 'draw') {
+        finalWinner = 'draw';
+      } else {
+        finalWinner = 'opponent';
+      }
+
       navigate('/pk-battle/result', {
         state: {
           roomId,
           playerName,
           avatarUrl,
-          myScore: data.myScore,
-          opponentScore: data.opponentScore,
-          opponent,
-          winner: data.winner,
-          myAnswers: data.myAnswers,
-          rewards: data.rewards
+          myScore: finalMyScore,
+          opponentScore: finalOpponentScore,
+          opponent: currentOpponent,
+          winner: finalWinner,
+          myAnswers: currentMyAnswers,
+          gameSettings,
+          rewards: {
+            xp: finalWinner === 'me' ? 100 : finalWinner === 'draw' ? 50 : 25,
+            coins: finalWinner === 'me' ? 50 : finalWinner === 'draw' ? 25 : 10
+          }
         }
       });
     });
@@ -486,115 +530,169 @@ const PKBattleRoom = () => {
         setGameStatus('playing');
       }
     } else {
-      // Game finished
-      const winner = myScore > opponentScore ? 'me' : myScore < opponentScore ? 'opponent' : 'draw';
-      navigate('/pk-battle/result', {
-        state: {
-          roomId,
-          playerName,
-          avatarUrl,
-          myScore,
-          opponentScore,
-          opponent,
-          winner,
-          myAnswers,
-          gameSettings,
-          rewards: {
-            xp: winner === 'me' ? 100 : winner === 'draw' ? 50 : 25,
-            coins: winner === 'me' ? 50 : winner === 'draw' ? 25 : 10
-          }
-        }
-      });
+      // Game finished - notify server and enter waiting status
+      if (socketRef.current) {
+        socketRef.current.emit('pk:player-finished', { roomId });
+      }
+      setGameStatus('waiting-opponent');
     }
   };
+
+  // Waiting for opponent screen
+  if (gameStatus === 'waiting-opponent') {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] font-sans pb-20 overflow-x-hidden flex flex-col items-center justify-center relative">
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-200/20 blur-[130px] rounded-full"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-indigo-100/30 blur-[120px] rounded-full"></div>
+        </div>
+
+        <div className="relative z-10 max-w-md w-full mx-auto px-6 flex flex-col items-center text-center">
+          <div className="w-24 h-24 bg-white/80 backdrop-blur-2xl rounded-[2rem] border-2 border-white shadow-xl flex items-center justify-center mb-8 animate-bounce">
+            <span className="text-4xl">🏁</span>
+          </div>
+          
+          <h1 className="text-3xl font-black text-slate-800 mb-3 tracking-tight">
+            Bạn đã hoàn thành!
+          </h1>
+          <p className="text-slate-500 font-bold mb-8 text-sm leading-relaxed">
+            Đang chờ đối thủ {opponent?.displayName ? `(${opponent.displayName})` : ''} hoàn thành các câu hỏi còn lại...
+          </p>
+
+          <div className="flex items-center gap-3 px-6 py-4 bg-white/80 backdrop-blur-xl border-2 border-white shadow-lg rounded-2xl">
+            <div className="animate-spin rounded-full h-5 w-5 border-3 border-[#274dad] border-t-transparent"></div>
+            <span className="text-slate-600 font-black text-xs uppercase tracking-wider">Đang đồng bộ kết quả</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Waiting screen
   if (gameStatus === 'waiting') {
     return (
-      <div className="pk-matchmaking">
-        <div className="pk-matchmaking-container">
-          <h2 style={{ color: 'white', fontSize: '2rem', marginBottom: 20 }}>
-            ⚔️ Phòng: {roomId}
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 20 }}>
-            {opponent ? 'Đối thủ đã vào phòng!' : 'Đang chờ đối thủ tham gia...'}
-          </p>
-          <p style={{ 
-            color: '#fbbf24', 
-            marginBottom: 40, 
-            fontSize: '0.9rem',
-            background: 'rgba(251, 191, 36, 0.1)',
-            padding: '10px 20px',
-            borderRadius: 10,
-            border: '1px solid rgba(251, 191, 36, 0.3)'
-          }}>
-            📋 Chia sẻ mã phòng <strong>{roomId}</strong> cho bạn bè để tham gia!
-          </p>
+      <div className="min-h-screen bg-[#f8fafc] font-sans pb-20 overflow-x-hidden flex flex-col items-center justify-center relative">
+        {/* ── BACKGROUND ELEMENTS ── */}
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-200/20 blur-[130px] rounded-full"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-indigo-100/30 blur-[120px] rounded-full"></div>
           
-          <div className="pk-vs-container">
-            <div className="pk-player-card">
-              <div className="pk-player-avatar">
-                <img src={avatarUrl} alt="You" />
-              </div>
-              <div className="pk-player-name">{playerName}</div>
-              <div style={{ color: '#10b981', marginTop: 10 }}>✓ Sẵn sàng</div>
+          {/* Subtle Geometric Grid */}
+          <div className="absolute inset-0 opacity-[0.03]" 
+            style={{ 
+              backgroundImage: 'radial-gradient(#274dad 1px, transparent 1px)', 
+              backgroundSize: '40px 40px' 
+            }}
+          ></div>
+        </div>
+
+        <div className="relative z-10 max-w-4xl w-full mx-auto px-6 flex flex-col items-center justify-center">
+          {/* ── HEADER TITLE ── */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 border border-blue-100 rounded-full text-[#274dad] text-[10px] font-black tracking-[0.2em] mb-4 shadow-sm uppercase">
+              ⚔️ Đấu trường PK
             </div>
-            
-            <div className="pk-vs-icon">VS</div>
-            
-            <div className="pk-player-card searching">
-              <div className="pk-player-avatar">
-                {opponent?.avatar ? (
-                  <img src={opponent.avatar} alt="Opponent" />
-                ) : (
-                  <div className="pk-spinner"></div>
-                )}
+            <h1 className="text-3xl md:text-5xl font-black text-slate-800 leading-tight mb-2 tracking-tighter">
+              Phòng: <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#21439b] to-[#274dad]">{roomId}</span>
+            </h1>
+            <p className="text-slate-400 text-base font-medium">
+              {opponent ? 'Đối thủ đã vào phòng!' : 'Đang chờ đối thủ tham gia...'}
+            </p>
+          </div>
+
+          {/* ── SHARE INFO CARD ── */}
+          <div className="bg-white/80 backdrop-blur-2xl rounded-2xl px-6 py-3 border-2 border-white shadow-[0_15px_35px_rgba(39,77,173,0.05)] text-center mb-8 flex flex-col sm:flex-row items-center gap-3">
+            <span className="text-slate-500 font-bold text-sm">📋 Chia sẻ mã phòng cho bạn bè:</span>
+            <span className="text-[#274dad] font-black text-lg tracking-wider bg-slate-50 px-4 py-1.5 rounded-xl border border-slate-100">{roomId}</span>
+          </div>
+          
+          {/* ── VS CARD CONTAINER ── */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 w-full max-w-2xl mb-12">
+            {/* Player Card */}
+            <div className="bg-white/80 backdrop-blur-2xl rounded-[2.5rem] p-8 border-2 border-white shadow-[0_20px_50px_rgba(0,0,0,0.04)] flex flex-col items-center w-64 hover:shadow-[0_20px_50px_rgba(39,77,173,0.08)] transition-all duration-300">
+              <div className="relative w-32 h-32 mb-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#274dad] to-[#21439b] rounded-[2rem] rotate-6 opacity-5"></div>
+                <div className="absolute inset-0 bg-white rounded-[2rem] border-2 border-slate-100 flex items-center justify-center shadow-md overflow-hidden">
+                  <img src={avatarUrl} alt="You" className="w-full h-full object-cover" />
+                </div>
               </div>
-              <div className="pk-player-name">{opponent?.displayName || '???'}</div>
-              <div style={{ color: opponent ? '#10b981' : 'rgba(255,255,255,0.5)', marginTop: 10 }}>
-                {opponent?.displayName ? '✓ Sẵn sàng' : 'Đang chờ...'}
+              <h3 className="text-slate-800 font-black text-lg mb-2 truncate max-w-[180px]">{playerName}</h3>
+              <div className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold">
+                ✓ Sẵn sàng
               </div>
+            </div>
+
+            {/* VS Icon */}
+            <div className="relative shrink-0 w-16 h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg rotate-45">
+              <div className="absolute inset-0 bg-red-400 blur-xl opacity-20 animate-pulse"></div>
+              <span className="text-white font-black text-xl -rotate-45">VS</span>
+            </div>
+
+            {/* Opponent Card */}
+            <div className={`bg-white/80 backdrop-blur-2xl rounded-[2.5rem] p-8 border-2 border-white shadow-[0_20px_50px_rgba(0,0,0,0.04)] flex flex-col items-center w-64 transition-all duration-300 ${!opponent ? 'border-dashed border-slate-300 bg-white/40' : 'hover:shadow-[0_20px_50px_rgba(39,77,173,0.08)]'}`}>
+              <div className="relative w-32 h-32 mb-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-[2rem] rotate-6 opacity-5"></div>
+                <div className="absolute inset-0 bg-white rounded-[2rem] border-2 border-slate-100 flex items-center justify-center shadow-md overflow-hidden">
+                  {opponent?.avatar ? (
+                    <img src={opponent.avatar} alt="Opponent" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-slate-50 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#274dad] border-t-transparent"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <h3 className="text-slate-800 font-black text-lg mb-2 truncate max-w-[180px]">
+                {opponent?.displayName || 'Đang tìm...'}
+              </h3>
+              {opponent ? (
+                <div className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold">
+                  ✓ Sẵn sàng
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-400 rounded-full text-xs font-bold animate-pulse">
+                  Đang chờ...
+                </div>
+              )}
             </div>
           </div>
 
-          {opponent && (
-            <p style={{ color: '#10b981', marginTop: 20, marginBottom: 20 }}>
-              🎮 Trận đấu sẽ bắt đầu khi cả hai sẵn sàng...
-            </p>
-          )}
-          
-          {/* Dev mode: Start without opponent for testing */}
-          {!opponent && process.env.NODE_ENV === 'development' && (
-            <button 
-              className="pk-start-btn" 
-              onClick={() => {
-                // Generate rounds for testing
-                const testRounds = generateBattleRounds(gameSettings);
-                setRounds(testRounds);
-                setOpponent({
-                  displayName: 'Bot Tester',
-                  avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=bot&backgroundColor=b6e3f4`
-                });
-                setGameStatus('countdown');
-              }}
-              style={{
-                marginBottom: 15,
-                padding: '12px 24px',
-                background: 'rgba(139, 92, 246, 0.3)',
-                border: '1px dashed rgba(139, 92, 246, 0.5)',
-                borderRadius: 12,
-                color: '#a78bfa',
-                cursor: 'pointer',
-                fontSize: '0.9rem'
-              }}
-            >
-              🧪 Test Mode - Bắt đầu (dev)
-            </button>
-          )}
-          
-          <button className="pk-cancel-btn" onClick={() => navigate('/pk-battle')}>
-            Rời phòng
-          </button>
+          {/* ── BOTTOM ACTIONS ── */}
+          <div className="flex flex-col items-center gap-4">
+            {opponent && (
+              <p className="text-emerald-500 font-bold text-sm animate-bounce">
+                🎮 Trận đấu sẽ bắt đầu khi cả hai sẵn sàng...
+              </p>
+            )}
+
+            <div className="flex items-center gap-4">
+              {/* Dev mode: Start without opponent for testing */}
+              {!opponent && process.env.NODE_ENV === 'development' && (
+                <button 
+                  className="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-200 border-dashed rounded-2xl text-slate-600 font-bold text-sm transition-all" 
+                  onClick={() => {
+                    // Generate rounds for testing
+                    const testRounds = generateBattleRounds(gameSettings);
+                    setRounds(testRounds);
+                    setOpponent({
+                      displayName: 'Bot Tester',
+                      avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=bot&backgroundColor=b6e3f4`
+                    });
+                    setGameStatus('countdown');
+                  }}
+                >
+                  🧪 Test Mode - Bắt đầu (dev)
+                </button>
+              )}
+              
+              <button 
+                className="px-8 py-3.5 bg-white hover:bg-rose-50 border-2 border-rose-100 hover:border-rose-200 text-rose-500 rounded-2xl font-black text-sm tracking-wider shadow-sm transition-all"
+                onClick={() => navigate('/pk-battle')}
+              >
+                Rời phòng
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -603,31 +701,29 @@ const PKBattleRoom = () => {
   // Countdown screen
   if (gameStatus === 'countdown') {
     return (
-      <div className="pk-matchmaking">
-        <div className="pk-matchmaking-container">
-          <h2 style={{ color: 'white', fontSize: '1.5rem', marginBottom: 40 }}>
+      <div className="min-h-screen bg-[#f8fafc] font-sans flex flex-col items-center justify-center relative overflow-hidden">
+        {/* Background elements */}
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-200/20 blur-[130px] rounded-full"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] bg-indigo-100/30 blur-[120px] rounded-full"></div>
+          <div className="absolute inset-0 opacity-[0.03]" 
+            style={{ 
+              backgroundImage: 'radial-gradient(#274dad 1px, transparent 1px)', 
+              backgroundSize: '40px 40px' 
+            }}
+          ></div>
+        </div>
+
+        <div className="relative z-10 text-center">
+          <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight mb-10">
             Trận đấu sắp bắt đầu!
           </h2>
           
-          <div style={{
-            width: 200,
-            height: 200,
-            borderRadius: '50%',
-            background: 'var(--pk-gradient-battle)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '6rem',
-            fontWeight: 900,
-            color: 'white',
-            margin: '0 auto',
-            animation: 'pulse 1s infinite',
-            boxShadow: '0 0 100px rgba(255, 107, 107, 0.5)'
-          }}>
+          <div className="w-48 h-48 rounded-[2.5rem] bg-gradient-to-br from-[#274dad] to-[#21439b] flex items-center justify-center text-7xl font-black text-white mx-auto shadow-[0_20px_50px_rgba(39,77,173,0.3)] animate-pulse">
             {countdown}
           </div>
           
-          <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: 40, fontSize: '1.2rem' }}>
+          <p className="text-slate-400 font-bold text-lg mt-10">
             Chuẩn bị sẵn sàng!
           </p>
         </div>

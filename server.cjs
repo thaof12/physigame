@@ -285,11 +285,12 @@ io.on('connection', (socket) => {
 
       activeRooms.set(roomId, {
         roomId,
-        players: [waitingPlayer, playerSockets.get(socket.id)],
+        players: [], // Will join via pk:join-room in PKBattleRoom
         questions,
         currentQuestion: 0,
         scores: {},
-        status: 'playing'
+        gameSettings,
+        status: 'waiting'
       });
 
       const idx = matchmakingQueue.findIndex(p => p.socketId === waitingPlayer.socketId);
@@ -404,7 +405,7 @@ io.on('connection', (socket) => {
       setTimeout(() => {
         io.to(roomId).emit('pk:game-start', {
           gameSettings: room.gameSettings,
-          questions: gameMode === 'quiz' ? getRandomQuestions(room.gameSettings?.totalQuestions || 10) : null
+          questions: gameMode === 'quiz' ? (room.questions?.length ? room.questions : getRandomQuestions(room.gameSettings?.totalQuestions || 10)) : null
         });
       }, 500);
     }
@@ -428,15 +429,103 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Submit challenge result
+  socket.on('pk:submit-challenge', (data) => {
+    const { roomId, roundIndex, gameId, completed, score, pointsEarned, responseTime } = data;
+
+    const room = activeRooms.get(roomId);
+    if (room) {
+      const player = playerSockets.get(socket.id);
+      if (player) {
+        room.scores[player.firebaseUid] = (room.scores[player.firebaseUid] || 0) + (pointsEarned || 0);
+      }
+
+      socket.to(roomId).emit('pk:opponent-answered', {
+        questionIndex: roundIndex,
+        opponentScore: room.scores[player?.firebaseUid] || 0
+      });
+    }
+  });
+
+  // Player finished all rounds
+  socket.on('pk:player-finished', (data) => {
+    const { roomId } = data;
+    const room = activeRooms.get(roomId);
+    if (room) {
+      const player = playerSockets.get(socket.id);
+      if (player) {
+        if (!room.finishedPlayers) {
+          room.finishedPlayers = new Set();
+        }
+        room.finishedPlayers.add(player.firebaseUid);
+        console.log(`🏁 Player ${player.displayName} finished in room ${roomId}. Total finished: ${room.finishedPlayers.size}/${room.players.length}`);
+
+        // Check if all active players in the room have finished
+        // (or if only 1 player is left in the room)
+        const activePlayerUids = room.players.map(p => p.firebaseUid);
+        const allFinished = activePlayerUids.every(uid => room.finishedPlayers.has(uid));
+
+        if (allFinished || room.players.length < 2) {
+          // Calculate winner based on scores
+          let winnerUid = 'draw';
+          const p1 = room.players[0];
+          const p2 = room.players[1];
+          
+          if (p1 && p2) {
+            const score1 = room.scores[p1.firebaseUid] || 0;
+            const score2 = room.scores[p2.firebaseUid] || 0;
+            if (score1 > score2) {
+              winnerUid = p1.firebaseUid;
+            } else if (score2 > score1) {
+              winnerUid = p2.firebaseUid;
+            }
+          } else if (p1) {
+            winnerUid = p1.firebaseUid;
+          }
+
+          console.log(`🏆 Game ended in room ${roomId}. Winner: ${winnerUid}`);
+          io.to(roomId).emit('pk:game-end', {
+            scores: room.scores,
+            winner: winnerUid
+          });
+        }
+      }
+    }
+  });
+
   // Leave room
   socket.on('pk:leave-room', (data) => {
     const { roomId } = data;
     socket.leave(roomId);
-    socket.to(roomId).emit('pk:player-left');
+    
+    const room = activeRooms.get(roomId);
+    if (room) {
+      const playerIdx = room.players.findIndex(p => p.socketId === socket.id);
+      if (playerIdx > -1) {
+        const removedPlayer = room.players.splice(playerIdx, 1)[0];
+        console.log(`🚪 ${removedPlayer.displayName} left room ${roomId}`);
+        socket.to(roomId).emit('pk:player-left', { displayName: removedPlayer.displayName });
+        
+        // Remove from finished list
+        if (room.finishedPlayers) {
+          room.finishedPlayers.delete(removedPlayer.firebaseUid);
+        }
 
-    const room = io.sockets.adapter.rooms.get(roomId);
-    if (!room || room.size === 0) {
-      activeRooms.delete(roomId);
+        // If remaining player is alone, end game if they finished
+        if (room.players.length === 1) {
+          const remainingPlayer = room.players[0];
+          if (room.finishedPlayers && room.finishedPlayers.has(remainingPlayer.firebaseUid)) {
+            io.to(roomId).emit('pk:game-end', {
+              scores: room.scores,
+              winner: remainingPlayer.firebaseUid
+            });
+          }
+        }
+
+        if (room.players.length === 0) {
+          activeRooms.delete(roomId);
+        }
+      }
     }
   });
 
@@ -453,6 +542,23 @@ io.on('connection', (socket) => {
         const removedPlayer = room.players.splice(playerIdx, 1)[0];
         console.log(`🚪 ${removedPlayer.displayName} removed from room ${roomId}`);
         io.to(roomId).emit('pk:player-left', { displayName: removedPlayer.displayName });
+        
+        // Remove from finished list
+        if (room.finishedPlayers) {
+          room.finishedPlayers.delete(removedPlayer.firebaseUid);
+        }
+
+        // If remaining player is alone, end game if they finished
+        if (room.players.length === 1) {
+          const remainingPlayer = room.players[0];
+          if (room.finishedPlayers && room.finishedPlayers.has(remainingPlayer.firebaseUid)) {
+            io.to(roomId).emit('pk:game-end', {
+              scores: room.scores,
+              winner: remainingPlayer.firebaseUid
+            });
+          }
+        }
+
         if (room.players.length === 0) {
           activeRooms.delete(roomId);
           console.log(`🗑️ Room ${roomId} deleted (empty)`);

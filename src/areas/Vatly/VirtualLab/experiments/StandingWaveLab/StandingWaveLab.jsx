@@ -387,7 +387,7 @@ const StandingWaveLab = () => {
             <div className="relative">
               <canvas
                 ref={canvasRef}
-                className="w-full"
+                className="w-full standing-wave-canvas"
                 style={{ height: '350px' }}
               />
 

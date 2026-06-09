@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
+
 import { supabase } from '../../../config/supabase';
 
 const TeacherAuthContext = createContext();
@@ -13,6 +15,8 @@ export const TeacherAuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const { logout: globalLogout } = useAuth();
+
 
   useEffect(() => {
     checkTeacherAuth();
@@ -54,6 +58,7 @@ export const TeacherAuthProvider = ({ children }) => {
     setTeacher(null);
     setIsAuthenticated(false);
     setIsVerified(false);
+    globalLogout();
   };
 
   const refreshTeacher = async () => {

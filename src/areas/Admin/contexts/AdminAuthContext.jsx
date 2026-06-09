@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
+
 
 const AdminAuthContext = createContext(null);
 
@@ -13,6 +15,8 @@ const ADMIN_CREDENTIALS = {
 export const AdminAuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { logout: globalLogout } = useAuth();
+
 
   useEffect(() => {
     // Check if admin is logged in from localStorage
@@ -48,6 +52,7 @@ export const AdminAuthProvider = ({ children }) => {
   const logout = () => {
     setAdmin(null);
     localStorage.removeItem('physigame_admin');
+    globalLogout();
   };
 
   const value = {

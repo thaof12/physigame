@@ -7,5 +7,5 @@
   "autoBackup": true,
   "backupFrequency": "daily",
   "maxUploadSize": 10,
-  "sessionTimeout": 2
+  "sessionTimeout": 59
 }
