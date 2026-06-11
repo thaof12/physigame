@@ -103,6 +103,10 @@ router.post('/login', async (req, res) => {
       return res.status(404).json({ message: 'User profile not found' });
     }
 
+    if (user.status === 'inactive') {
+      return res.status(403).json({ message: 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.' });
+    }
+
     console.log('✅ Login successful:', { id: user.id, email: user.email });
 
     res.json({
@@ -119,7 +123,8 @@ router.post('/login', async (req, res) => {
         firebaseUid: user.id,
         role: user.role,
         teacherStatus: user.teacher_status,
-        teacherProfile: user.teacher_profile
+        teacherProfile: user.teacher_profile,
+        status: user.status || 'active'
       }
     });
   } catch (error) {
@@ -286,6 +291,10 @@ router.get('/firebase/:firebaseUid', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    if (user.status === 'inactive') {
+      return res.status(403).json({ message: 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.' });
+    }
+
     res.json({
       id: user.id,
       username: user.username,
@@ -299,7 +308,8 @@ router.get('/firebase/:firebaseUid', async (req, res) => {
       firebaseUid: user.id,
       role: user.role,
       teacherStatus: user.teacher_status,
-      teacherProfile: user.teacher_profile
+      teacherProfile: user.teacher_profile,
+      status: user.status || 'active'
     });
   } catch (error) {
     console.error('❌ Error fetching user:', error);
@@ -313,6 +323,10 @@ router.get('/profile/:userId', async (req, res) => {
     const user = await User.findByAnyId(req.params.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.status === 'inactive') {
+      return res.status(403).json({ message: 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.' });
     }
 
     res.json({
@@ -339,6 +353,7 @@ router.put('/profile/:userId', async (req, res) => {
 
     const updates = {};
     if (displayName !== undefined) updates.display_name = displayName;
+    if (avatar !== undefined) updates.avatar = avatar;
 
     if (user.role === 'teacher') {
       const teacherProfile = user.teacher_profile || {};
@@ -365,7 +380,8 @@ router.put('/profile/:userId', async (req, res) => {
         displayName: updated.display_name, 
         profile: updated.profile,
         teacherProfile: updated.teacher_profile,
-        role: updated.role
+        role: updated.role,
+        avatar: updated.avatar
       }
     });
   } catch (error) {

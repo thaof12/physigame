@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Navigate, Outlet, Link } from 'react-router-dom';
 import { useTeacherAuth } from '../contexts/TeacherAuthContext';
+import api from '../../../config/api';
 import {
   LayoutGrid,
   BookOpen,
@@ -42,22 +43,10 @@ const menuItems = [
     path: '/teacher/my-exercises'
   },
   {
-    id: 'my-experiments',
-    label: 'Thí nghiệm của tôi',
-    icon: FlaskConical,
-    path: '/teacher/my-experiments'
-  },
-  {
     id: 'browse',
     label: 'Ngân hàng nội dung',
     icon: FolderOpen,
     path: '/teacher/browse'
-  },
-  {
-    id: 'students',
-    label: 'Thống kê học sinh',
-    icon: BarChart3,
-    path: '/teacher/students'
   },
   {
     id: 'classes',
@@ -80,6 +69,65 @@ const TeacherLayout = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Notification states
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const fetchNotifications = async () => {
+    if (!teacher?.id) return;
+    try {
+      const response = await api.get(`/classes/teacher/${teacher.id}/notifications`);
+      if (response.data?.success) {
+        setNotifications(response.data.notifications || []);
+      }
+    } catch (error) {
+      console.error('Error fetching teacher notifications:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (teacher?.id) {
+      fetchNotifications();
+      // Poll every 30 seconds for live notifications
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [teacher?.id]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowNotifDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleMarkAllAsRead = async () => {
+    if (!teacher?.id) return;
+    try {
+      await api.post(`/classes/teacher/${teacher.id}/notifications/read-all`);
+      // Update local state
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  const [headerSearch, setHeaderSearch] = useState('');
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (headerSearch.trim()) {
+      navigate(`/teacher/browse?search=${encodeURIComponent(headerSearch.trim())}`);
+    }
+  };
 
   // Show loading state
   if (loading) {
@@ -127,9 +175,10 @@ const TeacherLayout = () => {
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         bg-white border-r border-[#e2e8f0]/20
         transition-all duration-500 flex flex-col shadow-2xl shadow-[#0f172a]/5
+        overflow-y-auto no-scrollbar
       `}>
         {/* Logo */}
-        <div className="h-20 flex items-center justify-between px-8 border-b border-[#f8fafc]">
+        <div className="h-20 flex items-center justify-between px-8 border-b border-[#f8fafc] shrink-0">
           {!sidebarCollapsed && (
             <span className="font-premium-serif text-4xl font-bold text-slate-900 italic tracking-tighter select-none">
               Eureka
@@ -150,21 +199,8 @@ const TeacherLayout = () => {
           </button>
         </div>
 
-        {/* Quick Action */}
-        {!sidebarCollapsed && (
-          <div className="p-8">
-            <button
-              onClick={() => navigate('/teacher/create')}
-              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-[#4f46e5] to-[#7c3aed] text-white rounded-[1.5rem] font-black text-sm transition-all shadow-xl shadow-blue-500/20 hover:brightness-110 group"
-            >
-              <PlusCircle className="w-6 h-6 group-hover:rotate-90 transition-transform" />
-              Tạo nội dung mới
-            </button>
-          </div>
-        )}
-
         {/* Navigation */}
-        <nav className="flex-1 px-4 mt-6 space-y-2 overflow-hidden">
+        <nav className="flex-1 px-4 mt-6 space-y-2 shrink-0">
           {menuItems.map((item) => {
             const IconComponent = item.icon;
             const active = isActive(item.path);
@@ -196,13 +232,17 @@ const TeacherLayout = () => {
         </nav>
 
         {/* User info & Logout */}
-        <div className="p-8 border-t border-[#f8fafc]">
+        <div className="p-8 border-t border-[#f8fafc] shrink-0">
           {!sidebarCollapsed && (
             <div className="flex items-center gap-4 px-2 mb-8">
-              <div className="w-14 h-14 bg-white border-2 border-[#f8fafc] rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-[#0f172a]/5">
-                <span className="text-[#0f172a] font-black text-xl italic">
-                  {teacher?.displayName?.[0] || teacher?.email?.[0] || 'T'}
-                </span>
+              <div className="w-14 h-14 bg-white border-2 border-[#f8fafc] rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-[#0f172a]/5 shrink-0 overflow-hidden">
+                {teacher?.avatar ? (
+                  <img src={teacher.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[#0f172a] font-black text-xl italic">
+                    {teacher?.displayName?.[0] || teacher?.email?.[0] || 'T'}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-black text-[#4f46e5] uppercase tracking-widest mb-0.5">Giảng Viên</p>
@@ -239,33 +279,74 @@ const TeacherLayout = () => {
             <Menu className="w-7 h-7" />
           </button>
 
-          <div className="flex items-center gap-4">
-             <div className="hidden lg:flex items-center px-5 py-3 bg-[#4f46e5]/10 rounded-[1.25rem] text-[#0f172a]">
-                <span className="text-xs font-black uppercase tracking-widest text-[#0f172a]">Hàn Lâm Viện Vật Lý</span>
-             </div>
-          </div>
-
           {/* Search */}
-          <div className="hidden md:flex items-center flex-1 max-w-2xl mx-12">
+          <form onSubmit={handleSearchSubmit} className="hidden md:flex items-center flex-1 max-w-2xl mx-12">
             <div className="relative w-full group">
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-focus-within:text-[#4f46e5] transition-colors" />
               <input
                 type="text"
+                value={headerSearch}
+                onChange={(e) => setHeaderSearch(e.target.value)}
                 placeholder="Tìm kiến thức, bài giảng, mô phỏng..."
                 className="w-full bg-[#f8fafc]/50 border-2 border-transparent rounded-[1.5rem] pl-16 pr-8 py-4 text-sm text-[#0f172a] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#4f46e5] transition-all font-bold"
               />
             </div>
-          </div>
+          </form>
 
           {/* Actions */}
           <div className="flex items-center gap-5">
-            <button className="relative flex items-center justify-center w-14 h-14 rounded-[1.5rem] bg-white text-[#0f172a] hover:bg-[#f8fafc] transition-all border border-[#f8fafc] shadow-sm group">
-              <Bell className="w-7 h-7 group-hover:shake transition-all" />
-              <span className="absolute top-4 right-4 w-3.5 h-3.5 bg-[#4f46e5] border-2 border-white rounded-full"></span>
-            </button>
-            <div className="hidden sm:block text-right">
-              <p className="text-sm font-black text-[#0f172a]">{teacher?.displayName || 'Giảng viên'}</p>
-              <p className="text-[10px] font-black text-[#4f46e5] uppercase tracking-widest">{teacher?.teacherProfile?.subject || 'Vật lý Ứng dụng'}</p>
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                onClick={() => {
+                  setShowNotifDropdown(!showNotifDropdown);
+                  if (!showNotifDropdown) {
+                    handleMarkAllAsRead();
+                  }
+                }}
+                className="relative flex items-center justify-center w-14 h-14 rounded-[1.5rem] bg-white text-[#0f172a] hover:bg-[#f8fafc] transition-all border border-[#f8fafc] shadow-sm group"
+              >
+                <Bell className="w-6 h-6 group-hover:shake transition-all text-slate-700" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-md animate-bounce">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {showNotifDropdown && (
+                <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white border border-slate-100 rounded-3xl shadow-xl py-3 z-50 animate-fade-in max-h-[450px] overflow-y-auto">
+                  <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                    <span className="text-sm font-black text-slate-800">Thông báo của bạn</span>
+                    {unreadCount > 0 && (
+                      <span className="text-[10px] font-black bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {unreadCount} mới
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="divide-y divide-slate-50">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-slate-400 font-bold text-xs">
+                        <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        Chưa có thông báo nào.
+                      </div>
+                    ) : (
+                      notifications.map(n => (
+                        <div key={n.id} className={`p-4 hover:bg-slate-50 transition-colors flex items-start gap-3 ${!n.is_read ? 'bg-indigo-50/20' : ''}`}>
+                          <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${!n.is_read ? 'bg-indigo-600' : 'bg-transparent'}`} />
+                          <div className="flex-1 space-y-1">
+                            <p className="text-xs font-black text-slate-800">{n.title}</p>
+                            <p className="text-xs text-slate-500 leading-relaxed font-semibold">{n.content}</p>
+                            <p className="text-[9px] text-slate-400 font-bold">
+                              {new Date(n.created_at).toLocaleString('vi-VN')}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>

@@ -165,6 +165,27 @@ router.post('/join', async (req, res) => {
       throw joinError;
     }
 
+    // Create teacher notification asynchronously
+    try {
+      const { data: studentUser } = await supabase
+        .from('users')
+        .select('display_name, username')
+        .eq('id', studentId)
+        .maybeSingle();
+      const studentName = studentUser?.display_name || studentUser?.username || 'Học sinh';
+
+      await supabase
+        .from('teacher_notifications')
+        .insert({
+          teacher_id: cls.teacher_id,
+          title: 'Học sinh mới tham gia lớp',
+          content: `Học sinh ${studentName} đã tham gia vào lớp "${cls.name}" của bạn.`,
+          is_read: false
+        });
+    } catch (notifErr) {
+      console.error('Error creating teacher notification for join:', notifErr);
+    }
+
     res.json({ success: true, message: 'Tham gia lớp thành công', class: cls });
   } catch (error) {
     console.error('Error joining class:', error);
@@ -259,6 +280,415 @@ router.get('/:classId/students', async (req, res) => {
   } catch (error) {
     console.error('Error fetching class students:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// GET /api/classes/student/:studentId - Get classes enrolled by a student
+router.get('/student/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    
+    const { data: memberships, error: memberError } = await supabase
+      .from('class_members')
+      .select('class_id, joined_at')
+      .eq('student_id', studentId);
+      
+    if (memberError) throw memberError;
+    
+    if (!memberships || memberships.length === 0) {
+      return res.json({ success: true, classes: [] });
+    }
+    
+    const classIds = memberships.map(m => m.class_id);
+    
+    const { data: classes, error: classError } = await supabase
+      .from('classes')
+      .select('*')
+      .in('id', classIds)
+      .order('created_at', { ascending: false });
+      
+    if (classError) throw classError;
+    
+    const enrichedClasses = await Promise.all((classes || []).map(async (cls) => {
+      // Get teacher profile details
+      const { data: teacher, error: teacherError } = await supabase
+        .from('users')
+        .select('id, display_name, email, avatar')
+        .eq('id', cls.teacher_id)
+        .maybeSingle();
+        
+      // Get student count in class
+      const { count, error: countError } = await supabase
+        .from('class_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('class_id', cls.id);
+        
+      return {
+        id: cls.id,
+        name: cls.name,
+        code: cls.code,
+        created: cls.created_at ? cls.created_at.split('T')[0] : '',
+        studentsCount: count || 0,
+        teacher: teacher ? {
+          name: teacher.display_name || teacher.email.split('@')[0],
+          email: teacher.email,
+          avatar: teacher.avatar
+        } : null
+      };
+    }));
+    
+    res.json({ success: true, classes: enrichedClasses });
+  } catch (error) {
+    console.error('Error fetching student classes:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// GET /api/classes/:classId/announcements - Get announcements for a class
+router.get('/:classId/announcements', async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { data, error } = await supabase
+      .from('class_announcements')
+      .select('*')
+      .eq('class_id', classId)
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      if (error.code === 'PGRST205' || error.message.includes('relation') || error.message.includes('does not exist')) {
+        return res.json({ success: true, warning: 'needs_migration', announcements: [] });
+      }
+      throw error;
+    }
+    res.json({ success: true, announcements: data || [] });
+  } catch (error) {
+    console.error('Error fetching announcements:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// POST /api/classes/:classId/announcements - Post announcement
+router.post('/:classId/announcements', async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { title, content } = req.body;
+    
+    const { data, error } = await supabase
+      .from('class_announcements')
+      .insert({ class_id: classId, title, content })
+      .select()
+      .single();
+      
+    if (error) throw error;
+    res.json({ success: true, announcement: data });
+  } catch (error) {
+    console.error('Error creating announcement:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// GET /api/classes/:classId/assignments - Get assignments for a class (with optional completion status)
+router.get('/:classId/assignments', async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { studentId } = req.query;
+    
+    const { data: assignments, error } = await supabase
+      .from('class_assignments')
+      .select('*')
+      .eq('class_id', classId)
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      if (error.code === 'PGRST205' || error.message.includes('relation') || error.message.includes('does not exist')) {
+        return res.json({ success: true, warning: 'needs_migration', assignments: [] });
+      }
+      throw error;
+    }
+    
+    if (!studentId) {
+      return res.json({ success: true, assignments: assignments || [] });
+    }
+    
+    // Check completions if studentId provided
+    const enriched = await Promise.all((assignments || []).map(async (asg) => {
+      let completed = false;
+      let score = null;
+      
+      if (asg.type === 'lesson') {
+        const { data: comp } = await supabase
+          .from('lesson_completions')
+          .select('completed, score')
+          .eq('user_id', studentId)
+          .eq('lesson_id', asg.resource_id)
+          .maybeSingle();
+          
+        if (comp) {
+          completed = comp.completed;
+          score = comp.score;
+        }
+      } else if (asg.type === 'challenge') {
+        // Find in game_results
+        const { data: resObj } = await supabase
+          .from('game_results')
+          .select('completed, score')
+          .eq('user_id', studentId)
+          .eq('game_id', asg.resource_id)
+          .maybeSingle();
+          
+        if (resObj) {
+          completed = resObj.completed;
+          score = resObj.score;
+        }
+      }
+      
+      return { ...asg, completed, score };
+    }));
+    
+    res.json({ success: true, assignments: enriched });
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// POST /api/classes/:classId/assignments - Assign homework
+router.post('/:classId/assignments', async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { title, description, type, resourceId, dueDate } = req.body;
+    
+    const { data, error } = await supabase
+      .from('class_assignments')
+      .insert({
+        class_id: classId,
+        title,
+        description,
+        type,
+        resource_id: resourceId,
+        due_date: dueDate
+      })
+      .select()
+      .single();
+      
+    if (error) throw error;
+    res.json({ success: true, assignment: data });
+  } catch (error) {
+    console.error('Error creating assignment:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// GET /api/classes/:classId/meetings - Get meetings
+router.get('/:classId/meetings', async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { data, error } = await supabase
+      .from('class_meetings')
+      .select('*')
+      .eq('class_id', classId)
+      .order('start_time', { ascending: true });
+      
+    if (error) {
+      if (error.code === 'PGRST205' || error.message.includes('relation') || error.message.includes('does not exist')) {
+        return res.json({ success: true, warning: 'needs_migration', meetings: [] });
+      }
+      throw error;
+    }
+    res.json({ success: true, meetings: data || [] });
+  } catch (error) {
+    console.error('Error fetching meetings:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// POST /api/classes/:classId/meetings - Add meeting
+router.post('/:classId/meetings', async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { title, description, meetingLink, startTime } = req.body;
+    
+    const { data, error } = await supabase
+      .from('class_meetings')
+      .insert({
+        class_id: classId,
+        title,
+        description,
+        meeting_link: meetingLink,
+        start_time: startTime
+      })
+      .select()
+      .single();
+      
+    if (error) throw error;
+    res.json({ success: true, meeting: data });
+  } catch (error) {
+    console.error('Error creating meeting:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// GET /api/classes/:classId/discussions - Get discussions
+router.get('/:classId/discussions', async (req, res) => {
+  try {
+    const { classId } = req.params;
+    
+    const { data: posts, error } = await supabase
+      .from('class_discussions')
+      .select('*')
+      .eq('class_id', classId)
+      .order('created_at', { ascending: true });
+      
+    if (error) {
+      if (error.code === 'PGRST205' || error.message.includes('relation') || error.message.includes('does not exist')) {
+        return res.json({ success: true, warning: 'needs_migration', discussions: [] });
+      }
+      throw error;
+    }
+    
+    if (!posts || posts.length === 0) {
+      return res.json({ success: true, discussions: [] });
+    }
+    
+    const userIds = [...new Set(posts.map(p => p.user_id))];
+    const { data: users, error: userError } = await supabase
+      .from('users')
+      .select('id, display_name, email, avatar, role')
+      .in('id', userIds);
+      
+    if (userError) throw userError;
+    
+    const userMap = {};
+    (users || []).forEach(u => {
+      userMap[u.id] = {
+        name: u.display_name || u.email.split('@')[0],
+        email: u.email,
+        avatar: u.avatar,
+        role: u.role
+      };
+    });
+    
+    const enrichedPosts = posts.map(p => ({
+      ...p,
+      user: userMap[p.user_id] || { name: 'Người dùng ẩn danh', email: '', avatar: '', role: 'student' }
+    }));
+    
+    res.json({ success: true, discussions: enrichedPosts });
+  } catch (error) {
+    console.error('Error fetching discussions:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// POST /api/classes/:classId/discussions - Post message
+router.post('/:classId/discussions', async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { userId, content } = req.body;
+    
+    const { data, error } = await supabase
+      .from('class_discussions')
+      .insert({
+        class_id: classId,
+        user_id: userId,
+        content
+      })
+      .select()
+      .single();
+      
+    if (error) throw error;
+    
+    // Fetch posting user info
+    const { data: userObj } = await supabase
+      .from('users')
+      .select('id, display_name, email, avatar, role')
+      .eq('id', userId)
+      .single();
+      
+    // Create teacher notification asynchronously
+    try {
+      const { data: cls } = await supabase
+        .from('classes')
+        .select('name, teacher_id')
+        .eq('id', classId)
+        .single();
+
+      if (cls && cls.teacher_id !== userId) {
+        const studentName = userObj?.display_name || userObj?.email.split('@')[0] || 'Học sinh';
+        await supabase
+          .from('teacher_notifications')
+          .insert({
+            teacher_id: cls.teacher_id,
+            title: 'Thảo luận mới trong lớp',
+            content: `Học sinh ${studentName} đã gửi tin nhắn thảo luận mới trong lớp "${cls.name}".`,
+            is_read: false
+          });
+      }
+    } catch (notifErr) {
+      console.error('Error creating teacher notification for discussion:', notifErr);
+    }
+      
+    res.json({
+      success: true,
+      discussion: {
+        ...data,
+        user: userObj ? {
+          name: userObj.display_name || userObj.email.split('@')[0],
+          email: userObj.email,
+          avatar: userObj.avatar,
+          role: userObj.role
+        } : null
+      }
+    });
+  } catch (error) {
+    console.error('Error creating discussion:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// GET /api/classes/teacher/:teacherId/notifications - Fetch notifications
+router.get('/teacher/:teacherId/notifications', async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    const { data, error } = await supabase
+      .from('teacher_notifications')
+      .select('*')
+      .eq('teacher_id', teacherId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      if (error.code === 'PGRST205' || error.message.includes('relation') || error.message.includes('does not exist')) {
+        return res.json({ success: true, warning: 'needs_migration', notifications: [] });
+      }
+      throw error;
+    }
+
+    res.json({ success: true, notifications: data || [] });
+  } catch (error) {
+    console.error('Error fetching teacher notifications:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// POST /api/classes/teacher/:teacherId/notifications/read-all - Mark all notifications as read
+router.post('/teacher/:teacherId/notifications/read-all', async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    const { error } = await supabase
+      .from('teacher_notifications')
+      .update({ is_read: true })
+      .eq('teacher_id', teacherId);
+
+    if (error) {
+      if (error.code === 'PGRST205' || error.message.includes('relation') || error.message.includes('does not exist')) {
+        return res.json({ success: true, warning: 'needs_migration' });
+      }
+      throw error;
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error marking notifications read:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

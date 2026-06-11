@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, Lightbulb, ShieldCheck, ArrowRight } from 'lucide-react';
 
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loginWithGoogle } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [selectedRole, setSelectedRole] = useState('student');
-  const [error, setError] = useState('');
+  // Parse query parameters
+  const queryParams = new URLSearchParams(location.search);
+  const urlError = queryParams.get('error');
+  let initialError = location.state?.error || '';
+  if (urlError === 'deactivated') {
+    initialError = 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.';
+  }
+
+  const [error, setError] = useState(initialError);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {

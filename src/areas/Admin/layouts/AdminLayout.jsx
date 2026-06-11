@@ -112,9 +112,10 @@ const AdminLayout = () => {
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         bg-white border-r border-[#e2e8f0]/20
         transition-all duration-500 flex flex-col shadow-2xl shadow-[#0f172a]/5
+        overflow-y-auto no-scrollbar
       `}>
         {/* Logo */}
-        <div className="h-20 flex items-center justify-between px-8 border-b border-[#f8fafc]">
+        <div className="h-20 flex items-center justify-between px-8 border-b border-[#f8fafc] shrink-0">
           {!sidebarCollapsed && (
             <span className="font-premium-serif text-4xl font-bold text-slate-900 italic tracking-tighter select-none">
               Eureka
@@ -138,7 +139,7 @@ const AdminLayout = () => {
 
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 mt-6 space-y-2 overflow-hidden">
+        <nav className="flex-1 px-4 mt-6 space-y-2 shrink-0">
           {menuItems.map((item) => {
             const IconComponent = item.icon;
             const active = isActive(item.path);
@@ -170,10 +171,10 @@ const AdminLayout = () => {
         </nav>
 
         {/* User info & Logout */}
-        <div className="p-8 border-t border-[#f8fafc]">
+        <div className="p-8 border-t border-[#f8fafc] shrink-0">
           {!sidebarCollapsed && (
             <div className="flex items-center gap-4 px-2 mb-8">
-              <div className="w-14 h-14 bg-white border-2 border-[#f8fafc] rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-[#0f172a]/5">
+              <div className="w-14 h-14 bg-white border-2 border-[#f8fafc] rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-[#0f172a]/5 shrink-0">
                 <span className="text-[#0f172a] font-black text-xl italic">QT</span>
               </div>
               <div className="flex-1 min-w-0">

@@ -17,6 +17,17 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid token' });
     }
 
+    // Check status in database
+    const { data: dbUser } = await supabase
+      .from('users')
+      .select('status')
+      .eq('id', user.id)
+      .single();
+
+    if (dbUser && dbUser.status === 'inactive') {
+      return res.status(403).json({ message: 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.' });
+    }
+
     req.userId = user.id;
     req.email = user.email;
     req.user = user;

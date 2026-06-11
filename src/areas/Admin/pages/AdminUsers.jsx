@@ -72,6 +72,7 @@ const PendingTeachersTab = () => {
         username: t.display_name || t.username || 'Giáo viên',
         displayName: t.display_name || t.username || 'Giáo viên',
         email: t.email,
+        avatar: t.avatar || null,
         teacherStatus: t.teacher_status || 'pending',
         teacherProfile: {
           school: t.teacher_profile?.school || t.profile?.school || 'Chưa cập nhật',
@@ -291,8 +292,12 @@ const PendingTeachersTab = () => {
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 {/* Teacher info */}
                 <div className="flex items-start gap-4 flex-1">
-                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
-                    <span className="text-white font-black text-lg">{(teacher.displayName || teacher.username || 'G')[0].toUpperCase()}</span>
+                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20 overflow-hidden">
+                    {teacher.avatar ? (
+                      <img src={teacher.avatar} alt={teacher.displayName} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-white font-black text-lg">{(teacher.displayName || teacher.username || 'G')[0].toUpperCase()}</span>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -456,6 +461,7 @@ const AdminUsers = () => {
           id: u.id,
           name: u.display_name || u.username || 'Người dùng',
           email: u.email,
+          avatar: u.avatar || null,
           role: u.role || 'student',
           teacher_status: u.teacher_status || null,
           grade: u.profile?.grade || u.grade || '?',
@@ -472,6 +478,7 @@ const AdminUsers = () => {
       // Fallback to mock data for demonstration if DB is empty/fails
       setUsers(mockUsers.map(u => ({
         ...u,
+        avatar: u.avatar || null,
         teacher_status: u.role === 'teacher' ? 'verified' : null
       })));
     } finally {
@@ -538,6 +545,72 @@ const AdminUsers = () => {
       setShowEditModal(null);
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleBatchStatusUpdate = async (status) => {
+    if (selectedUsers.length === 0) return;
+    setLoading(true);
+    try {
+      const selectedList = users.filter(u => selectedUsers.includes(u.id));
+      const teacherIds = selectedList.filter(u => u.role === 'teacher').map(u => u.id);
+      const studentIds = selectedList.filter(u => u.role !== 'teacher').map(u => u.id);
+
+      if (teacherIds.length > 0) {
+        const payload = { status: status === 'active' ? 'active' : 'inactive' };
+        if (status === 'active') {
+          payload.teacher_status = 'verified';
+        } else {
+          payload.teacher_status = null; // deactivate teacher
+        }
+
+        const { error } = await supabase
+          .from('users')
+          .update(payload)
+          .in('id', teacherIds);
+
+        if (error) throw error;
+      }
+
+      if (studentIds.length > 0) {
+        const { error } = await supabase
+          .from('users')
+          .update({ status: status === 'active' ? 'active' : 'inactive' })
+          .in('id', studentIds);
+
+        if (error) throw error;
+      }
+
+      await fetchUsers();
+      setSelectedUsers([]);
+    } catch (err) {
+      console.error('Error during batch status update:', err);
+      alert('Không thể cập nhật trạng thái các tài khoản được chọn.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedUsers.length === 0) return;
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${selectedUsers.length} người dùng đã chọn? Hành động này không thể hoàn tác.`)) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .in('id', selectedUsers);
+
+      if (error) throw error;
+
+      await fetchUsers();
+      setSelectedUsers([]);
+    } catch (err) {
+      console.error('Error during batch delete:', err);
+      alert('Không thể xóa các tài khoản được chọn.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -725,13 +798,22 @@ const AdminUsers = () => {
             {selectedUsers.length > 0 && (
               <div className="flex items-center gap-3 mt-4 pt-4 border-t border-[#e4f2f0]">
                 <span className="text-sm font-bold text-slate-400">Đã chọn {selectedUsers.length} người dùng</span>
-                <button className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-black hover:bg-emerald-100 transition-colors">
+                <button 
+                  onClick={() => handleBatchStatusUpdate('active')}
+                  className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-black hover:bg-emerald-100 transition-colors"
+                >
                   KÍCH HOẠT
                 </button>
-                <button className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-black hover:bg-blue-100 transition-colors">
+                <button 
+                  onClick={() => handleBatchStatusUpdate('inactive')}
+                  className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-black hover:bg-blue-100 transition-colors"
+                >
                   VÔ HIỆU HÓA
                 </button>
-                <button className="px-3 py-1.5 bg-rose-50 text-rose-600 rounded-lg text-xs font-black hover:bg-rose-100 transition-colors">
+                <button 
+                  onClick={handleBatchDelete}
+                  className="px-3 py-1.5 bg-rose-50 text-rose-600 rounded-lg text-xs font-black hover:bg-rose-100 transition-colors"
+                >
                   XÓA
                 </button>
               </div>
@@ -754,7 +836,7 @@ const AdminUsers = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-[#e4f2f0]">
-                        <th className="px-6 py-6 text-left">
+                        <th className="w-[5%] px-6 py-6 text-left">
                           <input
                             type="checkbox"
                             checked={selectedUsers.length === paginatedUsers.length && paginatedUsers.length > 0}
@@ -762,12 +844,12 @@ const AdminUsers = () => {
                             className="w-5 h-5 rounded-lg border-[#85e4fb] bg-[#e4f2f0]/30 text-[#2099e9] focus:ring-[#2099e9]/20 transition-all cursor-pointer"
                           />
                         </th>
-                        <th className="px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Người dùng</th>
-                        <th className="px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Vai trò</th>
-                        <th className="px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Trạng thái</th>
-                        <th className="px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiến độ</th>
-                        <th className="px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Hoạt động cuối</th>
-                        <th className="px-6 py-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Thao tác</th>
+                        <th className="w-[35%] px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Người dùng</th>
+                        <th className="w-[15%] px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Vai trò</th>
+                        <th className="w-[15%] px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Trạng thái</th>
+                        <th className="w-[15%] px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiến độ</th>
+                        <th className="w-[10%] px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Hoạt động cuối</th>
+                        <th className="w-[5%] px-6 py-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#e4f2f0]">
@@ -782,20 +864,25 @@ const AdminUsers = () => {
                             />
                           </td>
                           <td className="px-6 py-6">
-                            <div className="flex items-center gap-4">
-                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/10 ${
+                            <div 
+                              onClick={() => setShowUserDetail(user)}
+                              className="flex items-center gap-4 cursor-pointer group/name"
+                            >
+                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/10 overflow-hidden shrink-0 ${
                                 user.role === 'teacher'
                                   ? 'bg-gradient-to-br from-blue-500 to-orange-600'
                                   : 'bg-gradient-to-br from-[#2099e9] to-[#85e4fb]'
                               }`}>
-                                {user.role === 'teacher' ? (
+                                {user.avatar ? (
+                                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                                ) : user.role === 'teacher' ? (
                                   <GraduationCap className="w-6 h-6 text-white" />
                                 ) : (
-                                  <span className="text-white font-black text-sm">{user.name[0]}</span>
+                                  <span className="text-white font-black text-sm">{user.name[0]?.toUpperCase()}</span>
                                 )}
                               </div>
                               <div>
-                                <p className="text-sm font-black text-[#274dad] group-hover:text-[#2099e9] transition-colors">{user.name}</p>
+                                <p className="text-sm font-black text-[#274dad] group-hover/name:text-[#2099e9] transition-colors">{user.name}</p>
                                 <p className="text-xs font-bold text-slate-400">{user.email}</p>
                               </div>
                             </div>
@@ -962,15 +1049,17 @@ const AdminUsers = () => {
             </div>
             <div className="p-8 space-y-6">
               <div className="flex items-center gap-6">
-                <div className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-lg text-white font-black text-2xl ${
+                <div className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-lg text-white font-black text-2xl overflow-hidden shrink-0 ${
                   showUserDetail.role === 'teacher'
                     ? 'bg-gradient-to-br from-blue-500 to-orange-600'
                     : 'bg-gradient-to-br from-[#2099e9] to-[#85e4fb]'
                 }`}>
-                  {showUserDetail.role === 'teacher' ? (
+                  {showUserDetail.avatar ? (
+                    <img src={showUserDetail.avatar} alt={showUserDetail.name} className="w-full h-full object-cover" />
+                  ) : showUserDetail.role === 'teacher' ? (
                     <GraduationCap className="w-10 h-10" />
                   ) : (
-                    <span>{showUserDetail.name[0]}</span>
+                    <span>{showUserDetail.name[0]?.toUpperCase()}</span>
                   )}
                 </div>
                 <div>

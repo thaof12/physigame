@@ -1,19 +1,17 @@
 const { supabase } = require('./src/config/supabase.cjs');
 
 async function check() {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', 'luongminhthanh1404@gmail.com')
-    .single();
+  const { data: { users }, error } = await supabase.auth.admin.listUsers();
 
   if (error) {
-    console.error('Error fetching:', error);
+    console.error('Error fetching auth users:', error);
     return;
   }
 
-  console.log('User status in Supabase:', data.teacher_status);
-  console.log('User role in Supabase:', data.role);
+  console.log('All auth users:');
+  users.forEach(u => {
+    console.log(`ID: ${u.id}, Email: ${u.email}, Metadata:`, u.user_metadata);
+  });
 }
 
 check();

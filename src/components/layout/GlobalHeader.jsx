@@ -49,6 +49,7 @@ const GlobalHeader = () => {
       children: [
         { name: t('header.classes'), path: '/physics-classes', icon: GraduationCap },
         { name: t('header.lectures'), path: '/interactive-lectures', icon: BookOpen },
+        { name: t('header.my_class'), path: '/my-class', icon: GraduationCap },
       ]
     },
     { 

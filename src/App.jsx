@@ -21,6 +21,7 @@ import LectureViewer from './components/LectureViewer';
 import LectureClassSelector from './components/LectureClassSelector';
 import Profile from './pages/Profile';
 import PlacementTest from './pages/PlacementTest';
+import MyClass from './pages/MyClass';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import MainLayout from './components/layout/MainLayout';
@@ -88,7 +89,6 @@ import TeacherDashboard from './areas/Teacher/pages/TeacherDashboard';
 import PendingApproval from './areas/Teacher/pages/PendingApproval';
 import MyLessons from './areas/Teacher/pages/MyLessons';
 import MyExercises from './areas/Teacher/pages/MyExercises';
-import MyExperiments from './areas/Teacher/pages/MyExperiments';
 import BrowseContent from './areas/Teacher/pages/BrowseContent';
 import StudentStats from './areas/Teacher/pages/StudentStats';
 import ClassManagement from './areas/Teacher/pages/ClassManagement';
@@ -97,14 +97,25 @@ import TeacherProfile from './areas/Teacher/pages/TeacherProfile';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
+
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
+  if (user.status === 'inactive') {
+    return <Navigate to="/login" replace state={{ error: 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.' }} />;
+  }
   return children;
 };
 
 const AppContent = () => {
   const location = useLocation();
+  const { user, refreshUser } = useAuth();
   const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+  useEffect(() => {
+    if (user && user.uid !== 'admin-hardcoded') {
+      refreshUser().catch((err) => console.log('Status verification skipped:', err.message));
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -173,6 +184,7 @@ const AppContent = () => {
           <Route path="/program/physics" element={<PhysicsHome />} />
           <Route path="/program/physics/dashboard" element={<Navigate to="/program/physics" replace />} />
           <Route path="/physics-classes" element={<ProtectedRoute><PhysicsClasses /></ProtectedRoute>} />
+          <Route path="/my-class" element={<ProtectedRoute><MyClass /></ProtectedRoute>} />
 
 
           {/* PK Battle Routes */}
@@ -271,9 +283,8 @@ const AppContent = () => {
           <Route path="dashboard" element={<TeacherDashboard />} />
           <Route path="my-lessons" element={<MyLessons />} />
           <Route path="my-exercises" element={<MyExercises />} />
-          <Route path="my-experiments" element={<MyExperiments />} />
           <Route path="browse" element={<BrowseContent />} />
-          <Route path="students" element={<StudentStats />} />
+          <Route path="students" element={<Navigate to="/teacher/dashboard" replace />} />
           <Route path="classes" element={<ClassManagement />} />
           <Route path="profile" element={<TeacherProfile />} />
           <Route path="create" element={<TeacherDashboard />} />

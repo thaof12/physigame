@@ -70,6 +70,9 @@ router.post('/google-login', async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
+    if (user.status === 'inactive') {
+      return res.status(403).json({ success: false, message: 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.' });
+    }
 
     res.json({
       success: true, message: 'Đăng nhập thành công',
@@ -77,7 +80,8 @@ router.post('/google-login', async (req, res) => {
         id: user.id, username: user.username, email: user.email,
         displayName: user.display_name, firebaseUid: user.id,
         uid: user.id, xp: user.xp, level: user.level,
-        programs: user.programs, profile: user.profile, avatar: user.avatar
+        programs: user.programs, profile: user.profile, avatar: user.avatar,
+        status: user.status || 'active'
       }
     });
   } catch (error) {
@@ -97,13 +101,17 @@ router.post('/email-login', async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản' });
     }
+    if (user.status === 'inactive') {
+      return res.status(403).json({ success: false, message: 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.' });
+    }
 
     res.json({
       success: true, message: 'Đăng nhập thành công',
       user: {
         id: user.id, username: user.username, email: user.email,
         displayName: user.display_name, xp: user.xp, level: user.level,
-        programs: user.programs, profile: user.profile
+        programs: user.programs, profile: user.profile,
+        status: user.status || 'active'
       }
     });
   } catch (error) {
@@ -128,7 +136,8 @@ router.get('/me/:idValue', async (req, res) => {
         id: user.id, firebaseUid: user.id,
         username: user.username, email: user.email,
         displayName: user.display_name, xp: user.xp, level: user.level,
-        programs: user.programs, profile: user.profile
+        programs: user.programs, profile: user.profile,
+        status: user.status || 'active'
       }
     });
   } catch (error) {

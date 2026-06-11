@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   display_name TEXT DEFAULT '',
   avatar TEXT DEFAULT '',
   role TEXT DEFAULT 'student' CHECK (role IN ('student', 'teacher')),
+  status TEXT DEFAULT 'active',
   teacher_status TEXT DEFAULT NULL CHECK (teacher_status IN ('pending', 'verified', 'rejected', NULL)),
   teacher_profile JSONB DEFAULT '{}',
   profile JSONB DEFAULT '{}',
@@ -333,7 +334,7 @@ $$ LANGUAGE plpgsql;
 -- =====================================================
 -- Row Level Security (RLS)
 -- =====================================================
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.users ENABLE ROW LEVEL SECURITY; -- Vô hiệu hóa RLS để tài khoản Admin hardcoded có thể cập nhật/xóa dữ liệu trực tiếp
 ALTER TABLE public.battles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.challenges ENABLE ROW LEVEL SECURITY;
@@ -343,10 +344,27 @@ ALTER TABLE public.physics_game_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lesson_completions ENABLE ROW LEVEL SECURITY;
 
--- Users: can read all profiles, update own
+-- Users: can read all profiles, update own or admin can update/delete all
+DROP POLICY IF EXISTS "Users can view all profiles" ON public.users;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
+DROP POLICY IF EXISTS "Admins can delete profiles" ON public.users;
+
 CREATE POLICY "Users can view all profiles" ON public.users FOR SELECT USING (true);
-CREATE POLICY "Users can update own profile" ON public.users FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON public.users FOR UPDATE USING (
+  auth.uid() = id 
+  OR EXISTS (
+    SELECT 1 FROM public.users 
+    WHERE id = auth.uid() AND role = 'admin'
+  )
+);
 CREATE POLICY "Users can insert own profile" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Admins can delete profiles" ON public.users FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM public.users 
+    WHERE id = auth.uid() AND role = 'admin'
+  )
+);
 
 -- Battles: all authenticated users can read/write
 CREATE POLICY "Authenticated users can manage battles" ON public.battles FOR ALL USING (auth.role() = 'authenticated');

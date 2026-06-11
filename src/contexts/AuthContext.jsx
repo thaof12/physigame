@@ -36,11 +36,45 @@ export const AuthProvider = ({ children }) => {
                 firebaseUid: session.user.id,
                 uid: session.user.id
               };
-              localStorage.setItem('user', JSON.stringify(userData));
-              setUser(userData);
-              console.log('✅ User profile loaded:', userData.email);
+              
+              const { data: { session: currentSession } } = await supabase.auth.getSession();
+              if (!currentSession || currentSession.user.id !== session.user.id) {
+                return;
+              }
+
+              if (userData.status === 'inactive') {
+                console.warn('⚠️ User account is inactive. Logging out.');
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                supabase.auth.signOut().finally(() => {
+                  window.location.href = '/login?error=deactivated';
+                });
+              } else {
+                localStorage.setItem('user', JSON.stringify(userData));
+                setUser(userData);
+                console.log('✅ User profile loaded:', userData.email);
+              }
             }
           } catch (profileError) {
+            const isDeactivatedError = profileError.response?.status === 403 && 
+              (profileError.response?.data?.message?.includes('vô hiệu hóa') || 
+               profileError.response?.data?.message?.includes('disabled') || 
+               profileError.response?.data?.message?.includes('inactive'));
+
+            if (isDeactivatedError) {
+              console.warn('⚠️ User account is inactive on profile fetch error. Logging out.');
+              localStorage.removeItem('user');
+              localStorage.removeItem('token');
+              supabase.auth.signOut().finally(() => {
+                window.location.href = '/login?error=deactivated';
+              });
+              return;
+            }
+
+            const { data: { session: currentSession } } = await supabase.auth.getSession();
+            if (!currentSession || currentSession.user.id !== session.user.id) {
+              return;
+            }
             console.warn('⚠️ Could not load profile, using basic data');
             const basicUser = {
               id: session.user.id,
@@ -71,8 +105,9 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('❌ Auth check error:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuth();
@@ -101,6 +136,12 @@ export const AuthProvider = ({ children }) => {
               api.get(`/users/firebase/${session.user.id}`).catch(() => null),
               supabase.from('users').select('*').eq('id', session.user.id).single()
             ]);
+
+            const { data: { session: currentSession } } = await supabase.auth.getSession();
+            if (!currentSession || currentSession.user.id !== session.user.id) {
+              console.warn('⚠️ Session changed or terminated during load. Aborting profile set.');
+              return;
+            }
 
             const dbUser = supabaseRes?.data;
             const apiUser = apiRes?.data;
@@ -189,6 +230,16 @@ export const AuthProvider = ({ children }) => {
             }
 
             if (userData) {
+              if (userData.status === 'inactive') {
+                console.warn('⚠️ User account is inactive. Logging out.');
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                supabase.auth.signOut().finally(() => {
+                  window.location.href = '/login?error=deactivated';
+                });
+                return;
+              }
+
               // Decide final role and teacher status
               const isTeacher = isAlreadyTeacher || isTeacherIntent;
               let finalStatus = 'verified';
@@ -217,6 +268,10 @@ export const AuthProvider = ({ children }) => {
               throw new Error('Profile determination failed');
             }
           } catch (error) {
+            const { data: { session: currentSession } } = await supabase.auth.getSession();
+            if (!currentSession || currentSession.user.id !== session.user.id) {
+              return;
+            }
             console.warn('%c⚠️ [AuthContext] Profile sync encountered issues, using fallback logic', 'color: #f59e0b', error.message);
             
             // Check localStorage cached user or metadata before defaulting to student
@@ -288,6 +343,13 @@ export const AuthProvider = ({ children }) => {
       // Fetch profile
       const response = await api.get(`/users/firebase/${data.user.id}`);
       const userData = { ...response.data, firebaseUid: data.user.id, uid: data.user.id };
+
+      if (userData.status === 'inactive') {
+        await supabase.auth.signOut();
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        throw new Error('Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.');
+      }
 
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
@@ -515,6 +577,16 @@ export const AuthProvider = ({ children }) => {
           teacherStatus: dbUser?.teacher_status || apiUser?.teacherStatus || 'pending',
           teacher_status: dbUser?.teacher_status || apiUser?.teacher_status || 'pending'
         };
+
+        if (mergedUser.status === 'inactive') {
+          console.warn('⚠️ User account is inactive on refresh. Logging out.');
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+          supabase.auth.signOut().finally(() => {
+            window.location.href = '/login?error=deactivated';
+          });
+          return null;
+        }
 
         localStorage.setItem('user', JSON.stringify(mergedUser));
         setUser(mergedUser);

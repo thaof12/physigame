@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTeacherAuth } from '../contexts/TeacherAuthContext';
 import {
   User,
@@ -18,6 +18,7 @@ import api from '../../../config/api';
 
 const TeacherProfile = () => {
   const { teacher, refreshTeacher } = useTeacherAuth();
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     displayName: teacher?.displayName || teacher?.display_name || '',
     email: teacher?.email || '',
@@ -28,6 +29,19 @@ const TeacherProfile = () => {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (teacher) {
+      setFormData({
+        displayName: teacher.displayName || teacher.display_name || '',
+        email: teacher.email || '',
+        school: teacher.teacherProfile?.school || teacher.teacher_profile?.school || '',
+        subject: teacher.teacherProfile?.subject || teacher.teacher_profile?.subject || '',
+        bio: teacher.teacherProfile?.bio || teacher.teacher_profile?.bio || '',
+        teachingGrades: teacher.teacherProfile?.teachingGrades || teacher.teacher_profile?.teachingGrades || []
+      });
+    }
+  }, [teacher]);
 
   const subjects = ['Vật lý'];
   const grades = [6, 7, 8, 9, 10, 11, 12];
@@ -48,6 +62,69 @@ const TeacherProfile = () => {
         : [...prev.teachingGrades, grade].sort((a, b) => a - b)
     }));
     setSaved(false);
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn một file hình ảnh hợp lệ.');
+      return;
+    }
+
+    try {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      img.onload = async () => {
+        URL.revokeObjectURL(objectUrl);
+        
+        // Resize parameters
+        const MAX_WIDTH = 200;
+        const MAX_HEIGHT = 200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress to JPEG format with 0.8 quality
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+        try {
+          setSaving(true);
+          await api.put(`/users/profile/${teacher.id}`, { avatar: compressedBase64 });
+          await refreshTeacher();
+          setSaved(true);
+        } catch (apiErr) {
+          console.error('Error uploading avatar:', apiErr);
+          alert('Đã có lỗi xảy ra khi lưu ảnh lên máy chủ. Vui lòng thử lại sau.');
+        } finally {
+          setSaving(false);
+        }
+      };
+
+      img.src = objectUrl;
+    } catch (err) {
+      console.error('Error preparing avatar:', err);
+      alert('Đã có lỗi xảy ra khi xử lý ảnh. Vui lòng chọn ảnh khác.');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -84,12 +161,27 @@ const TeacherProfile = () => {
       <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm">
         <div className="flex items-center gap-6">
           <div className="relative">
-            <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10">
-              <span className="text-3xl font-black text-white">
-                {(teacher?.displayName || teacher?.display_name)?.[0] || 'T'}
-              </span>
+            <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10 overflow-hidden">
+              {teacher?.avatar ? (
+                <img src={teacher.avatar} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-3xl font-black text-white">
+                  {(teacher?.displayName || teacher?.display_name)?.[0] || 'T'}
+                </span>
+              )}
             </div>
-            <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-slate-800 hover:bg-slate-950 border-2 border-white rounded-xl flex items-center justify-center transition-colors shadow-md">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleAvatarChange} 
+              accept="image/*" 
+              className="hidden" 
+            />
+            <button 
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute -bottom-2 -right-2 w-8 h-8 bg-slate-800 hover:bg-slate-950 border-2 border-white rounded-xl flex items-center justify-center transition-colors shadow-md"
+            >
               <Camera className="w-4 h-4 text-white" />
             </button>
           </div>

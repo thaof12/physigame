@@ -65,6 +65,7 @@ const TeacherDashboard = () => {
   const { teacher } = useTeacherAuth();
   const [stats, setStats] = useState(mockStats);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchDashboardData = async () => {
@@ -77,7 +78,13 @@ const TeacherDashboard = () => {
         setStats(statsRes.data.stats);
       }
 
-      // 2. Fetch Lessons and Challenges to build a dynamic "Recent Activity" list
+      // 2. Fetch notifications
+      const notifRes = await api.get(`/classes/teacher/${teacher.id}/notifications`);
+      if (notifRes.data?.success) {
+        setNotifications((notifRes.data.notifications || []).slice(0, 3));
+      }
+
+      // 3. Fetch Lessons and Challenges to build a dynamic "Recent Activity" list
       const [lessonsRes, challengesRes] = await Promise.all([
         api.get(`/lessons?teacherId=${teacher.id}`),
         api.get(`/challenges?teacherId=${teacher.id}`)
@@ -122,42 +129,6 @@ const TeacherDashboard = () => {
   return (
     <div className="space-y-10 pb-20">
       
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-[#4f46e5] to-[#0f172a] p-10 lg:p-14 shadow-xl shadow-indigo-500/20">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full -ml-20 -mb-20 blur-2xl"></div>
-        
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="space-y-4 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-indigo-200 text-xs font-black uppercase tracking-widest">
-              <Zap className="w-3.5 h-3.5" />
-              <span>Học viện đang hoạt động tốt</span>
-            </div>
-            <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight">
-              Chào mừng, {teacher?.displayName?.split(' ')?.[0] || 'Giáo viên'}!
-            </h1>
-            <p className="text-white/70 text-lg max-w-xl font-medium">
-              Hôm nay là một ngày tuyệt vời để chia sẻ kiến thức vật lý. Hệ thống đã tự động cập nhật báo cáo mới nhất cho bạn.
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-             <button 
-              onClick={refreshData}
-              className={`p-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white hover:bg-white/20 transition-all ${loading ? 'animate-spin' : ''}`}
-             >
-                <RefreshCw className="w-6 h-6" />
-             </button>
-             <button 
-              onClick={() => navigate('/teacher/create')}
-              className="px-8 py-4 bg-white text-[#4f46e5] hover:text-[#0f172a] rounded-[1.25rem] font-black text-lg shadow-xl shadow-black/10 hover:shadow-white/20 hover:-translate-y-1 transition-all flex items-center gap-3"
-             >
-                <PlusCircle className="w-6 h-6" />
-                Soạn Bài Giảng
-             </button>
-          </div>
-        </div>
-      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
@@ -298,13 +269,21 @@ const TeacherDashboard = () => {
               </div>
               
               <div className="space-y-6">
-                {mockNotifications.map((notif) => (
-                  <div key={notif.id} className="p-5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/5 hover:bg-white/20 transition-all cursor-pointer group">
-                    <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">{notif.time}</p>
-                    <h4 className="font-bold text-sm mb-1 group-hover:text-indigo-200 transition-colors">{notif.title}</h4>
-                    <p className="text-xs text-white/60 leading-relaxed">{notif.desc}</p>
+                {notifications.length === 0 ? (
+                  <div className="p-8 text-center text-indigo-200 font-bold text-xs">
+                    Chưa có thông báo mới nào.
                   </div>
-                ))}
+                ) : (
+                  notifications.map((notif) => (
+                    <div key={notif.id} className="p-5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/5 hover:bg-white/20 transition-all cursor-pointer group">
+                      <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">
+                        {new Date(notif.created_at).toLocaleDateString('vi-VN')} {new Date(notif.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
+                      </p>
+                      <h4 className="font-bold text-sm mb-1 group-hover:text-indigo-200 transition-colors">{notif.title}</h4>
+                      <p className="text-xs text-white/60 leading-relaxed font-semibold">{notif.content}</p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

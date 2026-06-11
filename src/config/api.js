@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { supabase } from './supabase';
 
 // Backend API base URL - use relative path for Vite proxy
 const API_BASE_URL = '/api';
@@ -27,7 +28,19 @@ api.interceptors.response.use(
       // Token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      supabase.auth.signOut().finally(() => {
+        window.location.href = '/login';
+      });
+    } else if (error.response?.status === 403 && 
+               (error.response?.data?.message?.includes('vô hiệu hóa') || 
+                error.response?.data?.message?.includes('disabled') || 
+                error.response?.data?.message?.includes('inactive'))) {
+      // Account deactivated
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      supabase.auth.signOut().finally(() => {
+        window.location.href = '/login?error=deactivated';
+      });
     }
     return Promise.reject(error);
   }
