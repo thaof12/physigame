@@ -15,90 +15,51 @@ export const TeacherAuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
-  const { logout: globalLogout } = useAuth();
-
+  const { user, loading: globalLoading, logout: globalLogout, refreshUser } = useAuth();
 
   useEffect(() => {
-    checkTeacherAuth();
-  }, []);
+    if (globalLoading) {
+      setLoading(true);
+      return;
+    }
 
-  const checkTeacherAuth = () => {
-    try {
-      const savedUser = localStorage.getItem('user');
-      const token = localStorage.getItem('token');
-
-      if (savedUser && token) {
-        const userData = JSON.parse(savedUser);
-
-        // Check if user is a teacher
-        if (userData.role === 'teacher') {
-          setTeacher(userData);
-          setIsAuthenticated(true);
-          setIsVerified(userData.teacherStatus === 'verified');
-        } else {
-          // Not a teacher, clear auth
-          setTeacher(null);
-          setIsAuthenticated(false);
-          setIsVerified(false);
-        }
-      }
-    } catch (error) {
-      console.error('Error checking teacher auth:', error);
+    if (user) {
+      const isTeacher = user.role === 'teacher';
+      const isTeacherVerified = user.teacherStatus === 'verified' || user.teacher_status === 'verified';
+      
+      setTeacher(isTeacher ? user : null);
+      setIsAuthenticated(isTeacher);
+      setIsVerified(isTeacher && isTeacherVerified);
+    } else {
       setTeacher(null);
       setIsAuthenticated(false);
       setIsVerified(false);
-    } finally {
-      setLoading(false);
     }
-  };
+    setLoading(false);
+  }, [user, globalLoading]);
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setTeacher(null);
-    setIsAuthenticated(false);
-    setIsVerified(false);
-    globalLogout();
+  const logout = async () => {
+    await globalLogout();
   };
 
   const refreshTeacher = async () => {
     try {
-      const savedUser = localStorage.getItem('user');
-      if (!savedUser) return;
-      
-      const userData = JSON.parse(savedUser);
-      
-      // Fetch fresh status from DB
-      const { data, error } = await supabase
-        .from('teacher profile')
-        .select('teacherStatus')
-        .eq('id', userData.id)
-        .single();
-
-      let currentStatus = userData.teacherStatus;
-      
-      if (!error && data) {
-        currentStatus = data.teacherStatus;
-      } else {
-        // Try fallback
-        const { data: fbData, error: fbError } = await supabase
-          .from('users')
-          .select('teacher_status')
-          .eq('id', userData.id)
-          .single();
-          
-        if (!fbError && fbData) {
-          currentStatus = fbData.teacher_status;
-        }
+      const updatedUser = await refreshUser();
+      if (updatedUser) {
+        setTeacher(updatedUser);
+        setIsVerified(updatedUser.teacherStatus === 'verified' || updatedUser.teacher_status === 'verified');
       }
-
-      const updatedUser = { ...userData, teacherStatus: currentStatus };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setTeacher(updatedUser);
-      setIsVerified(currentStatus === 'verified');
-      
     } catch (error) {
       console.error('Error refreshing teacher data:', error);
+    }
+  };
+
+  const checkTeacherAuth = () => {
+    if (user) {
+      const isTeacher = user.role === 'teacher';
+      setTeacher(isTeacher ? user : null);
+      setIsAuthenticated(isTeacher);
+      setIsVerified(isTeacher && (user.teacherStatus === 'verified' || user.teacher_status === 'verified'));
     }
   };
 
@@ -107,8 +68,8 @@ export const TeacherAuthProvider = ({ children }) => {
     loading,
     isAuthenticated,
     isVerified,
-    isPending: teacher?.teacherStatus === 'pending',
-    isRejected: teacher?.teacherStatus === 'rejected',
+    isPending: teacher?.teacherStatus === 'pending' || teacher?.teacher_status === 'pending',
+    isRejected: teacher?.teacherStatus === 'rejected' || teacher?.teacher_status === 'rejected',
     logout,
     refreshTeacher,
     checkTeacherAuth

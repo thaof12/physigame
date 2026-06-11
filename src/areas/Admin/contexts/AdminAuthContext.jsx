@@ -49,10 +49,10 @@ export const AdminAuthProvider = ({ children }) => {
     return { success: false, error: 'Email hoặc mật khẩu không đúng' };
   };
 
-  const logout = () => {
+  const logout = async () => {
     setAdmin(null);
     localStorage.removeItem('physigame_admin');
-    globalLogout();
+    await globalLogout();
   };
 
   const value = {

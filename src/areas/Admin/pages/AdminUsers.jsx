@@ -232,7 +232,7 @@ const PendingTeachersTab = () => {
             </div>
             <div>
               <p className="text-2xl font-black text-slate-900">{allTeachers.length}</p>
-              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Tổng giáo viên</p>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Tổng hồ sơ</p>
             </div>
           </div>
         </div>
@@ -445,23 +445,35 @@ const AdminUsers = () => {
 
       if (error) throw error;
 
-      setUsers((data || []).map(u => ({
-        id: u.id,
-        name: u.display_name || u.username || 'Người dùng',
-        email: u.email,
-        role: u.role || 'student',
-        grade: u.profile?.grade || u.grade || '?',
-        status: u.status || 'active',
-        joinDate: new Date(u.created_at).toLocaleDateString('vi-VN'),
-        lastActive: u.updated_at ? new Date(u.updated_at).toLocaleDateString('vi-VN') : '—',
-        lessonsCompleted: u.profile?.lessonsCompleted || 0,
-        exercisesCompleted: u.profile?.exercisesCompleted || 0,
-        originalData: u
-      })));
+      setUsers((data || []).map(u => {
+        let resolvedStatus = u.status || 'active';
+        if (u.role === 'teacher') {
+          if (u.teacher_status === 'pending') resolvedStatus = 'pending';
+          else if (u.teacher_status === 'rejected') resolvedStatus = 'rejected';
+          else if (u.teacher_status === 'verified') resolvedStatus = 'active';
+        }
+        return {
+          id: u.id,
+          name: u.display_name || u.username || 'Người dùng',
+          email: u.email,
+          role: u.role || 'student',
+          teacher_status: u.teacher_status || null,
+          grade: u.profile?.grade || u.grade || '?',
+          status: resolvedStatus,
+          joinDate: new Date(u.created_at).toLocaleDateString('vi-VN'),
+          lastActive: u.updated_at ? new Date(u.updated_at).toLocaleDateString('vi-VN') : '—',
+          lessonsCompleted: u.profile?.lessonsCompleted || 0,
+          exercisesCompleted: u.profile?.exercisesCompleted || 0,
+          originalData: u
+        };
+      }));
     } catch (err) {
       console.error('Error fetching users:', err);
       // Fallback to mock data for demonstration if DB is empty/fails
-      setUsers(mockUsers);
+      setUsers(mockUsers.map(u => ({
+        ...u,
+        teacher_status: u.role === 'teacher' ? 'verified' : null
+      })));
     } finally {
       setLoading(false);
     }
@@ -492,18 +504,32 @@ const AdminUsers = () => {
   const handleUpdateUser = async (userData) => {
     setActionLoading(userData.id);
     try {
+      const updatePayload = {
+        display_name: userData.name,
+        role: userData.role
+      };
+
+      // Handle teacher_status updates based on edited status/role
+      if (userData.role === 'student') {
+        updatePayload.teacher_status = null;
+      } else if (userData.role === 'teacher') {
+        if (userData.status === 'active') {
+          updatePayload.teacher_status = 'verified';
+        } else if (userData.status === 'pending') {
+          updatePayload.teacher_status = 'pending';
+        } else if (userData.status === 'rejected') {
+          updatePayload.teacher_status = 'rejected';
+        }
+      }
+
       const { error } = await supabase
         .from('users')
-        .update({
-          display_name: userData.name,
-          role: userData.role,
-          status: userData.status
-        })
+        .update(updatePayload)
         .eq('id', userData.id);
 
       if (error) throw error;
 
-      setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData } : u));
+      setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData, teacher_status: updatePayload.teacher_status || null } : u));
       setShowEditModal(null);
     } catch (err) {
       console.error('Error updating user:', err);
@@ -549,7 +575,7 @@ const AdminUsers = () => {
   const stats = {
     total: users.length,
     students: users.filter(u => u.role === 'student').length,
-    teachers: users.filter(u => u.role === 'teacher').length,
+    teachers: users.filter(u => u.role === 'teacher' && u.status === 'active').length,
     active: users.filter(u => u.status === 'active').length
   };
 
@@ -777,13 +803,21 @@ const AdminUsers = () => {
                           <td className="px-6 py-6">
                             <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
                               user.role === 'teacher'
-                                ? 'bg-blue-50 text-blue-500'
+                                ? (user.status === 'rejected'
+                                    ? 'bg-rose-50 text-rose-600 border border-rose-100'
+                                    : user.status === 'pending'
+                                    ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                                    : 'bg-blue-50 text-blue-500')
                                 : 'bg-[#e4f2f0] text-[#2099e9]'
                             }`}>
                               {user.role === 'teacher' ? (
                                 <>
                                   <GraduationCap className="w-3.5 h-3.5" />
-                                  Giáo viên
+                                  {user.status === 'rejected'
+                                    ? 'Giáo viên (Từ chối)'
+                                    : user.status === 'pending'
+                                    ? 'Giáo viên (Chờ duyệt)'
+                                    : 'Giáo viên'}
                                 </>
                               ) : (
                                 <>
@@ -799,6 +833,8 @@ const AdminUsers = () => {
                                 ? 'bg-emerald-50 text-emerald-500'
                                 : user.status === 'pending'
                                 ? 'bg-blue-50 text-blue-500'
+                                : user.status === 'rejected'
+                                ? 'bg-rose-50 text-rose-500'
                                 : 'bg-slate-50 text-slate-400'
                             }`}>
                               {user.status === 'active' ? (
@@ -809,7 +845,12 @@ const AdminUsers = () => {
                               ) : user.status === 'pending' ? (
                                 <>
                                   <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                                  Chờ xác nhận
+                                  Chờ duyệt
+                                </>
+                              ) : user.status === 'rejected' ? (
+                                <>
+                                  <span className="w-2 h-2 bg-rose-500 rounded-full"></span>
+                                  Từ chối
                                 </>
                               ) : (
                                 <>
@@ -941,13 +982,27 @@ const AdminUsers = () => {
                 <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Vai trò</p>
                   <p className="font-black text-[#2099e9] text-sm uppercase">
-                    {showUserDetail.role === 'teacher' ? 'Giáo viên' : `Học sinh lớp ${showUserDetail.grade}`}
+                    {showUserDetail.role === 'teacher' ? (
+                      showUserDetail.status === 'rejected'
+                        ? 'Giáo viên (Từ chối)'
+                        : showUserDetail.status === 'pending'
+                        ? 'Giáo viên (Chờ duyệt)'
+                        : 'Giáo viên'
+                    ) : `Học sinh lớp ${showUserDetail.grade}`}
                   </p>
                 </div>
                 <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Trạng thái</p>
-                  <p className="font-black text-emerald-500 text-sm uppercase">
-                    {showUserDetail.status === 'active' ? 'Hoạt động' : showUserDetail.status === 'pending' ? 'Chờ xác nhận' : 'Không hoạt động'}
+                  <p className={`font-black text-sm uppercase ${
+                    showUserDetail.status === 'active' ? 'text-emerald-500' :
+                    showUserDetail.status === 'pending' ? 'text-amber-500' :
+                    showUserDetail.status === 'rejected' ? 'text-rose-500' :
+                    'text-slate-400'
+                  }`}>
+                    {showUserDetail.status === 'active' ? 'Hoạt động' :
+                     showUserDetail.status === 'pending' ? 'Chờ duyệt' :
+                     showUserDetail.status === 'rejected' ? 'Từ chối' :
+                     'Không hoạt động'}
                   </p>
                 </div>
                 <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
@@ -1046,6 +1101,9 @@ const AdminUsers = () => {
                     >
                       <option value="active">Hoạt động</option>
                       <option value="pending">Chờ duyệt</option>
+                      {showEditModal.role === 'teacher' && (
+                        <option value="rejected">Từ chối</option>
+                      )}
                       <option value="inactive">Khóa</option>
                     </select>
                   </div>

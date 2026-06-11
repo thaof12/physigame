@@ -18,15 +18,31 @@ export default function MainLayout() {
     
     const isTeacher = user.role === 'teacher';
     const isPending = user.teacherStatus === 'pending' || user.teacher_status === 'pending';
+    const isAdmin = user.role === 'admin' || user.email === 'quantrivien@gmail.com';
     
     console.log(`%c🛡️ [MainLayout] Guard check - Role: ${user.role}, Status: ${user.teacherStatus || user.teacher_status}`, 'color: #274dad; font-weight: bold');
     
-    if (isTeacher && isPending) {
-      if (window.location.pathname !== '/teacher/pending') {
-        console.log('%c🚀 [MainLayout] Pending teacher detected on student route. FORCING REDIRECT...', 'color: #f59e0b; font-weight: black; font-size: 14px');
-        navigate('/teacher/pending', { replace: true });
+    if (isAdmin) {
+      console.log('%c🚀 [MainLayout] Admin detected on student route. FORCING REDIRECT...', 'color: #f59e0b; font-weight: black');
+      navigate('/admin/dashboard', { replace: true });
+      return;
+    }
+
+    if (isTeacher) {
+      if (isPending) {
+        if (location.pathname !== '/teacher/pending') {
+          console.log('%c🚀 [MainLayout] Pending teacher detected on student route. FORCING REDIRECT...', 'color: #f59e0b; font-weight: black; font-size: 14px');
+          navigate('/teacher/pending', { replace: true });
+        } else {
+          console.log('%c✅ [MainLayout] Teacher is on the pending page. Guard passed.', 'color: #10b981');
+        }
       } else {
-        console.log('%c✅ [MainLayout] Teacher is on the pending page. Guard passed.', 'color: #10b981');
+        // Verified teacher - redirect to dashboard if on general student homepage / landing paths
+        const studentHomePaths = ['/', '/home'];
+        if (studentHomePaths.includes(location.pathname)) {
+          console.log('%c🚀 [MainLayout] Verified teacher on landing page. FORCING REDIRECT...', 'color: #10b981; font-weight: black');
+          navigate('/teacher/dashboard', { replace: true });
+        }
       }
     }
   }, [user, navigate, location.pathname]);

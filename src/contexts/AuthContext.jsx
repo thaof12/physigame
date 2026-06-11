@@ -95,93 +95,119 @@ export const AuthProvider = ({ children }) => {
           }
 
           try {
-            // 2. Fetch existing profile from API
-            console.log('📡 [AuthContext] Fetching existing profile...');
-            const response = await api.get(`/users/firebase/${session.user.id}`);
-            let userData = response.data 
-              ? { ...response.data, firebaseUid: session.user.id, uid: session.user.id }
-              : null;
+            // 2. Fetch existing profile from dual sources for consistency
+            console.log('📡 [AuthContext] Fetching profile from dual sources...');
+            const [apiRes, supabaseRes] = await Promise.all([
+              api.get(`/users/firebase/${session.user.id}`).catch(() => null),
+              supabase.from('users').select('*').eq('id', session.user.id).single()
+            ]);
 
-            // 3. ATOMIC SYNC: If intent is teacher, force update both specialized and core tables
+            const dbUser = supabaseRes?.data;
+            const apiUser = apiRes?.data;
+
+            let userData = null;
+            if (dbUser || apiUser) {
+              userData = {
+                ...(apiUser || {}),
+                ...(dbUser || {}),
+                displayName: dbUser?.display_name || apiUser?.displayName || apiUser?.display_name || '',
+                id: session.user.id,
+                uid: session.user.id,
+                firebaseUid: session.user.id,
+                role: dbUser?.role || apiUser?.role,
+                teacherStatus: dbUser?.teacher_status || apiUser?.teacherStatus || apiUser?.teacher_status,
+                teacher_status: dbUser?.teacher_status || apiUser?.teacher_status || apiUser?.teacherStatus
+              };
+            }
+
+            const isAlreadyTeacher = userData?.role === 'teacher';
+            const existingStatus = userData?.teacherStatus || userData?.teacher_status;
+
+            // 3. ATOMIC SYNC: If intent is teacher and they aren't already a teacher with status, register them
             if (isTeacherIntent) {
-              console.log('%c🚀 [AuthContext] Teacher path triggered. Synchronizing database...', 'color: #2099e9; font-weight: black');
+              const hasExistingStatus = isAlreadyTeacher && (existingStatus === 'verified' || existingStatus === 'pending' || existingStatus === 'rejected');
               
-              const teacherProfileData = {
-                id: session.user.id,
-                name: userData?.display_name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
-                email: session.user.email,
-                teacherStatus: 'pending',
-                teacher_status: 'pending',
-                subject: 'Chưa cập nhật',
-                school: 'Chưa cập nhật',
-                createdAt: new Date().toISOString()
-              };
-
-              // 3. ATOMIC SYNC: Update core users table with teacher intent
-              console.log('%c🚀 [AuthContext] Teacher registration intent detected. Syncing with users table...', 'color: #2099e9; font-weight: black');
-              
-              const teacherSyncData = {
-                 id: session.user.id,
-                 username: session.user.user_metadata?.preferred_username || 
-                           session.user.user_metadata?.username || 
-                           session.user.user_metadata?.display_name || 
-                           session.user.email?.split('@')[0],
-                 display_name: session.user.user_metadata?.display_name || 
-                               session.user.user_metadata?.full_name || 
-                               session.user.email?.split('@')[0],
-                 email: session.user.email,
-                 role: 'teacher',
-                 teacher_status: 'pending',
-                 updated_at: new Date().toISOString()
-              };
-
-              // Single-layer sync to the correct core users table
-              const { error: syncError } = await supabase
-                .from('users')
-                .upsert(teacherSyncData);
-
-              if (syncError) {
-                console.error('❌ [AuthContext] Schema Sync failed:', syncError.message);
+              if (hasExistingStatus) {
+                console.log(`%cℹ️ [AuthContext] User is already a teacher with status: ${existingStatus}. Preserving status.`, 'color: #10b981; font-weight: bold');
+                localStorage.removeItem('pending_role');
               } else {
-                console.log('✅ [AuthContext] Database synchronized (teacher_status: pending)');
-              }
+                console.log('%c🚀 [AuthContext] Teacher path triggered. Synchronizing database...', 'color: #2099e9; font-weight: black');
+                
+                const teacherSyncData = {
+                   id: session.user.id,
+                   username: session.user.user_metadata?.preferred_username || 
+                             session.user.user_metadata?.username || 
+                             session.user.user_metadata?.display_name || 
+                             session.user.email?.split('@')[0],
+                   display_name: session.user.user_metadata?.display_name || 
+                                 session.user.user_metadata?.full_name || 
+                                 session.user.email?.split('@')[0],
+                   email: session.user.email,
+                   role: 'teacher',
+                   teacher_status: 'pending',
+                   updated_at: new Date().toISOString()
+                };
 
-              // 4. Update Backend API if possible
-              try {
-                await api.post('/auth/register', {
-                  username: session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
-                  email: session.user.email,
-                  firebaseUid: session.user.id,
-                  role: 'teacher',
-                  teacherStatus: 'pending' // Keeping this for API compatibility if needed
-                });
-              } catch (apiErr) {
-                console.warn('⚠️ [AuthContext] Backend API sync skipped or failed');
+                // Single-layer sync to the correct core users table
+                const { error: syncError } = await supabase
+                  .from('users')
+                  .upsert(teacherSyncData);
+
+                if (syncError) {
+                  console.error('❌ [AuthContext] Schema Sync failed:', syncError.message);
+                } else {
+                  console.log('✅ [AuthContext] Database synchronized (teacher_status: pending)');
+                }
+
+                // 4. Update Backend API if possible
+                try {
+                  await api.post('/auth/register', {
+                    username: session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
+                    email: session.user.email,
+                    firebaseUid: session.user.id,
+                    role: 'teacher',
+                    teacherStatus: 'pending'
+                  });
+                } catch (apiErr) {
+                  console.warn('⚠️ [AuthContext] Backend API sync skipped or failed');
+                }
+                
+                // Update local userData
+                userData = { 
+                  ...(userData || {}), 
+                  ...teacherSyncData,
+                  displayName: session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
+                  id: session.user.id,
+                  uid: session.user.id,
+                  teacherStatus: 'pending',
+                  teacher_status: 'pending'
+                };
+                
+                localStorage.removeItem('pending_role');
+                console.log('%c✅ [AuthContext] Teacher sync completed successfully!', 'color: #10b981; font-weight: bold');
               }
-              
-              // Standardize local userData
-              userData = { 
-                ...(userData || {}), 
-                ...teacherSyncData,
-                displayName: session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
-                id: session.user.id,
-                uid: session.user.id
-              };
-              
-              // Clear intent only after successful sync start
-              localStorage.removeItem('pending_role');
-              console.log('%c✅ [AuthContext] Teacher sync completed successfully!', 'color: #10b981; font-weight: bold');
             }
 
             if (userData) {
-              // Ensure we don't accidentally wipe teacher status if API returned student but intent was teacher
+              // Decide final role and teacher status
+              const isTeacher = isAlreadyTeacher || isTeacherIntent;
+              let finalStatus = 'verified';
+
+              if (isTeacher) {
+                if (isTeacherIntent && !isAlreadyTeacher) {
+                  finalStatus = 'pending';
+                } else {
+                  finalStatus = existingStatus || 'pending';
+                }
+              }
+
               const finalUser = {
                 ...userData,
                 email: userData.email || session.user.email,
                 displayName: userData.displayName || userData.display_name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
-                role: isTeacherIntent ? 'teacher' : (userData.role || 'student'),
-                teacherStatus: isTeacherIntent ? 'pending' : (userData.teacherStatus || userData.teacher_status || 'verified'),
-                teacher_status: isTeacherIntent ? 'pending' : (userData.teacher_status || userData.teacherStatus || 'verified')
+                role: isTeacher ? 'teacher' : (userData.role || 'student'),
+                teacherStatus: finalStatus,
+                teacher_status: finalStatus
               };
 
               console.log(`%c👤 [AuthContext] Session ready. Role: ${finalUser.role}, Status: ${finalUser.teacherStatus}`, 'color: #2099e9; font-weight: bold');
@@ -193,7 +219,10 @@ export const AuthProvider = ({ children }) => {
           } catch (error) {
             console.warn('%c⚠️ [AuthContext] Profile sync encountered issues, using fallback logic', 'color: #f59e0b', error.message);
             
-            const role = isTeacherIntent ? 'teacher' : 'student';
+            // Check localStorage cached user or metadata before defaulting to student
+            const cachedUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+            const role = isTeacherIntent ? 'teacher' : (cachedUser?.role || 'student');
+            
             const basicUser = {
               id: session.user.id,
               email: session.user.email,
@@ -202,8 +231,8 @@ export const AuthProvider = ({ children }) => {
               firebaseUid: session.user.id,
               uid: session.user.id,
               role: role,
-              teacherStatus: role === 'teacher' ? 'pending' : 'verified',
-              teacher_status: role === 'teacher' ? 'pending' : 'verified'
+              teacherStatus: role === 'teacher' ? (cachedUser?.teacherStatus || 'pending') : 'verified',
+              teacher_status: role === 'teacher' ? (cachedUser?.teacher_status || 'pending') : 'verified'
             };
             
             setUser(basicUser);
@@ -383,15 +412,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('physigame_admin');
+    setUser(null);
+
     try {
       await supabase.auth.signOut();
     } catch (err) {
       console.warn('Supabase signOut failed:', err);
     }
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('physigame_admin');
-    setUser(null);
   };
 
   // Inactivity Auto-Logout
@@ -406,7 +436,7 @@ export const AuthProvider = ({ children }) => {
 
     const setupTimer = async () => {
       try {
-        const response = await fetch('http://localhost:5002/api/settings');
+        const response = await fetch('/api/settings');
         const settings = await response.json();
         if (settings.sessionTimeout) {
           timeoutMinutes = Number(settings.sessionTimeout);

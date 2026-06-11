@@ -29,7 +29,7 @@ const DEFAULT_SETTINGS = {
   sessionTimeout: 30
 };
 
-const API_URL = 'http://localhost:5002/api/settings';
+const API_URL = '/api/settings';
 
 const AdminSettings = () => {
   const [activeTab, setActiveTab] = useState('general');

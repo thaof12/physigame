@@ -104,8 +104,8 @@ const TeacherLayout = () => {
     return <Navigate to="/teacher/pending" replace />;
   }
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
