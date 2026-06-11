@@ -9,7 +9,30 @@ const path = require('path');
 router.get('/', async (req, res) => {
   try {
     const Lesson = require('../models/Lesson.cjs');
-    const lessons = await Lesson.findAll();
+    const { teacherId } = req.query;
+    
+    let lessons;
+    if (teacherId === 'system' || teacherId === 'null' || !teacherId) {
+      const { data, error } = await require('../src/config/supabase.cjs').supabase
+        .from('lessons')
+        .select('*')
+        .is('teacher_id', null)
+        .order('class_id', { ascending: true })
+        .order('chapter_id', { ascending: true })
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      lessons = data || [];
+    } else if (teacherId) {
+      const { data, error } = await require('../src/config/supabase.cjs').supabase
+        .from('lessons')
+        .select('*')
+        .eq('teacher_id', teacherId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      lessons = data || [];
+    } else {
+      lessons = await Lesson.findAll();
+    }
     res.json(lessons);
   } catch (error) {
     res.status(500).json({ message: error.message });

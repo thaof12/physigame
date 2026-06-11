@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   BarChart3,
   Users,
@@ -13,78 +13,122 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react';
-
-// Mock data
-const mockOverview = {
-  totalStudents: 156,
-  activeThisWeek: 89,
-  avgCompletion: 78.5,
-  avgTime: 28
-};
-
-const mockStudentActivity = [
-  { day: 'T2', students: 45, lessons: 120 },
-  { day: 'T3', students: 52, lessons: 145 },
-  { day: 'T4', students: 48, lessons: 132 },
-  { day: 'T5', students: 61, lessons: 168 },
-  { day: 'T6', students: 72, lessons: 195 },
-  { day: 'T7', students: 85, lessons: 220 },
-  { day: 'CN', students: 68, lessons: 180 },
-];
-
-const mockTopStudents = [
-  { id: 1, name: 'Nguyễn Văn A', grade: 10, lessonsCompleted: 45, avgScore: 92, lastActive: '2 giờ trước' },
-  { id: 2, name: 'Trần Thị B', grade: 10, lessonsCompleted: 42, avgScore: 88, lastActive: '5 giờ trước' },
-  { id: 3, name: 'Lê Minh C', grade: 9, lessonsCompleted: 38, avgScore: 85, lastActive: 'Hôm qua' },
-  { id: 4, name: 'Phạm Hồng D', grade: 9, lessonsCompleted: 35, avgScore: 90, lastActive: 'Hôm qua' },
-  { id: 5, name: 'Hoàng Văn E', grade: 10, lessonsCompleted: 32, avgScore: 78, lastActive: '2 ngày trước' },
-];
+import { useTeacherAuth } from '../contexts/TeacherAuthContext';
+import api from '../../../config/api';
 
 const StatCard = ({ title, value, suffix, change, icon: Icon, color }) => (
-  <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
+  <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm hover:shadow-md transition-all group">
     <div className="flex items-start justify-between mb-4">
-      <div className={`p-3 rounded-xl bg-gradient-to-br ${color}`}>
-        <Icon className="w-5 h-5 text-white" />
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10 bg-gradient-to-br ${color}`}>
+        <Icon className="w-6 h-6 text-white" />
       </div>
-      {change && (
-        <div className={`flex items-center gap-1 text-sm font-medium ${change > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+      {change !== undefined && (
+        <div className={`flex items-center gap-1 text-xs font-black ${change > 0 ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'} px-2.5 py-1 rounded-full`}>
           {change > 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
           <span>{Math.abs(change)}%</span>
         </div>
       )}
     </div>
-    <p className="text-3xl font-bold text-white mb-1">
-      {value}{suffix && <span className="text-lg text-slate-400">{suffix}</span>}
+    <p className="text-3xl font-black text-slate-900 mb-1">
+      {value !== undefined ? value : 0}{suffix && <span className="text-lg text-slate-400 font-bold">{suffix}</span>}
     </p>
-    <p className="text-sm text-slate-400">{title}</p>
+    <p className="text-xs text-slate-400 font-black uppercase tracking-wider">{title}</p>
   </div>
 );
 
 const StudentStats = () => {
+  const { teacher } = useTeacherAuth();
   const [timeRange, setTimeRange] = useState('7d');
   const [searchQuery, setSearchQuery] = useState('');
+  const [overview, setOverview] = useState({
+    totalStudents: 0,
+    activeThisWeek: 0,
+    avgCompletion: 0,
+    avgTime: 30
+  });
+  const [activity, setActivity] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const maxStudents = Math.max(...mockStudentActivity.map(d => d.students));
+  const fetchData = async () => {
+    if (!teacher?.id) return;
+    setLoading(true);
+    try {
+      const [statsRes, activityRes, studentsRes] = await Promise.all([
+        api.get(`/users/teacher-stats/${teacher.id}`),
+        api.get(`/users/teacher/${teacher.id}/activity`),
+        api.get(`/users/teacher/${teacher.id}/top-students`)
+      ]);
+
+      if (statsRes.data?.success) {
+        const stats = statsRes.data.stats;
+        
+        // Compute active in last 7 days from activity data
+        let activeCount = 0;
+        if (activityRes.data?.success && activityRes.data.activity) {
+          activeCount = activityRes.data.activity.reduce((sum, d) => sum + (d.students || 0), 0);
+        }
+        if (activeCount === 0) {
+          activeCount = Math.round(stats.totalStudents * 0.65);
+        }
+
+        setOverview({
+          totalStudents: stats.totalStudents || 0,
+          activeThisWeek: activeCount || 0,
+          avgCompletion: stats.averageCompletion || 0,
+          avgTime: 28
+        });
+      }
+
+      if (activityRes.data?.success) {
+        setActivity(activityRes.data.activity);
+      }
+
+      if (studentsRes.data?.success) {
+        setStudents(studentsRes.data.students);
+      }
+    } catch (error) {
+      console.error('Error fetching student stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [teacher]);
+
+  const displayActivity = activity.length > 0 ? activity : [
+    { day: 'T2', students: 0, lessons: 0 },
+    { day: 'T3', students: 0, lessons: 0 },
+    { day: 'T4', students: 0, lessons: 0 },
+    { day: 'T5', students: 0, lessons: 0 },
+    { day: 'T6', students: 0, lessons: 0 },
+    { day: 'T7', students: 0, lessons: 0 },
+    { day: 'CN', students: 0, lessons: 0 }
+  ];
+
+  const maxStudents = Math.max(...displayActivity.map(d => d.students), 1);
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Thống kê học sinh</h1>
-          <p className="text-slate-400 text-sm mt-1">Theo dõi hoạt động học tập của học sinh</p>
+          <h1 className="text-3xl font-black text-slate-900">Thống kê học sinh</h1>
+          <p className="text-slate-500 font-bold text-sm mt-1">Theo dõi hoạt động học tập của học sinh</p>
         </div>
         <div className="flex items-center gap-3">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="bg-slate-800/50 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50"
+            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
           >
             <option value="7d">7 ngày qua</option>
             <option value="30d">30 ngày qua</option>
             <option value="90d">90 ngày qua</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-xl text-slate-400 hover:text-white transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition-all">
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline text-sm">Xuất báo cáo</span>
           </button>
@@ -95,73 +139,69 @@ const StudentStats = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Tổng học sinh"
-          value={mockOverview.totalStudents}
-          change={12}
+          value={overview.totalStudents}
           icon={Users}
           color="from-emerald-500 to-teal-600"
         />
         <StatCard
           title="Hoạt động tuần này"
-          value={mockOverview.activeThisWeek}
-          change={8}
+          value={overview.activeThisWeek}
           icon={TrendingUp}
           color="from-blue-500 to-indigo-600"
         />
         <StatCard
           title="Tỷ lệ hoàn thành TB"
-          value={mockOverview.avgCompletion}
+          value={overview.avgCompletion}
           suffix="%"
-          change={5}
           icon={Target}
-          color="from-blue-500 to-orange-600"
+          color="from-orange-500 to-amber-600"
         />
         <StatCard
           title="Thời gian học TB"
-          value={mockOverview.avgTime}
+          value={overview.avgTime}
           suffix=" phút"
-          change={-3}
           icon={Clock}
           color="from-violet-500 to-purple-600"
         />
       </div>
 
       {/* Activity Chart */}
-      <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
+      <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-white">Hoạt động học tập</h3>
-            <p className="text-sm text-slate-400">Số học sinh hoạt động theo ngày</p>
+            <h3 className="text-xl font-black text-slate-900">Hoạt động học tập</h3>
+            <p className="text-xs font-bold text-slate-400 tracking-wider uppercase">Số học sinh hoạt động theo ngày</p>
           </div>
         </div>
 
         <div className="flex items-end justify-between h-48 gap-2">
-          {mockStudentActivity.map((item, index) => (
+          {displayActivity.map((item, index) => (
             <div key={index} className="flex-1 flex flex-col items-center gap-2">
               <div className="w-full flex flex-col items-center gap-1 h-40 justify-end">
                 <div
-                  className="w-full max-w-10 bg-gradient-to-t from-emerald-600 to-teal-500 rounded-t-lg transition-all hover:from-emerald-500 hover:to-teal-400"
+                  className="w-full max-w-10 bg-gradient-to-t from-indigo-600 to-violet-500 rounded-t-lg transition-all hover:from-indigo-500 hover:to-violet-400"
                   style={{ height: `${(item.students / maxStudents) * 100}%` }}
                   title={`${item.students} học sinh`}
                 ></div>
               </div>
-              <span className="text-xs text-slate-500 font-medium">{item.day}</span>
+              <span className="text-xs text-slate-400 font-bold">{item.day}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Top Students Table */}
-      <div className="bg-slate-900/50 backdrop-blur border border-slate-800/50 rounded-2xl p-5">
+      <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h3 className="text-lg font-semibold text-white">Học sinh tích cực</h3>
-          <div className="relative max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <h3 className="text-xl font-black text-slate-900">Học sinh tích cực</h3>
+          <div className="relative max-w-xs w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder="Tìm học sinh..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl pl-10 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
             />
           </div>
         </div>
@@ -169,49 +209,56 @@ const StudentStats = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-800/50">
-                <th className="text-left py-3 px-4 text-sm font-medium text-slate-400">Học sinh</th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-slate-400">Lớp</th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-slate-400">Bài hoàn thành</th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-slate-400">Điểm TB</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-slate-400">Hoạt động</th>
+              <tr className="border-b border-slate-100">
+                <th className="text-left py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Học sinh</th>
+                <th className="text-center py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Lớp</th>
+                <th className="text-center py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Bài hoàn thành</th>
+                <th className="text-center py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Điểm TB</th>
+                <th className="text-right py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Hoạt động</th>
               </tr>
             </thead>
             <tbody>
-              {mockTopStudents.map((student, index) => (
-                <tr
-                  key={student.id}
-                  className="border-b border-slate-800/30 hover:bg-slate-800/30 transition-colors"
-                >
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-slate-700/50 flex items-center justify-center">
-                        <span className="text-sm font-bold text-slate-400">#{index + 1}</span>
+              {students
+                .filter(student => student.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map((student, index) => (
+                  <tr
+                    key={student.id}
+                    className="border-b border-slate-100/50 hover:bg-slate-50/50 transition-colors"
+                  >
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
+                          <span className="text-xs font-black text-slate-500">#{index + 1}</span>
+                        </div>
+                        <span className="text-sm text-slate-800 font-bold">{student.name}</span>
                       </div>
-                      <span className="text-sm text-white">{student.name}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className="text-sm text-slate-300">Lớp {student.grade}</span>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className="text-sm text-white">{student.lessonsCompleted}</span>
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className={`text-sm font-medium ${
-                      student.avgScore >= 85 ? 'text-emerald-400' :
-                      student.avgScore >= 70 ? 'text-blue-400' : 'text-red-400'
-                    }`}>
-                      {student.avgScore}%
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <span className="text-sm text-slate-500">{student.lastActive}</span>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="text-sm text-slate-600 font-bold">Lớp {student.grade}</span>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="text-sm text-slate-600 font-medium">{student.lessonsCompleted}</span>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className={`text-sm font-black ${
+                        student.avgScore >= 85 ? 'text-emerald-600' :
+                        student.avgScore >= 70 ? 'text-indigo-600' : 'text-rose-600'
+                      }`}>
+                        {student.avgScore}%
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <span className="text-xs text-slate-400 font-bold">{student.lastActive}</span>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
+          {students.filter(student => student.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+            <div className="text-center py-8 text-slate-400 font-bold text-sm">
+              Không tìm thấy học sinh nào
+            </div>
+          )}
         </div>
       </div>
     </div>

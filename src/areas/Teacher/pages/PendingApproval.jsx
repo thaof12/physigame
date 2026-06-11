@@ -50,7 +50,7 @@ const PendingApproval = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-[#274dad] animate-spin" />
+        <Loader2 className="w-10 h-10 text-[#4f46e5] animate-spin" />
       </div>
     );
   }
@@ -63,8 +63,8 @@ const PendingApproval = () => {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-8 font-sans relative overflow-hidden">
 
       {/* Background Decor */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#274dad]/5 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#2099e9]/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#4f46e5]/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none"></div>
       <div className="absolute inset-0 graph-grid pointer-events-none z-0 opacity-10"></div>
 
       <div className="w-full max-w-xl relative z-10">
@@ -77,7 +77,7 @@ const PendingApproval = () => {
           </div>
 
           <div className={`w-20 h-20 mx-auto rounded-3xl flex items-center justify-center mb-6 shadow-md ${isPending
-              ? 'bg-gradient-to-br from-[#2099e9] to-[#274dad] shadow-blue-500/20'
+              ? 'bg-gradient-to-br from-indigo-500 to-slate-900 shadow-indigo-500/20'
               : isRejected
                 ? 'bg-gradient-to-br from-rose-500 to-red-600 shadow-rose-500/20'
                 : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20'
@@ -101,7 +101,7 @@ const PendingApproval = () => {
         </div>
 
         {/* Central Card */}
-        <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-[0_25px_80px_-15px_rgba(39,77,173,0.08)] border border-slate-100">
+        <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-2xl shadow-[#0f172a]/5 border border-slate-100">
 
           <div className="space-y-4 mb-8">
             <div className="p-5 bg-slate-50/50 rounded-2xl border border-slate-100 flex items-center justify-between gap-4 group hover:bg-slate-50 hover:border-slate-200 transition-all">
@@ -123,7 +123,7 @@ const PendingApproval = () => {
                 </div>
                 <div>
                   <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Trạng Thái Hiện Tại</span>
-                  <p className={`font-black text-sm ${isPending ? 'text-[#2099e9]' : isRejected ? 'text-rose-600' : 'text-emerald-600'
+                  <p className={`font-black text-sm ${isPending ? 'text-[#4f46e5]' : isRejected ? 'text-rose-600' : 'text-emerald-600'
                     }`}>
                     {isPending ? 'Đang chờ phê duyệt' : isRejected ? 'Rejected' : 'Verified'}
                   </p>
@@ -148,7 +148,7 @@ const PendingApproval = () => {
 
           {/* Status Specific Message */}
           {isPending && (
-            <div className="flex items-start gap-3 p-5 bg-[#274dad]/5 border border-[#274dad]/10 rounded-2xl text-[#274dad] mb-8 shadow-sm">
+            <div className="flex items-start gap-3 p-5 bg-indigo-50 border border-indigo-100 rounded-2xl text-[#4f46e5] mb-8 shadow-sm">
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
               <p className="text-xs font-semibold leading-relaxed">
                 Quy trình xác minh thường diễn ra trong vòng 24-48h làm việc. Chúng tôi sẽ thông báo ngay khi có kết quả.
@@ -173,7 +173,7 @@ const PendingApproval = () => {
             <button
               onClick={handleRefresh}
               disabled={checking}
-              className="px-6 py-3.5 bg-gradient-to-r from-[#2099e9] to-[#274dad] hover:brightness-110 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-70"
+              className="px-6 py-3.5 bg-gradient-to-r from-[#4f46e5] to-[#0f172a] hover:brightness-110 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-70"
             >
               <RefreshCw className={`w-4 h-4 ${checking ? 'animate-spin' : ''}`} />
               {checking ? 'Đang kiểm tra...' : 'Kiểm tra trạng thái'}
@@ -200,7 +200,7 @@ const PendingApproval = () => {
         {/* Support Footer */}
         <p className="text-center text-slate-400 font-medium text-xs mt-8">
           Cần hỗ trợ kỹ thuật? Liên hệ{' '}
-          <a href="mailto:support@physigame.edu.vn" className="text-[#2099e9] hover:underline font-semibold">
+          <a href="mailto:support@physigame.edu.vn" className="text-[#4f46e5] hover:underline font-semibold">
             support@physigame.edu.vn
           </a>
         </p>

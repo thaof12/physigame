@@ -331,7 +331,7 @@ router.get('/profile/:userId', async (req, res) => {
 // Update user profile
 router.put('/profile/:userId', async (req, res) => {
   try {
-    const { displayName, bio, school, grade, avatar } = req.body;
+    const { displayName, bio, school, grade, avatar, subject, teachingGrades } = req.body;
     const user = await User.findByAnyId(req.params.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -340,18 +340,33 @@ router.put('/profile/:userId', async (req, res) => {
     const updates = {};
     if (displayName !== undefined) updates.display_name = displayName;
 
-    const profile = user.profile || {};
-    if (bio !== undefined) profile.bio = bio;
-    if (school !== undefined) profile.school = school;
-    if (grade !== undefined) profile.grade = grade;
-    if (avatar !== undefined) profile.avatar = avatar;
-    updates.profile = profile;
+    if (user.role === 'teacher') {
+      const teacherProfile = user.teacher_profile || {};
+      if (bio !== undefined) teacherProfile.bio = bio;
+      if (school !== undefined) teacherProfile.school = school;
+      if (subject !== undefined) teacherProfile.subject = subject;
+      if (teachingGrades !== undefined) teacherProfile.teachingGrades = teachingGrades;
+      updates.teacher_profile = teacherProfile;
+    } else {
+      const profile = user.profile || {};
+      if (bio !== undefined) profile.bio = bio;
+      if (school !== undefined) profile.school = school;
+      if (grade !== undefined) profile.grade = grade;
+      if (avatar !== undefined) profile.avatar = avatar;
+      updates.profile = profile;
+    }
 
     const updated = await User.update(user.id, updates);
 
     res.json({
       success: true, message: 'Profile updated successfully',
-      user: { id: updated.id, displayName: updated.display_name, profile: updated.profile }
+      user: { 
+        id: updated.id, 
+        displayName: updated.display_name, 
+        profile: updated.profile,
+        teacherProfile: updated.teacher_profile,
+        role: updated.role
+      }
     });
   } catch (error) {
     console.error('❌ Update profile error:', error);
@@ -518,17 +533,261 @@ router.post('/reject-teacher/:id', async (req, res) => {
 
 router.get('/teacher-stats/:teacherId', async (req, res) => {
   try {
-    const teacher = await User.findById(req.params.teacherId);
+    const { teacherId } = req.params;
+    const teacher = await User.findById(teacherId);
     if (!teacher || teacher.role !== 'teacher') {
       return res.status(404).json({ success: false, message: 'Teacher not found' });
     }
 
+    // 1. Lessons Created
+    const { count: lessonsCreated, error: lError } = await supabase
+      .from('lessons')
+      .select('*', { count: 'exact', head: true })
+      .eq('teacher_id', teacherId);
+
+    // 2. Exercises and Experiments Created
+    const { data: challenges, error: chError } = await supabase
+      .from('challenges')
+      .select('category, completions_count, views_count')
+      .eq('teacher_id', teacherId);
+
+    let exercisesCreated = 0;
+    let experimentsCreated = 0;
+    let challengeViews = 0;
+    
+    if (challenges) {
+      challenges.forEach(ch => {
+        if (ch.category === 'experiment') {
+          experimentsCreated++;
+        } else {
+          exercisesCreated++;
+        }
+        challengeViews += (ch.views_count || 0);
+      });
+    }
+
+    // 3. Lessons Views
+    const { data: lessonViewsData, error: lvError } = await supabase
+      .from('lessons')
+      .select('views')
+      .eq('teacher_id', teacherId);
+
+    let lessonViews = 0;
+    if (lessonViewsData) {
+      lessonViews = lessonViewsData.reduce((sum, item) => sum + (item.views || 0), 0);
+    }
+
+    const totalViews = lessonViews + challengeViews;
+
+    // 4. Enrolled Students
+    const { data: classes, error: classesError } = await supabase
+      .from('classes')
+      .select('id')
+      .eq('teacher_id', teacherId);
+
+    const classIds = (classes || []).map(c => c.id);
+    let totalStudents = 0;
+    let averageCompletion = 0;
+
+    if (classIds.length > 0) {
+      const { data: members, error: memError } = await supabase
+        .from('class_members')
+        .select('student_id')
+        .in('class_id', classIds);
+
+      const studentIds = [...new Set((members || []).map(m => m.student_id))];
+      totalStudents = studentIds.length;
+
+      if (totalStudents > 0) {
+        // Average completion/score across all enrolled students
+        const { data: completions, error: compError } = await supabase
+          .from('lesson_completions')
+          .select('score, total_questions')
+          .in('user_id', studentIds);
+
+        if (completions && completions.length > 0) {
+          const totalPct = completions.reduce((sum, item) => sum + (item.score / (item.total_questions || 1) * 100), 0);
+          averageCompletion = Math.round(totalPct / completions.length);
+        } else {
+          averageCompletion = 0;
+        }
+      }
+    }
+
     res.json({
       success: true,
-      stats: { lessonsCreated: 0, exercisesCreated: 0, experimentsCreated: 0, totalStudents: 0, totalViews: 0, averageCompletion: 0 },
-      teacher: { id: teacher.id, displayName: teacher.display_name, teacherStatus: teacher.teacher_status, teacherProfile: teacher.teacher_profile }
+      stats: {
+        lessonsCreated: lessonsCreated || 0,
+        exercisesCreated: exercisesCreated || 0,
+        experimentsCreated: experimentsCreated || 0,
+        totalStudents,
+        totalViews,
+        averageCompletion
+      },
+      teacher: {
+        id: teacher.id,
+        displayName: teacher.display_name,
+        teacherStatus: teacher.teacher_status,
+        teacherProfile: teacher.teacher_profile
+      }
     });
   } catch (error) {
+    console.error('Error fetching teacher stats:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// GET /api/users/teacher/:teacherId/activity - Get student activity in last 7 days
+router.get('/teacher/:teacherId/activity', async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    
+    // Find teacher's classes
+    const { data: classes } = await supabase
+      .from('classes')
+      .select('id')
+      .eq('teacher_id', teacherId);
+
+    const classIds = (classes || []).map(c => c.id);
+    if (classIds.length === 0) {
+      return res.json({ success: true, activity: [] });
+    }
+
+    // Find enrolled students
+    const { data: members } = await supabase
+      .from('class_members')
+      .select('student_id')
+      .in('class_id', classIds);
+
+    const studentIds = [...new Set((members || []).map(m => m.student_id))];
+    if (studentIds.length === 0) {
+      return res.json({ success: true, activity: [] });
+    }
+
+    // Get completions in the last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const { data: completions } = await supabase
+      .from('lesson_completions')
+      .select('completed_at, user_id')
+      .in('user_id', studentIds)
+      .gte('completed_at', sevenDaysAgo.toISOString());
+
+    // Group by day of week (T2, T3, T4, T5, T6, T7, CN)
+    const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    const activityMap = {};
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayName = dayNames[d.getDay()];
+      activityMap[dayName] = { day: dayName, students: new Set(), lessons: 0 };
+    }
+
+    if (completions) {
+      completions.forEach(c => {
+        const date = new Date(c.completed_at);
+        const dayName = dayNames[date.getDay()];
+        if (activityMap[dayName]) {
+          activityMap[dayName].students.add(c.user_id);
+          activityMap[dayName].lessons++;
+        }
+      });
+    }
+
+    const activity = Object.values(activityMap).map(act => ({
+      day: act.day,
+      students: act.students.size,
+      lessons: act.lessons
+    }));
+
+    res.json({ success: true, activity });
+  } catch (error) {
+    console.error('Error fetching teacher student activity:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// GET /api/users/teacher/:teacherId/top-students
+router.get('/teacher/:teacherId/top-students', async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    
+    // Find teacher's classes
+    const { data: classes } = await supabase
+      .from('classes')
+      .select('id')
+      .eq('teacher_id', teacherId);
+
+    const classIds = (classes || []).map(c => c.id);
+    if (classIds.length === 0) {
+      return res.json({ success: true, students: [] });
+    }
+
+    // Find class members
+    const { data: members, error: memError } = await supabase
+      .from('class_members')
+      .select('student_id')
+      .in('class_id', classIds);
+
+    if (memError) throw memError;
+
+    const studentIds = [...new Set((members || []).map(m => m.student_id))];
+    if (studentIds.length === 0) {
+      return res.json({ success: true, students: [] });
+    }
+
+    // Fetch user details
+    const { data: users, error: uError } = await supabase
+      .from('users')
+      .select('id, display_name, grade')
+      .in('id', studentIds);
+
+    if (uError) throw uError;
+
+    // Fetch lesson completions
+    const { data: completions, error: cError } = await supabase
+      .from('lesson_completions')
+      .select('user_id, score, total_questions, completed_at')
+      .in('user_id', studentIds);
+
+    if (cError) throw cError;
+
+    // Aggregate statistics per student
+    const studentStats = users.map(user => {
+      const userComps = (completions || []).filter(c => c.user_id === user.id);
+      const lessonsCompleted = userComps.length;
+      
+      let avgScore = 0;
+      if (lessonsCompleted > 0) {
+        const totalPct = userComps.reduce((sum, item) => sum + (item.score / (item.total_questions || 1) * 100), 0);
+        avgScore = Math.round(totalPct / lessonsCompleted);
+      }
+
+      // Find last active timestamp
+      let lastActive = 'Chưa hoạt động';
+      if (lessonsCompleted > 0) {
+        const sorted = userComps.sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
+        const lastDate = new Date(sorted[0].completed_at);
+        lastActive = lastDate.toLocaleDateString('vi-VN');
+      }
+
+      return {
+        id: user.id,
+        name: user.display_name || 'Học sinh',
+        grade: user.grade || 10,
+        lessonsCompleted,
+        avgScore,
+        lastActive
+      };
+    });
+
+    // Sort by avgScore desc, then lessonsCompleted desc
+    studentStats.sort((a, b) => b.avgScore - a.avgScore || b.lessonsCompleted - a.lessonsCompleted);
+
+    res.json({ success: true, students: studentStats });
+  } catch (error) {
+    console.error('Error fetching teacher top students:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });

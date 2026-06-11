@@ -6,8 +6,27 @@ const User = require('../models/User.cjs');
 // Get all challenges
 router.get('/', async (req, res) => {
   try {
-    const challenges = await Challenge.findAll();
-    res.json(challenges);
+    const { teacherId, category } = req.query;
+    let query = require('../src/config/supabase.cjs').supabase
+      .from('challenges')
+      .select('*');
+
+    if (teacherId === 'system' || teacherId === 'null' || !teacherId) {
+      query = query.is('teacher_id', null);
+    } else if (teacherId) {
+      query = query.eq('teacher_id', teacherId);
+    }
+
+    if (category === 'experiment') {
+      query = query.eq('category', 'experiment');
+    } else if (category === 'exercise') {
+      query = query.neq('category', 'experiment');
+    }
+
+    const { data: challenges, error } = await query.order('created_at', { ascending: false });
+    if (error) throw error;
+
+    res.json(challenges || []);
   } catch (error) {
     console.error('Error fetching challenges:', error);
     res.status(500).json({ message: 'Error fetching challenges', error: error.message });
@@ -91,8 +110,19 @@ router.put('/:id', async (req, res) => {
 // Delete challenge
 router.delete('/:id', async (req, res) => {
   try {
-    await Challenge.delete(parseInt(req.params.id));
-    res.json({ message: 'Challenge deleted successfully' });
+    const id = req.params.id;
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    
+    if (isUuid) {
+      const { error } = await require('../src/config/supabase.cjs').supabase
+        .from('challenges')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    } else {
+      await Challenge.delete(parseInt(id));
+    }
+    res.json({ success: true, message: 'Challenge deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting challenge', error: error.message });
   }
