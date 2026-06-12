@@ -80,7 +80,7 @@ const MyExercises = () => {
     if (!teacher?.id) return;
     try {
       const response = await api.get(`/challenges?teacherId=${teacher.id}&category=exercise`);
-      setExercises(response.data || []);
+      setExercises(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching exercises:', error);
     }

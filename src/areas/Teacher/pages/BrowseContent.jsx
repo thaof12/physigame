@@ -61,9 +61,9 @@ const BrowseContent = () => {
         api.get('/challenges?teacherId=null&category=exercise'),
         api.get('/challenges?teacherId=null&category=experiment')
       ]);
-      setLessons(lessonsRes.data || []);
-      setExercises(exercisesRes.data || []);
-      setExperiments(experimentsRes.data || []);
+      setLessons(Array.isArray(lessonsRes.data) ? lessonsRes.data : []);
+      setExercises(Array.isArray(exercisesRes.data) ? exercisesRes.data : []);
+      setExperiments(Array.isArray(experimentsRes.data) ? experimentsRes.data : []);
     } catch (error) {
       console.error('Error fetching system content:', error);
     } finally {

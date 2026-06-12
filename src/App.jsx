@@ -120,7 +120,7 @@ const AppContent = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch('http://localhost:5002/api/settings');
+        const response = await fetch('/api/settings');
         const settings = await response.json();
         
         // Cập nhật tiêu đề và mô tả website

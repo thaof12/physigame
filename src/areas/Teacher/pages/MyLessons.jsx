@@ -72,7 +72,7 @@ const MyLessons = () => {
     if (!teacher?.id) return;
     try {
       const response = await api.get(`/lessons?teacherId=${teacher.id}`);
-      setLessons(response.data || []);
+      setLessons(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching lessons:', error);
     }

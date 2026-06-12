@@ -132,7 +132,7 @@ const ClassManagement = () => {
       if (asgType === 'lesson') {
         const res = await api.get('/lessons');
         // Filter lessons and format
-        const items = (res.data || []).map(l => ({
+        const items = (Array.isArray(res.data) ? res.data : []).map(l => ({
           id: `${l.class_id}-${l.chapter_id}-${l.lesson_id}`,
           title: `Lớp ${l.class_id} - ${l.title}`
         }));
@@ -140,7 +140,7 @@ const ClassManagement = () => {
         if (items.length > 0) setAsgResourceId(items[0].id);
       } else {
         const res = await api.get('/challenges');
-        const items = (res.data || []).map(c => ({
+        const items = (Array.isArray(res.data) ? res.data : []).map(c => ({
           id: c.challenge_id.toString(),
           title: `[${c.difficulty}] ${c.name}`
         }));
@@ -296,14 +296,14 @@ const ClassManagement = () => {
 
         if (asg.type === 'lesson') {
           const res = await api.get(`/classes/${activeClass.id}/assignments?studentId=${stud.id}`);
-          const matching = (res.data?.assignments || []).find(a => a.id === asg.id);
+          const matching = (Array.isArray(res.data?.assignments) ? res.data.assignments : []).find(a => a.id === asg.id);
           if (matching) {
             completed = matching.completed;
             score = matching.score;
           }
         } else {
           const res = await api.get(`/classes/${activeClass.id}/assignments?studentId=${stud.id}`);
-          const matching = (res.data?.assignments || []).find(a => a.id === asg.id);
+          const matching = (Array.isArray(res.data?.assignments) ? res.data.assignments : []).find(a => a.id === asg.id);
           if (matching) {
             completed = matching.completed;
             score = matching.score;

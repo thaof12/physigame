@@ -24,7 +24,7 @@ const MyExperiments = () => {
     if (!teacher?.id) return;
     try {
       const response = await api.get(`/challenges?teacherId=${teacher.id}&category=experiment`);
-      setExperiments(response.data || []);
+      setExperiments(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching experiments:', error);
     }

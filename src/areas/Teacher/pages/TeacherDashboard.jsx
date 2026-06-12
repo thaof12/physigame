@@ -91,7 +91,7 @@ const TeacherDashboard = () => {
       ]);
 
       const combined = [
-        ...(lessonsRes.data || []).map(l => ({
+        ...(Array.isArray(lessonsRes.data) ? lessonsRes.data : []).map(l => ({
           id: l.id,
           type: 'lesson',
           title: l.title,
@@ -99,7 +99,7 @@ const TeacherDashboard = () => {
           date: l.created_at ? new Date(l.created_at).toLocaleDateString('vi-VN') : 'Mới đây',
           status: l.status === 'published' ? 'active' : 'pending'
         })),
-        ...(challengesRes.data || []).map(c => ({
+        ...(Array.isArray(challengesRes.data) ? challengesRes.data : []).map(c => ({
           id: c.id,
           type: c.category === 'experiment' ? 'experiment' : 'exercise',
           title: c.name,

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   BookOpen,
   Search,
@@ -19,66 +19,188 @@ import {
   X
 } from 'lucide-react';
 import { lectureData } from '../../../data/lectureData';
+import { supabase } from '../../../config/supabase';
 
 const AdminLessons = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSubject, setFilterSubject] = useState('all');
   const [filterGrade, setFilterGrade] = useState('all');
 
-  // Flatten lectureData for initial state
-  const initialLessons = useMemo(() => {
-    const flattened = [];
-    if (lectureData.physics) {
-      Object.entries(lectureData.physics).forEach(([grade, chapters]) => {
-        Object.entries(chapters).forEach(([chapterId, chapter]) => {
-          chapter.lessons.forEach(lesson => {
-            flattened.push({
-              id: `${grade}-${chapterId}-${lesson.id}`,
-              title: lesson.title,
-              subject: 'physics',
-              grade: parseInt(grade),
-              chapter: chapterId,
-              chapterTitle: chapter.title,
-              views: Math.floor(Math.random() * 2000) + 500,
-              completion: Math.floor(Math.random() * 30) + 70,
-              duration: 20 + Math.floor(Math.random() * 15),
-              rating: (4 + Math.random()).toFixed(1),
-              description: lesson.description || 'Nội dung bài học chi tiết về các hiện tượng vật lý và bài tập ứng dụng.'
-            });
-          });
-        });
-      });
-    }
-    return flattened;
-  }, []);
+  const [lessons, setLessons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null);
 
-  const [lessons, setLessons] = useState(initialLessons);
   const [showViewModal, setShowViewModal] = useState(null);
   const [showEditModal, setShowEditModal] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  const filteredLessons = lessons.filter(lesson => {
-    const matchSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchSubject = filterSubject === 'all' || lesson.subject === filterSubject;
-    const matchGrade = filterGrade === 'all' || lesson.grade.toString() === filterGrade;
-    return matchSearch && matchSubject && matchGrade;
-  });
+  useEffect(() => {
+    fetchLessons();
+  }, []);
 
-  const stats = {
-    total: lessons.length,
-    physics: lessons.filter(l => l.subject === 'physics').length,
-    avgCompletion: lessons.length > 0 ? Math.round(lessons.reduce((a, b) => a + b.completion, 0) / lessons.length) : 0
+  const fetchLessons = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from('lessons')
+        .select('*')
+        .order('class_id', { ascending: true })
+        .order('chapter_id', { ascending: true })
+        .order('lesson_id', { ascending: true });
+
+      if (error) throw error;
+
+      // Map lessons to format expected by UI
+      const mapped = (data || []).map(lesson => {
+        // Find chapter title from local lectureData if it's a system lesson matching class_id & chapter_id
+        let chTitle = '';
+        if (lesson.class_id && lectureData.physics?.[lesson.class_id]) {
+          const chapters = lectureData.physics[lesson.class_id];
+          const chKey = Object.keys(chapters).find(key => {
+            const ch = chapters[key];
+            return lesson.description && lesson.description.includes(ch.title);
+          }) || Object.keys(chapters)[lesson.chapter_id - 1] || '0';
+          
+          if (chapters[chKey]) {
+            chTitle = chapters[chKey].title;
+          }
+        }
+
+        // If no chapter title is resolved, parse it from description: "Chương/ chủ đề: ... - Thể loại: ..."
+        if (!chTitle && lesson.description) {
+          const chMatch = lesson.description.match(/Chương\/ chủ đề:\s*([^-]+)/);
+          if (chMatch) {
+            chTitle = chMatch[1].trim();
+          }
+        }
+        if (!chTitle) {
+          chTitle = `Chương ${lesson.chapter_id || 1}`;
+        }
+
+        return {
+          id: lesson.id,
+          title: lesson.title,
+          subject: 'physics', // default to physics
+          grade: lesson.class_id || 6,
+          chapter: lesson.chapter_id || 1,
+          chapterTitle: chTitle,
+          views: lesson.views || 0,
+          completion: Math.floor(Math.random() * 30) + 70, // Keep random or use reasonable default
+          duration: 20 + Math.floor(Math.random() * 15), // Keep random or use reasonable default
+          rating: (4 + Math.random()).toFixed(1),
+          description: lesson.description || 'Nội dung bài học chi tiết về các hiện tượng vật lý và bài tập ứng dụng.',
+          status: lesson.status || 'published', // 'published' = active (Kích hoạt), 'draft' = inactive (Vô hiệu)
+          teacher_id: lesson.teacher_id,
+          theory: lesson.theory,
+          content: lesson.content,
+          original: lesson
+        };
+      });
+
+      setLessons(mapped);
+    } catch (err) {
+      console.error('Error fetching lessons:', err);
+      setError('Không thể tải danh sách bài học từ database');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (id) => {
-    setLessons(prev => prev.filter(l => l.id !== id));
-    setShowDeleteConfirm(null);
+  const handleToggleStatus = async (lesson) => {
+    const newStatus = lesson.status === 'published' ? 'draft' : 'published';
+    setActionLoading(lesson.id);
+    try {
+      const { error } = await supabase
+        .from('lessons')
+        .update({ status: newStatus })
+        .eq('id', lesson.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setLessons(prev => prev.map(l => l.id === lesson.id ? { ...l, status: newStatus } : l));
+      // Update details modal if open
+      if (showViewModal && showViewModal.id === lesson.id) {
+        setShowViewModal(prev => ({ ...prev, status: newStatus }));
+      }
+    } catch (err) {
+      console.error('Error toggling lesson status:', err);
+      alert('Không thể cập nhật trạng thái bài giảng');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
-  const handleUpdate = (updatedLesson) => {
-    setLessons(prev => prev.map(l => l.id === updatedLesson.id ? { ...l, ...updatedLesson } : l));
-    setShowEditModal(null);
+  const handleDelete = async (id) => {
+    setActionLoading(id);
+    try {
+      const { error } = await supabase
+        .from('lessons')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setLessons(prev => prev.filter(l => l.id !== id));
+      setShowDeleteConfirm(null);
+    } catch (err) {
+      console.error('Error deleting lesson:', err);
+      alert('Không thể xóa bài học khỏi database');
+    } finally {
+      setActionLoading(null);
+    }
   };
+
+  const handleUpdate = async (updatedLesson) => {
+    setActionLoading(updatedLesson.id);
+    try {
+      const { error } = await supabase
+        .from('lessons')
+        .update({
+          title: updatedLesson.title,
+          class_id: updatedLesson.grade,
+          description: updatedLesson.description,
+          status: updatedLesson.status
+        })
+        .eq('id', updatedLesson.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setLessons(prev => prev.map(l => l.id === updatedLesson.id ? { ...l, ...updatedLesson } : l));
+      setShowEditModal(null);
+    } catch (err) {
+      console.error('Error updating lesson:', err);
+      alert('Không thể lưu thay đổi vào database');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="w-12 h-12 border-4 border-[#2099e9] border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-slate-500 font-bold text-sm">Đang tải danh sách bài học...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 bg-rose-50 border border-rose-200 rounded-3xl text-center space-y-4">
+        <p className="text-rose-600 font-bold">{error}</p>
+        <button 
+          onClick={fetchLessons}
+          className="px-6 py-2.5 bg-[#2099e9] text-white rounded-xl font-bold hover:brightness-110 transition-all"
+        >
+          Tải lại
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -87,7 +209,10 @@ const AdminLessons = () => {
           <h1 className="text-3xl font-black text-[#274dad]">Quản lý bài học</h1>
           <p className="text-slate-500 font-bold text-sm">Quản lý nội dung bài học trên toàn hệ thống</p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] rounded-[1.25rem] text-white text-sm font-black shadow-xl shadow-blue-500/10 hover:brightness-110 transition-all">
+        <button 
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] rounded-[1.25rem] text-white text-sm font-black shadow-xl shadow-blue-500/10 hover:brightness-110 transition-all"
+        >
           <Plus className="w-5 h-5" />
           <span>THÊM BÀI HỌC</span>
         </button>
@@ -189,6 +314,13 @@ const AdminLessons = () => {
                     <span className="px-3 py-1 bg-[#e4f2f0] text-[#2099e9] rounded-lg text-[10px] font-black uppercase tracking-widest">
                       {lesson.subject === 'physics' ? 'Vật lý' : 'Hóa học'} {lesson.grade}
                     </span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      lesson.status === 'published' 
+                        ? 'bg-emerald-100 text-emerald-600 border border-emerald-200/50' 
+                        : 'bg-rose-100 text-rose-600 border border-rose-200/50'
+                    }`}>
+                      {lesson.status === 'published' ? 'Kích hoạt' : 'Vô hiệu'}
+                    </span>
                     <span className="text-xs font-bold text-slate-400">
                       Chương {lesson.chapter}: {lesson.chapterTitle}
                     </span>
@@ -282,6 +414,30 @@ const AdminLessons = () => {
                 </p>
               </div>
 
+              <div className="flex items-center justify-between p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Trạng thái hiện tại:</span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                    showViewModal.status === 'published' 
+                      ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
+                      : 'bg-rose-50 text-rose-600 border border-rose-200'
+                  }`}>
+                    {showViewModal.status === 'published' ? 'Kích hoạt' : 'Vô hiệu'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleToggleStatus(showViewModal)}
+                  disabled={actionLoading === showViewModal.id}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                    showViewModal.status === 'published'
+                      ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/20'
+                      : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                  } disabled:opacity-50`}
+                >
+                  {actionLoading === showViewModal.id ? 'Đang cập nhật...' : (showViewModal.status === 'published' ? 'Vô hiệu hóa' : 'Kích hoạt')}
+                </button>
+              </div>
+
               <div className="flex gap-4 pt-4">
                 <button 
                   onClick={() => { setShowViewModal(null); setShowEditModal(showViewModal); }}
@@ -322,7 +478,9 @@ const AdminLessons = () => {
                 ...showEditModal,
                 title: formData.get('title'),
                 grade: parseInt(formData.get('grade')),
-                duration: parseInt(formData.get('duration'))
+                duration: parseInt(formData.get('duration')),
+                description: formData.get('description'),
+                status: formData.get('status')
               });
             }}>
               <div className="space-y-4">
@@ -358,6 +516,29 @@ const AdminLessons = () => {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Trạng thái</label>
+                  <select 
+                    name="status"
+                    defaultValue={showEditModal.status}
+                    className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all"
+                  >
+                    <option value="published">Kích hoạt (Published)</option>
+                    <option value="draft">Vô hiệu (Draft)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Mô tả bài học</label>
+                  <textarea 
+                    name="description"
+                    rows={3}
+                    defaultValue={showEditModal.description}
+                    placeholder="Nhập mô tả tóm tắt nội dung bài học..."
+                    className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all resize-none"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-4 pt-4">
@@ -370,9 +551,150 @@ const AdminLessons = () => {
                 </button>
                 <button 
                   type="submit"
+                  disabled={actionLoading === showEditModal.id}
                   className="flex-[2] py-4 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all"
                 >
-                  LƯU THAY ĐỔI
+                  {actionLoading === showEditModal.id ? 'ĐANG LƯU...' : 'LƯU THAY ĐỔI'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Lesson Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-[#274dad]/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-[#85e4fb]/20">
+            <div className="p-8 bg-gradient-to-br from-[#2099e9] to-[#274dad] text-white">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-2xl font-black">Thêm bài học mới</h3>
+                <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white/10 rounded-xl transition-all">
+                  <XCircle className="w-6 h-6" />
+                </button>
+              </div>
+              <p className="font-bold opacity-80">Tạo bài học mới trên hệ thống</p>
+            </div>
+            
+            <form className="p-8 space-y-6" onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const title = formData.get('title');
+              const grade = parseInt(formData.get('grade'));
+              const description = formData.get('description');
+              const status = formData.get('status');
+
+              if (!title) {
+                alert('Vui lòng nhập tiêu đề bài học');
+                return;
+              }
+
+              setActionLoading(true);
+              try {
+                // Find next lesson_id for class_id
+                const { data: siblingLessons, error: fetchErr } = await supabase
+                  .from('lessons')
+                  .select('lesson_id')
+                  .eq('class_id', grade);
+                
+                if (fetchErr) throw fetchErr;
+                
+                const nextLessonId = siblingLessons && siblingLessons.length > 0 
+                  ? Math.max(...siblingLessons.map(l => l.lesson_id)) + 1
+                  : 1;
+
+                const newLessonPayload = {
+                  class_id: grade,
+                  chapter_id: 1, // default to Chapter 1
+                  lesson_id: nextLessonId,
+                  title,
+                  description: description || `Chương/ chủ đề: Chương I - Thể loại: Bài giảng`,
+                  level: 'Beginner',
+                  status,
+                  theory: '',
+                  content: '',
+                  game: {},
+                  sort_order: (grade * 1000) + 100 + nextLessonId
+                };
+
+                const { error: insertErr } = await supabase
+                  .from('lessons')
+                  .insert(newLessonPayload);
+
+                if (insertErr) throw insertErr;
+
+                // Refresh the list
+                await fetchLessons();
+                setShowAddModal(false);
+              } catch (err) {
+                console.error('Error adding lesson:', err);
+                alert('Không thể tạo bài học mới');
+              } finally {
+                setActionLoading(false);
+              }
+            }}>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Tiêu đề bài học</label>
+                  <input 
+                    name="title"
+                    placeholder="VD: Bài 1: Chuyển động cơ học"
+                    className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Khối lớp</label>
+                    <select 
+                      name="grade"
+                      defaultValue="8"
+                      className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all"
+                    >
+                      {[6, 7, 8, 9, 10, 11, 12].map(g => (
+                        <option key={g} value={g}>Lớp {g}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Trạng thái</label>
+                    <select 
+                      name="status"
+                      defaultValue="published"
+                      className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all"
+                    >
+                      <option value="published">Kích hoạt (Published)</option>
+                      <option value="draft">Vô hiệu (Draft)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Mô tả bài học</label>
+                  <textarea 
+                    name="description"
+                    rows={3}
+                    placeholder="Nhập mô tả tóm tắt nội dung bài học..."
+                    className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button 
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all"
+                >
+                  Hủy bỏ
+                </button>
+                <button 
+                  type="submit"
+                  disabled={actionLoading}
+                  className="flex-[2] py-4 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all disabled:opacity-50"
+                >
+                  {actionLoading ? 'ĐANG TẠO...' : 'TẠO BÀI HỌC'}
                 </button>
               </div>
             </form>
@@ -401,9 +723,10 @@ const AdminLessons = () => {
                 </button>
                 <button 
                   onClick={() => handleDelete(showDeleteConfirm.id)}
+                  disabled={actionLoading === showDeleteConfirm.id}
                   className="flex-1 py-4 bg-rose-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all"
                 >
-                  XÓA NGAY
+                  {actionLoading === showDeleteConfirm.id ? 'ĐANG XÓA...' : 'XÓA NGAY'}
                 </button>
               </div>
             </div>
