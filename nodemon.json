@@ -1,0 +1,18 @@
+{
+  "watch": [
+    "server.cjs",
+    "api",
+    "routes",
+    "models",
+    "middleware"
+  ],
+  "ignore": [
+    "src",
+    "dist",
+    "public",
+    "node_modules",
+    ".git",
+    ".gemini"
+  ],
+  "ext": "js,json,cjs"
+}

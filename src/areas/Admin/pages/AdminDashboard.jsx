@@ -186,15 +186,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Real Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
-        <StatCard title="Tổng người dùng" value={realStats.totalUsers} icon={Users} color="bg-gradient-to-br from-indigo-500 to-violet-600" sub="Tất cả tài khoản" />
-        <StatCard title="Học sinh" value={realStats.students} icon={BookOpen} color="bg-gradient-to-br from-emerald-500 to-teal-600" sub="Đang học tập" />
-        <StatCard title="Giáo viên" value={realStats.teachers} icon={GraduationCap} color="bg-gradient-to-br from-blue-500 to-cyan-600" sub="Đã đăng ký" />
-        <StatCard title="Chờ duyệt" value={realStats.pendingTeachers} icon={UserX} color="bg-gradient-to-br from-amber-500 to-orange-600" sub="GV chờ phê duyệt" />
-        <StatCard title="Mới (30 ngày)" value={realStats.newUsers30d} icon={TrendingUp} color="bg-gradient-to-br from-rose-500 to-pink-600" sub="Đăng ký gần đây" />
-        <StatCard title="Bài giảng" value={realStats.totalLessons} icon={FileQuestion} color="bg-gradient-to-br from-slate-600 to-slate-800" sub="Từ kho nội dung" />
-      </div>
+
 
       {/* Main Content */}
       <div className="grid lg:grid-cols-3 gap-8">

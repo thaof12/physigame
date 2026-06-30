@@ -1,98 +1,98 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Wrench } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { GameProgressProvider } from './contexts/GameProgressContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Home from './pages/Home';
-
-import "./index.css";
-
-// Physics Tools Hub
-import PhysicsToolsHub from './pages/PhysicsToolsHub';
-import PhysicsCalculator from './components/PhysicsTools/PhysicsCalculator';
-import ConstantsReference from './components/PhysicsTools/ConstantsReference';
-import UnitConverter from './components/PhysicsTools/UnitConverter';
-
-// Interactive Lecture Hub
-import InteractiveLectureHub from './pages/InteractiveLectureHub';
-import LectureGradeSelector from './pages/LectureGradeSelector';
-import LectureViewer from './components/LectureViewer';
-import LectureClassSelector from './components/LectureClassSelector';
-import Profile from './pages/Profile';
-import PlacementTest from './pages/PlacementTest';
-import MyClass from './pages/MyClass';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import MainLayout from './components/layout/MainLayout';
+import PhysicsHome from './areas/Vatly/pages/PhysicsHome';
+
+import "./index.css";
+
+// Lazy-loaded components for better load performance (code splitting)
+
+// Physics Tools Hub
+const PhysicsToolsHub = lazy(() => import('./pages/PhysicsToolsHub'));
+const PhysicsCalculator = lazy(() => import('./components/PhysicsTools/PhysicsCalculator'));
+const ConstantsReference = lazy(() => import('./components/PhysicsTools/ConstantsReference'));
+const UnitConverter = lazy(() => import('./components/PhysicsTools/UnitConverter'));
+
+// Interactive Lecture Hub
+const InteractiveLectureHub = lazy(() => import('./pages/InteractiveLectureHub'));
+const LectureGradeSelector = lazy(() => import('./pages/LectureGradeSelector'));
+const LectureViewer = lazy(() => import('./components/LectureViewer'));
+const LectureClassSelector = lazy(() => import('./components/LectureClassSelector'));
+const Profile = lazy(() => import('./pages/Profile'));
+const PlacementTest = lazy(() => import('./pages/PlacementTest'));
+const MyClass = lazy(() => import('./pages/MyClass'));
 
 // Support Pages
-import UserGuide from './pages/support/UserGuide';
-import FAQ from './pages/support/FAQ';
-import PrivacyPolicy from './pages/support/PrivacyPolicy';
-import TermsOfService from './pages/support/TermsOfService';
+const UserGuide = lazy(() => import('./pages/support/UserGuide'));
+const FAQ = lazy(() => import('./pages/support/FAQ'));
+const PrivacyPolicy = lazy(() => import('./pages/support/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/support/TermsOfService'));
 
-// Physics area
-import PhysicsHome from './areas/Vatly/pages/PhysicsHome';
-import PhysicsClassDashboard from './areas/Vatly/pages/PhysicsClassDashboard';
-import PhysicsClasses from './areas/Vatly/pages/PhysicsClasses';
-import PhysicsLesson from './areas/Vatly/pages/PhysicsLesson';
-import AdvancedPhysicsChallenge from './areas/Vatly/gamelist/AdvancedPhysicsChallenge';
+// Physics area pages
+const PhysicsClassDashboard = lazy(() => import('./areas/Vatly/pages/PhysicsClassDashboard'));
+const PhysicsClasses = lazy(() => import('./areas/Vatly/pages/PhysicsClasses'));
+const PhysicsLesson = lazy(() => import('./areas/Vatly/pages/PhysicsLesson'));
+const AdvancedPhysicsChallenge = lazy(() => import('./areas/Vatly/gamelist/AdvancedPhysicsChallenge'));
 
 // Physics challenge games
-import BalanceChallenge from './areas/Vatly/challenges/BalanceChallenge/BalanceChallenge';
-import ForceWorldGame from './areas/Vatly/challenges/ForceWorldGame/ForceWorldGame';
-import WaterLab from './areas/Vatly/challenges/WaterLab/WaterLab';
-import BoilingGame from './areas/Vatly/challenges/BoilingGame/BoilingGame';
-import ThermalEnergyGame from './areas/Vatly/challenges/ThermalEnergyGame/ThermalEnergyGame';
-import LightReflectionGame from './areas/Vatly/challenges/LightReflectionGame/LightReflectionGame';
-import LightPathGame from './areas/Vatly/challenges/LightPathGame/LightPathGame';
-import MirrorLabGame from './areas/Vatly/challenges/MirrorLabGame/MirrorLabGame';
-import RaceTracker from './areas/Vatly/challenges/RaceTracker/RaceTracker';
-import ForceArena from './areas/Vatly/challenges/ForceArena/ForceArena';
-import ProjectileMotion from './areas/Vatly/challenges/ProjectileMotion/ProjectileMotion';
-import CircuitBuilderGame from './areas/Vatly/challenges/CircuitBuilderGame/CircuitBuilderGame';
-
+const BalanceChallenge = lazy(() => import('./areas/Vatly/challenges/BalanceChallenge/BalanceChallenge'));
+const ForceWorldGame = lazy(() => import('./areas/Vatly/challenges/ForceWorldGame/ForceWorldGame'));
+const WaterLab = lazy(() => import('./areas/Vatly/challenges/WaterLab/WaterLab'));
+const BoilingGame = lazy(() => import('./areas/Vatly/challenges/BoilingGame/BoilingGame'));
+const ThermalEnergyGame = lazy(() => import('./areas/Vatly/challenges/ThermalEnergyGame/ThermalEnergyGame'));
+const LightReflectionGame = lazy(() => import('./areas/Vatly/challenges/LightReflectionGame/LightReflectionGame'));
+const LightPathGame = lazy(() => import('./areas/Vatly/challenges/LightPathGame/LightPathGame'));
+const MirrorLabGame = lazy(() => import('./areas/Vatly/challenges/MirrorLabGame/MirrorLabGame'));
+const RaceTracker = lazy(() => import('./areas/Vatly/challenges/RaceTracker/RaceTracker'));
+const ForceArena = lazy(() => import('./areas/Vatly/challenges/ForceArena/ForceArena'));
+const ProjectileMotion = lazy(() => import('./areas/Vatly/challenges/ProjectileMotion/ProjectileMotion'));
+const CircuitBuilderGame = lazy(() => import('./areas/Vatly/challenges/CircuitBuilderGame/CircuitBuilderGame'));
 
 // PK Battle System
-import PKLobby from './pages/PKBattle/PKLobby';
-import PKMatchmaking from './pages/PKBattle/PKMatchmaking';
-import PKBattleRoom from './pages/PKBattle/PKBattleRoom';
-import PKResult from './pages/PKBattle/PKResult';
+const PKLobby = lazy(() => import('./pages/PKBattle/PKLobby'));
+const PKMatchmaking = lazy(() => import('./pages/PKBattle/PKMatchmaking'));
+const PKBattleRoom = lazy(() => import('./pages/PKBattle/PKBattleRoom'));
+const PKResult = lazy(() => import('./pages/PKBattle/PKResult'));
 
 // Virtual Lab (Phòng thí nghiệm ảo)
-import VirtualLabHome from './areas/Vatly/VirtualLab/pages/VirtualLabHome';
-import PendulumLab from './areas/Vatly/VirtualLab/experiments/PendulumLab';
-import FreeFallLabVirtual from './areas/Vatly/VirtualLab/experiments/FreeFallLab';
-import OhmLawLab from './areas/Vatly/VirtualLab/experiments/OhmLawLab';
-import LensOpticsLab from './areas/Vatly/VirtualLab/experiments/LensOpticsLab';
-import StandingWaveLab from './areas/Vatly/VirtualLab/experiments/StandingWaveLab';
-import CalorimeterLab from './areas/Vatly/VirtualLab/experiments/CalorimeterLab';
-import InclinedPlaneLab from './areas/Vatly/VirtualLab/experiments/InclinedPlaneLab';
-import ResistorCircuitLab from './areas/Vatly/VirtualLab/experiments/ResistorCircuitLab';
-import LightInterferenceLab from './areas/Vatly/VirtualLab/experiments/LightInterferenceLab';
+const VirtualLabHome = lazy(() => import('./areas/Vatly/VirtualLab/pages/VirtualLabHome'));
+const PendulumLab = lazy(() => import('./areas/Vatly/VirtualLab/experiments/PendulumLab'));
+const FreeFallLabVirtual = lazy(() => import('./areas/Vatly/VirtualLab/experiments/FreeFallLab'));
+const OhmLawLab = lazy(() => import('./areas/Vatly/VirtualLab/experiments/OhmLawLab'));
+const LensOpticsLab = lazy(() => import('./areas/Vatly/VirtualLab/experiments/LensOpticsLab'));
+const StandingWaveLab = lazy(() => import('./areas/Vatly/VirtualLab/experiments/StandingWaveLab'));
+const CalorimeterLab = lazy(() => import('./areas/Vatly/VirtualLab/experiments/CalorimeterLab'));
+const InclinedPlaneLab = lazy(() => import('./areas/Vatly/VirtualLab/experiments/InclinedPlaneLab'));
+const ResistorCircuitLab = lazy(() => import('./areas/Vatly/VirtualLab/experiments/ResistorCircuitLab'));
+const LightInterferenceLab = lazy(() => import('./areas/Vatly/VirtualLab/experiments/LightInterferenceLab'));
 
 // Admin Panel
 import { AdminAuthProvider } from './areas/Admin/contexts/AdminAuthContext';
-import AdminLayout from './areas/Admin/layouts/AdminLayout';
-import AdminDashboard from './areas/Admin/pages/AdminDashboard';
-import AdminUsers from './areas/Admin/pages/AdminUsers';
-import AdminLessons from './areas/Admin/pages/AdminLessons';
-import AdminExercises from './areas/Admin/pages/AdminExercises';
-import AdminStatistics from './areas/Admin/pages/AdminStatistics';
-import AdminSettings from './areas/Admin/pages/AdminSettings';
+const AdminLayout = lazy(() => import('./areas/Admin/layouts/AdminLayout'));
+const AdminDashboard = lazy(() => import('./areas/Admin/pages/AdminDashboard'));
+const AdminUsers = lazy(() => import('./areas/Admin/pages/AdminUsers'));
+const AdminLessons = lazy(() => import('./areas/Admin/pages/AdminLessons'));
+const AdminExercises = lazy(() => import('./areas/Admin/pages/AdminExercises'));
+const AdminStatistics = lazy(() => import('./areas/Admin/pages/AdminStatistics'));
+const AdminSettings = lazy(() => import('./areas/Admin/pages/AdminSettings'));
 
 // Teacher Panel
 import { TeacherAuthProvider } from './areas/Teacher/contexts/TeacherAuthContext';
-import TeacherLayout from './areas/Teacher/layouts/TeacherLayout';
-import TeacherDashboard from './areas/Teacher/pages/TeacherDashboard';
-import PendingApproval from './areas/Teacher/pages/PendingApproval';
-import MyLessons from './areas/Teacher/pages/MyLessons';
-import MyExercises from './areas/Teacher/pages/MyExercises';
-import BrowseContent from './areas/Teacher/pages/BrowseContent';
-import StudentStats from './areas/Teacher/pages/StudentStats';
-import ClassManagement from './areas/Teacher/pages/ClassManagement';
-import TeacherProfile from './areas/Teacher/pages/TeacherProfile';
+const TeacherLayout = lazy(() => import('./areas/Teacher/layouts/TeacherLayout'));
+const TeacherDashboard = lazy(() => import('./areas/Teacher/pages/TeacherDashboard'));
+const PendingApproval = lazy(() => import('./areas/Teacher/pages/PendingApproval'));
+const MyLessons = lazy(() => import('./areas/Teacher/pages/MyLessons'));
+const MyExercises = lazy(() => import('./areas/Teacher/pages/MyExercises'));
+const BrowseContent = lazy(() => import('./areas/Teacher/pages/BrowseContent'));
+const ClassManagement = lazy(() => import('./areas/Teacher/pages/ClassManagement'));
+const TeacherProfile = lazy(() => import('./areas/Teacher/pages/TeacherProfile'));
 
 
 const ProtectedRoute = ({ children }) => {
@@ -113,9 +113,15 @@ const AppContent = () => {
 
   useEffect(() => {
     if (user && user.uid !== 'admin-hardcoded') {
-      refreshUser().catch((err) => console.log('Status verification skipped:', err.message));
+      const isPendingTeacher = user.role === 'teacher' && 
+        (user.teacherStatus === 'pending' || user.teacher_status === 'pending');
+      
+      // Only refresh user profile on page change if they are a pending teacher waiting for approval
+      if (isPendingTeacher) {
+        refreshUser().catch((err) => console.log('Status verification skipped:', err.message));
+      }
     }
-  }, [location.pathname]);
+  }, [location.pathname, user?.role, user?.teacherStatus, user?.teacher_status]);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -300,7 +306,17 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <GameProgressProvider>
-            <AppContent />
+            <Suspense fallback={
+              <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
+                <div className="text-center">
+                  <div className="w-16 h-16 border-4 border-[#274dad] border-t-transparent rounded-full animate-spin mx-auto mb-6 shadow-lg shadow-[#274dad]/10"></div>
+                  <h2 className="text-2xl font-black text-[#274dad] italic tracking-tight mb-2">Eureka</h2>
+                  <p className="text-slate-500 font-bold text-sm tracking-wide uppercase">Đang tải tài nguyên học tập...</p>
+                </div>
+              </div>
+            }>
+              <AppContent />
+            </Suspense>
           </GameProgressProvider>
         </ThemeProvider>
       </AuthProvider>

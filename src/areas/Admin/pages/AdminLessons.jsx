@@ -179,6 +179,33 @@ const AdminLessons = () => {
       setActionLoading(null);
     }
   };
+
+  const filteredLessons = useMemo(() => {
+    return lessons.filter(lesson => {
+      const matchesSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (lesson.description && lesson.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesSubject = filterSubject === 'all' || lesson.subject === filterSubject;
+      
+      const matchesGrade = filterGrade === 'all' || String(lesson.grade) === String(filterGrade);
+      
+      return matchesSearch && matchesSubject && matchesGrade;
+    });
+  }, [lessons, searchTerm, filterSubject, filterGrade]);
+
+  const stats = useMemo(() => {
+    const total = lessons.length;
+    const physics = lessons.filter(l => l.subject === 'physics').length;
+    const totalCompletion = lessons.reduce((acc, l) => acc + (l.completion || 0), 0);
+    const avgCompletion = total > 0 ? Math.round(totalCompletion / total) : 0;
+    
+    return {
+      total,
+      physics,
+      avgCompletion
+    };
+  }, [lessons]);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">

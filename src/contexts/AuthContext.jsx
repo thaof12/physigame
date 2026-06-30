@@ -1,8 +1,25 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../config/supabase';
 import api from '../config/api';
 
 const AuthContext = createContext();
+
+// Safe localStorage parsing to prevent app crashes on corrupt data
+const safeGetItem = (key, fallback = null) => {
+  const value = localStorage.getItem(key);
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value);
+  } catch (e) {
+    console.error(`Error parsing localStorage key "${key}":`, e);
+    try {
+      localStorage.removeItem(key);
+    } catch (err) {
+      console.error(`Failed to auto-heal corrupted key "${key}":`, err);
+    }
+    return fallback;
+  }
+};
 
 export const useAuth = () => {
   return useContext(AuthContext);
@@ -11,6 +28,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const fetchingUserRef = useRef(null);
 
   // Check session on mount
   useEffect(() => {
@@ -21,6 +39,12 @@ export const AuthProvider = ({ children }) => {
 
         if (session?.user) {
           console.log('✅ Supabase session found:', session.user.email);
+
+          if (fetchingUserRef.current === session.user.id) {
+            console.log('ℹ️ [AuthContext] checkAuth: Profile already being fetched or loaded, skipping duplicate');
+            return;
+          }
+          fetchingUserRef.current = session.user.id;
 
           // Store token for API calls
           localStorage.setItem('token', session.access_token);
@@ -92,14 +116,9 @@ export const AuthProvider = ({ children }) => {
           }
         } else {
           // Check localStorage fallback
-          const savedUser = localStorage.getItem('user');
+          const savedUser = safeGetItem('user');
           if (savedUser) {
-            try {
-              setUser(JSON.parse(savedUser));
-            } catch {
-              localStorage.removeItem('user');
-              localStorage.removeItem('token');
-            }
+            setUser(savedUser);
           }
           console.log('ℹ️ No active session');
         }
@@ -119,6 +138,12 @@ export const AuthProvider = ({ children }) => {
         console.log(`%c🔄 [AuthContext] ${timestamp} - Event: ${event}`, 'color: #2099e9; font-weight: bold', session?.user?.email);
 
         if (event === 'SIGNED_IN' && session) {
+          if (fetchingUserRef.current === session.user.id) {
+            console.log('ℹ️ [AuthContext] onAuthStateChange SIGNED_IN: Profile already fetching or loaded, skipping duplicate');
+            return;
+          }
+          fetchingUserRef.current = session.user.id;
+
           localStorage.setItem('token', session.access_token);
 
           // 1. Get Intent from LocalStorage
@@ -275,7 +300,7 @@ export const AuthProvider = ({ children }) => {
             console.warn('%c⚠️ [AuthContext] Profile sync encountered issues, using fallback logic', 'color: #f59e0b', error.message);
             
             // Check localStorage cached user or metadata before defaulting to student
-            const cachedUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+            const cachedUser = safeGetItem('user');
             const role = isTeacherIntent ? 'teacher' : (cachedUser?.role || 'student');
             
             const basicUser = {
@@ -296,6 +321,7 @@ export const AuthProvider = ({ children }) => {
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('%c👋 [AuthContext] Session terminated', 'color: #ef4444; font-weight: bold');
+          fetchingUserRef.current = null;
           setUser(null);
           localStorage.removeItem('user');
           localStorage.removeItem('token');
@@ -609,9 +635,21 @@ export const AuthProvider = ({ children }) => {
     refreshUser
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#274dad] border-t-transparent rounded-full animate-spin mx-auto mb-6 shadow-lg shadow-[#274dad]/10"></div>
+          <h2 className="text-2xl font-black text-[#274dad] italic tracking-tight mb-2">Eureka</h2>
+          <p className="text-slate-500 font-bold text-sm tracking-wide uppercase">Đang tải học viện vật lý...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

@@ -197,7 +197,8 @@ const PhysicsLesson = () => {
 
   const handleFinish = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
       const userId = user?.email || user?.uid;
       
       if (userId) {
@@ -219,7 +220,13 @@ const PhysicsLesson = () => {
         
         // Update local progress
         const lessonKey = `${classId}-${chapterId}-${lessonId}`;
-        const savedProgress = JSON.parse(localStorage.getItem(`physics-progress-${classId}`) || '{}');
+        let savedProgress = {};
+        try {
+          const progressStr = localStorage.getItem(`physics-progress-${classId}`);
+          savedProgress = progressStr ? JSON.parse(progressStr) : {};
+        } catch (e) {
+          console.error('Failed to parse physics-progress:', e);
+        }
         savedProgress[lessonKey] = 'completed';
         localStorage.setItem(`physics-progress-${classId}`, JSON.stringify(savedProgress));
       }

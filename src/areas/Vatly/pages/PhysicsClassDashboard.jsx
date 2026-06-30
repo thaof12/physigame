@@ -13,11 +13,17 @@ const PhysicsClassDashboard = () => {
     const loadProgress = async () => {
       const savedProgress = localStorage.getItem(`physics-progress-${classId}`);
       if (savedProgress) {
-        setUserProgress(JSON.parse(savedProgress));
+        try {
+          setUserProgress(JSON.parse(savedProgress));
+        } catch (e) {
+          console.error('Failed to parse savedProgress:', e);
+          localStorage.removeItem(`physics-progress-${classId}`);
+        }
       }
       
       try {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const userStr = localStorage.getItem('user');
+        const user = userStr ? JSON.parse(userStr) : null;
         if (user?.email || user?.uid) {
           const userId = user.email || user.uid;
           const response = await fetch(`/api/users/profile/${userId}`);
