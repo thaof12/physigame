@@ -282,10 +282,6 @@ const LectureViewer = () => {
         </div>
       </main>
 
-      {/* Floating Action Button for Support/Help */}
-      <button className="fixed bottom-8 right-8 w-16 h-16 bg-[#274dad] text-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50">
-        <MessageSquare className="w-8 h-8" />
-      </button>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import GlobalHeader from './GlobalHeader';
 import GlobalFooter from './GlobalFooter';
 import { useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import DifyChatbot from '../AIChatbot/DifyChatbot';
 
 export default function MainLayout() {
   const location = useLocation();
@@ -63,6 +64,8 @@ export default function MainLayout() {
         </div>
       </main>
       <GlobalFooter />
+      {/* AI Chatbot - floating widget, hiển thị trên toàn bộ student layout */}
+      <DifyChatbot />
     </div>
   );
 }
