@@ -17,7 +17,7 @@ export const lectureData = {
         lessons: [
           { id: "b5", title: "Bài 5: Lực là gì? [Bài 40 - SGK]", videoId: "EqvEGVd24BU" },
           { id: "b6", title: "Bài 6: Biểu diễn lực [Bài 41 - SGK]", videoId: "GpvFp9tIYpU" },
-          { id: "b7", title: "Bài 7: Trọng lượng và Khối lượng [Bài 42 - SGK]", videoId: "U8XG3w8r6Qc" }
+          { id: "b7", title: "Bài 7: Trọng lượng và Khối lượng [Bài 42 - SGK]", videoId: "mK2mnOyn_Wc" }
         ]
       }
     },
@@ -35,7 +35,7 @@ export const lectureData = {
         title: "Chương IV: Âm thanh",
         description: "Nghiên cứu về sự truyền âm, độ cao, độ to của âm và các hiện tượng phản xạ âm.",
         lessons: [
-          { id: "b4", title: "Bài 4: Sóng âm [Bài 12 - SGK]", videoId: "J8A6uR9P2Y8" },
+          { id: "b4", title: "Bài 4: Sóng âm [Bài 12 - SGK]", videoId: "QAi5wEnKhlA" },
           { id: "b5", title: "Bài 5: Độ cao và độ to của âm [Bài 13 - SGK]", videoId: "B-IBQJ8bqGg" }
         ]
       }
@@ -56,8 +56,8 @@ export const lectureData = {
         title: "Chương V: Điện",
         description: "Khám phá về dòng điện, mạch điện và các tác dụng của dòng điện.",
         lessons: [
-          { id: "b6", title: "Bài 6: Nguồn điện [Bài 22 - SGK]", videoId: "dM6R7R8R9R0" },
-          { id: "b7", title: "Bài 7: Sơ đồ mạch điện [Bài 23 - SGK]", videoId: "eM6R7R8R9R0" }
+          { id: "b6", title: "Bài 6: Nguồn điện [Bài 22 - SGK]", videoId: "iGpgr8trGM4" },
+          { id: "b7", title: "Bài 7: Sơ đồ mạch điện [Bài 23 - SGK]", videoId: "0AgudISAmA0" }
         ]
       }
     },
@@ -75,8 +75,8 @@ export const lectureData = {
         title: "Chương II: Ánh sáng",
         description: "Nghiên cứu các hiện tượng khúc xạ, phản xạ và các loại thấu kính.",
         lessons: [
-          { id: "b4", title: "Bài 4: Khúc xạ ánh sáng [Bài 10 - SGK]", videoId: "hM6R7R8R9R0" },
-          { id: "b5", title: "Bài 5: Thấu kính hội tụ [Bài 11 - SGK]", videoId: "iM6R7R8R9R0" }
+          { id: "b4", title: "Bài 4: Khúc xạ ánh sáng [Bài 10 - SGK]", videoId: "8nJ7NKXfzIs" },
+          { id: "b5", title: "Bài 5: Thấu kính hội tụ [Bài 11 - SGK]", videoId: "-pS53S9dkqg" }
         ]
       }
     },
@@ -87,14 +87,14 @@ export const lectureData = {
         lessons: [
           { id: "b1", title: "Bài 1: Làm quen với Vật lý", videoId: "_NqmRT2zxAY" },
           { id: "b2", title: "Bài 2: Các quy tắc an toàn trong phòng thực hành", videoId: "8yQ-BScJWQE" },
-          { id: "b3", title: "Bài 3: Sai số trong phép đo và thực hành", videoId: "xAEEQo1DcFA" }
+          { id: "b3", title: "Bài 3: Sai số trong phép đo và thực hành", videoId: "U5cI8oVBifI" }
         ]
       },
       "1": {
         title: "Chương II: Động học",
         description: "Mô tả các loại chuyển động cơ bản trong không gian.",
         lessons: [
-          { id: "b4", title: "Bài 4: Độ dịch chuyển và quãng đường đi được", videoId: "2Zf398qQ_Z8" },
+          { id: "b4", title: "Bài 4: Độ dịch chuyển và quãng đường đi được", videoId: "-yvU6sncrpM" },
           { id: "b5", title: "Bài 5: Tốc độ và vận tốc", videoId: "sOOe1qQXVBU" }
         ]
       }
@@ -113,8 +113,8 @@ export const lectureData = {
         title: "Chương II: Sóng",
         description: "Tìm hiểu về sự lan truyền dao động trong các môi trường.",
         lessons: [
-          { id: "b4", title: "Bài 4: Sóng và sự truyền sóng", videoId: "rM6R7R8R9R0" },
-          { id: "b5", title: "Bài 5: Các đặc trưng vật lý của sóng", videoId: "sM6R7R8R9R0" }
+          { id: "b4", title: "Bài 4: Sóng và sự truyền sóng", videoId: "Xrq8f98YdTM" },
+          { id: "b5", title: "Bài 5: Các đặc trưng vật lý của sóng", videoId: "Bshvq-TgUU4" }
         ]
       }
     },
@@ -132,8 +132,8 @@ export const lectureData = {
         title: "Chương II: Khí lý tưởng",
         description: "Mô tả động học phân tử và các định luật chất khí.",
         lessons: [
-          { id: "b4", title: "Bài 4: Mô hình động học phân tử chất khí", videoId: "wM6R7R8R9R0" },
-          { id: "b5", title: "Bài 5: Định luật Boy-Mariotte", videoId: "xM6R7R8R9R0" }
+          { id: "b4", title: "Bài 4: Mô hình động học phân tử chất khí", videoId: "JQqa9MIdls0" },
+          { id: "b5", title: "Bài 5: Định luật Boy-Mariotte", videoId: "uFOXlSsetZA" }
         ]
       }
     }

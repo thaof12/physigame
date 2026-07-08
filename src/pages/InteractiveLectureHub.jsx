@@ -10,28 +10,42 @@ const InteractiveLectureHub = () => {
 
   const grades = [6, 7, 8, 9, 10, 11, 12];
 
-  // Flatten all lessons for the selected grade into a searchable list
+  // Flatten all lessons for the selected grade or all grades into a searchable list
   const currentGradeLectures = useMemo(() => {
-    const data = lectureData.physics?.[selectedGrade] || {};
     const flattened = [];
     
-    Object.entries(data).forEach(([chapterId, chapter]) => {
-      chapter.lessons.forEach((lesson) => {
-        flattened.push({
-          ...lesson,
-          chapterTitle: chapter.title,
-          chapterId: chapterId,
-          grade: selectedGrade
+    if (searchQuery) {
+      grades.forEach((g) => {
+        const data = lectureData.physics?.[g] || {};
+        Object.entries(data).forEach(([chapterId, chapter]) => {
+          chapter.lessons.forEach((lesson) => {
+            flattened.push({
+              ...lesson,
+              chapterTitle: chapter.title,
+              chapterId: chapterId,
+              grade: g
+            });
+          });
         });
       });
-    });
-
-    if (!searchQuery) return flattened;
-    
-    return flattened.filter(l => 
-      l.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      l.chapterTitle.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+      return flattened.filter(l => 
+        l.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        l.chapterTitle.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    } else {
+      const data = lectureData.physics?.[selectedGrade] || {};
+      Object.entries(data).forEach(([chapterId, chapter]) => {
+        chapter.lessons.forEach((lesson) => {
+          flattened.push({
+            ...lesson,
+            chapterTitle: chapter.title,
+            chapterId: chapterId,
+            grade: selectedGrade
+          });
+        });
+      });
+      return flattened;
+    }
   }, [selectedGrade, searchQuery]);
 
   return (
@@ -99,7 +113,7 @@ const InteractiveLectureHub = () => {
                 
                 <div className="relative z-10">
                   <div className="text-[#274dad] text-xs font-black tracking-widest uppercase mb-4 opacity-70">
-                    BÀI {lecture.id.replace('b', '')}
+                    LỚP {lecture.grade} • BÀI {lecture.id.replace('b', '')}
                   </div>
                   
                   <h3 className="text-xl font-bold text-[#1E293B] mb-4 leading-tight group-hover:text-[#274dad] transition-colors">

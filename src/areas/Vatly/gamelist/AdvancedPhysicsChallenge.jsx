@@ -22,7 +22,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'balance',
       title: 'Trò chơi cân bằng',
       description: 'Khám phá các nguyên lý cân bằng và trọng tâm qua các thử thách thú vị',
-      icon: '⚖️',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/scales.png',
       path: '/advanced-physics-challenge/balance',
       color: 'from-blue-500 to-indigo-600',
       tag: 'Cơ học'
@@ -31,7 +31,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'water',
       title: 'Phòng thí nghiệm nước',
       description: 'Tìm hiểu về các tính chất vật lý của nước và áp suất thủy tĩnh',
-      icon: '💧',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/water.png',
       path: '/advanced-physics-challenge/water',
       color: 'from-cyan-400 to-blue-500',
       tag: 'Thủy học'
@@ -40,7 +40,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'force-world',
       title: 'Thế giới lực',
       description: 'Khám phá thế giới của các loại lực và cách chúng tác động lên vật thể',
-      icon: '🌍',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/globe.png',
       path: '/advanced-physics-challenge/force-world',
       color: 'from-blue-600 to-blue-800',
       tag: 'Lực học'
@@ -49,7 +49,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'boiling',
       title: 'Sự sôi',
       description: 'Mô phỏng quá trình chuyển thể và các yếu tố ảnh hưởng đến sự sôi',
-      icon: '🌡️',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/thermometer.png',
       path: '/advanced-physics-challenge/boiling',
       color: 'from-orange-400 to-red-500',
       tag: 'Nhiệt học'
@@ -58,7 +58,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'thermal-energy',
       title: 'Năng lượng nhiệt',
       description: 'Nghiên cứu về nhiệt lượng và sự truyền nhiệt trong môi trường',
-      icon: '🔥',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/campfire.png',
       path: '/advanced-physics-challenge/thermal-energy',
       color: 'from-red-500 to-orange-600',
       tag: 'Nhiệt học'
@@ -67,7 +67,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'light-reflection',
       title: 'Phản xạ ánh sáng',
       description: 'Thực hành định luật phản xạ và ứng dụng trong các trò chơi',
-      icon: '🔦',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/searchlight.png',
       path: '/advanced-physics-challenge/light-reflection',
       color: 'from-yellow-400 to-orange-500',
       tag: 'Quang học'
@@ -76,7 +76,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'mirror-lab',
       title: 'Phòng thí nghiệm gương',
       description: 'Mô phỏng sự tạo ảnh qua các loại gương phẳng, gương cầu',
-      icon: '🪞',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/mirror.png',
       path: '/advanced-physics-challenge/mirror-lab',
       color: 'from-slate-400 to-slate-600',
       tag: 'Quang học'
@@ -85,7 +85,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'light-path',
       title: 'Đường đi của ánh sáng',
       description: 'Khám phá cách ánh sáng truyền đi và bẻ cong trong môi trường',
-      icon: '✨',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/sparkles.png',
       path: '/advanced-physics-challenge/light-path',
       color: 'from-indigo-400 to-purple-600',
       tag: 'Quang học'
@@ -94,7 +94,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'circuit-builder',
       title: 'Xây dựng mạch điện',
       description: 'Tự tay thiết kế và lắp ráp các mạch điện từ cơ bản đến phức tạp',
-      icon: '🔌',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/plug.png',
       path: '/advanced-physics-challenge/circuit-builder',
       color: 'from-yellow-500 to-amber-600',
       tag: 'Điện học'
@@ -103,7 +103,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'race-tracker',
       title: 'Đua xe tốc độ',
       description: 'Thử thách về vận tốc, gia tốc và quãng đường trên đường đua',
-      icon: '🏎️',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/car.png',
       path: '/advanced-physics-challenge/race-tracker',
       color: 'from-red-600 to-rose-700',
       tag: 'Động lực học'
@@ -112,7 +112,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'force-arena',
       title: 'Võ đài lực học',
       description: 'Sử dụng kiến thức về lực để chiến thắng trong các trận đấu kịch tính',
-      icon: '🏟️',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/stadium.png',
       path: '/advanced-physics-challenge/force-arena',
       color: 'from-stone-600 to-neutral-800',
       tag: 'Cơ học'
@@ -121,7 +121,7 @@ const AdvancedPhysicsChallenge = () => {
       id: 'projectile',
       title: 'Chuyển động ném xiên',
       description: 'Tính toán góc bắn và lực để đạt mục tiêu trong chuyển động ném',
-      icon: '🎯',
+      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/target.png',
       path: '/advanced-physics-challenge/projectile',
       color: 'from-emerald-500 to-teal-600',
       tag: 'Động học'
@@ -192,9 +192,9 @@ const AdvancedPhysicsChallenge = () => {
               {/* Inner Card */}
               <div className="relative bg-white rounded-[2.2rem] h-full flex flex-col p-6">
                 {/* Icon Container */}
-                <div className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${game.color} flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform duration-500 mb-6 relative overflow-hidden`}>
+                <div className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${game.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 mb-6 relative overflow-hidden p-3.5`}>
                   <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
-                  <span className="relative z-10">{game.icon}</span>
+                  <img src={game.icon} alt={game.title} className="w-9 h-9 relative z-10 object-contain" />
                 </div>
 
                 {/* Badge */}

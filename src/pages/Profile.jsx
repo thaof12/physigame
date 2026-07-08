@@ -1,9 +1,9 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import api from '../config/api';
-import { 
-  Trophy, Star, Flame, Target, Zap, Clock, 
-  BookOpen, Award, Medal, Crown, Shield, 
+import {
+  Trophy, Star, Flame, Target, Zap, Clock,
+  BookOpen, Award, Medal, Crown, Shield,
   TrendingUp, Calendar, Edit3, Camera, ChevronRight,
   Swords, Users, CheckCircle, Lock, Hexagon, LogOut
 } from 'lucide-react';
@@ -36,16 +36,16 @@ const Profile = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Fetch user profile and quest data in parallel
         const [profileRes, questRes] = await Promise.all([
           api.get(`/users/profile/${user.uid}`),
           api.get(`/quests/${user.uid}`).catch(() => ({ data: null }))
         ]);
-        
+
         setUserData(profileRes.data);
         setQuestData(questRes.data);
-        
+
         setEditForm({
           displayName: profileRes.data?.displayName || '',
           bio: profileRes.data?.profile?.bio || '',
@@ -85,7 +85,7 @@ const Profile = () => {
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     if (!file.type.startsWith('image/')) {
       alert('Vui lòng chọn một file hình ảnh hợp lệ.');
       return;
@@ -97,7 +97,7 @@ const Profile = () => {
 
       img.onload = async () => {
         URL.revokeObjectURL(objectUrl);
-        
+
         // Resize parameters
         const MAX_WIDTH = 200;
         const MAX_HEIGHT = 200;
@@ -127,9 +127,9 @@ const Profile = () => {
 
         try {
           await api.put(`/users/profile/${user.uid}`, { avatar: compressedBase64 });
-          
+
           const updatedProfile = { avatar: compressedBase64 };
-          
+
           setUserData(prev => ({
             ...prev,
             profile: {
@@ -137,7 +137,7 @@ const Profile = () => {
               ...updatedProfile
             }
           }));
-          
+
           // Cập nhật AuthContext để thay đổi hiển thị trên header ngay lập tức
           setUser(prev => ({
             ...prev,
@@ -175,7 +175,7 @@ const Profile = () => {
       programs.forEach(p => {
         if (p.progress) {
           if (Array.isArray(p.progress.completedLessons)) {
-             completedLessonIds = [...completedLessonIds, ...p.progress.completedLessons];
+            completedLessonIds = [...completedLessonIds, ...p.progress.completedLessons];
           }
           totalPoints += p.progress.totalScore || 0;
         }
@@ -248,12 +248,12 @@ const Profile = () => {
   }
 
   const allAchievements = questData?.achievements || [
-    { id: 'first_lesson', title: 'Bước Đầu Tiên', icon: <Target/>, description: 'Hoàn thành bài học đầu tiên', unlockedAt: stats.completedLessons >= 1 ? new Date() : null },
-    { id: 'streak_7', title: 'Tuần Lễ Rực Lửa', icon: <Flame/>, description: '7 ngày học liên tục', unlockedAt: stats.currentStreak >= 7 ? new Date() : null },
-    { id: 'lessons_5', title: 'Học Sinh Chăm Chỉ', icon: <BookOpen/>, description: 'Hoàn thành 5 bài học', unlockedAt: stats.completedLessons >= 5 ? new Date() : null },
-    { id: 'perfect_score', title: 'Hoàn Hảo', icon: <Star/>, description: 'Đạt điểm tuyệt đối trong bài học', unlockedAt: userData?.progress?.completedLessons?.some(l => l.score === 100) ? new Date() : null },
-    { id: 'lessons_10', title: 'Thám Hiểm Gia', icon: <Trophy/>, description: 'Hoàn thành 10 bài học', unlockedAt: stats.completedLessons >= 10 ? new Date() : null },
-    { id: 'streak_14', title: 'Kiên Trì', icon: <TrendingUp/>, description: '14 ngày học liên tục', unlockedAt: stats.currentStreak >= 14 ? new Date() : null },
+    { id: 'first_lesson', title: 'Bước Đầu Tiên', icon: <Target />, description: 'Hoàn thành bài học đầu tiên', unlockedAt: stats.completedLessons >= 1 ? new Date() : null },
+    { id: 'streak_7', title: 'Tuần Lễ Rực Lửa', icon: <Flame />, description: '7 ngày học liên tục', unlockedAt: stats.currentStreak >= 7 ? new Date() : null },
+    { id: 'lessons_5', title: 'Học Sinh Chăm Chỉ', icon: <BookOpen />, description: 'Hoàn thành 5 bài học', unlockedAt: stats.completedLessons >= 5 ? new Date() : null },
+    { id: 'perfect_score', title: 'Hoàn Hảo', icon: <Star />, description: 'Đạt điểm tuyệt đối trong bài học', unlockedAt: userData?.progress?.completedLessons?.some(l => l.score === 100) ? new Date() : null },
+    { id: 'lessons_10', title: 'Thám Hiểm Gia', icon: <Trophy />, description: 'Hoàn thành 10 bài học', unlockedAt: stats.completedLessons >= 10 ? new Date() : null },
+    { id: 'streak_14', title: 'Kiên Trì', icon: <TrendingUp />, description: '14 ngày học liên tục', unlockedAt: stats.currentStreak >= 14 ? new Date() : null },
   ];
 
   const getRelativeTime = (isoString) => {
@@ -261,7 +261,7 @@ const Profile = () => {
     const date = new Date(isoString);
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
-    
+
     if (diffInSeconds < 60) return 'Vừa xong';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
@@ -274,7 +274,7 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-white">
-         <div className="w-16 h-16 border-t-4 border-[#274dad] border-r-4 border-r-transparent rounded-full animate-spin"></div>
+        <div className="w-16 h-16 border-t-4 border-[#274dad] border-r-4 border-r-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -283,26 +283,26 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-[#FFFFFF] font-sans text-[#1E293B] overflow-x-hidden selection:bg-[#274dad]/20">
-      
+
       {/* Background patterns */}
       <div className="fixed inset-0 graph-grid opacity-[0.15] pointer-events-none" />
       <div className="fixed top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#274dad]/5" />
       <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#44b5d7]/5" />
 
       <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6 pt-24 lg:pt-32 pb-12 lg:pb-16">
-        
+
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-          
+
           {/* ──────────────────────────────────────────────
               SIDEBAR: USER IDENTITY & NAVIGATION
               ────────────────────────────────────────────── */}
           <aside className="w-full lg:w-80 space-y-8">
-            
+
             {/* User Info Card */}
             <div className="bg-white rounded-[2.5rem] border border-[#E5E7EB] shadow-[0_20px_50px_-15px_rgba(0,0,0,0.05)] p-8 text-center relative overflow-hidden group">
               {/* Decorative brass accent */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-gradient-to-r from-transparent via-[#274dad]/30 to-transparent" />
-              
+
               <div className="relative inline-block mb-6 pt-2">
                 <div className={`w-32 h-32 rounded-full p-1.5 bg-white border-2 border-[#E5E7EB] group-hover:border-[#274dad]/50 transition-colors duration-500 shadow-xl overflow-hidden`}>
                   <div className="w-full h-full rounded-full bg-[#e4f2f0] flex items-center justify-center overflow-hidden border border-[#274dad]/10">
@@ -315,14 +315,14 @@ const Profile = () => {
                     )}
                   </div>
                 </div>
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleAvatarChange} 
-                  accept="image/*" 
-                  className="hidden" 
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleAvatarChange}
+                  accept="image/*"
+                  className="hidden"
                 />
-                <button 
+                <button
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute bottom-1 right-1 w-9 h-9 bg-white rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#274dad] shadow-lg hover:bg-[#FFFFFF] transition-colors"
                   title="Thay đổi ảnh đại diện"
@@ -363,19 +363,18 @@ const Profile = () => {
             <nav className="bg-white rounded-[2rem] border border-[#E5E7EB] shadow-sm overflow-hidden p-3">
               {[
                 { id: 'info', label: 'Thông tin cá nhân', icon: Users, color: 'text-blue-500' },
-                { id: 'overview', label: 'Thống kê & Thành tựu', icon: TrendingUp, color: 'text-emerald-500' },
-                { id: 'achievements', label: 'Kho Huy hiệu', icon: Trophy, color: 'text-blue-500' },
-                { id: 'activity', label: 'Nhật ký Hoạt động', icon: Clock, color: 'text-indigo-500' },
-                { id: 'pk', label: 'Lịch sử Đấu trường', icon: Swords, color: 'text-rose-500' },
+                { id: 'overview', label: 'Thống kê & thành tựu', icon: TrendingUp, color: 'text-emerald-500' },
+                { id: 'achievements', label: 'Kho huy hiệu', icon: Trophy, color: 'text-blue-500' },
+                { id: 'activity', label: 'Nhật ký hoạt động', icon: Clock, color: 'text-indigo-500' },
+                { id: 'pk', label: 'Lịch sử đấu trường', icon: Swords, color: 'text-rose-500' },
               ].map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl font-black text-sm transition-all text-left mb-1 group ${
-                    activeTab === item.id 
-                      ? 'bg-[#FFFFFF] border border-[#274dad]/20 text-[#274dad] shadow-sm' 
-                      : 'text-slate-500 hover:bg-[#F8F9FA] hover:text-[#1E293B]'
-                  }`}
+                  className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl font-black text-sm transition-all text-left mb-1 group ${activeTab === item.id
+                    ? 'bg-[#FFFFFF] border border-[#274dad]/20 text-[#274dad] shadow-sm'
+                    : 'text-slate-500 hover:bg-[#F8F9FA] hover:text-[#1E293B]'
+                    }`}
                 >
                   <item.icon className={`w-5 h-5 ${activeTab === item.id ? item.color : 'text-slate-400 opacity-60'}`} />
                   <span className="flex-1">{item.label}</span>
@@ -383,7 +382,7 @@ const Profile = () => {
                 </button>
               ))}
               <div className="mt-2 pt-2 border-t border-[#F1F5F9]">
-                <button 
+                <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-4 px-5 py-4 rounded-xl font-black text-sm text-rose-500 hover:bg-rose-50 transition-all"
                 >
@@ -398,7 +397,7 @@ const Profile = () => {
               MAIN CONTENT: SECTION DETAILS
               ────────────────────────────────────────────── */}
           <main className="flex-1 animate-fade-in-right">
-            
+
             {/* Header for content */}
             <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E7EB] pb-8">
               <div>
@@ -412,7 +411,7 @@ const Profile = () => {
                 <p className="text-slate-500 font-medium text-sm mt-1">Quản lý và cập nhật tiến trình khoa học của bạn.</p>
               </div>
               {activeTab === 'info' && !isEditing && (
-                <button 
+                <button
                   onClick={() => setIsEditing(true)}
                   className="pg-btn-brass px-6 py-3 text-xs flex items-center gap-2"
                 >
@@ -423,11 +422,11 @@ const Profile = () => {
 
             {/* Content Display based on activeTab */}
             <div className="space-y-8">
-              
+
               {/* SECTION: PERSONAL INFO / FORM */}
               {activeTab === 'info' && (
                 <div className="bg-white rounded-[2rem] border border-[#E5E7EB] p-8 sm:p-10 shadow-sm relative overflow-hidden">
-                   {isEditing ? (
+                  {isEditing ? (
                     <div className="max-w-2xl space-y-8">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <div className="space-y-3">
@@ -435,7 +434,7 @@ const Profile = () => {
                           <input
                             type="text"
                             value={editForm.displayName}
-                            onChange={(e) => setEditForm({...editForm, displayName: e.target.value})}
+                            onChange={(e) => setEditForm({ ...editForm, displayName: e.target.value })}
                             className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-bold"
                           />
                         </div>
@@ -454,7 +453,7 @@ const Profile = () => {
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiểu sử / Châm ngôn khoa học</label>
                         <textarea
                           value={editForm.bio}
-                          onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
+                          onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                           rows={3}
                           className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-medium"
                           placeholder="Mô tả hành trình khám phá vũ trụ của bạn..."
@@ -467,7 +466,7 @@ const Profile = () => {
                           <input
                             type="text"
                             value={editForm.school}
-                            onChange={(e) => setEditForm({...editForm, school: e.target.value})}
+                            onChange={(e) => setEditForm({ ...editForm, school: e.target.value })}
                             className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-bold"
                           />
                         </div>
@@ -475,11 +474,11 @@ const Profile = () => {
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Khối lớp (Grade)</label>
                           <select
                             value={editForm.grade}
-                            onChange={(e) => setEditForm({...editForm, grade: e.target.value})}
+                            onChange={(e) => setEditForm({ ...editForm, grade: e.target.value })}
                             className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 transition-all font-bold appearance-none"
                           >
-                             <option value="">Lựa chọn cấp bậc</option>
-                             {[6,7,8,9,10,11,12].map(g => <option key={g} value={g}>Lớp {g}</option>)}
+                            <option value="">Lựa chọn cấp bậc</option>
+                            {[6, 7, 8, 9, 10, 11, 12].map(g => <option key={g} value={g}>Lớp {g}</option>)}
                           </select>
                         </div>
                       </div>
@@ -558,9 +557,9 @@ const Profile = () => {
                       <div className="p-2 bg-[#e4f2f0] rounded-xl border border-[#274dad]/10">
                         <TrendingUp className="w-5 h-5 text-[#274dad]" />
                       </div>
-                      <h3 className="text-xl font-black text-[#1E293B]">Tiến độ Giải mã Khoa học</h3>
+                      <h3 className="text-xl font-black text-[#1E293B]">Tiến độ giải mã khoa học</h3>
                     </div>
-                    
+
                     <div className="space-y-10">
                       {calculateProgressByLevel(completedLessonIds).map((lvl, idx) => (
                         <div key={idx} className="relative">
@@ -569,8 +568,8 @@ const Profile = () => {
                             <span className="text-sm font-black text-[#274dad]">{lvl.percentage}% ({lvl.completed}/{lvl.total})</span>
                           </div>
                           <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                            <div 
-                              className={`h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-[#274dad] to-[#44b5d7] shadow-[0_0_10px_rgba(184,115,51,0.2)]`} 
+                            <div
+                              className={`h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-[#274dad] to-[#44b5d7] shadow-[0_0_10px_rgba(184,115,51,0.2)]`}
                               style={{ width: `${lvl.percentage}%` }}
                             ></div>
                           </div>
@@ -588,20 +587,18 @@ const Profile = () => {
                     {allAchievements.map((ach) => {
                       const isUnlocked = ach.unlockedAt;
                       return (
-                        <div 
-                          key={ach.id} 
-                          className={`relative flex flex-col items-center text-center p-6 rounded-3xl border transition-all duration-500 ${
-                            isUnlocked 
-                              ? 'bg-white border-[#274dad]/30 shadow-lg shadow-[#274dad]/5 hover:scale-105' 
-                              : 'bg-slate-50 border-slate-100 opacity-60'
-                          }`}
+                        <div
+                          key={ach.id}
+                          className={`relative flex flex-col items-center text-center p-6 rounded-3xl border transition-all duration-500 ${isUnlocked
+                            ? 'bg-white border-[#274dad]/30 shadow-lg shadow-[#274dad]/5 hover:scale-105'
+                            : 'bg-slate-50 border-slate-100 opacity-60'
+                            }`}
                         >
                           {isUnlocked && <CheckCircle className="absolute top-3 right-3 w-5 h-5 text-emerald-500" />}
-                          <div className={`w-16 h-16 mb-4 flex items-center justify-center rounded-2xl ${
-                            isUnlocked 
-                              ? 'bg-[#FFFFFF] text-[#274dad] border-2 border-[#274dad]/10 shadow-[inner_0_0_10px_rgba(184,115,51,0.1)]' 
-                              : 'bg-slate-100 text-slate-300'
-                          }`}>
+                          <div className={`w-16 h-16 mb-4 flex items-center justify-center rounded-2xl ${isUnlocked
+                            ? 'bg-[#FFFFFF] text-[#274dad] border-2 border-[#274dad]/10 shadow-[inner_0_0_10px_rgba(184,115,51,0.1)]'
+                            : 'bg-slate-100 text-slate-300'
+                            }`}>
                             {isUnlocked ? ach.icon : <Lock className="w-7 h-7" />}
                           </div>
                           <h4 className={`font-black tracking-tight text-sm mb-1 ${isUnlocked ? 'text-[#1E293B]' : 'text-slate-400'}`}>

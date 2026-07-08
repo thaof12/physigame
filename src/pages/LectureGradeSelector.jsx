@@ -33,9 +33,9 @@ const LectureGradeSelector = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 pt-24">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-40">
+      <div className="bg-white dark:bg-gray-800 shadow-lg sticky top-24 z-40">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
             <button

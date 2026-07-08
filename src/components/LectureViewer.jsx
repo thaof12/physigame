@@ -21,6 +21,7 @@ const LectureViewer = () => {
   const [expandedChapters, setExpandedChapters] = useState({});
   const [note, setNote] = useState('');
   const [activeTab, setActiveTab] = useState('notes'); // 'notes' or 'qa'
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Parse grade
   const gradeNum = useMemo(() => {
@@ -63,9 +64,9 @@ const LectureViewer = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] flex">
+    <div className="min-h-screen bg-[#FFFFFF] flex pt-24">
       {/* Sidebar - Desktop */}
-      <aside className="w-80 h-screen sticky top-0 bg-white border-r border-slate-100 flex flex-col overflow-hidden shrink-0 hidden md:flex">
+      <aside className="w-80 h-[calc(100vh-6rem)] sticky top-24 bg-white border-r border-slate-100 flex flex-col overflow-hidden shrink-0 hidden md:flex">
         {/* Sidebar Header */}
         <div className="p-6 border-b border-slate-50">
           <button 
@@ -99,47 +100,58 @@ const LectureViewer = () => {
           <h4 className="text-[10px] font-black text-slate-700 uppercase tracking-widest mb-6">CẤU TRÚC CHƯƠNG TRÌNH</h4>
           
           <div className="space-y-4">
-            {Object.entries(curriculum).map(([chId, chapter]) => (
-              <div key={chId} className="space-y-2">
-                <button 
-                  onClick={() => toggleChapter(chId)}
-                  className="w-full flex items-start gap-3 text-left group"
-                >
-                  <div className={`mt-1 flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold ${expandedChapters[chId] ? 'bg-blue-100 text-[#274dad] border border-blue-200' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
-                    {parseInt(chId) + 1}
-                  </div>
-                  <span className={`text-xs font-bold uppercase tracking-tight group-hover:text-[#274dad] transition-colors ${expandedChapters[chId] ? 'text-[#274dad]' : 'text-slate-600'}`}>
-                    {chapter.title}
-                  </span>
-                  {expandedChapters[chId] ? <ChevronUp className="w-3 h-3 ml-auto text-slate-400" /> : <ChevronDown className="w-3 h-3 ml-auto text-slate-400" />}
-                </button>
+            {Object.entries(curriculum).map(([chId, chapter]) => {
+              const filteredLessons = chapter.lessons.filter(l => 
+                l.title.toLowerCase().includes(searchQuery.toLowerCase())
+              );
+              
+              if (searchQuery && filteredLessons.length === 0) return null;
+              
+              const lessonsToRender = searchQuery ? filteredLessons : chapter.lessons;
+              const isChapterExpanded = searchQuery ? true : !!expandedChapters[chId];
 
-                {expandedChapters[chId] && (
-                  <div className="ml-8 space-y-1 pt-1">
-                    {chapter.lessons.map((lesson) => (
-                      <button
-                        key={lesson.id}
-                        onClick={() => navigate(`/interactive-lectures/physics/class${gradeNum}/${lesson.id}`)}
-                        className={`w-full flex items-center gap-3 p-2 rounded-xl text-left transition-all ${lesson.id === lectureId ? 'bg-blue-50 border border-blue-100 shadow-sm' : 'hover:bg-slate-50'}`}
-                      >
-                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${lesson.id === lectureId ? 'bg-[#274dad] text-white' : 'bg-slate-100 text-slate-400'}`}>
-                          {lesson.id === lectureId ? <Play className="w-3 h-3 fill-current" /> : <span className="text-[10px] font-bold">{lesson.id.replace('b', '')}</span>}
-                        </div>
-                        <div className="flex-1 overflow-hidden">
-                          <div className={`text-[11px] font-bold truncate ${lesson.id === lectureId ? 'text-[#274dad]' : 'text-slate-600'}`}>
-                            {lesson.title}
+              return (
+                <div key={chId} className="space-y-2">
+                  <button 
+                    onClick={() => toggleChapter(chId)}
+                    className="w-full flex items-start gap-3 text-left group"
+                  >
+                    <div className={`mt-1 flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold ${isChapterExpanded ? 'bg-blue-100 text-[#274dad] border border-blue-200' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
+                      {parseInt(chId) + 1}
+                    </div>
+                    <span className={`text-xs font-bold uppercase tracking-tight group-hover:text-[#274dad] transition-colors ${isChapterExpanded ? 'text-[#274dad]' : 'text-slate-600'}`}>
+                      {chapter.title}
+                    </span>
+                    {isChapterExpanded ? <ChevronUp className="w-3 h-3 ml-auto text-slate-400" /> : <ChevronDown className="w-3 h-3 ml-auto text-slate-400" />}
+                  </button>
+
+                  {isChapterExpanded && (
+                    <div className="ml-8 space-y-1 pt-1">
+                      {lessonsToRender.map((lesson) => (
+                        <button
+                          key={lesson.id}
+                          onClick={() => navigate(`/interactive-lectures/physics/class${gradeNum}/${lesson.id}`)}
+                          className={`w-full flex items-center gap-3 p-2 rounded-xl text-left transition-all ${lesson.id === lectureId ? 'bg-blue-50 border border-blue-100 shadow-sm' : 'hover:bg-slate-50'}`}
+                        >
+                          <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${lesson.id === lectureId ? 'bg-[#274dad] text-white' : 'bg-slate-100 text-slate-400'}`}>
+                            {lesson.id === lectureId ? <Play className="w-3 h-3 fill-current" /> : <span className="text-[10px] font-bold">{lesson.id.replace('b', '')}</span>}
                           </div>
-                          <div className="flex items-center gap-2 text-[9px] text-slate-400 font-bold uppercase">
-                            <span>MODULE {lesson.id.replace('b', '')}</span>
-                            <span>• 15P</span>
+                          <div className="flex-1 overflow-hidden">
+                            <div className={`text-[11px] font-bold truncate ${lesson.id === lectureId ? 'text-[#274dad]' : 'text-slate-600'}`}>
+                              {lesson.title}
+                            </div>
+                            <div className="flex items-center gap-2 text-[9px] text-slate-400 font-bold uppercase">
+                              <span>MODULE {lesson.id.replace('b', '')}</span>
+                              <span>• 15P</span>
+                            </div>
                           </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -149,6 +161,8 @@ const LectureViewer = () => {
             <input 
               type="text" 
               placeholder="Tìm bài học..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs outline-none focus:border-blue-200 transition-all font-medium"
             />
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
@@ -157,7 +171,7 @@ const LectureViewer = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 h-screen overflow-y-auto p-6 md:p-12">
+      <main className="flex-grow h-[calc(100vh-6rem)] overflow-y-auto p-6 md:p-12">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Breadcrumb Tag */}
           <div className="inline-block px-4 py-1.5 bg-[#274dad] text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-blue-900/20">
