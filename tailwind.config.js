@@ -24,7 +24,9 @@ export default {
         danger: '#ef4444',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+        heading: ['Manrope', 'system-ui', 'sans-serif'],
+        body: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
       },
     },
   },

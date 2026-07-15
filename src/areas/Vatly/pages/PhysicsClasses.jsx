@@ -27,8 +27,8 @@ const PhysicsClasses = () => {
 
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative z-10 text-center">
           <div className="mb-16 sm:mb-24">
-            <h2 className="text-4xl sm:text-5xl font-black text-[#1E293B] tracking-tight mb-6">Bắt đầu hành trình học tập tại đây</h2>
-            <p className="text-slate-500 max-w-2xl mx-auto font-medium text-lg leading-relaxed">
+            <h2 className="font-heading text-4xl sm:text-5xl font-extrabold text-[#1E293B] tracking-tight mb-6">Bắt đầu hành trình học tập tại đây</h2>
+            <p className="font-body text-slate-500 max-w-2xl mx-auto font-medium text-lg leading-relaxed">
               Mỗi cấp độ là một hành trình mới với câu chuyện riêng và thử thách thú vị, giúp bạn khám phá Vật Lý một cách tự nhiên và phát triển toàn diện.
             </p>
           </div>
@@ -112,10 +112,10 @@ const PhysicsClasses = () => {
 
                 {/* Content */}
                 <div className="p-8 text-left">
-                  <h3 className="text-xl font-black text-[#1E293B] mb-3 group-hover:text-[#274dad] transition-colors leading-tight">
+                  <h3 className="font-heading text-xl font-extrabold text-[#1E293B] mb-3 group-hover:text-[#274dad] transition-colors leading-tight">
                     {card.title}
                   </h3>
-                  <p className="text-slate-500 font-medium leading-relaxed text-[13px]">
+                  <p className="font-body text-slate-500 font-medium leading-relaxed text-[13px]">
                     {card.desc}
                   </p>
 

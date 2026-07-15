@@ -129,7 +129,7 @@ const AdvancedPhysicsChallenge = () => {
   ];
 
   return (
-    <div className="min-h-screen relative bg-[#FFFFFF] pb-20">
+    <div className="min-h-screen relative bg-[#FFFFFF] pb-20 font-body">
       {/* Background Decorative Elements */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-20 left-1/4 w-[600px] h-[600px] rounded-full blur-[150px] bg-blue-50/50" />
@@ -145,10 +145,10 @@ const AdvancedPhysicsChallenge = () => {
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div className="max-w-3xl">
-               <h1 className="text-5xl md:text-6xl font-black text-slate-800 leading-tight">
+               <h1 className="font-heading text-5xl md:text-6xl font-extrabold text-slate-800 leading-tight">
                  Trò chơi <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2a4095] to-[#274dad]">vật lý</span>
                </h1>
-               <p className="text-xl text-slate-500 mt-4 font-medium leading-relaxed">
+               <p className="font-body text-xl text-slate-500 mt-4 font-medium leading-relaxed">
                  Thử thách bản thân với những trò chơi mô phỏng thế giới thực. 
                  Mỗi trò chơi là một vũ trụ kiến thức khác nhau, chứa đầy nhiệm vụ game tương tác.
                </p>
@@ -161,8 +161,8 @@ const AdvancedPhysicsChallenge = () => {
                     <Star className="w-6 h-6 text-amber-500 fill-amber-500" />
                   </div>
                   <div>
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Trình độ của bạn</p>
-                    <p className="text-xl font-black text-slate-800">Tập Sự Vật Lý</p>
+                    <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Trình độ của bạn</p>
+                    <p className="font-heading text-xl font-extrabold text-slate-800">Tập Sự Vật Lý</p>
                   </div>
                </div>
                <div className="space-y-3">
@@ -198,21 +198,21 @@ const AdvancedPhysicsChallenge = () => {
                 </div>
 
                 {/* Badge */}
-                <div className="absolute top-8 right-8 px-3 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                <div className="font-heading absolute top-8 right-8 px-3 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
                   {game.tag}
                 </div>
 
                 {/* Content */}
-                <h3 className="text-xl font-black text-slate-800 mb-3 group-hover:text-[#274dad] transition-colors line-clamp-1">
+                <h3 className="font-heading text-xl font-extrabold text-slate-800 mb-3 group-hover:text-[#274dad] transition-colors line-clamp-1">
                   {game.title}
                 </h3>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed line-clamp-3 mb-6">
+                <p className="font-body text-sm text-slate-500 font-medium leading-relaxed line-clamp-3 mb-6">
                   {game.description}
                 </p>
 
                 {/* Footer */}
                 <div className="mt-auto flex items-center justify-between">
-                   <div className="flex items-center gap-2 text-[#274dad] font-black text-xs uppercase tracking-widest">
+                   <div className="font-heading flex items-center gap-2 text-[#274dad] font-extrabold text-xs uppercase tracking-widest">
                      Bắt đầu <Sparkles className="w-3 h-3" />
                    </div>
                    <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center group-hover:bg-[#274dad] group-hover:text-white transition-all duration-300">

@@ -1,33 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { io } from 'socket.io-client';
-import { Clock, Zap, CheckCircle, XCircle, AlertCircle, Gamepad2, Loader2 } from 'lucide-react';
+import { Clock, Zap, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { generateBattleRounds } from './pkRoundGenerator';
 import './PKBattle.css';
-
-// Lazy load challenge games
-const challengeGameComponents = {
-  // Mechanical & Motion
-  'ProjectileMotion': lazy(() => import('../../areas/Vatly/challenges/ProjectileMotion/ProjectileMotion')),
-  'BalanceChallenge': lazy(() => import('../../areas/Vatly/challenges/BalanceChallenge/BalanceChallenge')),
-  'ForceArena': lazy(() => import('../../areas/Vatly/challenges/ForceArena/ForceArena')),
-  'ForceWorldGame': lazy(() => import('../../areas/Vatly/challenges/ForceWorldGame/ForceWorldGame')),
-  'RaceTracker': lazy(() => import('../../areas/Vatly/challenges/RaceTracker/RaceTracker')),
-  
-  // Optics
-  'LightReflectionGame': lazy(() => import('../../areas/Vatly/challenges/LightReflectionGame/LightReflectionGame')),
-  'LightPathGame': lazy(() => import('../../areas/Vatly/challenges/LightPathGame/LightPathGame')),
-  'MirrorLabGame': lazy(() => import('../../areas/Vatly/challenges/MirrorLabGame/MirrorLabGame')),
-  
-  // Thermal
-  'BoilingGame': lazy(() => import('../../areas/Vatly/challenges/BoilingGame/BoilingGame')),
-  'ThermalEnergyGame': lazy(() => import('../../areas/Vatly/challenges/ThermalEnergyGame/ThermalEnergyGame')),
-  'WaterLab': lazy(() => import('../../areas/Vatly/challenges/WaterLab/WaterLab')),
-  
-  // Electricity
-  'CircuitBuilderGame': lazy(() => import('../../areas/Vatly/challenges/CircuitBuilderGame/CircuitBuilderGame')),
-};
 
 // Sample physics questions - In production, these would come from the server
 const SAMPLE_QUESTIONS = [
@@ -153,10 +130,10 @@ const PKBattleRoom = () => {
   const { playerName, avatarUrl, opponent: initialOpponent, questions: initialQuestions } = location.state || {};
 
   // Game state
-  const [gameStatus, setGameStatus] = useState('waiting'); // waiting, countdown, playing, playing-challenge, finished
+  const [gameStatus, setGameStatus] = useState('waiting'); // waiting, countdown, playing, finished
   const [countdown, setCountdown] = useState(3);
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
-  const [rounds, setRounds] = useState([]); // Rounds can be quiz or challenge
+  const [rounds, setRounds] = useState([]);
   const [questions, setQuestions] = useState(initialQuestions || SAMPLE_QUESTIONS); // Legacy fallback
   const [timeLeft, setTimeLeft] = useState(30);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -171,9 +148,6 @@ const PKBattleRoom = () => {
   // Answer tracking
   const [myAnswers, setMyAnswers] = useState([]);
   const [opponentAnswered, setOpponentAnswered] = useState(false);
-  
-  // Challenge game state
-  const [challengeStarted, setChallengeStarted] = useState(false);
 
   // Ref to hold latest state for socket event closures
   const latestStateRef = useRef({
@@ -194,9 +168,8 @@ const PKBattleRoom = () => {
     };
   }, [opponent, myAnswers, myScore, opponentScore, user]);
 
-  // Get current round (either from new rounds system or legacy questions)
-  const currentRound = rounds.length > 0 ? rounds[currentRoundIndex] : null;
-  const currentQuestion = currentRound?.type === 'quiz' ? currentRound : questions[currentRoundIndex];
+  // Get current round/question
+  const currentQuestion = rounds.length > 0 ? rounds[currentRoundIndex] : questions[currentRoundIndex];
 
   // Get game settings from location state
   const gameSettings = location.state?.gameSettings || {};
@@ -236,15 +209,10 @@ const PKBattleRoom = () => {
       console.log('Game starting:', data);
       console.log('Game settings received:', data.gameSettings);
       
-      // Use gameSettings from server or local state
       const settings = data.gameSettings || gameSettings;
-      const gameMode = settings?.gameMode || 'mixed';
       
-      console.log('Game Mode:', gameMode);
-      
-      // Generate rounds based on game mode
-      if (gameMode === 'quiz' && data.questions) {
-        // Quiz mode: use server questions
+      // Generate rounds (always quiz mode)
+      if (data.questions) {
         setQuestions(data.questions);
         const quizRounds = data.questions.map((q, i) => ({
           index: i,
@@ -254,21 +222,12 @@ const PKBattleRoom = () => {
         setRounds(quizRounds);
         console.log('Generated quiz rounds:', quizRounds.length);
       } else {
-        // Challenge or Mixed mode: generate rounds locally with correct settings
         console.log('=== GENERATING ROUNDS ===');
-        console.log('Settings:', settings);
-        console.log('Game Mode:', gameMode);
-        
         const generatedRounds = generateBattleRounds({
           ...settings,
-          gameMode: gameMode,
+          gameMode: 'quiz',
           totalQuestions: settings?.totalQuestions || 10
         });
-        
-        console.log('Generated rounds:', generatedRounds);
-        console.log('Round count:', generatedRounds.length);
-        console.log('First round:', generatedRounds[0]);
-        
         setRounds(generatedRounds);
       }
       
@@ -339,15 +298,9 @@ const PKBattleRoom = () => {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
     } else if (gameStatus === 'countdown' && countdown === 0) {
-      // Check what type of round this is
       const firstRound = rounds[0];
-      if (firstRound?.type === 'challenge') {
-        setGameStatus('playing-challenge');
-        setTimeLeft(firstRound.timeLimit || 60);
-      } else {
-        setGameStatus('playing');
-        setTimeLeft(firstRound?.timeLimit || 30);
-      }
+      setGameStatus('playing');
+      setTimeLeft(firstRound?.timeLimit || 30);
     }
   }, [gameStatus, countdown, rounds]);
 
@@ -359,17 +312,6 @@ const PKBattleRoom = () => {
     } else if (gameStatus === 'playing' && timeLeft === 0 && !selectedAnswer) {
       // Time's up - auto select wrong
       handleTimeout();
-    }
-  }, [gameStatus, timeLeft, selectedAnswer]);
-
-  // Challenge timer (for challenge game rounds)
-  useEffect(() => {
-    if (gameStatus === 'playing-challenge' && timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (gameStatus === 'playing-challenge' && timeLeft === 0) {
-      // Challenge time's up - auto complete with partial score
-      handleChallengeTimeout();
     }
   }, [gameStatus, timeLeft, selectedAnswer]);
 
@@ -397,72 +339,6 @@ const PKBattleRoom = () => {
 
     setTimeout(() => moveToNextRound(), 2000);
   };
-
-  // Handler for challenge game timeout
-  const handleChallengeTimeout = () => {
-    setChallengeStarted(false);
-    
-    setMyAnswers(prev => [...prev, {
-      roundIndex: currentRoundIndex,
-      type: 'challenge',
-      gameId: currentRound?.gameId,
-      gameName: currentRound?.gameName,
-      completed: false,
-      score: 0,
-      responseTime: currentRound?.timeLimit || 60
-    }]);
-
-    // Emit challenge result to server
-    if (socketRef.current) {
-      socketRef.current.emit('pk:submit-challenge', {
-        roomId,
-        roundIndex: currentRoundIndex,
-        gameId: currentRound?.gameId,
-        completed: false,
-        score: 0,
-        responseTime: currentRound?.timeLimit || 60
-      });
-    }
-
-    setTimeout(() => moveToNextRound(), 2000);
-  };
-
-  // Handler for challenge game completion
-  const handleChallengeComplete = useCallback((result) => {
-    setChallengeStarted(false);
-    
-    const pointsEarned = result.completed ? 
-      (currentRound?.points || 100) + Math.floor((timeLeft / (currentRound?.timeLimit || 60)) * 50) :
-      Math.floor((result.score || 0) * 0.3);
-    
-    setMyScore(prev => prev + pointsEarned);
-    
-    setMyAnswers(prev => [...prev, {
-      roundIndex: currentRoundIndex,
-      type: 'challenge',
-      gameId: currentRound?.gameId,
-      gameName: currentRound?.gameName,
-      completed: result.completed,
-      score: result.score || 0,
-      pointsEarned,
-      responseTime: (currentRound?.timeLimit || 60) - timeLeft
-    }]);
-
-    // Emit challenge result to server
-    if (socketRef.current) {
-      socketRef.current.emit('pk:submit-challenge', {
-        roomId,
-        roundIndex: currentRoundIndex,
-        gameId: currentRound?.gameId,
-        completed: result.completed,
-        score: result.score || 0,
-        pointsEarned,
-        responseTime: (currentRound?.timeLimit || 60) - timeLeft
-      });
-    }
-
-    setTimeout(() => moveToNextRound(), 2500);
-  }, [currentRound, currentRoundIndex, timeLeft, roomId]);
 
   const handleAnswer = (answerIndex) => {
     if (selectedAnswer !== null) return;
@@ -518,17 +394,10 @@ const PKBattleRoom = () => {
       setSelectedAnswer(null);
       setAnswerStatus(null);
       setShowCorrectAnswer(false);
-      setChallengeStarted(false);
       setOpponentAnswered(false);
       
-      // Set timer and game status based on round type
-      if (nextRound?.type === 'challenge') {
-        setTimeLeft(nextRound.timeLimit || 60);
-        setGameStatus('playing-challenge');
-      } else {
-        setTimeLeft(nextRound?.timeLimit || questions[nextRoundIndex]?.timeLimit || 30);
-        setGameStatus('playing');
-      }
+      setTimeLeft(nextRound?.timeLimit || questions[nextRoundIndex]?.timeLimit || 30);
+      setGameStatus('playing');
     } else {
       // Game finished - notify server and enter waiting status
       if (socketRef.current) {
@@ -733,118 +602,6 @@ const PKBattleRoom = () => {
 
   // Calculate total rounds for display
   const totalRounds = rounds.length > 0 ? rounds.length : questions.length;
-
-  // Challenge game screen
-  if (gameStatus === 'playing-challenge') {
-    const ChallengeGame = currentRound?.gameComponent ? 
-      challengeGameComponents[currentRound.gameComponent] : null;
-
-    return (
-      <div className="pk-battle-room">
-        {/* Header with scores */}
-        <div className="pk-battle-header">
-          <div className="pk-battle-player">
-            <div className="pk-battle-player-avatar">
-              <img src={avatarUrl} alt="You" />
-            </div>
-            <div className="pk-battle-player-info">
-              <h4>{playerName}</h4>
-              <div className="score">{myScore}</div>
-            </div>
-          </div>
-          
-          <div className="pk-battle-timer">
-            <div className="time" style={{ 
-              color: timeLeft <= 10 ? '#ef4444' : timeLeft <= 20 ? '#f59e0b' : 'white' 
-            }}>
-              <Clock size={24} style={{ display: 'inline', marginRight: 8 }} />
-              {timeLeft}s
-            </div>
-            <div className="round">
-              <Gamepad2 size={16} style={{ display: 'inline', marginRight: 5 }} />
-              Vòng {currentRoundIndex + 1}/{totalRounds}
-            </div>
-          </div>
-          
-          <div className="pk-battle-player right">
-            <div className="pk-battle-player-avatar">
-              <img 
-                src={opponent?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=opponent&backgroundColor=b6e3f4`} 
-                alt="Opponent" 
-              />
-            </div>
-            <div className="pk-battle-player-info" style={{ textAlign: 'right' }}>
-              <h4>{opponent?.displayName || 'Opponent'}</h4>
-              <div className="score">{opponentScore}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Challenge Game Content */}
-        <div className="pk-battle-content pk-challenge-content">
-          <div className="pk-challenge-info">
-            <div className="pk-challenge-header">
-              <Gamepad2 size={24} />
-              <h3>{currentRound?.gameName || 'Challenge Game'}</h3>
-              <span className={`pk-question-difficulty ${currentRound?.difficulty}`}>
-                {currentRound?.difficulty === 'easy' ? '🟢 Dễ' :
-                 currentRound?.difficulty === 'medium' ? '🟡 TB' : '🔴 Khó'}
-              </span>
-              <span style={{ 
-                color: 'var(--pk-accent)', 
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5
-              }}>
-                <Zap size={18} />
-                +{currentRound?.points || 100} điểm
-              </span>
-            </div>
-          </div>
-
-          <div className="pk-challenge-game-wrapper">
-            {ChallengeGame ? (
-              <Suspense fallback={
-                <div className="pk-challenge-loading">
-                  <Loader2 size={48} className="animate-spin" />
-                  <p>Đang tải mini game...</p>
-                </div>
-              }>
-                <ChallengeGame 
-                  isPKMode={true}
-                  pkTimeLimit={timeLeft}
-                  onComplete={handleChallengeComplete}
-                  onExit={() => handleChallengeComplete({ completed: false, score: 0 })}
-                />
-              </Suspense>
-            ) : (
-              <div className="pk-challenge-not-found">
-                <AlertCircle size={48} />
-                <p>Không tìm thấy mini game: {currentRound?.gameComponent}</p>
-                <button 
-                  className="pk-btn pk-btn-primary"
-                  onClick={() => handleChallengeComplete({ completed: false, score: 0 })}
-                >
-                  Bỏ qua
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Progress Bar */}
-          <div className="pk-progress-container">
-            <div className="pk-progress-bar">
-              <div 
-                className="pk-progress-fill" 
-                style={{ width: `${((currentRoundIndex + 1) / totalRounds) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Battle screen (Quiz mode)
   return (

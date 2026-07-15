@@ -94,12 +94,12 @@ const Leaderboard = ({ isOpen, onClose }) => {
 
   return (
     <div className="leaderboard-overlay" onClick={onClose}>
-      <div className="leaderboard-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="leaderboard-modal font-body" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="leaderboard-header">
           <div className="leaderboard-header-content">
             <Trophy className="w-8 h-8 text-yellow-400" />
-            <h2 className="leaderboard-title">Bảng Xếp Hạng</h2>
+            <h2 className="leaderboard-title font-heading">Bảng Xếp Hạng</h2>
           </div>
           <button className="leaderboard-close" onClick={onClose}>
             <X className="w-5 h-5" />
@@ -109,21 +109,21 @@ const Leaderboard = ({ isOpen, onClose }) => {
         {/* Tabs */}
         <div className="leaderboard-tabs">
           <button
-            className={`leaderboard-tab ${activeTab === 'xp' ? 'active' : ''}`}
+            className={`leaderboard-tab font-heading ${activeTab === 'xp' ? 'active' : ''}`}
             onClick={() => setActiveTab('xp')}
           >
             <Star className="w-4 h-4" />
             <span>XP</span>
           </button>
           <button
-            className={`leaderboard-tab ${activeTab === 'streak' ? 'active' : ''}`}
+            className={`leaderboard-tab font-heading ${activeTab === 'streak' ? 'active' : ''}`}
             onClick={() => setActiveTab('streak')}
           >
             <Flame className="w-4 h-4" />
             <span>Chuỗi ngày</span>
           </button>
           <button
-            className={`leaderboard-tab ${activeTab === 'pk' ? 'active' : ''}`}
+            className={`leaderboard-tab font-heading ${activeTab === 'pk' ? 'active' : ''}`}
             onClick={() => setActiveTab('pk')}
           >
             <TrendingUp className="w-4 h-4" />
@@ -136,7 +136,7 @@ const Leaderboard = ({ isOpen, onClose }) => {
           {['daily', 'weekly', 'alltime'].map((range) => (
             <button
               key={range}
-              className={`time-range-btn ${timeRange === range ? 'active' : ''}`}
+              className={`time-range-btn font-heading ${timeRange === range ? 'active' : ''}`}
               onClick={() => setTimeRange(range)}
             >
               {range === 'daily' ? 'Hôm nay' : range === 'weekly' ? 'Tuần này' : 'Tất cả'}
@@ -169,12 +169,12 @@ const Leaderboard = ({ isOpen, onClose }) => {
                         {podiumItem.avatar ? (
                           <img src={podiumItem.avatar} alt="" />
                         ) : (
-                          <span>{podiumItem.displayName?.[0] || podiumItem.username?.[0] || '?'}</span>
+                          <span className="font-heading">{podiumItem.displayName?.[0] || podiumItem.username?.[0] || '?'}</span>
                         )}
                         <div className="podium-rank">{getRankIcon(podiumItem.rank)}</div>
                       </div>
-                      <div className="podium-name">{podiumItem.displayName || podiumItem.username}</div>
-                      <div className="podium-value">
+                      <div className="podium-name font-heading">{podiumItem.displayName || podiumItem.username}</div>
+                      <div className="podium-value font-heading">
                         {valueData.icon}
                         <span>{valueData.value}</span>
                       </div>
@@ -201,13 +201,13 @@ const Leaderboard = ({ isOpen, onClose }) => {
                         )}
                       </div>
                       <div className="leaderboard-item-info">
-                        <div className="leaderboard-item-name">{item.displayName || item.username}</div>
-                        <div className="leaderboard-item-username">@{item.username}</div>
+                        <div className="leaderboard-item-name font-heading">{item.displayName || item.username}</div>
+                        <div className="leaderboard-item-username font-body">@{item.username}</div>
                       </div>
-                      <div className="leaderboard-item-value">
+                      <div className="leaderboard-item-value font-heading">
                         {valueData.icon}
                         <span className="value">{valueData.value}</span>
-                        <span className="label">{valueData.label}</span>
+                        <span className="label font-body">{valueData.label}</span>
                       </div>
                     </div>
                   );
@@ -217,31 +217,31 @@ const Leaderboard = ({ isOpen, onClose }) => {
               {/* User's Rank */}
               {userRank && userRank.rank > 10 && (
                 <div className="leaderboard-user-rank">
-                  <div className="user-rank-separator">
+                  <div className="user-rank-separator font-heading">
                     <ChevronDown className="w-4 h-4" />
                     <span>Vị trí của bạn</span>
                     <ChevronDown className="w-4 h-4" />
                   </div>
                   <div className="leaderboard-item leaderboard-item-user">
                     <div className="leaderboard-item-rank">
-                      <span className="w-6 h-6 flex items-center justify-center text-purple-600 font-bold">
+                      <span className="w-6 h-6 flex items-center justify-center text-purple-600 font-heading font-extrabold">
                         {userRank.rank}
                       </span>
                     </div>
                     <div className="leaderboard-item-avatar user">
-                      <span>{user?.displayName?.[0] || user?.email?.[0] || '?'}</span>
+                      <span className="font-heading">{user?.displayName?.[0] || user?.email?.[0] || '?'}</span>
                     </div>
                     <div className="leaderboard-item-info">
-                      <div className="leaderboard-item-name">{user?.displayName || 'Bạn'}</div>
-                      <div className="leaderboard-item-username">@{user?.email?.split('@')[0]}</div>
+                      <div className="leaderboard-item-name font-heading">{user?.displayName || 'Bạn'}</div>
+                      <div className="leaderboard-item-username font-body">@{user?.email?.split('@')[0]}</div>
                     </div>
-                    <div className="leaderboard-item-value">
+                    <div className="leaderboard-item-value font-heading">
                       {getValue({ ...userRank }).icon}
                       <span className="value">
                         {activeTab === 'xp' ? userRank.xp?.toLocaleString() : 
                          activeTab === 'streak' ? userRank.streak : userRank.pkRating}
                       </span>
-                      <span className="label">{getValue({ ...userRank }).label}</span>
+                      <span className="label font-body">{getValue({ ...userRank }).label}</span>
                     </div>
                   </div>
                 </div>

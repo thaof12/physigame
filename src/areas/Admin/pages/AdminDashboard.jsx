@@ -30,9 +30,9 @@ const StatCard = ({ title, value, sub, icon: Icon, color }) => (
       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 shadow-lg ${color}`}>
         <Icon className="w-6 h-6 text-white" />
       </div>
-      <p className="text-3xl font-black text-slate-900 mb-1">{value}</p>
-      <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{title}</p>
-      {sub && <p className="text-xs text-slate-300 mt-1">{sub}</p>}
+      <p className="font-heading text-3xl font-extrabold text-slate-900 mb-1">{value}</p>
+      <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">{title}</p>
+      {sub && <p className="font-body text-xs text-slate-300 mt-1">{sub}</p>}
     </div>
   </div>
 );
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-          <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Đang tải dữ liệu...</p>
+          <p className="font-heading text-slate-400 font-extrabold text-sm uppercase tracking-widest">Đang tải dữ liệu...</p>
         </div>
       </div>
     );
@@ -166,8 +166,8 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black text-slate-900">Ban Điều Hành</h1>
-          <p className="text-slate-500 font-bold text-sm">Dữ liệu thực tế • Cập nhật mỗi lần tải trang</p>
+          <h1 className="font-heading text-3xl font-extrabold text-slate-900">Ban Điều Hành</h1>
+          <p className="font-body text-slate-500 font-bold text-sm">Dữ liệu thực tế • Cập nhật mỗi lần tải trang</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -178,7 +178,7 @@ const AdminDashboard = () => {
           </button>
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-[1.25rem] text-white text-sm font-black shadow-xl shadow-indigo-500/20 hover:brightness-110 transition-all uppercase tracking-widest"
+            className="font-heading flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-[1.25rem] text-white text-sm font-extrabold shadow-xl shadow-indigo-500/20 hover:brightness-110 transition-all uppercase tracking-widest"
           >
             <Download className="w-5 h-5" />
             Tải Báo Cáo
@@ -195,8 +195,8 @@ const AdminDashboard = () => {
           <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-xl font-black text-slate-900">Duyệt Hồ Sơ Giảng Viên</h3>
-                <p className="text-slate-400 text-xs font-bold mt-1">
+                <h3 className="font-heading text-xl font-extrabold text-slate-900">Duyệt Hồ Sơ Giảng Viên</h3>
+                <p className="font-body text-slate-400 text-xs font-bold mt-1">
                   {pendingTeachers.length > 0 ? `${pendingTeachers.length} yêu cầu đang chờ xử lý` : 'Không có yêu cầu mới'}
                 </p>
               </div>
@@ -212,22 +212,22 @@ const AdminDashboard = () => {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
                         <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                          <span className="text-white font-black text-lg">{teacher.name[0].toUpperCase()}</span>
+                          <span className="font-heading text-white font-extrabold text-lg">{teacher.name[0].toUpperCase()}</span>
                         </div>
                         <div>
-                          <h4 className="font-black text-slate-900">{teacher.name}</h4>
-                          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 mt-1">
+                          <h4 className="font-heading font-extrabold text-slate-900">{teacher.name}</h4>
+                          <div className="font-body flex items-center gap-2 text-xs font-bold text-slate-400 mt-1">
                             <Mail className="w-3.5 h-3.5" />
                             <span>{teacher.email}</span>
                           </div>
-                          <p className="text-xs text-slate-300 mt-0.5">Đăng ký: {teacher.joinDate}</p>
+                          <p className="font-body text-xs text-slate-300 mt-0.5">Đăng ký: {teacher.joinDate}</p>
                         </div>
                       </div>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleApprove(teacher)}
                           disabled={actionLoading === teacher.id}
-                          className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl font-black text-xs hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/20 disabled:opacity-50"
+                          className="font-heading flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl font-extrabold text-xs hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/20 disabled:opacity-50"
                         >
                           {actionLoading === teacher.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                           PHÊ DUYỆT
@@ -235,7 +235,7 @@ const AdminDashboard = () => {
                         <button
                           onClick={() => openRejectModal(teacher)}
                           disabled={actionLoading === teacher.id}
-                          className="flex items-center gap-2 px-4 py-2 bg-white text-rose-500 border border-rose-100 rounded-xl font-black text-xs hover:bg-rose-50 transition-all disabled:opacity-50"
+                          className="font-heading flex items-center gap-2 px-4 py-2 bg-white text-rose-500 border border-rose-100 rounded-xl font-extrabold text-xs hover:bg-rose-50 transition-all disabled:opacity-50"
                         >
                           <XCircle className="w-3.5 h-3.5" />
                           TỪ CHỐI
@@ -250,8 +250,8 @@ const AdminDashboard = () => {
                 <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center">
                   <CheckCircle className="w-10 h-10 text-emerald-500" />
                 </div>
-                <p className="text-lg font-black text-slate-800">Tất cả hồ sơ đã được xử lý</p>
-                <p className="text-slate-400 font-bold text-sm max-w-xs">Hệ thống đang hoạt động bình thường</p>
+                <p className="font-heading text-lg font-extrabold text-slate-800">Tất cả hồ sơ đã được xử lý</p>
+                <p className="font-body text-slate-400 font-bold text-sm max-w-xs">Hệ thống đang hoạt động bình thường</p>
               </div>
             )}
           </div>
@@ -262,7 +262,7 @@ const AdminDashboard = () => {
           {/* Tỉ lệ người dùng */}
           <div className="bg-white rounded-[3rem] p-8 shadow-sm border border-slate-100">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-base font-black text-slate-900">Phân loại tài khoản</h3>
+              <h3 className="font-heading text-base font-extrabold text-slate-900">Phân loại tài khoản</h3>
               <Atom className="w-5 h-5 text-indigo-500" />
             </div>
             <div className="space-y-5">
@@ -274,8 +274,8 @@ const AdminDashboard = () => {
                 return (
                   <div key={i} className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{item.label}</span>
-                      <span className={`text-xs font-black ${item.text}`}>{item.value} ({pct}%)</span>
+                      <span className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">{item.label}</span>
+                      <span className={`font-heading text-xs font-extrabold ${item.text}`}>{item.value} ({pct}%)</span>
                     </div>
                     <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
                       <div className={`h-full ${item.color} rounded-full transition-all duration-1000`} style={{ width: `${pct}%` }} />
@@ -293,15 +293,15 @@ const AdminDashboard = () => {
                 <UserX className="w-5 h-5 text-amber-600" />
               </div>
               <div>
-                <p className="font-black text-amber-800 text-sm">Cần phê duyệt</p>
-                <p className="text-amber-600 text-xs font-bold">{realStats.pendingTeachers} giáo viên đang chờ xác nhận</p>
+                <p className="font-heading font-extrabold text-amber-800 text-sm">Cần phê duyệt</p>
+                <p className="font-body text-amber-600 text-xs font-bold">{realStats.pendingTeachers} giáo viên đang chờ xác nhận</p>
               </div>
             </div>
           )}
 
           {/* System Status */}
           <div className="bg-white rounded-[3rem] p-8 shadow-sm border border-slate-100">
-            <h3 className="text-base font-black text-slate-900 mb-6">Trạng thái hệ thống</h3>
+            <h3 className="font-heading text-base font-extrabold text-slate-900 mb-6">Trạng thái hệ thống</h3>
             <div className="space-y-5">
               {[
                 { label: 'Server Backend', status: 'Online', pct: 100, color: 'bg-emerald-500', textColor: 'text-emerald-600' },
@@ -309,7 +309,7 @@ const AdminDashboard = () => {
                 { label: 'Socket.io', status: 'Active', pct: 100, color: 'bg-blue-500', textColor: 'text-blue-600' },
               ].map((item, i) => (
                 <div key={i} className="space-y-2">
-                  <div className="flex justify-between text-xs font-black uppercase tracking-widest text-slate-400">
+                  <div className="flex justify-between text-xs font-heading font-extrabold uppercase tracking-widest text-slate-400">
                     <span>{item.label}</span>
                     <span className={item.textColor}>{item.status}</span>
                   </div>
@@ -329,30 +329,30 @@ const AdminDashboard = () => {
           <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden">
             <div className="bg-gradient-to-br from-indigo-600 to-slate-900 p-8 text-white">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xl font-black">Từ Chối Hồ Sơ</h3>
+                <h3 className="font-heading text-xl font-extrabold">Từ Chối Hồ Sơ</h3>
                 <button onClick={() => setRejectionModalOpen(false)} className="p-2 hover:bg-white/10 rounded-xl transition-all">
                   <XCircle className="w-5 h-5" />
                 </button>
               </div>
-              <p className="font-bold opacity-70 text-sm">Gửi phản hồi cho: <span className="opacity-100 font-black">{selectedTeacher.name}</span></p>
+              <p className="font-body font-bold opacity-70 text-sm">Gửi phản hồi cho: <span className="font-heading opacity-100 font-extrabold">{selectedTeacher.name}</span></p>
             </div>
             <div className="p-8 space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-black text-slate-800 flex items-center gap-2">
+                <label className="font-heading text-sm font-extrabold text-slate-800 flex items-center gap-2">
                   <Mail className="w-4 h-4" /> Lý do từ chối (Tùy chọn)
                 </label>
                 <textarea
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
                   placeholder="Nhập lý do để giúp giáo viên hoàn thiện hồ sơ..."
-                  className="w-full h-36 p-5 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl text-slate-700 font-bold placeholder:text-slate-300 transition-all outline-none resize-none"
+                  className="font-body w-full h-36 p-5 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl text-slate-700 font-bold placeholder:text-slate-300 transition-all outline-none resize-none"
                 />
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setRejectionModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all">
+                <button onClick={() => setRejectionModalOpen(false)} className="font-heading flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-extrabold text-sm hover:bg-slate-200 transition-all">
                   Hủy
                 </button>
-                <button onClick={handleRejectSubmit} className="flex-[2] py-4 bg-rose-500 text-white rounded-2xl font-black text-sm hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20">
+                <button onClick={handleRejectSubmit} className="font-heading flex-[2] py-4 bg-rose-500 text-white rounded-2xl font-extrabold text-sm hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20">
                   Xác nhận Từ Chối & Gửi Email
                 </button>
               </div>

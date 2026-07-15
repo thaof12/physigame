@@ -135,7 +135,7 @@ const TeacherLayout = () => {
       <div className="min-h-screen bg-[#e4f2f0] flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-[#2099e9] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#274dad] font-bold">Đang tải học viện...</p>
+          <p className="font-body text-[#274dad] font-bold">Đang tải học viện...</p>
         </div>
       </div>
     );
@@ -159,7 +159,7 @@ const TeacherLayout = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex font-sans">
+    <div className="min-h-screen bg-[#f8fafc] flex font-body">
       {/* Mobile menu overlay */}
       {mobileMenuOpen && (
         <div
@@ -213,10 +213,10 @@ const TeacherLayout = () => {
                   setMobileMenuOpen(false);
                 }}
                 className={`
-                  w-full flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all
+                  font-heading w-full flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all
                   ${active
                     ? 'bg-[#4f46e5] text-white shadow-xl shadow-blue-500/20'
-                    : 'text-slate-500 hover:text-[#0f172a] hover:bg-[#f8fafc]/50'
+                    : 'text-slate-500 hover:text-[#0f172a] hover:bg-[#f8fafc]/50 font-extrabold'
                   }
                   ${sidebarCollapsed ? 'justify-center' : ''}
                 `}
@@ -224,7 +224,7 @@ const TeacherLayout = () => {
               >
                 <IconComponent className={`w-6 h-6 shrink-0 ${active ? 'text-white' : ''}`} />
                 {!sidebarCollapsed && (
-                  <span className="font-black text-sm tracking-tight">{item.label}</span>
+                  <span className="font-extrabold text-sm tracking-tight">{item.label}</span>
                 )}
               </button>
             );
@@ -245,9 +245,9 @@ const TeacherLayout = () => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-black text-[#4f46e5] uppercase tracking-widest mb-0.5">Giảng Viên</p>
-                <p className="text-sm font-black text-[#0f172a] truncate">{teacher?.displayName || 'Giảng Viên'}</p>
-                <p className="text-[10px] text-slate-400 font-bold truncate">{teacher?.email}</p>
+                <p className="font-heading text-[10px] font-extrabold text-[#4f46e5] uppercase tracking-widest mb-0.5">Giảng Viên</p>
+                <p className="font-heading text-sm font-extrabold text-[#0f172a] truncate">{teacher?.displayName || 'Giảng Viên'}</p>
+                <p className="font-body text-[10px] text-slate-400 font-bold truncate">{teacher?.email}</p>
               </div>
             </div>
           )}
@@ -256,7 +256,7 @@ const TeacherLayout = () => {
             onClick={handleLogout}
             className={`
               w-full flex items-center gap-4 px-5 py-4 rounded-[1.5rem]
-              text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all font-black text-sm
+              text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all font-heading font-extrabold text-sm
               ${sidebarCollapsed ? 'justify-center px-0 ring-0 bg-transparent' : ''}
             `}
             title={sidebarCollapsed ? 'Đăng xuất' : ''}
@@ -288,7 +288,7 @@ const TeacherLayout = () => {
                 value={headerSearch}
                 onChange={(e) => setHeaderSearch(e.target.value)}
                 placeholder="Tìm kiến thức, bài giảng, mô phỏng..."
-                className="w-full bg-[#f8fafc]/50 border-2 border-transparent rounded-[1.5rem] pl-16 pr-8 py-4 text-sm text-[#0f172a] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#4f46e5] transition-all font-bold"
+                className="font-body w-full bg-[#f8fafc]/50 border-2 border-transparent rounded-[1.5rem] pl-16 pr-8 py-4 text-sm text-[#0f172a] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#4f46e5] transition-all font-bold"
               />
             </div>
           </form>
@@ -307,7 +307,7 @@ const TeacherLayout = () => {
               >
                 <Bell className="w-6 h-6 group-hover:shake transition-all text-slate-700" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-md animate-bounce">
+                  <span className="font-heading absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-md animate-bounce">
                     {unreadCount}
                   </span>
                 )}
@@ -316,9 +316,9 @@ const TeacherLayout = () => {
               {showNotifDropdown && (
                 <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white border border-slate-100 rounded-3xl shadow-xl py-3 z-50 animate-fade-in max-h-[450px] overflow-y-auto">
                   <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
-                    <span className="text-sm font-black text-slate-800">Thông báo của bạn</span>
+                    <span className="font-heading text-sm font-extrabold text-slate-800">Thông báo của bạn</span>
                     {unreadCount > 0 && (
-                      <span className="text-[10px] font-black bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      <span className="font-heading text-[10px] font-extrabold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-wider">
                         {unreadCount} mới
                       </span>
                     )}
@@ -326,7 +326,7 @@ const TeacherLayout = () => {
 
                   <div className="divide-y divide-slate-50">
                     {notifications.length === 0 ? (
-                      <div className="p-8 text-center text-slate-400 font-bold text-xs">
+                      <div className="font-body p-8 text-center text-slate-400 font-bold text-xs">
                         <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                         Chưa có thông báo nào.
                       </div>
@@ -335,9 +335,9 @@ const TeacherLayout = () => {
                         <div key={n.id} className={`p-4 hover:bg-slate-50 transition-colors flex items-start gap-3 ${!n.is_read ? 'bg-indigo-50/20' : ''}`}>
                           <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${!n.is_read ? 'bg-indigo-600' : 'bg-transparent'}`} />
                           <div className="flex-1 space-y-1">
-                            <p className="text-xs font-black text-slate-800">{n.title}</p>
-                            <p className="text-xs text-slate-500 leading-relaxed font-semibold">{n.content}</p>
-                            <p className="text-[9px] text-slate-400 font-bold">
+                            <p className="font-heading text-xs font-extrabold text-slate-800">{n.title}</p>
+                            <p className="font-body text-xs text-slate-500 leading-relaxed font-bold">{n.content}</p>
+                            <p className="font-body text-[9px] text-slate-400 font-bold">
                               {new Date(n.created_at).toLocaleString('vi-VN')}
                             </p>
                           </div>

@@ -68,7 +68,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex font-sans bg-gray-100 items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+    <div className="min-h-screen flex font-body bg-gray-100 items-center justify-center p-4 sm:p-8 relative overflow-hidden">
 
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-black/5 blur-[120px] rounded-full pointer-events-none"></div>
@@ -89,7 +89,7 @@ const Login = () => {
             <div className="p-2 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 group-hover:bg-white/20 transition-all">
               <ChevronLeft className="w-5 h-5 text-white" />
             </div>
-            <span className="text-white/80 font-bold group-hover:text-white transition-colors">Về trang chủ</span>
+            <span className="font-body text-white/80 font-bold group-hover:text-white transition-colors">Về trang chủ</span>
           </Link>
 
           <div className="relative z-10 flex flex-col h-full justify-center">
@@ -97,13 +97,13 @@ const Login = () => {
               <span className="font-premium-serif text-4xl font-bold text-white italic tracking-tight">Eureka</span>
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight tracking-tight">
+            <h1 className="font-heading text-4xl lg:text-5xl font-extrabold text-white mb-6 leading-tight tracking-tight">
               Khám Phá <br />
               <span className="text-gray-300">
                 Bí Mật Vũ Trụ
               </span>
             </h1>
-            <p className="text-white/70 text-lg mb-12 max-w-sm leading-relaxed">
+            <p className="font-body text-white/70 text-lg mb-12 max-w-sm leading-relaxed">
               Trở thành nhà vật lý tương lai với nền tảng học tập 3D sinh động. Chinh phục tri thức, khai thác tiềm năng.
             </p>
 
@@ -118,8 +118,8 @@ const Login = () => {
                     <CheckCircle2 className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-white font-bold text-base group-hover:text-gray-300 transition-colors">{item.title}</h3>
-                    <p className="text-white/50 text-sm mt-0.5">{item.desc}</p>
+                    <h3 className="font-heading text-white font-extrabold text-base group-hover:text-gray-300 transition-colors">{item.title}</h3>
+                    <p className="font-body text-white/50 text-sm mt-0.5">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -137,13 +137,13 @@ const Login = () => {
                 <span className="font-premium-serif text-3xl font-bold text-slate-900 italic tracking-tight">Eureka</span>
               </div>
 
-              <h2 className="text-3xl font-black text-slate-900 mb-3">Chào mừng trở lại</h2>
-              <p className="text-slate-500 font-medium">Bắt đầu hành trình khám phá mới hôm nay</p>
+              <h2 className="font-heading text-3xl font-extrabold text-slate-900 mb-3">Chào mừng trở lại</h2>
+              <p className="font-body text-slate-500 font-medium">Bắt đầu hành trình khám phá mới hôm nay</p>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-bold flex items-center gap-3 animate-shake">
+              <div className="font-body mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-sm font-bold flex items-center gap-3 animate-shake">
                 <div className="w-1.5 h-6 bg-rose-500 rounded-full"></div>
                 {error}
               </div>
@@ -153,7 +153,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Input */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-800 ml-1">Email Học Viện</label>
+                <label className="font-heading text-sm font-extrabold text-slate-800 ml-1">Email Học Viện</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-black transition-colors" />
@@ -164,7 +164,7 @@ const Login = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold"
+                    className="font-body w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold"
                     placeholder="name@university.edu"
                   />
                 </div>
@@ -173,8 +173,8 @@ const Login = () => {
               {/* Password Input */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center ml-1">
-                  <label className="text-sm font-bold text-slate-800">Mật mã Bảo mật</label>
-                  <a href="#" className="text-xs font-bold text-gray-500 hover:text-black transition-colors">Quên?</a>
+                  <label className="font-heading text-sm font-extrabold text-slate-800">Mật mã Bảo mật</label>
+                  <a href="#" className="font-body text-xs font-bold text-gray-500 hover:text-black transition-colors">Quên?</a>
                 </div>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -186,7 +186,7 @@ const Login = () => {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold"
+                    className="font-body w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold"
                     placeholder="••••••••••••"
                   />
                 </div>
@@ -198,14 +198,14 @@ const Login = () => {
                     <input type="checkbox" className="peer opacity-0 absolute inset-0 cursor-pointer" />
                     <div className="w-2.5 h-2.5 bg-black rounded-sm opacity-0 peer-checked:opacity-100 transition-opacity"></div>
                   </div>
-                  <span className="text-sm font-bold text-slate-500 group-hover:text-black transition-colors">Duy trì đăng nhập</span>
+                  <span className="font-body text-sm font-bold text-slate-500 group-hover:text-black transition-colors">Duy trì đăng nhập</span>
                 </label>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full relative group overflow-hidden bg-black text-white rounded-2xl py-4 font-black text-lg transition-all hover:-translate-y-0.5 hover:bg-slate-800 active:scale-95 shadow-xl hover:shadow-2xl mt-4"
+                className="font-heading w-full relative group overflow-hidden bg-black text-white rounded-2xl py-4 font-extrabold text-lg transition-all hover:-translate-y-0.5 hover:bg-slate-800 active:scale-95 shadow-xl hover:shadow-2xl mt-4"
               >
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 <span className="relative flex justify-center items-center gap-3">
@@ -219,7 +219,7 @@ const Login = () => {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-100"></div>
               </div>
-              <div className="relative flex justify-center text-xs uppercase font-black tracking-widest text-slate-400">
+              <div className="font-heading relative flex justify-center text-xs uppercase font-extrabold tracking-widest text-slate-400">
                 <span className="bg-white px-4 italic">Cổng kết nối</span>
               </div>
             </div>
@@ -228,13 +228,13 @@ const Login = () => {
               type="button"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="mt-8 w-full flex items-center justify-center gap-4 py-4 bg-white text-black font-bold rounded-2xl hover:bg-gray-50 border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-[0.98] shadow-sm"
+              className="font-heading mt-8 w-full flex items-center justify-center gap-4 py-4 bg-white text-black font-extrabold rounded-2xl hover:bg-gray-50 border-2 border-slate-200 hover:border-slate-300 transition-all active:scale-[0.98] shadow-sm"
             >
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
               <span>Đăng nhập qua Google (SSO)</span>
             </button>
 
-            <p className="mt-10 text-center text-slate-500 font-bold">
+            <p className="font-body mt-10 text-center text-slate-500 font-bold">
               Bạn là lính mới?{' '}
               <Link to="/register" className="text-black hover:text-gray-600 underline underline-offset-4 decoration-2">
                 Gia nhập ngay
@@ -246,7 +246,7 @@ const Login = () => {
         </div>
       </div>
 
-      <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-slate-400 text-xs font-bold tracking-widest uppercase opacity-50">
+      <p className="font-body absolute bottom-6 left-1/2 -translate-x-1/2 text-slate-400 text-xs font-bold tracking-widest uppercase opacity-50">
         © 2026 PhysiGame Academy • Version 2.0 Blue
       </p>
     </div>

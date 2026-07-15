@@ -23,16 +23,16 @@ const StatCard = ({ title, value, suffix, change, icon: Icon, color }) => (
         <Icon className="w-6 h-6 text-white" />
       </div>
       {change !== undefined && (
-        <div className={`flex items-center gap-1 text-xs font-black ${change > 0 ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'} px-2.5 py-1 rounded-full`}>
+        <div className={`font-heading flex items-center gap-1 text-xs font-extrabold ${change > 0 ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'} px-2.5 py-1 rounded-full`}>
           {change > 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
           <span>{Math.abs(change)}%</span>
         </div>
       )}
     </div>
-    <p className="text-3xl font-black text-slate-900 mb-1">
-      {value !== undefined ? value : 0}{suffix && <span className="text-lg text-slate-400 font-bold">{suffix}</span>}
+    <p className="font-heading text-3xl font-extrabold text-slate-900 mb-1">
+      {value !== undefined ? value : 0}{suffix && <span className="font-body text-lg text-slate-400 font-bold">{suffix}</span>}
     </p>
-    <p className="text-xs text-slate-400 font-black uppercase tracking-wider">{title}</p>
+    <p className="font-heading text-xs text-slate-400 font-extrabold uppercase tracking-wider">{title}</p>
   </div>
 );
 
@@ -115,20 +115,20 @@ const StudentStats = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900">Thống kê học sinh</h1>
-          <p className="text-slate-500 font-bold text-sm mt-1">Theo dõi hoạt động học tập của học sinh</p>
+          <h1 className="font-heading text-3xl font-extrabold text-slate-900">Thống kê học sinh</h1>
+          <p className="font-body text-slate-500 font-bold text-sm mt-1">Theo dõi hoạt động học tập của học sinh</p>
         </div>
         <div className="flex items-center gap-3">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+            className="font-body bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
           >
             <option value="7d">7 ngày qua</option>
             <option value="30d">30 ngày qua</option>
             <option value="90d">90 ngày qua</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition-all">
+          <button className="font-heading flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 hover:text-slate-900 font-extrabold transition-all">
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline text-sm">Xuất báo cáo</span>
           </button>
@@ -169,8 +169,8 @@ const StudentStats = () => {
       <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-xl font-black text-slate-900">Hoạt động học tập</h3>
-            <p className="text-xs font-bold text-slate-400 tracking-wider uppercase">Số học sinh hoạt động theo ngày</p>
+            <h3 className="font-heading text-xl font-extrabold text-slate-900">Hoạt động học tập</h3>
+            <p className="font-heading text-xs font-extrabold text-slate-400 tracking-wider uppercase">Số học sinh hoạt động theo ngày</p>
           </div>
         </div>
 
@@ -184,7 +184,7 @@ const StudentStats = () => {
                   title={`${item.students} học sinh`}
                 ></div>
               </div>
-              <span className="text-xs text-slate-400 font-bold">{item.day}</span>
+              <span className="font-heading text-xs text-slate-400 font-extrabold">{item.day}</span>
             </div>
           ))}
         </div>
@@ -193,7 +193,7 @@ const StudentStats = () => {
       {/* Top Students Table */}
       <div className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h3 className="text-xl font-black text-slate-900">Học sinh tích cực</h3>
+          <h3 className="font-heading text-xl font-extrabold text-slate-900">Học sinh tích cực</h3>
           <div className="relative max-w-xs w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -201,7 +201,7 @@ const StudentStats = () => {
               placeholder="Tìm học sinh..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+              className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
             />
           </div>
         </div>
@@ -210,11 +210,11 @@ const StudentStats = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-100">
-                <th className="text-left py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Học sinh</th>
-                <th className="text-center py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Lớp</th>
-                <th className="text-center py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Bài hoàn thành</th>
-                <th className="text-center py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Điểm TB</th>
-                <th className="text-right py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Hoạt động</th>
+                <th className="font-heading text-left py-3 px-4 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Học sinh</th>
+                <th className="font-heading text-center py-3 px-4 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Lớp</th>
+                <th className="font-heading text-center py-3 px-4 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Bài hoàn thành</th>
+                <th className="font-heading text-center py-3 px-4 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Điểm TB</th>
+                <th className="font-heading text-right py-3 px-4 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Hoạt động</th>
               </tr>
             </thead>
             <tbody>
@@ -228,19 +228,19 @@ const StudentStats = () => {
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
-                          <span className="text-xs font-black text-slate-500">#{index + 1}</span>
+                          <span className="font-heading text-xs font-extrabold text-slate-500">#{index + 1}</span>
                         </div>
-                        <span className="text-sm text-slate-800 font-bold">{student.name}</span>
+                        <span className="font-body text-sm text-slate-800 font-bold">{student.name}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="text-sm text-slate-600 font-bold">Lớp {student.grade}</span>
+                      <span className="font-body text-sm text-slate-600 font-bold">Lớp {student.grade}</span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="text-sm text-slate-600 font-medium">{student.lessonsCompleted}</span>
+                      <span className="font-body text-sm text-slate-600 font-medium">{student.lessonsCompleted}</span>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className={`text-sm font-black ${
+                      <span className={`font-heading text-sm font-extrabold ${
                         student.avgScore >= 85 ? 'text-emerald-600' :
                         student.avgScore >= 70 ? 'text-indigo-600' : 'text-rose-600'
                       }`}>
@@ -248,14 +248,14 @@ const StudentStats = () => {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <span className="text-xs text-slate-400 font-bold">{student.lastActive}</span>
+                      <span className="font-body text-xs text-slate-400 font-bold">{student.lastActive}</span>
                     </td>
                   </tr>
                 ))}
             </tbody>
           </table>
           {students.filter(student => student.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
-            <div className="text-center py-8 text-slate-400 font-bold text-sm">
+            <div className="font-body text-center py-8 text-slate-400 font-bold text-sm">
               Không tìm thấy học sinh nào
             </div>
           )}

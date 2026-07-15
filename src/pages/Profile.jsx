@@ -282,7 +282,7 @@ const Profile = () => {
   const RankIcon = rank.icon;
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] font-sans text-[#1E293B] overflow-x-hidden selection:bg-[#274dad]/20">
+    <div className="min-h-screen bg-[#FFFFFF] font-body text-[#1E293B] overflow-x-hidden selection:bg-[#274dad]/20">
 
       {/* Background patterns */}
       <div className="fixed inset-0 graph-grid opacity-[0.15] pointer-events-none" />
@@ -309,7 +309,7 @@ const Profile = () => {
                     {userData?.profile?.avatar ? (
                       <img src={userData.profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#2099e9] to-[#274dad]">
+                      <span className="font-heading text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-[#2099e9] to-[#274dad]">
                         {userData?.displayName?.[0]?.toUpperCase() || user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'ID'}
                       </span>
                     )}
@@ -332,10 +332,10 @@ const Profile = () => {
               </div>
 
               <div className="space-y-1">
-                <h2 className="text-2xl font-black text-[#1E293B] tracking-tight truncate px-2">
+                <h2 className="font-heading text-2xl font-extrabold text-[#1E293B] tracking-tight truncate px-2">
                   {userData?.displayName || user?.displayName || user?.email?.split('@')[0] || 'Unknown Cadet'}
                 </h2>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e4f2f0] text-[#2099e9] text-[10px] font-black tracking-widest uppercase border border-[#274dad]/10">
+                <div className="font-heading inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e4f2f0] text-[#2099e9] text-[10px] font-extrabold tracking-widest uppercase border border-[#274dad]/10">
                   <RankIcon className={`w-3 h-3 ${rank.color}`} /> {rank.name}
                 </div>
               </div>
@@ -346,15 +346,15 @@ const Profile = () => {
                   <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#FFF7ED] text-cyan-500 mb-2 border border-cyan-100 group-hover/streak:scale-110 transition-transform">
                     <Flame className="w-6 h-6 animate-pulse" />
                   </div>
-                  <div className="text-lg font-black text-[#1E293B] leading-none mb-1">{stats.currentStreak}</div>
-                  <div className="text-[9px] font-black text-slate-400 uppercase tracking-tight">Ngày liên tục</div>
+                  <div className="text-lg font-heading font-extrabold text-[#1E293B] leading-none mb-1">{stats.currentStreak}</div>
+                  <div className="text-[9px] font-heading font-extrabold text-slate-400 uppercase tracking-tight">Ngày liên tục</div>
                 </div>
                 <div className="text-center group/xp">
                   <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 mb-2 border border-indigo-100 group-hover/xp:scale-110 transition-transform">
                     <Zap className="w-6 h-6" />
                   </div>
-                  <div className="text-lg font-black text-[#1E293B] leading-none mb-1">{stats.level}</div>
-                  <div className="text-[9px] font-black text-slate-400 uppercase tracking-tight">Cấp độ (LVL)</div>
+                  <div className="text-lg font-heading font-extrabold text-[#1E293B] leading-none mb-1">{stats.level}</div>
+                  <div className="text-[9px] font-heading font-extrabold text-slate-400 uppercase tracking-tight">Cấp độ (LVL)</div>
                 </div>
               </div>
             </div>
@@ -371,7 +371,7 @@ const Profile = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl font-black text-sm transition-all text-left mb-1 group ${activeTab === item.id
+                  className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl font-heading font-extrabold text-sm transition-all text-left mb-1 group ${activeTab === item.id
                     ? 'bg-[#FFFFFF] border border-[#274dad]/20 text-[#274dad] shadow-sm'
                     : 'text-slate-500 hover:bg-[#F8F9FA] hover:text-[#1E293B]'
                     }`}
@@ -384,7 +384,7 @@ const Profile = () => {
               <div className="mt-2 pt-2 border-t border-[#F1F5F9]">
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-4 px-5 py-4 rounded-xl font-black text-sm text-rose-500 hover:bg-rose-50 transition-all"
+                  className="w-full flex items-center gap-4 px-5 py-4 rounded-xl font-heading font-extrabold text-sm text-rose-500 hover:bg-rose-50 transition-all"
                 >
                   <LogOut className="w-5 h-5" />
                   <span>Đăng xuất</span>
@@ -401,19 +401,19 @@ const Profile = () => {
             {/* Header for content */}
             <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E7EB] pb-8">
               <div>
-                <h1 className="text-3xl font-black text-[#1E293B] tracking-tight">
+                <h1 className="font-heading text-3xl font-extrabold text-[#1E293B] tracking-tight">
                   {activeTab === 'info' && 'Thông tin cá nhân'}
                   {activeTab === 'overview' && 'Thống kê tổng quan'}
                   {activeTab === 'achievements' && 'Bộ sưu tập danh dự'}
                   {activeTab === 'activity' && 'Lịch sử khám phá'}
                   {activeTab === 'pk' && 'Dữ liệu đấu trường'}
                 </h1>
-                <p className="text-slate-500 font-medium text-sm mt-1">Quản lý và cập nhật tiến trình khoa học của bạn.</p>
+                <p className="font-body text-slate-500 font-medium text-sm mt-1">Quản lý và cập nhật tiến trình khoa học của bạn.</p>
               </div>
               {activeTab === 'info' && !isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="pg-btn-brass px-6 py-3 text-xs flex items-center gap-2"
+                  className="font-heading pg-btn-brass px-6 py-3 text-xs flex items-center gap-2"
                 >
                   <Edit3 className="w-4 h-4" /> Cập nhật thông tin
                 </button>
@@ -430,52 +430,52 @@ const Profile = () => {
                     <div className="max-w-2xl space-y-8">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Danh xưng hiển thị</label>
+                          <label className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Danh xưng hiển thị</label>
                           <input
                             type="text"
                             value={editForm.displayName}
                             onChange={(e) => setEditForm({ ...editForm, displayName: e.target.value })}
-                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-bold"
+                            className="font-body w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-bold"
                           />
                         </div>
                         <div className="space-y-3">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email (Tài khoản)</label>
+                          <label className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Email (Tài khoản)</label>
                           <input
                             type="text"
                             value={user?.email}
                             disabled
-                            className="w-full bg-slate-50 border border-[#E5E7EB] text-slate-400 rounded-2xl px-5 py-4 cursor-not-allowed font-medium"
+                            className="font-body w-full bg-slate-50 border border-[#E5E7EB] text-slate-400 rounded-2xl px-5 py-4 cursor-not-allowed font-medium"
                           />
                         </div>
                       </div>
 
                       <div className="space-y-3">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiểu sử / Châm ngôn khoa học</label>
+                        <label className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Tiểu sử / Châm ngôn khoa học</label>
                         <textarea
                           value={editForm.bio}
                           onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                           rows={3}
-                          className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-medium"
+                          className="font-body w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-medium"
                           placeholder="Mô tả hành trình khám phá vũ trụ của bạn..."
                         />
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Trường học / Cơ sở</label>
+                          <label className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Trường học / Cơ sở</label>
                           <input
                             type="text"
                             value={editForm.school}
                             onChange={(e) => setEditForm({ ...editForm, school: e.target.value })}
-                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-bold"
+                            className="font-body w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 focus:ring-4 focus:ring-[#274dad]/5 transition-all font-bold"
                           />
                         </div>
                         <div className="space-y-3">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Khối lớp (Grade)</label>
+                          <label className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Khối lớp (Grade)</label>
                           <select
                             value={editForm.grade}
                             onChange={(e) => setEditForm({ ...editForm, grade: e.target.value })}
-                            className="w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 transition-all font-bold appearance-none"
+                            className="font-body w-full bg-[#F8F9FA] border border-[#E5E7EB] text-[#1E293B] rounded-2xl px-5 py-4 focus:outline-none focus:border-[#274dad]/50 transition-all font-bold appearance-none"
                           >
                             <option value="">Lựa chọn cấp bậc</option>
                             {[6, 7, 8, 9, 10, 11, 12].map(g => <option key={g} value={g}>Lớp {g}</option>)}
@@ -484,8 +484,8 @@ const Profile = () => {
                       </div>
 
                       <div className="flex gap-4 pt-4">
-                        <button onClick={handleSaveProfile} className="pg-btn-brass px-8 py-4 text-sm font-black shadow-lg shadow-[#274dad]/20">Đồng bộ dữ liệu</button>
-                        <button onClick={() => setIsEditing(false)} className="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-2xl transition-all text-sm">Hủy bỏ</button>
+                        <button onClick={handleSaveProfile} className="font-heading pg-btn-brass px-8 py-4 text-sm font-extrabold shadow-lg shadow-[#274dad]/20">Đồng bộ dữ liệu</button>
+                        <button onClick={() => setIsEditing(false)} className="font-heading px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold rounded-2xl transition-all text-sm">Hủy bỏ</button>
                       </div>
                     </div>
                   ) : (
@@ -494,22 +494,22 @@ const Profile = () => {
                         <div className="flex items-start gap-6">
                           <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center shrink-0 border border-blue-100 font-bold">1</div>
                           <div>
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Họ và tên</h4>
-                            <p className="text-xl font-bold text-[#1E293B]">{userData?.displayName || 'Chưa cập nhật'}</p>
+                            <h4 className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Họ và tên</h4>
+                            <p className="font-body text-xl font-bold text-[#1E293B]">{userData?.displayName || 'Chưa cập nhật'}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-6">
                           <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center shrink-0 border border-emerald-100 font-bold">2</div>
                           <div>
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email liên hệ</h4>
-                            <p className="text-xl font-bold text-[#1E293B]">{user?.email}</p>
+                            <h4 className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Email liên hệ</h4>
+                            <p className="font-body text-xl font-bold text-[#1E293B]">{user?.email}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-6">
                           <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center shrink-0 border border-blue-100 font-bold">3</div>
                           <div>
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Trường học</h4>
-                            <p className="text-xl font-bold text-[#1E293B]">{userData?.profile?.school || 'Chưa cập nhật'}</p>
+                            <h4 className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Trường học</h4>
+                            <p className="font-body text-xl font-bold text-[#1E293B]">{userData?.profile?.school || 'Chưa cập nhật'}</p>
                           </div>
                         </div>
                       </div>
@@ -518,22 +518,22 @@ const Profile = () => {
                         <div className="flex items-start gap-6">
                           <div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center shrink-0 border border-purple-100 font-bold">4</div>
                           <div>
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cấp lớp</h4>
-                            <p className="text-xl font-bold text-[#1E293B]">{userData?.profile?.grade ? `Lớp ${userData.profile.grade}` : 'Chưa cập nhật'}</p>
+                            <h4 className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Cấp lớp</h4>
+                            <p className="font-body text-xl font-bold text-[#1E293B]">{userData?.profile?.grade ? `Lớp ${userData.profile.grade}` : 'Chưa cập nhật'}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-6">
                           <div className="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center shrink-0 border border-indigo-100 font-bold">5</div>
                           <div>
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ngày tham gia</h4>
-                            <p className="text-xl font-bold text-[#1E293B]">{new Date(userData?.createdAt || Date.now()).toLocaleDateString('vi-VN')}</p>
+                            <h4 className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Ngày tham gia</h4>
+                            <p className="font-body text-xl font-bold text-[#1E293B]">{new Date(userData?.createdAt || Date.now()).toLocaleDateString('vi-VN')}</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-6">
                           <div className="w-12 h-12 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center shrink-0 border border-slate-100 font-bold">6</div>
                           <div className="flex-1">
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tiểu sử</h4>
-                            <p className="text-sm font-medium text-slate-600 italic">"{userData?.profile?.bio || 'Chưa thiết lập châm ngôn...'}"</p>
+                            <h4 className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Tiểu sử</h4>
+                            <p className="font-body text-sm font-medium text-slate-600 italic">"{userData?.profile?.bio || 'Chưa thiết lập châm ngôn...'}"</p>
                           </div>
                         </div>
                       </div>
@@ -557,15 +557,15 @@ const Profile = () => {
                       <div className="p-2 bg-[#e4f2f0] rounded-xl border border-[#274dad]/10">
                         <TrendingUp className="w-5 h-5 text-[#274dad]" />
                       </div>
-                      <h3 className="text-xl font-black text-[#1E293B]">Tiến độ giải mã khoa học</h3>
+                      <h3 className="font-heading text-xl font-extrabold text-[#1E293B]">Tiến độ giải mã khoa học</h3>
                     </div>
 
                     <div className="space-y-10">
                       {calculateProgressByLevel(completedLessonIds).map((lvl, idx) => (
                         <div key={idx} className="relative">
                           <div className="flex justify-between items-end mb-3">
-                            <span className="font-black text-sm text-[#1E293B] uppercase tracking-tight">{lvl.name}</span>
-                            <span className="text-sm font-black text-[#274dad]">{lvl.percentage}% ({lvl.completed}/{lvl.total})</span>
+                            <span className="font-heading font-extrabold text-sm text-[#1E293B] uppercase tracking-tight">{lvl.name}</span>
+                            <span className="font-heading text-sm font-extrabold text-[#274dad]">{lvl.percentage}% ({lvl.completed}/{lvl.total})</span>
                           </div>
                           <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                             <div
@@ -601,14 +601,14 @@ const Profile = () => {
                             }`}>
                             {isUnlocked ? ach.icon : <Lock className="w-7 h-7" />}
                           </div>
-                          <h4 className={`font-black tracking-tight text-sm mb-1 ${isUnlocked ? 'text-[#1E293B]' : 'text-slate-400'}`}>
+                          <h4 className="font-heading font-extrabold tracking-tight text-sm mb-1 text-slate-800">
                             {ach.title}
                           </h4>
-                          <p className="text-[10px] text-slate-500 font-medium leading-tight mb-2">
+                          <p className="font-body text-[10px] text-slate-500 font-medium leading-tight mb-2">
                             {ach.description}
                           </p>
                           {isUnlocked && (
-                            <span className="text-[8px] font-black text-emerald-500 tracking-widest uppercase mt-auto">
+                            <span className="font-heading text-[8px] font-extrabold text-emerald-500 tracking-widest uppercase mt-auto">
                               {new Date(ach.unlockedAt).toLocaleDateString('vi-VN')}
                             </span>
                           )}
@@ -630,18 +630,18 @@ const Profile = () => {
                           {act.type === 'lesson' ? <BookOpen className="w-6 h-6" /> : act.type === 'achievement' ? <Trophy className="w-6 h-6" /> : <Swords className="w-6 h-6" />}
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-black text-[#1E293B] text-lg leading-tight mb-1">{act.title}</h4>
-                          <p className="text-sm font-medium text-slate-500">{act.detail}</p>
+                          <h4 className="font-heading font-extrabold text-[#1E293B] text-lg leading-tight mb-1">{act.title}</h4>
+                          <p className="font-body text-sm font-medium text-slate-500">{act.detail}</p>
                         </div>
                         <div className="sm:text-right flex sm:flex-col justify-between items-center sm:items-end gap-1">
-                          <span className="text-emerald-600 font-black text-xl">+{act.xp} XP</span>
-                          <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{getRelativeTime(act.time)}</span>
+                          <span className="font-heading font-extrabold text-xl text-emerald-600">+{act.xp} XP</span>
+                          <span className="font-heading text-[10px] font-extrabold text-slate-300 uppercase tracking-widest">{getRelativeTime(act.time)}</span>
                         </div>
                       </div>
                     )) : (
                       <div className="text-center py-20 text-slate-400">
                         <Clock className="w-16 h-16 mx-auto mb-4 opacity-10" />
-                        <p className="font-bold">Chưa có dấu vết hành trình tại đây.</p>
+                        <p className="font-body font-bold">Chưa có dấu vết hành trình tại đây.</p>
                       </div>
                     )}
                   </div>
@@ -661,8 +661,8 @@ const Profile = () => {
                     <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-100">
                       <Users className="w-10 h-10" />
                     </div>
-                    <h3 className="text-2xl font-black text-[#1E293B] mb-3">Sảnh Danh Vọng Đấu Trường</h3>
-                    <p className="text-slate-500 max-w-md mx-auto font-medium">Lịch sử giao đấu chi tiết đang được đồng bộ hóa từ máy chủ trung tâm.</p>
+                    <h3 className="font-heading text-2xl font-extrabold text-[#1E293B] mb-3">Sảnh Danh Vọng Đấu Trường</h3>
+                    <p className="font-body text-slate-500 max-w-md mx-auto font-medium">Lịch sử giao đấu chi tiết đang được đồng bộ hóa từ máy chủ trung tâm.</p>
                   </div>
                 </div>
               )}
@@ -684,9 +684,9 @@ const StatCardAcademic = ({ icon, value, label, subtext, color }) => (
       </div>
     </div>
     <div>
-      <div className="text-3xl font-black text-[#1E293B] tracking-tight">{value}</div>
-      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{label}</div>
-      {subtext && <div className="text-[10px] text-[#274dad] mt-2 font-bold">{subtext}</div>}
+      <div className="font-heading text-3xl font-extrabold text-[#1E293B] tracking-tight">{value}</div>
+      <div className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mt-1">{label}</div>
+      {subtext && <div className="font-heading text-[10px] text-[#274dad] mt-2 font-bold">{subtext}</div>}
     </div>
   </div>
 );

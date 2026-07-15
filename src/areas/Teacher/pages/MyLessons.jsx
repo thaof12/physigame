@@ -230,12 +230,12 @@ const MyLessons = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900">Bài học của tôi</h1>
-          <p className="text-slate-500 font-bold text-sm mt-1">Quản lý các bài học bạn đã tạo</p>
+          <h1 className="font-heading text-3xl font-extrabold text-slate-900">Bài học của tôi</h1>
+          <p className="font-body text-slate-500 font-bold text-sm mt-1">Quản lý các bài học bạn đã tạo</p>
         </div>
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:brightness-110 text-white text-sm font-black rounded-[1.25rem] shadow-xl shadow-indigo-500/20 transition-all uppercase tracking-widest"
+          className="font-heading flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:brightness-110 text-white text-sm font-extrabold rounded-[1.25rem] shadow-xl shadow-indigo-500/20 transition-all uppercase tracking-widest"
         >
           <Plus className="w-5 h-5" />
           Tạo bài học mới
@@ -251,13 +251,13 @@ const MyLessons = () => {
             placeholder="Tìm kiếm bài học..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+            className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
           />
         </div>
         <select
           value={filterGrade}
           onChange={(e) => setFilterGrade(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+          className="font-body bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
         >
           <option value="all">Tất cả lớp</option>
           {[6, 7, 8, 9, 10, 11, 12].map(grade => (
@@ -267,7 +267,7 @@ const MyLessons = () => {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+          className="font-body bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
         >
           <option value="all">Tất cả trạng thái</option>
           <option value="published">Đã xuất bản</option>
@@ -281,13 +281,13 @@ const MyLessons = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-100">
-                <th className="text-left py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Bài học</th>
-                <th className="text-left py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Lớp</th>
-                <th className="text-left py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Chương</th>
-                <th className="text-center py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Lượt xem</th>
-                <th className="text-center py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Học sinh</th>
-                <th className="text-center py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Trạng thái</th>
-                <th className="text-right py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Thao tác</th>
+                <th className="font-heading text-left py-4 px-6 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Bài học</th>
+                <th className="font-heading text-left py-4 px-6 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Lớp</th>
+                <th className="font-heading text-left py-4 px-6 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Chương</th>
+                <th className="font-heading text-center py-4 px-6 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Lượt xem</th>
+                <th className="font-heading text-center py-4 px-6 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Học sinh</th>
+                <th className="font-heading text-center py-4 px-6 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Trạng thái</th>
+                <th className="font-heading text-right py-4 px-6 text-xs font-extrabold text-slate-400 uppercase tracking-wider">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -299,35 +299,35 @@ const MyLessons = () => {
                 >
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/10">
+                       <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/10">
                         <BookOpen className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-800">{lesson.title}</p>
-                        <p className="text-xs text-slate-400 font-medium">Cập nhật: {lesson.created_at ? new Date(lesson.created_at).toLocaleDateString('vi-VN') : 'Mới đây'}</p>
+                        <p className="font-heading text-sm font-extrabold text-slate-800">{lesson.title}</p>
+                        <p className="font-body text-xs text-slate-400 font-medium">Cập nhật: {lesson.created_at ? new Date(lesson.created_at).toLocaleDateString('vi-VN') : 'Mới đây'}</p>
                       </div>
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className="text-sm text-slate-600 font-bold">Lớp {lesson.class_id || lesson.grade || 10}</span>
+                    <span className="font-body text-sm text-slate-600 font-bold">Lớp {lesson.class_id || lesson.grade || 10}</span>
                   </td>
                   <td className="py-4 px-6">
-                    <span className="text-sm text-slate-600 font-medium">{lesson.chapter_id ? `Chương ${lesson.chapter_id}` : (lesson.chapter || 'Tổng quan')}</span>
+                    <span className="font-body text-sm text-slate-600 font-medium">{lesson.chapter_id ? `Chương ${lesson.chapter_id}` : (lesson.chapter || 'Tổng quan')}</span>
                   </td>
                   <td className="py-4 px-6 text-center" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-center gap-1.5 text-slate-500 font-bold">
+                    <div className="font-body flex items-center justify-center gap-1.5 text-slate-500 font-bold">
                       <Eye className="w-4 h-4 text-slate-400" />
                       <span className="text-sm">{lesson.views || 0}</span>
                     </div>
                   </td>
                   <td className="py-4 px-6 text-center" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-center gap-1.5 text-slate-500 font-bold">
+                    <div className="font-body flex items-center justify-center gap-1.5 text-slate-500 font-bold">
                       <Users className="w-4 h-4 text-slate-400" />
                       <span className="text-sm">{lesson.students_count || lesson.students || 0}</span>
                     </div>
                   </td>
                   <td className="py-4 px-6 text-center" onClick={(e) => e.stopPropagation()}>
-                    <span className={`inline-block px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider ${
+                    <span className={`font-heading inline-block px-3 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wider ${
                       lesson.status === 'published'
                         ? 'bg-emerald-50 text-emerald-600'
                         : 'bg-indigo-50 text-indigo-600'
@@ -362,10 +362,10 @@ const MyLessons = () => {
         {filteredLessons.length === 0 && (
           <div className="py-16 text-center">
             <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-400 font-bold">Không tìm thấy bài học nào</p>
+            <p className="font-body text-slate-400 font-bold">Không tìm thấy bài học nào</p>
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="mt-4 text-indigo-600 hover:text-indigo-700 font-black text-sm flex items-center justify-center gap-1.5 mx-auto hover:underline"
+              className="font-heading mt-4 text-indigo-600 hover:text-indigo-700 font-extrabold text-sm flex items-center justify-center gap-1.5 mx-auto hover:underline"
             >
               + Tạo bài học đầu tiên
             </button>
@@ -384,8 +384,8 @@ const MyLessons = () => {
                   <BookMarked className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">Tạo bài học mới</h3>
-                  <p className="text-xs text-slate-400 font-bold">Thêm tài liệu hoặc bài giảng vào thư viện của bạn</p>
+                  <h3 className="font-heading text-xl font-extrabold text-slate-900">Tạo bài học mới</h3>
+                  <p className="font-body text-xs text-slate-400 font-bold">Thêm tài liệu hoặc bài giảng vào thư viện của bạn</p>
                 </div>
               </div>
               <button 
@@ -402,23 +402,23 @@ const MyLessons = () => {
               {/* Title & Level */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Tên bài học</label>
+                  <label className="font-heading block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2">Tên bài học</label>
                   <input
                     type="text"
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
                     placeholder="Ví dụ: Định luật Vạn vật hấp dẫn"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                    className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Mức độ</label>
+                  <label className="font-heading block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2">Mức độ</label>
                   <select
                     name="level"
                     value={formData.level}
                     onChange={handleInputChange}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                    className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
                   >
                     <option value="Beginner">Cơ bản</option>
                     <option value="Intermediate">Trung bình</option>
@@ -430,12 +430,12 @@ const MyLessons = () => {
               {/* Class & Chapter */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Lớp</label>
+                  <label className="font-heading block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2">Lớp</label>
                   <select
                     name="class_id"
                     value={formData.class_id}
                     onChange={handleInputChange}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                    className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
                   >
                     {[6, 7, 8, 9, 10, 11, 12].map(grade => (
                       <option key={grade} value={grade}>Lớp {grade}</option>
@@ -443,39 +443,39 @@ const MyLessons = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Chương (số thứ tự)</label>
+                  <label className="font-heading block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2">Chương (số thứ tự)</label>
                   <input
                     type="number"
                     name="chapter_id"
                     value={formData.chapter_id}
                     onChange={handleInputChange}
                     min="1"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                    className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
                   />
                 </div>
               </div>
 
               {/* Short Description */}
               <div>
-                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Mô tả ngắn</label>
+                <label className="font-heading block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2">Mô tả ngắn</label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   rows="2"
                   placeholder="Nhập mô tả ngắn gọn về nội dung bài học..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                  className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
                 />
               </div>
 
               {/* Creation Method Tabs */}
               <div className="space-y-4">
-                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">Hình thức soạn thảo</label>
+                <label className="font-heading block text-xs font-extrabold text-slate-500 uppercase tracking-widest">Hình thức soạn thảo</label>
                 <div className="flex border border-slate-100 p-1.5 rounded-2xl bg-slate-50 gap-1">
                   <button
                     type="button"
                     onClick={() => setCreateTab('manual')}
-                    className={`flex-1 py-3 text-xs font-black rounded-xl transition-all ${
+                    className={`font-heading flex-1 py-3 text-xs font-extrabold rounded-xl transition-all ${
                       createTab === 'manual'
                         ? 'bg-white text-indigo-600 shadow-sm border border-slate-100'
                         : 'text-slate-500 hover:text-slate-700'
@@ -486,7 +486,7 @@ const MyLessons = () => {
                   <button
                     type="button"
                     onClick={() => setCreateTab('link')}
-                    className={`flex-1 py-3 text-xs font-black rounded-xl transition-all ${
+                    className={`font-heading flex-1 py-3 text-xs font-extrabold rounded-xl transition-all ${
                       createTab === 'link'
                         ? 'bg-white text-indigo-600 shadow-sm border border-slate-100'
                         : 'text-slate-500 hover:text-slate-700'
@@ -497,7 +497,7 @@ const MyLessons = () => {
                   <button
                     type="button"
                     onClick={() => setCreateTab('upload')}
-                    className={`flex-1 py-3 text-xs font-black rounded-xl transition-all ${
+                    className={`font-heading flex-1 py-3 text-xs font-extrabold rounded-xl transition-all ${
                       createTab === 'upload'
                         ? 'bg-white text-indigo-600 shadow-sm border border-slate-100'
                         : 'text-slate-500 hover:text-slate-700'
@@ -515,7 +515,7 @@ const MyLessons = () => {
                       onChange={handleInputChange}
                       rows="6"
                       placeholder="Viết nội dung lý thuyết bài học tại đây (Hỗ trợ Markdown)..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-medium leading-relaxed"
+                      className="font-body w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-medium leading-relaxed"
                     />
                   </div>
                 )}
@@ -528,9 +528,9 @@ const MyLessons = () => {
                       value={formData.link}
                       onChange={handleInputChange}
                       placeholder="Nhập link Google Drive, link PDF, link Word..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                      className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
                     />
-                    <p className="text-[10px] text-slate-400 font-bold mt-2 ml-1">
+                    <p className="font-body text-[10px] text-slate-400 font-bold mt-2 ml-1">
                       Mẹo: Nhập link Google Drive ở chế độ chia sẻ công khai ("Bất kỳ ai có liên kết đều có thể xem") để có thể xem trước tài liệu trực tiếp.
                     </p>
                   </div>
@@ -547,8 +547,8 @@ const MyLessons = () => {
                            className="absolute inset-0 opacity-0 cursor-pointer"
                         />
                         <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3 group-hover:text-indigo-500 transition-colors" />
-                        <p className="text-sm font-bold text-slate-700">Kéo thả hoặc nhấn để chọn tệp tải lên</p>
-                        <p className="text-xs text-slate-400 font-medium mt-1">Hỗ trợ PDF, Word, PowerPoint, Hình ảnh lên tới 20MB</p>
+                        <p className="font-body text-sm font-bold text-slate-700">Kéo thả hoặc nhấn để chọn tệp tải lên</p>
+                        <p className="font-body text-xs text-slate-400 font-medium mt-1">Hỗ trợ PDF, Word, PowerPoint, Hình ảnh lên tới 20MB</p>
                       </div>
                     ) : (
                       <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl">
@@ -561,8 +561,8 @@ const MyLessons = () => {
                             )}
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-slate-800 truncate max-w-[320px]">{uploadedFile.name}</p>
-                            <p className="text-xs text-slate-400 font-bold">
+                            <p className="font-body text-sm font-bold text-slate-800 truncate max-w-[320px]">{uploadedFile.name}</p>
+                            <p className="font-body text-xs text-slate-400 font-bold">
                               {isUploading ? `Đang tải lên: ${uploadProgress}%` : uploadedFile.size}
                             </p>
                           </div>
@@ -583,8 +583,8 @@ const MyLessons = () => {
               {/* Status Toggle */}
               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <div>
-                  <p className="text-sm font-bold text-slate-800">Xuất bản bài học ngay</p>
-                  <p className="text-xs text-slate-400 font-medium">Học sinh có thể xem bài học này ngay lập tức nếu được xuất bản</p>
+                  <p className="font-heading text-sm font-extrabold text-slate-800">Xuất bản bài học ngay</p>
+                  <p className="font-body text-xs text-slate-400 font-medium">Học sinh có thể xem bài học này ngay lập tức nếu được xuất bản</p>
                 </div>
                 <button
                   type="button"
@@ -604,14 +604,14 @@ const MyLessons = () => {
                 <button
                   type="button"
                   onClick={() => { setIsCreateOpen(false); resetForm(); }}
-                  className="px-6 py-3 border border-slate-200 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-50 text-sm font-black transition-all"
+                  className="font-heading px-6 py-3 border border-slate-200 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-50 text-sm font-extrabold transition-all"
                 >
                   Hủy bỏ
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || isUploading}
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl text-sm font-black hover:brightness-110 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50"
+                  className="font-heading flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl text-sm font-extrabold hover:brightness-110 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50"
                 >
                   {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                   Tạo bài học
@@ -633,15 +633,15 @@ const MyLessons = () => {
                   <BookOpen className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">{selectedLesson.title}</h3>
+                  <h3 className="font-heading text-xl font-extrabold text-slate-900">{selectedLesson.title}</h3>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="px-2 py-0.5 bg-indigo-50 text-[#4f46e5] text-[10px] font-black uppercase tracking-wider rounded">
+                    <span className="font-heading px-2 py-0.5 bg-indigo-50 text-[#4f46e5] text-[10px] font-extrabold uppercase tracking-wider rounded">
                       Lớp {selectedLesson.class_id || selectedLesson.grade}
                     </span>
-                    <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-wider rounded">
+                    <span className="font-heading px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-extrabold uppercase tracking-wider rounded">
                       Chương {selectedLesson.chapter_id || selectedLesson.chapter}
                     </span>
-                    <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded ${
+                    <span className={`font-heading px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded ${
                       selectedLesson.level === 'Advanced' 
                         ? 'bg-rose-50 text-rose-600' 
                         : selectedLesson.level === 'Intermediate'
@@ -666,16 +666,16 @@ const MyLessons = () => {
               {/* Info Stats Row */}
               <div className="grid grid-cols-3 gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100/50">
                 <div className="text-center">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Lượt xem</p>
-                  <p className="text-lg font-black text-slate-800">{selectedLesson.views || 0}</p>
+                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Lượt xem</p>
+                  <p className="font-heading text-lg font-extrabold text-slate-800">{selectedLesson.views || 0}</p>
                 </div>
                 <div className="text-center border-x border-slate-200">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Học sinh hoàn thành</p>
-                  <p className="text-lg font-black text-slate-800">{selectedLesson.students_count || selectedLesson.students || 0}</p>
+                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Học sinh hoàn thành</p>
+                  <p className="font-heading text-lg font-extrabold text-slate-800">{selectedLesson.students_count || selectedLesson.students || 0}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Trạng thái</p>
-                  <span className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider mt-1 ${
+                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Trạng thái</p>
+                  <span className={`font-heading inline-block px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider mt-1 ${
                     selectedLesson.status === 'published'
                       ? 'bg-emerald-50 text-emerald-600'
                       : 'bg-indigo-50 text-indigo-600'
@@ -688,8 +688,8 @@ const MyLessons = () => {
               {/* Description */}
               {selectedLesson.description && (
                 <div className="space-y-2">
-                  <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest">Mô tả bài học</h4>
-                  <p className="text-sm font-bold text-slate-700 bg-slate-50/50 p-4 rounded-xl border border-slate-100/30 leading-relaxed">
+                  <h4 className="font-heading text-xs font-extrabold text-slate-500 uppercase tracking-widest">Mô tả bài học</h4>
+                  <p className="font-body text-sm font-bold text-slate-700 bg-slate-50/50 p-4 rounded-xl border border-slate-100/30 leading-relaxed">
                     {selectedLesson.description}
                   </p>
                 </div>
@@ -697,11 +697,11 @@ const MyLessons = () => {
 
               {/* Lesson Theory Content */}
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest">Nội dung bài giảng</h4>
+                <h4 className="font-heading text-xs font-extrabold text-slate-500 uppercase tracking-widest">Nội dung bài giảng</h4>
                 
                 {selectedLesson.theory && (selectedLesson.theory.startsWith('http://') || selectedLesson.theory.startsWith('https://')) ? (
                   <div className="space-y-3">
-                    <div className="bg-amber-50 border border-amber-200/60 rounded-xl p-3 text-[11px] text-amber-800 font-medium leading-relaxed flex items-start gap-2">
+                    <div className="font-body bg-amber-50 border border-amber-200/60 rounded-xl p-3 text-[11px] text-amber-800 font-medium leading-relaxed flex items-start gap-2">
                       <span className="text-base select-none mt-0.5">💡</span>
                       <div>
                         <strong>Lưu ý về tài liệu:</strong> Để xem trực tiếp, tệp Google Drive cần được chia sẻ ở chế độ công khai <strong>"Bất kỳ ai có liên kết đều có thể xem"</strong>. Nếu bạn thấy thông báo "Tệp không tồn tại", đây có thể là liên kết giả lập hoặc quyền truy cập của tệp bị hạn chế.
@@ -717,7 +717,7 @@ const MyLessons = () => {
                     </div>
                     <button
                       onClick={() => window.open(selectedLesson.theory, '_blank')}
-                      className="w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-black rounded-xl text-sm flex items-center justify-center gap-2 transition-all border border-indigo-100/50"
+                      className="font-heading w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold rounded-xl text-sm flex items-center justify-center gap-2 transition-all border border-indigo-100/50"
                     >
                       <ExternalLink className="w-4 h-4" />
                       Mở tài liệu trong tab mới
@@ -731,14 +731,14 @@ const MyLessons = () => {
                         <FileText className="w-6 h-6" />
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-800">{selectedLesson.content}</p>
-                        <p className="text-xs text-slate-400 font-bold">Tài liệu bài giảng trực quan</p>
+                        <p className="font-heading text-sm font-extrabold text-slate-800">{selectedLesson.content}</p>
+                        <p className="font-body text-xs text-slate-400 font-bold">Tài liệu bài giảng trực quan</p>
                       </div>
                     </div>
                     <a 
                       href="#" 
                       onClick={(e) => { e.preventDefault(); alert('Tải xuống tài liệu: ' + selectedLesson.content); }}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black hover:bg-indigo-700 transition-colors shadow-sm"
+                      className="font-heading px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-extrabold hover:bg-indigo-700 transition-colors shadow-sm"
                     >
                       Tải xuống
                     </a>
@@ -747,9 +747,9 @@ const MyLessons = () => {
                   /* Render text theory description */
                   <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 leading-relaxed max-h-[300px] overflow-y-auto scrollbar-thin">
                     {selectedLesson.theory ? (
-                      <p className="text-sm font-medium text-slate-700 whitespace-pre-wrap">{selectedLesson.theory}</p>
+                      <p className="font-body text-sm font-medium text-slate-700 whitespace-pre-wrap">{selectedLesson.theory}</p>
                     ) : (
-                      <p className="text-sm italic text-slate-400 text-center py-4">Không có chi tiết nội dung lý thuyết cho bài học này.</p>
+                      <p className="font-body text-sm italic text-slate-400 text-center py-4">Không có chi tiết nội dung lý thuyết cho bài học này.</p>
                     )}
                   </div>
                 )}
@@ -758,14 +758,14 @@ const MyLessons = () => {
 
             {/* Modal Footer */}
             <div className="flex items-center justify-between px-8 py-6 border-t border-slate-100 bg-slate-50/50">
-              <span className="text-xs text-slate-400 font-bold">
+              <span className="font-body text-xs text-slate-400 font-bold">
                 Tạo lúc: {selectedLesson.created_at ? new Date(selectedLesson.created_at).toLocaleString('vi-VN') : 'Không rõ'}
               </span>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => handleDeleteLesson(selectedLesson.id)}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-black hover:bg-rose-100 transition-colors border border-rose-100/50"
+                  className="font-heading flex items-center gap-1.5 px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-extrabold hover:bg-rose-100 transition-colors border border-rose-100/50"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Xóa bài học
@@ -773,7 +773,7 @@ const MyLessons = () => {
                 <button
                   type="button"
                   onClick={() => setSelectedLesson(null)}
-                  className="px-5 py-2 bg-slate-800 text-white rounded-xl text-xs font-black hover:bg-slate-900 transition-colors shadow-sm"
+                  className="font-heading px-5 py-2 bg-slate-800 text-white rounded-xl text-xs font-extrabold hover:bg-slate-900 transition-colors shadow-sm"
                 >
                   Đóng lại
                 </button>

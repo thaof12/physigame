@@ -153,8 +153,8 @@ const TeacherProfile = () => {
     <div className="space-y-6 max-w-3xl">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-black text-slate-900">Hồ sơ cá nhân</h1>
-        <p className="text-slate-500 font-bold text-sm mt-1">Quản lý thông tin tài khoản giáo viên của bạn</p>
+        <h1 className="font-heading text-3xl font-extrabold text-slate-900">Hồ sơ cá nhân</h1>
+        <p className="font-body text-slate-500 font-bold text-sm mt-1">Quản lý thông tin tài khoản giáo viên của bạn</p>
       </div>
 
       {/* Avatar Section */}
@@ -165,7 +165,7 @@ const TeacherProfile = () => {
               {teacher?.avatar ? (
                 <img src={teacher.avatar} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-3xl font-black text-white">
+                <span className="font-heading text-3xl font-extrabold text-white">
                   {(teacher?.displayName || teacher?.display_name)?.[0] || 'T'}
                 </span>
               )}
@@ -186,10 +186,10 @@ const TeacherProfile = () => {
             </button>
           </div>
           <div>
-            <h2 className="text-2xl font-black text-slate-900">{teacher?.displayName || teacher?.display_name}</h2>
-            <p className="text-slate-400 font-bold text-sm mt-0.5">{teacher?.email}</p>
+            <h2 className="font-heading text-2xl font-extrabold text-slate-900">{teacher?.displayName || teacher?.display_name}</h2>
+            <p className="font-body text-slate-400 font-bold text-sm mt-0.5">{teacher?.email}</p>
             <div className="flex items-center gap-2 mt-2">
-              <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5">
+              <span className="font-heading px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-extrabold uppercase tracking-wider rounded-lg flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5" />
                 Giáo viên đã xác minh
               </span>
@@ -201,14 +201,14 @@ const TeacherProfile = () => {
       {/* Profile Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm">
-          <h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+          <h3 className="font-heading text-lg font-extrabold text-slate-900 mb-6 flex items-center gap-2">
             <User className="w-5 h-5 text-indigo-600" />
             Thông tin cơ bản
           </h3>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
+              <label className="font-heading block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                 Họ và tên
               </label>
               <input
@@ -216,12 +216,12 @@ const TeacherProfile = () => {
                 name="displayName"
                 value={formData.displayName}
                 onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
+              <label className="font-heading block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                 Email
               </label>
               <input
@@ -229,13 +229,13 @@ const TeacherProfile = () => {
                 name="email"
                 value={formData.email}
                 disabled
-                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-slate-400 cursor-not-allowed font-bold"
+                className="font-body w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-slate-400 cursor-not-allowed font-bold"
               />
-              <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wide">Email không thể thay đổi</p>
+              <p className="font-heading text-[10px] text-slate-400 font-extrabold mt-1 uppercase tracking-wide">Email không thể thay đổi</p>
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
+              <label className="font-heading block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                 Giới thiệu bản thân
               </label>
               <textarea
@@ -244,21 +244,21 @@ const TeacherProfile = () => {
                 onChange={handleChange}
                 rows={3}
                 placeholder="Viết vài dòng giới thiệu về bạn..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold resize-none"
+                className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold resize-none"
               />
             </div>
           </div>
         </div>
 
         <div className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm">
-          <h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+          <h3 className="font-heading text-lg font-extrabold text-slate-900 mb-6 flex items-center gap-2">
             <Building className="w-5 h-5 text-indigo-600" />
             Thông tin giảng dạy
           </h3>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
+              <label className="font-heading block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                 Trường đang giảng dạy
               </label>
               <input
@@ -267,19 +267,19 @@ const TeacherProfile = () => {
                 value={formData.school}
                 onChange={handleChange}
                 placeholder="VD: THPT Nguyễn Huệ"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
+              <label className="font-heading block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                 Môn giảng dạy
               </label>
               <select
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
               >
                 <option value="">-- Chọn môn --</option>
                 {subjects.map(subject => (
@@ -289,7 +289,7 @@ const TeacherProfile = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
+              <label className="font-heading block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                 Lớp giảng dạy
               </label>
               <div className="flex flex-wrap gap-2">
@@ -298,9 +298,9 @@ const TeacherProfile = () => {
                     key={grade}
                     type="button"
                     onClick={() => handleGradeToggle(grade)}
-                    className={`px-4 py-2 rounded-xl text-sm transition-all ${
+                    className={`font-heading px-4 py-2 rounded-xl text-sm transition-all ${
                       formData.teachingGrades.includes(grade)
-                        ? 'bg-indigo-600 text-white font-black shadow-md shadow-indigo-500/15 border border-indigo-600'
+                        ? 'bg-indigo-600 text-white font-extrabold shadow-md shadow-indigo-500/15 border border-indigo-600'
                         : 'bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200 font-bold'
                     }`}
                   >
@@ -315,7 +315,7 @@ const TeacherProfile = () => {
         {/* Save Button */}
         <div className="flex items-center justify-end gap-4">
           {saved && (
-            <span className="flex items-center gap-2 text-emerald-600 font-black text-sm">
+            <span className="font-heading flex items-center gap-2 text-emerald-600 font-extrabold text-sm">
               <CheckCircle className="w-4 h-4" />
               Đã lưu thay đổi
             </span>
@@ -323,7 +323,7 @@ const TeacherProfile = () => {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:brightness-110 text-white text-sm font-black rounded-[1.25rem] shadow-xl shadow-indigo-500/20 transition-all uppercase tracking-widest disabled:opacity-50"
+            className="font-heading flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:brightness-110 text-white text-sm font-extrabold rounded-[1.25rem] shadow-xl shadow-indigo-500/20 transition-all uppercase tracking-widest disabled:opacity-50"
           >
             {saving ? (
               <>

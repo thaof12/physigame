@@ -78,7 +78,7 @@ const ConstantsReference = () => {
   }, [filteredConstants]);
 
   return (
-    <div className="bg-[#FFFFFF] font-sans min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728] relative overflow-hidden perspective-1000">
+    <div className="bg-[#FFFFFF] font-body min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728] relative overflow-hidden perspective-1000">
       {/* Background Ambience */}
       <div className="absolute inset-0 graph-grid opacity-[0.25] pointer-events-none" />
       <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#274dad]/10" />
@@ -117,11 +117,11 @@ const ConstantsReference = () => {
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </button>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-[#1E293B] tracking-tight flex items-center gap-3">
+              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight flex items-center gap-3">
                 <BookOpen className="w-8 h-8 text-[#274dad]" />
                 Tra Cứu Hằng Số Vật Lý
               </h1>
-              <p className="text-slate-500 font-medium mt-1">
+              <p className="font-body text-slate-500 font-medium mt-1">
                 Lưu trữ định mức và trị số chuẩn quốc tế
               </p>
             </div>
@@ -143,7 +143,7 @@ const ConstantsReference = () => {
           <div className="grid md:grid-cols-2 gap-6 relative z-30">
             {/* Search */}
             <div className="relative">
-              <label className="flex items-center gap-2 text-xs font-black text-slate-400 tracking-[0.1em] uppercase mb-2">
+              <label className="font-heading flex items-center gap-2 text-xs font-extrabold text-slate-400 tracking-[0.1em] uppercase mb-2">
                 <Search className="w-3 h-3" /> Tìm Kiếm Hằng Số
               </label>
               <div className="relative group-focus-within/search">
@@ -160,7 +160,7 @@ const ConstantsReference = () => {
 
             {/* Category Filter */}
             <div className="relative">
-              <label className="flex items-center gap-2 text-xs font-black text-slate-400 tracking-[0.1em] uppercase mb-2">
+              <label className="font-heading flex items-center gap-2 text-xs font-extrabold text-slate-400 tracking-[0.1em] uppercase mb-2">
                 Danh Mục Hằng Số
               </label>
               <div className="relative" ref={dropdownRef}>
@@ -209,7 +209,7 @@ const ConstantsReference = () => {
           </div>
 
           {/* Quick stats */}
-          <div className="mt-6 flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500 bg-[#1E293B] p-4 rounded-xl border border-white/10 relative z-10 shadow-inner">
+          <div className="font-body mt-6 flex flex-wrap items-center gap-4 text-sm font-medium text-slate-500 bg-[#1E293B] p-4 rounded-xl border border-white/10 relative z-10 shadow-inner">
             <span className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22C55E]" />
               <span className="text-slate-300">Tìm thấy:</span>
@@ -235,7 +235,7 @@ const ConstantsReference = () => {
                   <div className="p-3 bg-[#1E293B] rounded-xl shadow-lg border border-[#274dad]/30 shrink-0">
                     <Star className="w-6 h-6 text-[#44b5d7]" />
                   </div>
-                  <h2 className="text-2xl font-black text-[#1E293B] tracking-tight uppercase">
+                  <h2 className="font-heading text-2xl font-extrabold text-[#1E293B] tracking-tight uppercase">
                     {category}
                   </h2>
                   <div className="flex-1 h-[2px] bg-gradient-to-r from-[#274dad]/50 to-transparent ml-4" />
@@ -274,10 +274,10 @@ const ConstantsReference = () => {
           <div className="bg-white rounded-[2rem] border-2 border-[#E5E7EB] p-16 text-center flex flex-col items-center justify-center relative overflow-hidden backdrop-blur-md">
             <div className="absolute inset-0 bg-[#e4f2f0] opacity-50 graph-grid" />
             <Scan className="w-20 h-20 text-slate-300 mb-6 relative z-10" />
-            <p className="text-2xl font-black text-[#1E293B] tracking-tight relative z-10">
+            <p className="font-heading text-2xl font-extrabold text-[#1E293B] tracking-tight relative z-10">
               Không tìm thấy tín hiệu
             </p>
-            <p className="text-slate-500 mt-2 font-medium relative z-10">Vòng quét radar không thu được kết quả. Vui lòng mở rộng băng tần tìm kiếm.</p>
+            <p className="font-body text-slate-500 mt-2 font-medium relative z-10">Vui lòng mở rộng băng tần tìm kiếm.</p>
           </div>
         )}
       </div>
@@ -295,10 +295,10 @@ const ConstantCard = ({ constant, onCopy, copied, formatScientific }) => {
 
       <div className="flex items-start justify-between mb-6 relative z-10 transform translate-z-[20px]">
         <div className="flex-1 pr-4">
-          <span className="inline-block px-3 py-1 text-[10px] font-black tracking-widest uppercase bg-[#1E293B] border border-black/20 text-[#44b5d7] rounded-full mb-3 shadow-inner">
+          <span className="font-heading inline-block px-3 py-1 text-[10px] font-extrabold tracking-widest uppercase bg-[#1E293B] border border-black/20 text-[#44b5d7] rounded-full mb-3 shadow-inner">
             {constant.category}
           </span>
-          <h3 className="text-xl font-bold text-[#1E293B] leading-tight drop-shadow-sm">
+          <h3 className="font-heading text-xl font-bold text-[#1E293B] leading-tight drop-shadow-sm">
             {constant.name}
           </h3>
         </div>
@@ -319,7 +319,7 @@ const ConstantCard = ({ constant, onCopy, copied, formatScientific }) => {
         <div className="grid grid-cols-3 gap-0 bg-[#FFFFFF] border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-inner group-hover:border-[#274dad]/20 transition-colors">
           {/* Symbol */}
           <div className="col-span-1 p-4 bg-white/50 border-r border-[#E5E7EB] flex flex-col items-center justify-center text-center">
-            <p className="text-[9px] font-black tracking-[0.2em] text-slate-400 uppercase mb-2">Đinh danh</p>
+            <p className="font-heading text-[9px] font-extrabold tracking-[0.2em] text-slate-400 uppercase mb-2">Đinh danh</p>
             <p className="text-3xl font-black text-[#2099e9] font-mono leading-none drop-shadow-sm">
               {constant.symbol}
             </p>
@@ -328,7 +328,7 @@ const ConstantCard = ({ constant, onCopy, copied, formatScientific }) => {
           {/* Value (Digital terminal screen inside card) */}
           <div className="col-span-2 p-4 bg-[#0F172A] relative overflow-hidden flex flex-col justify-center">
             <div className="absolute inset-0 bg-[#44b5d7]/5 pointer-events-none" />
-            <p className="text-[9px] font-black tracking-[0.2em] text-slate-400 uppercase mb-2 relative z-10">Thông số kỹ trị</p>
+            <p className="font-heading text-[9px] font-extrabold tracking-[0.2em] text-slate-400 uppercase mb-2 relative z-10">Thông số kỹ trị</p>
             <div className="flex items-baseline gap-2 relative z-10 w-full overflow-hidden">
               <p className="text-lg font-mono font-bold text-[#44b5d7] leading-tight truncate">
                 {formatScientific(constant.value)}
@@ -342,7 +342,7 @@ const ConstantCard = ({ constant, onCopy, copied, formatScientific }) => {
 
         {/* Description */}
         <div className="px-2 mt-3 transform translate-z-[5px]">
-          <p className="text-[13px] font-medium text-slate-500 leading-relaxed group-hover:text-slate-600 transition-colors">
+          <p className="font-body text-[13px] font-medium text-slate-500 leading-relaxed group-hover:text-slate-600 transition-colors">
             {constant.description}
           </p>
         </div>

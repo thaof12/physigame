@@ -155,7 +155,7 @@ const AdminStatistics = () => {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-          <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Đang tải dữ liệu...</p>
+          <p className="font-heading text-slate-400 font-extrabold text-sm uppercase tracking-widest">Đang tải dữ liệu...</p>
         </div>
       </div>
     );
@@ -166,14 +166,14 @@ const AdminStatistics = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black text-slate-900">Thống kê hệ thống</h1>
-          <p className="text-slate-500 font-bold text-sm">Dữ liệu thực tế từ Supabase Database</p>
+          <h1 className="font-heading text-3xl font-extrabold text-slate-900">Thống kê hệ thống</h1>
+          <p className="font-body text-slate-500 font-bold text-sm">Dữ liệu thực tế từ Supabase Database</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 font-heading">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-2xl px-6 py-3 text-sm text-slate-700 focus:outline-none font-black uppercase tracking-widest"
+            className="bg-slate-50 border border-slate-200 rounded-2xl px-6 py-3 text-sm text-slate-700 focus:outline-none font-extrabold uppercase tracking-widest"
           >
             <option value="7d">7 ngày qua</option>
             <option value="30d">30 ngày qua</option>
@@ -182,7 +182,7 @@ const AdminStatistics = () => {
           </select>
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-[1.25rem] text-white text-sm font-black shadow-xl shadow-indigo-500/20 hover:brightness-110 transition-all uppercase tracking-widest"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-[1.25rem] text-white text-sm font-extrabold shadow-xl shadow-indigo-500/20 hover:brightness-110 transition-all uppercase tracking-widest"
           >
             <Download className="w-5 h-5" />
             <span>Xuất CSV</span>
@@ -207,9 +207,9 @@ const AdminStatistics = () => {
                 <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4 shadow-lg`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
-                <p className="text-4xl font-black text-slate-900 mb-1">{stat.value}</p>
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                <p className="text-xs text-slate-300 mt-1">{stat.note}</p>
+                <p className="font-heading text-4xl font-extrabold text-slate-900 mb-1">{stat.value}</p>
+                <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                <p className="font-body text-xs text-slate-300 mt-1">{stat.note}</p>
               </div>
             </div>
           );
@@ -222,20 +222,20 @@ const AdminStatistics = () => {
         <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="text-xl font-black text-slate-900">Đăng ký theo tháng</h3>
-              <p className="text-slate-400 text-xs font-bold mt-1">Số người dùng mới tạo tài khoản</p>
+              <h3 className="font-heading text-xl font-extrabold text-slate-900">Đăng ký theo tháng</h3>
+              <p className="font-body text-slate-400 text-xs font-bold mt-1">Số người dùng mới tạo tài khoản</p>
             </div>
             <Activity className="w-6 h-6 text-indigo-500" />
           </div>
           {monthlyData.length === 0 ? (
-            <div className="text-center py-12 text-slate-400 font-bold">Chưa có dữ liệu</div>
+            <div className="font-body text-center py-12 text-slate-400 font-bold">Chưa có dữ liệu</div>
           ) : (
             <div className="space-y-6">
               {monthlyData.map((data, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex justify-between items-end">
-                    <span className="text-sm font-black text-slate-500 uppercase tracking-widest">{data.label}</span>
-                    <div className="flex items-center gap-3 text-xs font-black">
+                    <span className="font-heading text-sm font-extrabold text-slate-500 uppercase tracking-widest">{data.label}</span>
+                    <div className="font-heading flex items-center gap-3 text-xs font-extrabold">
                       <span className="text-emerald-500">{data.students} HS</span>
                       <span className="text-blue-500">{data.teachers} GV</span>
                     </div>
@@ -256,8 +256,8 @@ const AdminStatistics = () => {
         <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="text-xl font-black text-slate-900">Phân loại tài khoản</h3>
-              <p className="text-slate-400 text-xs font-bold mt-1">Tỉ lệ vai trò trong hệ thống</p>
+              <h3 className="font-heading text-xl font-extrabold text-slate-900">Phân loại tài khoản</h3>
+              <p className="font-body text-slate-400 text-xs font-bold mt-1">Tỉ lệ vai trò trong hệ thống</p>
             </div>
             <Target className="w-6 h-6 text-indigo-500" />
           </div>
@@ -271,8 +271,8 @@ const AdminStatistics = () => {
               return (
                 <div key={i} className="space-y-2">
                   <div className="flex justify-between items-end">
-                    <span className="text-sm font-black text-slate-500 uppercase tracking-widest">{item.label}</span>
-                    <span className={`text-sm font-black ${item.textColor}`}>{item.value} người ({pct}%)</span>
+                    <span className="font-heading text-sm font-extrabold text-slate-500 uppercase tracking-widest">{item.label}</span>
+                    <span className={`font-heading text-sm font-extrabold ${item.textColor}`}>{item.value} người ({pct}%)</span>
                   </div>
                   <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
                     <div
@@ -291,8 +291,8 @@ const AdminStatistics = () => {
                   <UserX className="w-5 h-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="font-black text-amber-800 text-sm">Cần phê duyệt</p>
-                  <p className="text-amber-600 text-xs font-bold">{overview.pendingTeachers} giáo viên đang chờ xác nhận tài khoản</p>
+                  <p className="font-heading font-extrabold text-amber-800 text-sm">Cần phê duyệt</p>
+                  <p className="font-body text-amber-600 text-xs font-bold">{overview.pendingTeachers} giáo viên đang chờ xác nhận tài khoản</p>
                 </div>
               </div>
             )}
@@ -304,30 +304,30 @@ const AdminStatistics = () => {
       <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h3 className="text-xl font-black text-slate-900">Bảng xếp hạng học sinh</h3>
-            <p className="text-slate-400 text-xs font-bold mt-1">Xếp hạng theo điểm XP tích lũy thực tế</p>
+            <h3 className="font-heading text-xl font-extrabold text-slate-900">Bảng xếp hạng học sinh</h3>
+            <p className="font-body text-slate-400 text-xs font-bold mt-1">Xếp hạng theo điểm XP tích lũy thực tế</p>
           </div>
           <Award className="w-6 h-6 text-indigo-500" />
         </div>
         {topStudents.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 font-bold">Chưa có dữ liệu học sinh</div>
+          <div className="font-body text-center py-12 text-slate-400 font-bold">Chưa có dữ liệu học sinh</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-100">
-                  <th className="px-6 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Xếp hạng</th>
-                  <th className="px-6 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Học sinh</th>
-                  <th className="px-6 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">XP</th>
-                  <th className="px-6 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Level</th>
-                  <th className="px-6 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Ngày tham gia</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-widest">Xếp hạng</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-widest">Học sinh</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-widest">XP</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-widest">Level</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-widest">Ngày tham gia</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {topStudents.map((student) => (
                   <tr key={student.id} className="hover:bg-slate-50 transition-colors group">
                     <td className="px-6 py-5">
-                      <span className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-black shadow-sm ${
+                      <span className={`font-heading w-10 h-10 flex items-center justify-center rounded-xl text-sm font-extrabold shadow-sm ${
                         student.rank === 1 ? 'bg-amber-50 text-amber-500 border border-amber-100' :
                         student.rank === 2 ? 'bg-slate-50 text-slate-400 border border-slate-200' :
                         student.rank === 3 ? 'bg-orange-50 text-orange-500 border border-orange-100' :
@@ -338,24 +338,24 @@ const AdminStatistics = () => {
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-4">
-                        <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                          <span className="text-white font-black text-sm">{student.name[0].toUpperCase()}</span>
+                        <div className="font-heading w-11 h-11 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                          <span className="text-white font-extrabold text-sm">{student.name[0].toUpperCase()}</span>
                         </div>
-                        <span className="text-base font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{student.name}</span>
+                        <span className="font-heading text-base font-extrabold text-slate-800 group-hover:text-indigo-600 transition-colors">{student.name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <span className={`text-xl font-black ${student.xp > 0 ? 'text-emerald-500' : 'text-slate-300'}`}>
+                      <span className={`font-heading text-xl font-extrabold ${student.xp > 0 ? 'text-emerald-500' : 'text-slate-300'}`}>
                         {student.xp.toLocaleString()}
                       </span>
                     </td>
                     <td className="px-6 py-5">
-                      <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-black">
+                      <span className="font-heading px-3 py-1 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-extrabold">
                         Lv.{student.level}
                       </span>
                     </td>
                     <td className="px-6 py-5">
-                      <span className="text-sm font-bold text-slate-400">{student.joinDate}</span>
+                      <span className="font-body text-sm font-bold text-slate-400">{student.joinDate}</span>
                     </td>
                   </tr>
                 ))}

@@ -202,8 +202,8 @@ const AppContent = () => {
           <Route path="/physics-class/:classId" element={<ProtectedRoute><PhysicsClassDashboard /></ProtectedRoute>} />
           <Route path="/physics-lesson/:classId/:chapterId/:lessonId" element={<ProtectedRoute><PhysicsLesson /></ProtectedRoute>} />
 
-          {/* Physics Tools Hub */}
-          <Route path="/physics-tools" element={<ProtectedRoute><PhysicsToolsHub /></ProtectedRoute>} />
+          {/* Physics Tools - redirect hub to calculator */}
+          <Route path="/physics-tools" element={<Navigate to="/physics-tools/calculator" replace />} />
           <Route path="/physics-tools/calculator" element={<ProtectedRoute><PhysicsCalculator /></ProtectedRoute>} />
           <Route path="/physics-tools/constants" element={<ProtectedRoute><ConstantsReference /></ProtectedRoute>} />
           <Route path="/physics-tools/converter" element={<ProtectedRoute><UnitConverter /></ProtectedRoute>} />
@@ -214,8 +214,8 @@ const AppContent = () => {
           <Route path="/interactive-lectures/:subject/:grade" element={<ProtectedRoute><LectureClassSelector /></ProtectedRoute>} />
           <Route path="/interactive-lectures/:subject/:grade/:lectureId" element={<ProtectedRoute><LectureViewer /></ProtectedRoute>} />
 
-          {/* Legacy Physics Calculator - redirect to new hub */}
-          <Route path="/physics-calculator" element={<PhysicsToolsHub />} />
+          {/* Legacy Physics Calculator - redirect to calculator */}
+          <Route path="/physics-calculator" element={<Navigate to="/physics-tools/calculator" replace />} />
 
           {/* Virtual Lab - Phòng thí nghiệm ảo */}
           <Route path="/vatly/virtual-lab" element={<ProtectedRoute><VirtualLabHome /></ProtectedRoute>} />
@@ -307,11 +307,11 @@ function App() {
         <ThemeProvider>
           <GameProgressProvider>
             <Suspense fallback={
-              <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-sans">
+              <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center">
                 <div className="text-center">
                   <div className="w-16 h-16 border-4 border-[#274dad] border-t-transparent rounded-full animate-spin mx-auto mb-6 shadow-lg shadow-[#274dad]/10"></div>
-                  <h2 className="text-2xl font-black text-[#274dad] italic tracking-tight mb-2">Eureka</h2>
-                  <p className="text-slate-500 font-bold text-sm tracking-wide uppercase">Đang tải tài nguyên học tập...</p>
+                  <h2 className="font-heading text-2xl font-extrabold text-[#274dad] italic tracking-tight mb-2">Eureka</h2>
+                  <p className="font-body text-slate-500 font-bold text-sm tracking-wide uppercase">Đang tải tài nguyên học tập...</p>
                 </div>
               </div>
             }>

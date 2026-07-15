@@ -143,15 +143,15 @@ const PhysicsHome = () => {
             Eureka
           </h1>
           
-          <p className="text-xl md:text-2xl font-medium text-slate-400 tracking-tight leading-relaxed max-w-3xl mb-16">
-            {t('home.slogan_1')} <span className="text-indigo-600 font-black">{t('home.slogan_highlight')}</span>. <br />
+          <p className="font-body text-xl md:text-2xl font-medium text-slate-400 tracking-tight leading-relaxed max-w-3xl mb-16">
+            {t('home.slogan_1')} <span className="text-indigo-600 font-extrabold">{t('home.slogan_highlight')}</span>. <br />
             {t('home.slogan_2')}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <button
               onClick={() => handleAction(`/physics-class/${activeGrade}`)}
-              className="group relative px-12 py-6 rounded-full bg-slate-900 text-white font-black text-xs uppercase tracking-[0.3em] overflow-hidden shadow-2xl transition-all hover:scale-105 active:scale-95"
+              className="font-heading group relative px-12 py-6 rounded-full bg-slate-900 text-white font-extrabold text-xs uppercase tracking-[0.3em] overflow-hidden shadow-2xl transition-all hover:scale-105 active:scale-95"
             >
               <div className="relative z-10 flex items-center gap-4">
                  {t('home.start_now')}
@@ -162,7 +162,7 @@ const PhysicsHome = () => {
             
             <button
               onClick={() => handleAction('/vatly/virtual-lab')}
-              className="px-12 py-6 rounded-full bg-white text-slate-900 font-black text-xs uppercase tracking-[0.3em] border border-slate-100 hover:bg-slate-50 transition-all shadow-lg hover:shadow-xl active:scale-95"
+              className="font-heading px-12 py-6 rounded-full bg-white text-slate-900 font-extrabold text-xs uppercase tracking-[0.3em] border border-slate-100 hover:bg-slate-50 transition-all shadow-lg hover:shadow-xl active:scale-95"
             >
               {t('home.virtual_lab')}
             </button>
@@ -182,7 +182,7 @@ const PhysicsHome = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24">
              <div className="physics-annotation text-indigo-600 tracking-[0.4em] mb-4 uppercase text-[10px]">{t('home.features')}</div>
-             <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter">{t('home.features_title')} <span className="text-indigo-600">{t('home.features_title_highlight')}</span> {t('home.features_title_2')}</h2>
+             <h2 className="font-heading text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tighter">{t('home.features_title')} <span className="text-indigo-600">{t('home.features_title_highlight')}</span> {t('home.features_title_2')}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 auto-rows-[30rem]">
             {/* Virtual Lab */}
@@ -195,8 +195,8 @@ const PhysicsHome = () => {
                      <div className="physics-annotation text-white/50 tracking-[0.3em]">{t('home.lab_tag')}</div>
                   </div>
                   <div className="space-y-4">
-                     <h3 className="text-5xl font-black text-white tracking-tighter">{t('home.lab_title')}</h3>
-                     <p className="text-white/60 font-medium max-w-md text-lg leading-relaxed">{t('home.lab_desc')}</p>
+                     <h3 className="font-heading text-5xl font-extrabold text-white tracking-tighter">{t('home.lab_title')}</h3>
+                     <p className="font-body text-white/60 font-medium max-w-md text-lg leading-relaxed">{t('home.lab_desc')}</p>
                   </div>
                </div>
             </div>
@@ -211,8 +211,8 @@ const PhysicsHome = () => {
                      <div className="physics-annotation text-white/70">{t('home.arena_tag')}</div>
                   </div>
                   <div className="space-y-4">
-                     <h3 className="text-3xl font-black text-white tracking-tight">{t('home.arena_title')}</h3>
-                     <p className="text-white/80 text-sm font-medium leading-relaxed">{t('home.arena_desc')}</p>
+                     <h3 className="font-heading text-3xl font-extrabold text-white tracking-tight">{t('home.arena_title')}</h3>
+                     <p className="font-body text-white/80 text-sm font-medium leading-relaxed">{t('home.arena_desc')}</p>
                   </div>
                </div>
             </div>
@@ -227,8 +227,8 @@ const PhysicsHome = () => {
                      <div className="physics-annotation text-slate-400">{t('home.curriculum_tag')}</div>
                   </div>
                   <div className="space-y-4 pt-12">
-                     <h3 className="text-3xl font-black text-slate-900 tracking-tight">{t('home.curriculum_title')}</h3>
-                     <p className="text-slate-600 text-sm font-medium leading-relaxed">{t('home.curriculum_desc')}</p>
+                     <h3 className="font-heading text-3xl font-extrabold text-slate-900 tracking-tight">{t('home.curriculum_title')}</h3>
+                     <p className="font-body text-slate-600 text-sm font-medium leading-relaxed">{t('home.curriculum_desc')}</p>
                   </div>
                </div>
             </div>
@@ -242,8 +242,8 @@ const PhysicsHome = () => {
                      <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-3xl flex items-center justify-center text-white border border-white/30 shadow-2xl group-hover:scale-110 transition-transform duration-500">
                         <Play fill="currentColor" size={24} className="ml-1" />
                      </div>
-                     <h3 className="text-5xl font-black text-white tracking-tighter">{t('home.lecture_title')}</h3>
-                     <p className="text-white/70 font-medium max-w-md text-lg leading-relaxed">{t('home.lecture_desc')}</p>
+                     <h3 className="font-heading text-5xl font-extrabold text-white tracking-tighter">{t('home.lecture_title')}</h3>
+                     <p className="font-body text-white/70 font-medium max-w-md text-lg leading-relaxed">{t('home.lecture_desc')}</p>
                   </div>
                   <div className="hidden lg:block w-px h-1/2 bg-white/20 mx-12" />
                   <div className="hidden lg:flex flex-col gap-8 text-white/40 font-black text-[10px] uppercase tracking-[0.4em]">
@@ -265,13 +265,13 @@ const PhysicsHome = () => {
         {/* Foreground Content */}
         <div className="container mx-auto px-4 relative z-20 pointer-events-none">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            <h2 className="font-heading text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
               {t('home.bend_limits')} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">
                 {t('home.bend_limits_highlight')}
               </span>
             </h2>
-            <p className="text-xl md:text-2xl text-indigo-100/70 mb-16 font-light max-w-2xl mx-auto drop-shadow-md">
+            <p className="font-body text-xl md:text-2xl text-indigo-100/70 mb-16 font-light max-w-2xl mx-auto drop-shadow-md">
               {t('home.bend_limits_desc')}
             </p>
             
@@ -279,22 +279,22 @@ const PhysicsHome = () => {
                <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
                  <Orbit className="w-10 h-10 text-indigo-400 mx-auto mb-4" />
-                 <div className="text-2xl font-black text-white mb-2">{t('home.3d_sim')}</div>
-                 <div className="text-sm font-medium text-indigo-200/60">{t('home.3d_sim_desc')}</div>
+                 <div className="font-heading text-2xl font-extrabold text-white mb-2">{t('home.3d_sim')}</div>
+                 <div className="font-body text-sm font-medium text-indigo-200/60">{t('home.3d_sim_desc')}</div>
                </div>
                
                <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transform md:-translate-y-4">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
                  <Cpu className="w-10 h-10 text-purple-400 mx-auto mb-4" />
-                 <div className="text-2xl font-black text-white mb-2">{t('home.ai_assistant')}</div>
-                 <div className="text-sm font-medium text-purple-200/60">{t('home.ai_assistant_desc')}</div>
+                 <div className="font-heading text-2xl font-extrabold text-white mb-2">{t('home.ai_assistant')}</div>
+                 <div className="font-body text-sm font-medium text-purple-200/60">{t('home.ai_assistant_desc')}</div>
                </div>
 
                <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
                  <Zap className="w-10 h-10 text-cyan-400 mx-auto mb-4" />
-                 <div className="text-2xl font-black text-white mb-2">{t('home.120hz_core')}</div>
-                 <div className="text-sm font-medium text-cyan-200/60">{t('home.120hz_core_desc')}</div>
+                 <div className="font-heading text-2xl font-extrabold text-white mb-2">{t('home.120hz_core')}</div>
+                 <div className="font-body text-sm font-medium text-cyan-200/60">{t('home.120hz_core_desc')}</div>
                </div>
             </div>
           </div>
@@ -310,10 +310,10 @@ const PhysicsHome = () => {
            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#4338ca44_0%,transparent_60%)]" />
            <div className="relative z-10 space-y-12">
               <div className="physics-annotation text-indigo-400 tracking-[0.5em] uppercase text-[10px]">{t('home.unlock_potential')}</div>
-              <h2 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-none">{t('home.ready_to_start')} <br /> {t('home.ready_to_start_2')}</h2>
+              <h2 className="font-heading text-6xl md:text-8xl font-extrabold text-white tracking-tighter leading-none">{t('home.ready_to_start')} <br /> {t('home.ready_to_start_2')}</h2>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                 <button onClick={() => handleAction('/register')} className="w-full sm:w-auto px-16 py-6 rounded-2xl bg-white text-slate-900 font-black text-xs uppercase tracking-[0.3em] hover:scale-105 transition-all">{t('home.start_now')}</button>
-                 <button onClick={() => handleAction('/interactive-lectures')} className="w-full sm:w-auto px-16 py-6 rounded-2xl bg-slate-800 text-white font-black text-xs uppercase tracking-[0.3em] border border-slate-700 hover:bg-slate-700 transition-all">{t('home.watch_demo')}</button>
+                 <button onClick={() => handleAction('/register')} className="font-heading w-full sm:w-auto px-16 py-6 rounded-2xl bg-white text-slate-900 font-extrabold text-xs uppercase tracking-[0.3em] hover:scale-105 transition-all">{t('home.start_now')}</button>
+                 <button onClick={() => handleAction('/interactive-lectures')} className="font-heading w-full sm:w-auto px-16 py-6 rounded-2xl bg-slate-800 text-white font-extrabold text-xs uppercase tracking-[0.3em] border border-slate-700 hover:bg-slate-700 transition-all">{t('home.watch_demo')}</button>
               </div>
               <div className="flex justify-center gap-12 opacity-40 pt-8 border-t border-white/5">
                  <div className="physics-annotation text-white text-[10px]">E = MC²</div><div className="physics-annotation text-white text-[10px]">F = G(M1M2/R²)</div><div className="physics-annotation text-white text-[10px]">ΔS ≥ 0</div>

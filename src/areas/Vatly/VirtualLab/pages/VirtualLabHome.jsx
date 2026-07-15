@@ -154,8 +154,8 @@ const VirtualLabHome = () => {
             {CatIcon && <CatIcon className="text-white w-full h-full" />}
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Phase {exp.difficulty}</span>
-            <span className="px-3 py-1 bg-white border border-slate-100 rounded-full text-[11px] text-[#274dad] font-black shadow-sm">
+            <span className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1 italic">Phase {exp.difficulty}</span>
+            <span className="font-heading px-3 py-1 bg-white border border-slate-100 rounded-full text-[11px] text-[#274dad] font-extrabold shadow-sm">
                 LỚP {exp.grade}
             </span>
           </div>
@@ -163,10 +163,10 @@ const VirtualLabHome = () => {
 
         {/* Content */}
         <div>
-           <h3 className="text-xl font-black text-slate-800 leading-tight mb-2 group-hover:text-[#274dad] transition-colors">
+           <h3 className="font-heading text-xl font-extrabold text-slate-800 leading-tight mb-2 group-hover:text-[#274dad] transition-colors">
              {exp.name}
            </h3>
-           <p className="text-slate-500 text-[13px] leading-relaxed line-clamp-2 font-medium mb-6">
+           <p className="font-body text-slate-500 text-[13px] leading-relaxed line-clamp-2 font-medium mb-6">
              {exp.description}
            </p>
         </div>
@@ -179,7 +179,7 @@ const VirtualLabHome = () => {
            </div>
            
            {exp.available && (
-             <div className="flex items-center gap-1.5 text-xs font-black text-[#274dad] uppercase tracking-wider group-hover:gap-2.5 transition-all duration-300">
+             <div className="font-heading flex items-center gap-1.5 text-xs font-extrabold text-[#274dad] uppercase tracking-wider group-hover:gap-2.5 transition-all duration-300">
                 Thực hành <Play className="w-3 h-3 fill-current" />
              </div>
            )}
@@ -189,7 +189,7 @@ const VirtualLabHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans overflow-x-hidden pb-20">
+    <div className="min-h-screen bg-[#f8fafc] font-body overflow-x-hidden pb-20">
       {/* ── BACKGROUND ELEMENTS ── */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-200/20 blur-[120px] rounded-full animate-pulse"></div>
@@ -222,14 +222,14 @@ const VirtualLabHome = () => {
                 LAB SIMULATION — LIVE
               </div>
               
-              <h1 className="text-4xl md:text-6xl font-black text-slate-800 leading-tight mb-6">
+              <h1 className="font-heading text-4xl md:text-6xl font-extrabold text-slate-800 leading-tight mb-6">
                 Phòng Thí Nghiệm <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2a4095] to-[#274dad]">
                   Ảo Tương Tác
                 </span>
               </h1>
               
-              <p className="text-slate-500 text-lg md:text-xl max-w-2xl leading-relaxed mb-8 font-medium">
+              <p className="font-body text-slate-500 text-lg md:text-xl max-w-2xl leading-relaxed mb-8 font-medium">
                 Tương tác với hệ thống mô phỏng độ chính xác cao, thu thập dữ liệu thực tế và kiểm chứng các định luật vật lý nền tảng.
               </p>
 
@@ -243,7 +243,7 @@ const VirtualLabHome = () => {
                   return (
                     <div key={i} className={`flex items-center gap-2.5 ${item.bg} px-4 py-2 rounded-2xl shadow-sm border border-white/50`}>
                       <I className={`w-4 h-4 ${item.color}`} />
-                      <span className={`text-[13px] font-black ${item.color} tracking-tight uppercase`}>{item.text}</span>
+                      <span className={`font-heading text-[13px] font-extrabold ${item.color} tracking-tight uppercase`}>{item.text}</span>
                     </div>
                   );
                 })}
@@ -276,7 +276,7 @@ const VirtualLabHome = () => {
                   placeholder="Tìm tên bài thí nghiệm hoặc chương học..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full pl-14 pr-12 py-4 bg-slate-50/50 hover:bg-white border-2 border-slate-50 focus:border-[#274dad]/30 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none transition-all text-sm font-bold shadow-inner"
+                  className="font-body w-full pl-14 pr-12 py-4 bg-slate-50/50 hover:bg-white border-2 border-slate-50 focus:border-[#274dad]/30 rounded-2xl text-slate-800 placeholder-slate-400 focus:outline-none transition-all text-sm font-bold shadow-inner"
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
@@ -293,7 +293,7 @@ const VirtualLabHome = () => {
                     <button
                       key={item.mode}
                       onClick={() => setViewMode(item.mode)}
-                      className={`flex flex-1 lg:flex-none items-center justify-center gap-2.5 px-6 py-3 rounded-xl text-[11px] font-black tracking-widest transition-all ${
+                      className={`font-heading flex flex-1 lg:flex-none items-center justify-center gap-2.5 px-6 py-3 rounded-xl text-[11px] font-extrabold tracking-widest transition-all ${
                         viewMode === item.mode 
                         ? 'bg-white text-[#2a4095] shadow-[0_4px_12px_rgba(0,0,0,0.06)] scale-105' 
                         : 'text-slate-400 hover:text-slate-600'
@@ -316,7 +316,7 @@ const VirtualLabHome = () => {
                   <button
                     key={g.id}
                     onClick={() => setSelectedGrade(g.id)}
-                    className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all ${
+                    className={`font-heading px-5 py-2.5 rounded-2xl text-xs font-extrabold transition-all ${
                       selectedGrade === g.id
                         ? 'bg-[#274dad] text-white shadow-[0_8px_20px_rgba(39,77,173,0.2)] scale-105'
                         : 'bg-white text-slate-500 hover:text-[#274dad] border border-slate-100 hover:border-[#274dad]/30 hover:scale-105'
@@ -343,11 +343,11 @@ const VirtualLabHome = () => {
               <div className="w-24 h-24 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-slate-200 transform -rotate-6">
                 <Search className="w-10 h-10 text-slate-300" />
               </div>
-              <h3 className="text-2xl font-black text-slate-800 mb-2 tracking-tight">Không tìm thấy thí nghiệm</h3>
-              <p className="text-slate-500 mb-8 font-medium">Bạn hãy thử từ khóa khác hoặc thay đổi lớp học xem sao!</p>
+              <h3 className="font-heading text-2xl font-extrabold text-slate-800 mb-2 tracking-tight">Không tìm thấy thí nghiệm</h3>
+              <p className="font-body text-slate-500 mb-8 font-medium">Bạn hãy thử từ khóa khác hoặc thay đổi lớp học xem sao!</p>
               <button
                 onClick={() => { setSelectedGrade('all'); setSearchQuery(''); }}
-                className="px-8 py-4 bg-[#274dad] text-white rounded-2xl shadow-xl hover:-translate-y-1 transition-all font-black text-sm tracking-widest active:scale-95"
+                className="font-heading px-8 py-4 bg-[#274dad] text-white rounded-2xl shadow-xl hover:-translate-y-1 transition-all font-extrabold text-sm tracking-widest active:scale-95"
               >
                 HIỂN THỊ TẤT CẢ
               </button>
@@ -363,8 +363,8 @@ const VirtualLabHome = () => {
                           <CatIcon className="text-white w-6 h-6" />
                        </div>
                        <div>
-                         <h2 className="text-2xl font-black text-slate-800 tracking-tight">{category.title}</h2>
-                         <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-[0.2em]">{category.experiments.length} BÀI THỰC HÀNH</p>
+                          <h2 className="font-heading text-2xl font-extrabold text-slate-800 tracking-tight">{category.title}</h2>
+                          <p className="font-heading text-xs font-extrabold text-slate-400 mt-1 uppercase tracking-[0.2em]">{category.experiments.length} BÀI THỰC HÀNH</p>
                        </div>
                        <div className="flex-1 h-1 bg-slate-100 rounded-full ml-4"></div>
                     </div>
@@ -389,8 +389,8 @@ const VirtualLabHome = () => {
                           <GraduationCap className="text-white w-6 h-6" />
                        </div>
                        <div>
-                         <h2 className="text-2xl font-black text-slate-800 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500">LỚP {grade}</h2>
-                         <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-[0.2em]">{gradeExps.length} BÀI THỰC HÀNH</p>
+                          <h2 className="font-heading text-2xl font-extrabold text-slate-800 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-500">LỚP {grade}</h2>
+                          <p className="font-heading text-xs font-extrabold text-slate-400 mt-1 uppercase tracking-[0.2em]">{gradeExps.length} BÀI THỰC HÀNH</p>
                        </div>
                        <div className="flex-1 h-1 bg-slate-100 rounded-full ml-4"></div>
                     </div>
@@ -412,7 +412,7 @@ const VirtualLabHome = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                 </div>
-                <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Hệ thống đang liên tục cập nhật thêm thí nghiệm mới</span>
+                <span className="font-heading text-[11px] font-extrabold text-slate-500 uppercase tracking-widest">Hệ thống đang liên tục cập nhật thêm thí nghiệm mới</span>
             </div>
         </div>
       </div>

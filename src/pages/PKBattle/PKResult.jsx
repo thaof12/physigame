@@ -63,7 +63,7 @@ const PKResult = () => {
             opponentName: opponent?.displayName,
             opponentFirebaseUid: opponent?.firebaseUid,
             winner: finalWinner,
-            correctAnswers: myAnswers.filter(a => a.isCorrect || a.completed).length,
+             correctAnswers: myAnswers.filter(a => a.isCorrect).length,
             totalQuestions: myAnswers.length || 10,
             avgResponseTime: myAnswers.length > 0
               ? myAnswers.reduce((sum, a) => sum + (a.responseTime || 0), 0) / myAnswers.length
@@ -100,7 +100,7 @@ const PKResult = () => {
 
   // Calculate stats
   const totalQuestions = myAnswers.length || 10;
-  const correctAnswers = myAnswers.filter(a => a.isCorrect || a.completed).length;
+  const correctAnswers = myAnswers.filter(a => a.isCorrect).length;
   const accuracy = totalQuestions > 0 ? ((correctAnswers / totalQuestions) * 100).toFixed(0) : 0;
   const avgTime = myAnswers.length > 0
     ? (myAnswers.reduce((sum, a) => sum + (a.responseTime || 0), 0) / myAnswers.length).toFixed(1)
@@ -292,17 +292,17 @@ const PKResult = () => {
                   {myAnswers.map((answer, idx) => (
                     <div
                       key={idx}
-                      className={`flex justify-between items-center px-3 py-1.5 rounded-lg border text-[10px] ${answer.isCorrect || answer.completed
+                      className={`flex justify-between items-center px-3 py-1.5 rounded-lg border text-[10px] ${answer.isCorrect
                           ? 'bg-emerald-50/40 border-emerald-100/50 text-emerald-700'
                           : 'bg-rose-50/40 border-rose-100/50 text-rose-700'
                         }`}
                     >
                       <span className="font-bold">
-                        Câu {idx + 1}: {answer.type === 'challenge' ? `Game ${answer.gameName || ''}` : 'Trắc nghiệm'}
+                        Câu {idx + 1}: Trắc nghiệm
                       </span>
                       <div className="flex items-center gap-2">
                         <span className="text-[9px] text-slate-400 font-semibold">{answer.responseTime}s</span>
-                        <span className="font-black text-xs">{answer.isCorrect || answer.completed ? `+${answer.pointsEarned || 100}` : '0'}</span>
+                        <span className="font-black text-xs">{answer.isCorrect ? `+${answer.pointsEarned || 100}` : '0'}</span>
                       </div>
                     </div>
                   ))}
