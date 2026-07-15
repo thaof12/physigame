@@ -3,7 +3,7 @@
  * Generates rounds for PK battles based on game mode, grade, and difficulty
  */
 
-import { pkChallengeGames, getGamesByGradeAndDifficulty, getRandomGames } from './pkGameModes';
+// No challenge mode imports needed as PK is quiz-only now
 
 // Sample quiz questions organized by grade
 const quizQuestions = {
@@ -279,7 +279,6 @@ export const getQuizQuestions = (grade = 'all', difficulty = 'mixed', count = 10
  */
 export const generateBattleRounds = (settings) => {
   const {
-    gameMode = 'mixed',
     grade = 'all',
     difficulty = 'mixed',
     totalQuestions = 10,
@@ -288,101 +287,22 @@ export const generateBattleRounds = (settings) => {
 
   const rounds = [];
 
-  if (gameMode === 'quiz') {
-    // Only quiz questions
-    const questions = getQuizQuestions(grade, difficulty, totalQuestions);
-    questions.forEach((q, index) => {
-      rounds.push({
-        index,
-        type: 'quiz',
-        questionId: q.id,
-        question: q.question,
-        options: q.options,
-        correctAnswer: q.correctAnswer,
-        difficulty: q.difficulty,
-        category: q.category,
-        points: q.points,
-        timeLimit: timePerQuestion
-      });
+  // Only quiz questions
+  const questions = getQuizQuestions(grade, difficulty, totalQuestions);
+  questions.forEach((q, index) => {
+    rounds.push({
+      index,
+      type: 'quiz',
+      questionId: q.id,
+      question: q.question,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      difficulty: q.difficulty,
+      category: q.category,
+      points: q.points,
+      timeLimit: timePerQuestion
     });
-  } else if (gameMode === 'challenge') {
-    // Only challenge games
-    console.log('Generating CHALLENGE mode rounds, total:', totalQuestions);
-    const games = getRandomGames(totalQuestions, { grade, difficulty });
-    console.log('Got games from getRandomGames:', games.length, games);
-    
-    games.forEach((game, index) => {
-      console.log(`Creating challenge round ${index}:`, game.name, game.component);
-      rounds.push({
-        index,
-        type: 'challenge',
-        gameId: game.id,
-        gameName: game.name,
-        gameComponent: game.component,
-        gameGrade: game.grade,
-        gameCategory: game.category || game.topic,
-        difficulty: game.difficulty || 'medium',
-        points: game.points || 100,
-        timeLimit: game.duration || 60
-      });
-    });
-  } else {
-    // Mixed mode - alternate between quiz and challenge
-    const quizCount = Math.floor(totalQuestions / 2);
-    const challengeCount = totalQuestions - quizCount;
-    
-    const questions = getQuizQuestions(grade, difficulty, quizCount);
-    const games = getRandomGames(challengeCount, { grade, difficulty });
-    
-    let qIndex = 0, gIndex = 0;
-    
-    for (let i = 0; i < totalQuestions; i++) {
-      // Alternate between quiz and challenge
-      if (i % 2 === 0 && qIndex < questions.length) {
-        const q = questions[qIndex++];
-        rounds.push({
-          index: i,
-          type: 'quiz',
-          questionId: q.id,
-          question: q.question,
-          options: q.options,
-          correctAnswer: q.correctAnswer,
-          difficulty: q.difficulty,
-          category: q.category,
-          points: q.points,
-          timeLimit: timePerQuestion
-        });
-      } else if (gIndex < games.length) {
-        const game = games[gIndex++];
-        rounds.push({
-          index: i,
-          type: 'challenge',
-          gameId: game.id,
-          gameName: game.name,
-          gameComponent: game.component,
-          gameGrade: game.grade,
-          gameCategory: game.category,
-          difficulty: game.difficulty,
-          points: game.points,
-          timeLimit: game.duration || 60
-        });
-      } else if (qIndex < questions.length) {
-        const q = questions[qIndex++];
-        rounds.push({
-          index: i,
-          type: 'quiz',
-          questionId: q.id,
-          question: q.question,
-          options: q.options,
-          correctAnswer: q.correctAnswer,
-          difficulty: q.difficulty,
-          category: q.category,
-          points: q.points,
-          timeLimit: timePerQuestion
-        });
-      }
-    }
-  }
+  });
 
   return rounds;
 };
@@ -400,23 +320,13 @@ export const calculateRoundScore = (round, result) => {
     expert: 2.5
   }[round.difficulty] || 1;
   
-  if (round.type === 'quiz') {
-    if (result.isCorrect) {
-      // Time bonus for quick answers
-      const maxTimeBonus = 50;
-      const timeBonus = Math.floor((result.timeRemaining / round.timeLimit) * maxTimeBonus);
-      return Math.floor((basePoints + timeBonus) * difficultyMultiplier);
-    }
-    return 0;
-  } else {
-    // Challenge game
-    if (result.completed) {
-      const gameScore = result.score || 0;
-      const timeBonus = Math.floor((result.timeRemaining / round.timeLimit) * 30);
-      return Math.floor((gameScore + timeBonus) * difficultyMultiplier);
-    }
-    return Math.floor((result.score || 0) * 0.3); // Partial points for incomplete
+  if (result.isCorrect) {
+    // Time bonus for quick answers
+    const maxTimeBonus = 50;
+    const timeBonus = Math.floor((result.timeRemaining / round.timeLimit) * maxTimeBonus);
+    return Math.floor((basePoints + timeBonus) * difficultyMultiplier);
   }
+  return 0;
 };
 
 export default {

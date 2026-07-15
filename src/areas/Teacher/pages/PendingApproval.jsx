@@ -60,7 +60,7 @@ const PendingApproval = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-8 font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-8 font-body relative overflow-hidden">
 
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#4f46e5]/5 blur-[120px] rounded-full pointer-events-none"></div>
@@ -87,13 +87,13 @@ const PendingApproval = () => {
             {isVerified && <CheckCircle className="w-9 h-9 text-white" />}
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 mb-2 tracking-tight">
+          <h1 className="font-heading text-2xl md:text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">
             {isPending && 'Đang Chờ Xác Minh'}
             {isRejected && 'Đăng Ký Bị Từ Chối'}
             {isVerified && 'Đã Được Xác Minh'}
           </h1>
 
-          <p className="text-slate-500 font-medium text-sm md:text-base max-w-md mx-auto leading-relaxed">
+          <p className="font-body text-slate-500 font-medium text-sm md:text-base max-w-md mx-auto leading-relaxed">
             {isPending && 'Yêu cầu của bạn đang được chờ xác nhận. Admin đang xem xét hồ sơ giảng dạy của bạn.'}
             {isRejected && 'Rất tiếc, hồ sơ giảng viên của bạn chưa đáp ứng được các tiêu chuẩn của hệ thống.'}
             {isVerified && 'Chúc mừng! Tài khoản của bạn đã sẵn sàng để bắt đầu giảng dạy.'}
@@ -110,8 +110,8 @@ const PendingApproval = () => {
                   <Mail className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Email Giảng Viên</span>
-                  <p className="font-bold text-slate-800 truncate text-sm">{teacher.email}</p>
+                  <span className="font-heading block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Email Giảng Viên</span>
+                  <p className="font-body font-bold text-slate-800 truncate text-sm">{teacher.email}</p>
                 </div>
               </div>
             </div>
@@ -122,8 +122,8 @@ const PendingApproval = () => {
                   <ShieldAlert className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Trạng Thái Hiện Tại</span>
-                  <p className={`font-black text-sm ${isPending ? 'text-[#4f46e5]' : isRejected ? 'text-rose-600' : 'text-emerald-600'
+                  <span className="font-heading block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Trạng Thái Hiện Tại</span>
+                  <p className={`font-heading font-extrabold text-sm ${isPending ? 'text-[#4f46e5]' : isRejected ? 'text-rose-600' : 'text-emerald-600'
                     }`}>
                     {isPending ? 'Đang chờ phê duyệt' : isRejected ? 'Rejected' : 'Verified'}
                   </p>
@@ -138,8 +138,8 @@ const PendingApproval = () => {
                     <Building className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Đơn Vị Công Tác</span>
-                    <p className="font-bold text-slate-800 text-sm truncate">{teacher.teacherProfile.school}</p>
+                    <span className="font-heading block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Đơn Vị Công Tác</span>
+                    <p className="font-body font-bold text-slate-800 text-sm truncate">{teacher.teacherProfile.school}</p>
                   </div>
                 </div>
               </div>
@@ -150,7 +150,7 @@ const PendingApproval = () => {
           {isPending && (
             <div className="flex items-start gap-3 p-5 bg-indigo-50 border border-indigo-100 rounded-2xl text-[#4f46e5] mb-8 shadow-sm">
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-              <p className="text-xs font-semibold leading-relaxed">
+              <p className="font-body text-xs font-semibold leading-relaxed">
                 Quy trình xác minh thường diễn ra trong vòng 24-48h làm việc. Chúng tôi sẽ thông báo ngay khi có kết quả.
               </p>
             </div>
@@ -160,20 +160,20 @@ const PendingApproval = () => {
             <div className="p-5 bg-rose-50 border border-rose-100 rounded-2xl mb-8">
               <div className="flex items-center gap-2 mb-2 text-rose-700">
                 <AlertCircle className="w-4 h-4" />
-                <h4 className="font-bold text-xs uppercase tracking-wider">Lý do từ chối:</h4>
+                <h4 className="font-heading font-extrabold text-xs uppercase tracking-wider">Lý do từ chối:</h4>
               </div>
-              <p className="text-xs font-medium text-rose-600 leading-relaxed">
+              <p className="font-body text-xs font-medium text-rose-600 leading-relaxed">
                 {teacher.teacherProfile?.rejectionReason || 'Thông tin cung cấp không đủ điều kiện xác minh danh tính giảng viên.'}
               </p>
             </div>
           )}
 
           {/* Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="font-heading grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               onClick={handleRefresh}
               disabled={checking}
-              className="px-6 py-3.5 bg-gradient-to-r from-[#4f46e5] to-[#0f172a] hover:brightness-110 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-70"
+              className="px-6 py-3.5 bg-gradient-to-r from-[#4f46e5] to-[#0f172a] hover:brightness-110 text-white rounded-xl font-extrabold text-sm transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-70"
             >
               <RefreshCw className={`w-4 h-4 ${checking ? 'animate-spin' : ''}`} />
               {checking ? 'Đang kiểm tra...' : 'Kiểm tra trạng thái'}
@@ -181,7 +181,7 @@ const PendingApproval = () => {
 
             <button
               onClick={handleLogout}
-              className="px-6 py-3.5 bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 rounded-xl font-bold text-sm transition-all border border-slate-200/40 flex items-center justify-center gap-2.5 active:scale-[0.98]"
+              className="px-6 py-3.5 bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 rounded-xl font-extrabold text-sm transition-all border border-slate-200/40 flex items-center justify-center gap-2.5 active:scale-[0.98]"
             >
               <LogOut className="w-4 h-4" />
               Đăng xuất hệ thống
@@ -189,7 +189,7 @@ const PendingApproval = () => {
 
             <Link
               to="/"
-              className="sm:col-span-2 px-6 py-3 bg-transparent text-slate-400 hover:text-slate-600 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+              className="sm:col-span-2 px-6 py-3 bg-transparent text-slate-400 hover:text-slate-600 rounded-xl font-extrabold text-sm transition-all flex items-center justify-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
               Quay lại Trang Chủ
@@ -198,7 +198,7 @@ const PendingApproval = () => {
         </div>
 
         {/* Support Footer */}
-        <p className="text-center text-slate-400 font-medium text-xs mt-8">
+        <p className="font-body text-center text-slate-400 font-medium text-xs mt-8">
           Cần hỗ trợ kỹ thuật? Liên hệ{' '}
           <a href="mailto:support@physigame.edu.vn" className="text-[#4f46e5] hover:underline font-semibold">
             support@physigame.edu.vn

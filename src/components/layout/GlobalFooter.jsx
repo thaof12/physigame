@@ -4,7 +4,7 @@ import { Facebook, Youtube, Instagram, MapPin, Phone, Mail, ChevronRight } from 
 
 const GlobalFooter = () => {
   return (
-    <footer className="w-full bg-[#FFFFFF] border-t border-slate-100 pt-20 pb-10 relative overflow-hidden font-sans">
+    <footer className="w-full bg-[#FFFFFF] border-t border-slate-100 pt-20 pb-10 relative overflow-hidden font-body">
       {/* Graph grid background */}
       <div className="absolute inset-0 graph-grid opacity-[0.4] pointer-events-none" />
 
@@ -18,7 +18,7 @@ const GlobalFooter = () => {
                 Eureka
               </span>
             </Link>
-            <p className="text-slate-500 font-medium leading-relaxed text-sm max-w-xs">
+            <p className="font-body text-slate-500 font-medium leading-relaxed text-sm max-w-xs">
               Học Vật lý thông qua trò chơi tương tác và thí nghiệm ảo chân thực. Nền tảng không gian học tập công nghệ hiện đại dành cho thế hệ tương lai.
             </p>
             <div className="flex items-center gap-4 pt-2">
@@ -33,20 +33,22 @@ const GlobalFooter = () => {
 
           {/* Khám phá */}
           <div className="space-y-6">
-            <h4 className="font-black text-[#4A3728] text-base flex items-center gap-2">
+            <h4 className="font-heading font-extrabold text-[#4A3728] text-base flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#274dad]" />
               Khám phá
             </h4>
             <ul className="space-y-4">
               {[
                 ['Trung tâm học tập', '/program/physics'],
-                ['Công cụ Vật lý', '/physics-tools'],
+                ['Máy Tính Vật Lý', '/physics-tools/calculator'],
+                ['Tra Cứu Hằng Số', '/physics-tools/constants'],
+                ['Chuyển Đổi Đơn Vị', '/physics-tools/converter'],
                 ['Bài giảng tương tác', '/interactive-lectures'],
                 ['Phòng Thí nghiệm ảo', '/vatly/virtual-lab'],
                 ['Cuộc đua PK', '/pk-battle'],
               ].map(([label, path]) => (
                 <li key={label}>
-                  <Link to={path} className="text-slate-500 hover:text-[#274dad] font-bold text-sm transition-colors flex items-center gap-2 group">
+                  <Link to={path} className="font-body text-slate-500 hover:text-[#274dad] font-semibold text-sm transition-colors flex items-center gap-2 group">
                     <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
                     {label}
                   </Link>
@@ -57,7 +59,7 @@ const GlobalFooter = () => {
 
           {/* Hỗ trợ */}
           <div className="space-y-6">
-            <h4 className="font-black text-[#4A3728] text-base flex items-center gap-2">
+            <h4 className="font-heading font-extrabold text-[#4A3728] text-base flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#274dad]" />
               Hỗ trợ
             </h4>
@@ -69,7 +71,7 @@ const GlobalFooter = () => {
                 { label: 'Điều khoản dịch vụ', path: '/support/terms' },
               ].map(({ label, path }) => (
                 <li key={label}>
-                  <Link to={path} className="text-slate-500 font-bold text-sm cursor-pointer hover:text-[#274dad] transition-colors">{label}</Link>
+                  <Link to={path} className="font-body text-slate-500 font-semibold text-sm cursor-pointer hover:text-[#274dad] transition-colors">{label}</Link>
                 </li>
               ))}
             </ul>
@@ -77,7 +79,7 @@ const GlobalFooter = () => {
 
           {/* Liên hệ */}
           <div className="space-y-6">
-            <h4 className="font-black text-[#4A3728] text-base flex items-center gap-2">
+            <h4 className="font-heading font-extrabold text-[#4A3728] text-base flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#10B981]" />
               Liên hệ
             </h4>
@@ -98,8 +100,8 @@ const GlobalFooter = () => {
                     </div>
                   )}
                   <div>
-                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{title}</div>
-                    <div className="text-slate-600 font-bold text-sm leading-relaxed whitespace-pre-line">{body}</div>
+                    <div className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">{title}</div>
+                    <div className="font-body text-slate-600 font-semibold text-sm leading-relaxed whitespace-pre-line">{body}</div>
                   </div>
                 </li>
               ))}
@@ -109,12 +111,12 @@ const GlobalFooter = () => {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-slate-400 font-bold text-xs">
+          <p className="font-body text-slate-400 font-semibold text-xs">
             &copy; 2026 Eureka Physics Lab. Built with passion for science.
           </p>
           <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">
             <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse" />
-            <span className="text-[10px] font-black text-slate-500 tracking-widest uppercase">Tín hiệu ổn định</span>
+            <span className="font-heading text-[10px] font-extrabold text-slate-500 tracking-widest uppercase">Tín hiệu ổn định</span>
           </div>
         </div>
       </div>

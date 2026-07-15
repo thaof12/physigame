@@ -104,10 +104,10 @@ const AdminExercises = () => {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black text-[#274dad]">Quản lý bài tập</h1>
-          <p className="text-slate-500 font-bold text-sm">Quản lý bài tập và game tương tác</p>
+          <h1 className="font-heading text-3xl font-extrabold text-[#274dad]">Quản lý bài tập</h1>
+          <p className="font-body text-slate-500 font-bold text-sm">Quản lý bài tập và game tương tác</p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] rounded-[1.25rem] text-white text-sm font-black shadow-xl shadow-blue-500/10 hover:brightness-110 transition-all">
+        <button className="font-heading flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] rounded-[1.25rem] text-white text-sm font-extrabold shadow-xl shadow-blue-500/10 hover:brightness-110 transition-all">
           <Plus className="w-5 h-5" />
           <span>THÊM BÀI TẬP</span>
         </button>
@@ -120,8 +120,8 @@ const AdminExercises = () => {
               <FileQuestion className="w-8 h-8 text-indigo-500" />
             </div>
             <div>
-              <p className="text-3xl font-black text-[#274dad]">{stats.total}</p>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Tổng bài tập</p>
+              <p className="font-heading text-3xl font-extrabold text-[#274dad]">{stats.total}</p>
+              <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Tổng bài tập</p>
             </div>
           </div>
         </div>
@@ -131,8 +131,8 @@ const AdminExercises = () => {
               <Target className="w-8 h-8 text-violet-500" />
             </div>
             <div>
-              <p className="text-3xl font-black text-[#274dad]">{stats.totalQuestions}</p>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Tổng câu hỏi</p>
+              <p className="font-heading text-3xl font-extrabold text-[#274dad]">{stats.totalQuestions}</p>
+              <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Tổng câu hỏi</p>
             </div>
           </div>
         </div>
@@ -142,8 +142,8 @@ const AdminExercises = () => {
               <BarChart3 className="w-8 h-8 text-cyan-500" />
             </div>
             <div>
-              <p className="text-3xl font-black text-[#274dad]">{stats.totalAttempts.toLocaleString()}</p>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Lượt làm bài</p>
+              <p className="font-heading text-3xl font-extrabold text-[#274dad]">{stats.totalAttempts.toLocaleString()}</p>
+              <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Lượt làm bài</p>
             </div>
           </div>
         </div>
@@ -153,15 +153,15 @@ const AdminExercises = () => {
               <CheckCircle2 className="w-8 h-8 text-emerald-500" />
             </div>
             <div>
-              <p className="text-3xl font-black text-[#274dad]">{stats.avgScore}%</p>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Điểm TB</p>
+              <p className="font-heading text-3xl font-extrabold text-[#274dad]">{stats.avgScore}%</p>
+              <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Điểm TB</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-[#85e4fb]/20">
-        <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex flex-col lg:flex-row gap-4 font-body">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
@@ -217,19 +217,19 @@ const AdminExercises = () => {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-black text-[#274dad] group-hover:text-[#2099e9] transition-colors line-clamp-1">{exercise.title}</h3>
+                  <h3 className="font-heading text-xl font-extrabold text-[#274dad] group-hover:text-[#2099e9] transition-colors line-clamp-1">{exercise.title}</h3>
                   <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 bg-[#e4f2f0] text-[#2099e9] rounded-lg text-[10px] font-black uppercase tracking-widest">
+                    <span className="font-heading px-3 py-1 bg-[#e4f2f0] text-[#2099e9] rounded-lg text-[10px] font-extrabold uppercase tracking-widest">
                       {exercise.subject === 'physics' ? 'Vật lý' : 'Hóa học'} {exercise.grade}
                     </span>
-                    <span className="px-3 py-1 bg-indigo-50 text-indigo-500 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                    <span className="font-heading px-3 py-1 bg-indigo-50 text-indigo-500 rounded-lg text-[10px] font-extrabold uppercase tracking-widest">
                       {typeLabels[exercise.type]}
                     </span>
-                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${difficultyColors[exercise.difficulty].replace('text-', 'text-opacity-100 text-')}`}>
+                    <span className={`font-heading px-3 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-widest ${difficultyColors[exercise.difficulty].replace('text-', 'text-opacity-100 text-')}`}>
                       {exercise.difficulty === 'easy' ? 'DỄ' : exercise.difficulty === 'medium' ? 'TRUNG BÌNH' : 'KHÓ'}
                     </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-6 pt-2">
+                  <div className="font-body flex flex-wrap items-center gap-6 pt-2">
                     <div className="flex items-center gap-2 text-slate-400 font-bold">
                       <Target className="w-4 h-4" />
                       <span className="text-xs">{exercise.questions} câu</span>
@@ -283,10 +283,10 @@ const AdminExercises = () => {
                   <FileQuestion className="w-10 h-10 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-2xl font-black leading-tight line-clamp-2">{showViewModal.title}</h3>
+                  <h3 className="font-heading text-2xl font-extrabold leading-tight line-clamp-2">{showViewModal.title}</h3>
                   <div className="flex items-center gap-3 mt-2">
-                    <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-[10px] font-black uppercase">{typeLabels[showViewModal.type]}</span>
-                    <span className="px-2 py-1 bg-white/20 backdrop-blur rounded text-[10px] font-black uppercase">Lớp {showViewModal.grade}</span>
+                    <span className="font-heading px-2 py-1 bg-white/20 backdrop-blur rounded text-[10px] font-extrabold uppercase">{typeLabels[showViewModal.type]}</span>
+                    <span className="font-heading px-2 py-1 bg-white/20 backdrop-blur rounded text-[10px] font-extrabold uppercase">Lớp {showViewModal.grade}</span>
                   </div>
                 </div>
               </div>
@@ -301,15 +301,15 @@ const AdminExercises = () => {
                 ].map((item, idx) => (
                   <div key={idx} className={`${item.bg} rounded-2xl p-6 flex flex-col items-center text-center gap-2`}>
                     <item.icon className={`w-6 h-6 ${item.color}`} />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
-                    <p className={`font-black text-lg ${item.color}`}>{item.value}</p>
+                    <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{item.label}</p>
+                    <p className={`font-heading font-extrabold text-lg ${item.color}`}>{item.value}</p>
                   </div>
                 ))}
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-sm font-black text-[#274dad] uppercase tracking-widest">Chi tiết nội dung</h4>
-                <p className="text-slate-500 font-bold leading-relaxed">
+                <h4 className="font-heading text-sm font-extrabold text-[#274dad] uppercase tracking-widest">Chi tiết nội dung</h4>
+                <p className="font-body text-slate-500 font-bold leading-relaxed">
                   {showViewModal.description}
                 </p>
               </div>
@@ -317,13 +317,13 @@ const AdminExercises = () => {
               <div className="flex gap-4 pt-4">
                 <button 
                   onClick={() => { setShowViewModal(null); setShowEditModal(showViewModal); }}
-                  className="flex-1 py-4 bg-[#e4f2f0] text-[#2099e9] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#e4f2f0]/80 transition-all"
+                  className="font-heading flex-1 py-4 bg-[#e4f2f0] text-[#2099e9] rounded-2xl font-extrabold text-xs uppercase tracking-widest hover:bg-[#e4f2f0]/80 transition-all"
                 >
                   Sửa bài tập
                 </button>
                 <button 
                   onClick={() => setShowViewModal(null)}
-                  className="flex-1 py-4 bg-[#2099e9] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all"
+                  className="font-heading flex-1 py-4 bg-[#2099e9] text-white rounded-2xl font-extrabold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all"
                 >
                   Đóng
                 </button>
@@ -339,12 +339,12 @@ const AdminExercises = () => {
           <div className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-[#85e4fb]/20">
             <div className="p-8 bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-2xl font-black">Chỉnh sửa bài tập</h3>
+                <h3 className="font-heading text-2xl font-extrabold">Chỉnh sửa bài tập</h3>
                 <button onClick={() => setShowEditModal(null)} className="p-2 hover:bg-white/10 rounded-xl transition-all">
                   <XCircle className="w-6 h-6" />
                 </button>
               </div>
-              <p className="font-bold opacity-80">Cập nhật thông số bài tập</p>
+              <p className="font-body font-bold opacity-80">Cập nhật thông số bài tập</p>
             </div>
             
             <form className="p-8 space-y-6" onSubmit={(e) => {
@@ -359,21 +359,21 @@ const AdminExercises = () => {
             }}>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Tiêu đề / Câu hỏi</label>
+                  <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Tiêu đề / Câu hỏi</label>
                   <textarea 
                     name="title"
                     defaultValue={showEditModal.title}
-                    className="w-full h-24 bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all resize-none"
+                    className="font-body w-full h-24 bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all resize-none"
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Độ khó</label>
+                    <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Độ khó</label>
                     <select 
                       name="difficulty"
                       defaultValue={showEditModal.difficulty}
-                      className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all"
+                      className="font-body w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all"
                     >
                       <option value="easy">Dễ</option>
                       <option value="medium">Trung bình</option>
@@ -381,11 +381,11 @@ const AdminExercises = () => {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Lớp học</label>
+                    <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Lớp học</label>
                     <select 
                       name="grade"
                       defaultValue={showEditModal.grade}
-                      className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all"
+                      className="font-body w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all"
                     >
                       {[6, 7, 8, 9, 10, 11, 12].map(g => (
                         <option key={g} value={g}>Lớp {g}</option>
@@ -399,13 +399,13 @@ const AdminExercises = () => {
                 <button 
                   type="button"
                   onClick={() => setShowEditModal(null)}
-                  className="flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all"
+                  className="font-heading flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-extrabold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all"
                 >
                   Hủy bỏ
                 </button>
                 <button 
                   type="submit"
-                  className="flex-[2] py-4 bg-gradient-to-r from-violet-500 to-indigo-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-500/20 hover:brightness-110 transition-all"
+                  className="font-heading flex-[2] py-4 bg-gradient-to-r from-violet-500 to-indigo-500 text-white rounded-2xl font-extrabold text-xs uppercase tracking-widest shadow-lg shadow-indigo-500/20 hover:brightness-110 transition-all"
                 >
                   CẬP NHẬT NGAY
                 </button>
@@ -424,19 +424,19 @@ const AdminExercises = () => {
                 <Trash2 className="w-10 h-10" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-black text-[#274dad]">Xóa bài tập này?</h3>
-                <p className="text-slate-400 font-bold line-clamp-3 px-4">Bạn có chắc chắn muốn xóa: <span className="text-[#274dad]">{showDeleteConfirm.title}</span>?</p>
+                <h3 className="font-heading text-2xl font-extrabold text-[#274dad]">Xóa bài tập này?</h3>
+                <p className="font-body text-slate-400 font-bold line-clamp-3 px-4">Bạn có chắc chắn muốn xóa: <span className="text-[#274dad]">{showDeleteConfirm.title}</span>?</p>
               </div>
               <div className="flex gap-4 pt-4">
                 <button 
                   onClick={() => setShowDeleteConfirm(null)}
-                  className="flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all"
+                  className="font-heading flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-extrabold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all"
                 >
                   Hủy bỏ
                 </button>
                 <button 
                   onClick={() => handleDelete(showDeleteConfirm.id)}
-                  className="flex-1 py-4 bg-rose-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all"
+                  className="font-heading flex-1 py-4 bg-rose-500 text-white rounded-2xl font-extrabold text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all"
                 >
                   XÓA NGAY
                 </button>

@@ -19,7 +19,9 @@ import {
   Gamepad2,
   Swords,
   Compass,
-  Library
+  Library,
+  Calculator,
+  ArrowLeftRight
 } from 'lucide-react';
 
 import EurekaPremiumLogo from '../ui/EurekaPremiumLogo';
@@ -56,7 +58,9 @@ const GlobalHeader = () => {
       name: t('header.treasure'), 
       icon: Library,
       children: [
-        { name: t('header.tools'), path: '/physics-tools', icon: Wrench },
+        { name: t('header.calculator'), path: '/physics-tools/calculator', icon: Calculator },
+        { name: t('header.constants'), path: '/physics-tools/constants', icon: BookOpen },
+        { name: t('header.converter'), path: '/physics-tools/converter', icon: ArrowLeftRight },
       ]
     },
     { 
@@ -112,7 +116,7 @@ const GlobalHeader = () => {
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <button
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-[13px] tracking-wide transition-all duration-300 ${
+                  className={`font-heading flex items-center gap-2 px-4 py-2.5 rounded-xl font-extrabold text-[13px] tracking-wide transition-all duration-300 ${
                     parentActive 
                     ? 'bg-[#274dad] text-white shadow-[0_4px_12px_rgba(39,77,173,0.3)]' 
                     : 'text-slate-500 hover:bg-slate-50 hover:text-[#274dad]'
@@ -140,7 +144,7 @@ const GlobalHeader = () => {
                               else navigate(child.path);
                               setActiveDropdown(null);
                             }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                            className={`font-heading w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
                               active 
                               ? 'bg-[#274dad]/10 text-[#274dad]' 
                               : 'text-slate-600 hover:bg-slate-50 hover:text-[#274dad]'

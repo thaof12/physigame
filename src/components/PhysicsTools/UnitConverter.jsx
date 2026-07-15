@@ -21,7 +21,7 @@ const MechanicalSelector = ({ options, value, onChange, label }) => {
   const selectedOption = options.find(opt => opt.id === value);
 
   return (
-    <div className="relative font-sans" ref={wrapperRef}>
+    <div className="relative font-body" ref={wrapperRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between bg-white border-2 border-[#E5E7EB] hover:border-[#274dad]/50 px-4 py-4 rounded-xl text-[#1E293B] font-bold transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] relative overflow-hidden group focus:outline-none"
@@ -164,7 +164,7 @@ const UnitConverter = () => {
   };
 
   return (
-    <div className="bg-[#FFFFFF] font-sans min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728] relative overflow-hidden">
+    <div className="bg-[#FFFFFF] font-body min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728] relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute inset-0 graph-grid opacity-[0.25] pointer-events-none" />
       <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#274dad]/10" />
@@ -181,11 +181,11 @@ const UnitConverter = () => {
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </button>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-[#1E293B] tracking-tight flex items-center gap-3">
+              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight flex items-center gap-3">
                 <ArrowLeftRight className="w-8 h-8 text-[#274dad]" />
                 Chuyển Đổi Đơn Vị
               </h1>
-              <p className="text-slate-500 font-medium mt-1">
+              <p className="font-body text-slate-500 font-medium mt-1">
                 Bộ chuyển tiếp tiêu chuẩn hóa đo lường vật lý
               </p>
             </div>
@@ -200,7 +200,7 @@ const UnitConverter = () => {
                 <Ruler className="w-6 h-6 text-[#274dad]/20" />
               </div>
 
-              <h2 className="text-lg font-black text-[#1E293B] mb-6 flex items-center gap-2 relative z-10">
+              <h2 className="font-heading text-lg font-extrabold text-[#1E293B] mb-6 flex items-center gap-2 relative z-10">
                 <span className="w-2 h-2 rounded-full bg-[#274dad]" />
                 Danh mục Tham số
               </h2>
@@ -216,7 +216,7 @@ const UnitConverter = () => {
                       }`}
                   >
                     <div>
-                      <div className="font-bold text-sm tracking-wide group-hover:translate-x-1 transition-transform">{quantity.name}</div>
+                      <div className="font-heading font-bold text-sm tracking-wide group-hover:translate-x-1 transition-transform">{quantity.name}</div>
                       <div className={`text-xs mt-1 ${selectedQuantity === key ? 'text-slate-400' : 'text-slate-500'}`}>
                         Cơ sở: {quantity.baseUnit}
                       </div>
@@ -238,10 +238,10 @@ const UnitConverter = () => {
               <div className="absolute inset-0 opacity-0 group-hover/conv:opacity-100 transition-opacity duration-1000 border-2 border-[#274dad]/5 rounded-[2rem] pointer-events-none" />
 
               <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-6 mb-8 relative z-10">
-                <h2 className="text-3xl font-black text-[#1E293B] tracking-tight">
+                <h2 className="font-heading text-3xl font-extrabold text-[#1E293B] tracking-tight">
                   {currentQuantity.name}
                 </h2>
-                <div className="px-3 py-1 bg-[#e4f2f0] border border-[#274dad]/20 rounded text-[#2099e9] text-xs font-bold uppercase tracking-wider">
+                <div className="font-heading px-3 py-1 bg-[#e4f2f0] border border-[#274dad]/20 rounded text-[#2099e9] text-xs font-extrabold uppercase tracking-wider">
                   {Object.keys(currentQuantity.units).length} Đơn vị
                 </div>
               </div>
@@ -250,7 +250,7 @@ const UnitConverter = () => {
               <div className="space-y-8 relative z-10">
                 {/* From Unit */}
                 <div className="bg-[#FFFFFF] p-6 rounded-2xl border border-[#E5E7EB] group focus-within:border-[#274dad] transition-colors">
-                  <label className="block text-xs font-black text-slate-400 tracking-[0.1em] uppercase mb-4 group-focus-within:text-[#274dad] transition-colors">
+                  <label className="font-heading block text-xs font-extrabold text-slate-400 tracking-[0.1em] uppercase mb-4 group-focus-within:text-[#274dad] transition-colors">
                     Nguồn đầu vào
                   </label>
                   <div className="grid grid-cols-[2fr_1fr] md:grid-cols-[3fr_2fr] gap-4">
@@ -293,7 +293,7 @@ const UnitConverter = () => {
                 <div className="bg-[#1E293B] p-6 rounded-2xl shadow-inner relative overflow-hidden">
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(212,175,55,0.05)_0%,transparent_60%)] pointer-events-none" />
 
-                  <label className="block text-xs font-black text-slate-400 tracking-[0.1em] uppercase mb-4 relative z-10">
+                  <label className="font-heading block text-xs font-extrabold text-slate-400 tracking-[0.1em] uppercase mb-4 relative z-10">
                     Kết xuất đầu ra
                   </label>
                   <div className="grid grid-cols-[2fr_1fr] md:grid-cols-[3fr_2fr] gap-4 relative z-10">
@@ -329,7 +329,7 @@ const UnitConverter = () => {
 
                 {/* Quick Reference Table */}
                 <div className="mt-12 pt-8 border-t border-[#E5E7EB]">
-                  <h3 className="text-lg font-black text-[#1E293B] mb-6 flex items-center gap-2">
+                  <h3 className="font-heading text-lg font-extrabold text-[#1E293B] mb-6 flex items-center gap-2">
                     <BookOpen className="w-5 h-5 text-[#274dad]" />
                     Bảng Tham Khảo Định Mức
                   </h3>
@@ -337,9 +337,9 @@ const UnitConverter = () => {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-[#FFFFFF] border-b border-[#E5E7EB]">
-                          <th className="px-6 py-4 text-left font-black text-slate-500 tracking-wider">Mã đơn vị</th>
-                          <th className="px-6 py-4 text-left font-black text-slate-500 tracking-wider">Định danh</th>
-                          <th className="px-6 py-4 text-right font-black text-slate-500 tracking-wider">
+                          <th className="px-6 py-4 text-left font-heading font-extrabold text-slate-500 tracking-wider">Mã đơn vị</th>
+                          <th className="px-6 py-4 text-left font-heading font-extrabold text-slate-500 tracking-wider">Định danh</th>
+                          <th className="px-6 py-4 text-right font-heading font-extrabold text-slate-500 tracking-wider">
                             Quy đổi sang <span className="text-[#274dad] px-1 bg-[#e4f2f0] rounded border border-[#274dad]/20">{currentQuantity.baseUnit}</span>
                           </th>
                         </tr>

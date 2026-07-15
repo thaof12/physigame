@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calculator, BookOpen, ArrowLeftRight, ArrowLeft, Wrench, Sparkles, ChevronRight, CheckCircle2 } from 'lucide-react';
-import heroMaster from '../assets/images/hero_master.png';
+
 
 const PhysicsToolsHub = () => {
   const navigate = useNavigate();
@@ -39,15 +39,7 @@ const PhysicsToolsHub = () => {
           HERO & HEADER BANNER
           ══════════════════════════════════════════ */}
       <section className="relative pt-24 pb-20 overflow-hidden bg-[#FFFFFF]">
-        {/* Background Atmosphere */}
-        <div className="absolute inset-0 z-0 select-none pointer-events-none">
-          <img
-            src={heroMaster}
-            alt="Academy Background"
-            className="w-full h-[500px] object-cover opacity-10 blur-sm"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FFFFFF]/90 to-[#FFFFFF]" />
-        </div>
+
         
         {/* Dynamic Background Elements */}
         <div className="absolute inset-0 graph-grid opacity-[0.25] pointer-events-none" />

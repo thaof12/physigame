@@ -84,20 +84,20 @@ const AdminSettings = () => {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black text-[#0f172a]">Cài đặt hệ thống</h1>
-          <p className="text-slate-500 font-bold text-sm">Quản lý cấu hình và tùy chọn vận hành</p>
+          <h1 className="font-heading text-3xl font-extrabold text-[#0f172a]">Cài đặt hệ thống</h1>
+          <p className="font-body text-slate-500 font-bold text-sm">Quản lý cấu hình và tùy chọn vận hành</p>
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={handleRestore}
-            className="flex items-center gap-2 px-6 py-3 bg-[#f8fafc] border border-transparent rounded-[1.25rem] text-slate-500 hover:text-[#4f46e5] transition-all font-black text-xs uppercase tracking-widest shadow-sm"
+            className="font-heading flex items-center gap-2 px-6 py-3 bg-[#f8fafc] border border-transparent rounded-[1.25rem] text-slate-500 hover:text-[#4f46e5] transition-all font-extrabold text-xs uppercase tracking-widest shadow-sm"
           >
             <RotateCcw className="w-4 h-4" />
             <span>Khôi phục</span>
           </button>
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#4f46e5] to-[#e2e8f0] rounded-[1.25rem] text-white text-sm font-black shadow-xl shadow-blue-500/10 hover:brightness-110 transition-all uppercase tracking-widest"
+            className="font-heading flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#4f46e5] to-[#e2e8f0] rounded-[1.25rem] text-white text-sm font-extrabold shadow-xl shadow-blue-500/10 hover:brightness-110 transition-all uppercase tracking-widest"
           >
             {saved ? <Check className="w-5 h-5" /> : <Save className="w-5 h-5" />}
             <span>{saved ? 'Đã lưu' : 'Lưu thay đổi'}</span>
@@ -113,16 +113,16 @@ const AdminSettings = () => {
               const Icon = tab.icon;
               return (
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${
-                    activeTab === tab.id
-                      ? 'bg-[#4f46e5] text-white shadow-lg shadow-blue-500/20'
-                      : 'text-slate-400 hover:text-[#0f172a] hover:bg-[#f8fafc]/50 font-bold'
-                  }`}
+                   key={tab.id}
+                   onClick={() => setActiveTab(tab.id)}
+                   className={`font-heading w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${
+                     activeTab === tab.id
+                       ? 'bg-[#4f46e5] text-white shadow-lg shadow-blue-500/20'
+                       : 'text-slate-400 hover:text-[#0f172a] hover:bg-[#f8fafc]/50 font-extrabold'
+                   }`}
                 >
                   <Icon className={`w-6 h-6 ${activeTab === tab.id ? 'text-white' : ''}`} />
-                  <span className="font-black text-sm uppercase tracking-tight">{tab.label}</span>
+                  <span className="font-extrabold text-sm uppercase tracking-tight">{tab.label}</span>
                 </button>
               );
             })}
@@ -135,31 +135,31 @@ const AdminSettings = () => {
             {activeTab === 'general' && (
               <div className="space-y-10">
                 <div>
-                  <h3 className="text-xl font-black text-[#0f172a] mb-8">Thông tin website</h3>
+                  <h3 className="font-heading text-xl font-extrabold text-[#0f172a] mb-8">Thông tin website</h3>
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Tên website</label>
+                      <label className="font-heading block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Tên website</label>
                       <input
                         type="text"
                         value={settings.siteName}
                         onChange={(e) => setSettings({ ...settings, siteName: e.target.value })}
-                        className="w-full bg-[#f8fafc]/30 border border-[#f8fafc] rounded-2xl px-6 py-4 text-[#0f172a] font-bold focus:outline-none focus:border-[#4f46e5]/50 transition-all"
+                        className="font-body w-full bg-[#f8fafc]/30 border border-[#f8fafc] rounded-2xl px-6 py-4 text-[#0f172a] font-bold focus:outline-none focus:border-[#4f46e5]/50 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Mô tả</label>
+                      <label className="font-heading block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Mô tả</label>
                       <textarea
                         value={settings.siteDescription}
                         onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })}
                         rows={3}
-                        className="w-full bg-[#f8fafc]/30 border border-[#f8fafc] rounded-2xl px-6 py-4 text-[#0f172a] font-bold focus:outline-none focus:border-[#4f46e5]/50 transition-all resize-none"
+                        className="font-body w-full bg-[#f8fafc]/30 border border-[#f8fafc] rounded-2xl px-6 py-4 text-[#0f172a] font-bold focus:outline-none focus:border-[#4f46e5]/50 transition-all resize-none"
                       />
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t border-[#f8fafc] pt-10">
-                  <h3 className="text-xl font-black text-[#0f172a] mb-8">Chế độ hoạt động</h3>
+                  <h3 className="font-heading text-xl font-extrabold text-[#0f172a] mb-8">Chế độ hoạt động</h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-6 bg-[#f8fafc]/30 rounded-[2rem] border border-[#f8fafc]">
                       <div className="flex items-center gap-4">
@@ -167,8 +167,8 @@ const AdminSettings = () => {
                           <AlertTriangle className="w-6 h-6 text-blue-500" />
                         </div>
                         <div>
-                          <p className="font-black text-[#0f172a]">Chế độ bảo trì</p>
-                          <p className="text-xs font-bold text-slate-400">Tạm dừng truy cập cho người dùng</p>
+                          <p className="font-heading font-extrabold text-[#0f172a]">Chế độ bảo trì</p>
+                          <p className="font-body text-xs font-bold text-slate-400">Tạm dừng truy cập cho người dùng</p>
                         </div>
                       </div>
                       <button
@@ -189,8 +189,8 @@ const AdminSettings = () => {
                           <Globe className="w-6 h-6 text-emerald-500" />
                         </div>
                         <div>
-                          <p className="font-black text-[#0f172a]">Cho phép đăng ký</p>
-                          <p className="text-xs font-bold text-slate-400">Người dùng mới có thể tạo tài khoản</p>
+                          <p className="font-heading font-extrabold text-[#0f172a]">Cho phép đăng ký</p>
+                          <p className="font-body text-xs font-bold text-slate-400">Người dùng mới có thể tạo tài khoản</p>
                         </div>
                       </div>
                       <button
@@ -212,22 +212,22 @@ const AdminSettings = () => {
             {activeTab === 'security' && (
               <div className="space-y-10">
                 <div>
-                  <h3 className="text-xl font-black text-[#0f172a] mb-8">Bảo mật phiên</h3>
+                  <h3 className="font-heading text-xl font-extrabold text-[#0f172a] mb-8">Bảo mật phiên</h3>
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Thời gian hết hạn phiên (phút)</label>
+                      <label className="font-heading block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Thời gian hết hạn phiên (phút)</label>
                       <input
                         type="number"
                         value={settings.sessionTimeout}
                         onChange={(e) => setSettings({ ...settings, sessionTimeout: parseInt(e.target.value) })}
-                        className="w-full bg-[#f8fafc]/30 border border-[#f8fafc] rounded-2xl px-6 py-4 text-[#0f172a] font-bold focus:outline-none focus:border-[#4f46e5]/50 transition-all"
+                        className="font-body w-full bg-[#f8fafc]/30 border border-[#f8fafc] rounded-2xl px-6 py-4 text-[#0f172a] font-bold focus:outline-none focus:border-[#4f46e5]/50 transition-all"
                       />
                     </div>
                   </div>
                 </div>
 
                 <div className="border-t border-[#f8fafc] pt-10">
-                  <h3 className="text-xl font-black text-[#0f172a] mb-8">Tùy chọn bảo mật cao cấp</h3>
+                  <h3 className="font-heading text-xl font-extrabold text-[#0f172a] mb-8">Tùy chọn bảo mật cao cấp</h3>
                   <div className="grid gap-6">
                     <div className="flex items-center justify-between p-6 bg-[#f8fafc]/30 rounded-[2rem] border border-[#f8fafc]">
                       <div className="flex items-center gap-4">
@@ -235,11 +235,11 @@ const AdminSettings = () => {
                           <Key className="w-6 h-6 text-indigo-500" />
                         </div>
                         <div>
-                          <p className="font-black text-[#0f172a]">Xác thực 2 yếu tố</p>
-                          <p className="text-xs font-bold text-slate-400">Bắt buộc cho tài khoản admin</p>
+                          <p className="font-heading font-extrabold text-[#0f172a]">Xác thực 2 yếu tố</p>
+                          <p className="font-body text-xs font-bold text-slate-400">Bắt buộc cho tài khoản admin</p>
                         </div>
                       </div>
-                      <span className="px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest">Đã bật</span>
+                      <span className="font-heading px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-extrabold uppercase tracking-widest">Đã bật</span>
                     </div>
                     <div className="flex items-center justify-between p-6 bg-[#f8fafc]/30 rounded-[2rem] border border-[#f8fafc]">
                       <div className="flex items-center gap-4">
@@ -247,11 +247,11 @@ const AdminSettings = () => {
                           <Shield className="w-6 h-6 text-violet-500" />
                         </div>
                         <div>
-                          <p className="font-black text-[#0f172a]">Mã hóa dữ liệu</p>
-                          <p className="text-xs font-bold text-slate-400">Tiêu chuẩn quân đội AES-256</p>
+                          <p className="font-heading font-extrabold text-[#0f172a]">Mã hóa dữ liệu</p>
+                          <p className="font-body text-xs font-bold text-slate-400">Tiêu chuẩn quân đội AES-256</p>
                         </div>
                       </div>
-                      <span className="px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest">Hoạt động</span>
+                      <span className="font-heading px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-extrabold uppercase tracking-widest">Hoạt động</span>
                     </div>
                   </div>
                 </div>
@@ -261,15 +261,15 @@ const AdminSettings = () => {
             {activeTab === 'notifications' && (
               <div className="space-y-10">
                 <div>
-                  <h3 className="text-xl font-black text-[#0f172a] mb-8">Hệ thống thông báo</h3>
+                  <h3 className="font-heading text-xl font-extrabold text-[#0f172a] mb-8">Hệ thống thông báo</h3>
                   <div className="flex items-center justify-between p-6 bg-[#f8fafc]/30 rounded-[2rem] border border-[#f8fafc]">
                     <div className="flex items-center gap-4">
                       <div className="p-4 bg-cyan-50 rounded-2xl">
                         <Mail className="w-6 h-6 text-cyan-500" />
                       </div>
                       <div>
-                        <p className="font-black text-[#0f172a]">Gửi email thông báo</p>
-                        <p className="text-xs font-bold text-slate-400">Thông báo tự động cho người dùng</p>
+                        <p className="font-heading font-extrabold text-[#0f172a]">Gửi email thông báo</p>
+                        <p className="font-body text-xs font-bold text-slate-400">Thông báo tự động cho người dùng</p>
                       </div>
                     </div>
                     <button
@@ -290,7 +290,7 @@ const AdminSettings = () => {
             {activeTab === 'database' && (
               <div className="space-y-10">
                 <div>
-                  <h3 className="text-xl font-black text-[#0f172a] mb-8">Quản trị dữ liệu</h3>
+                  <h3 className="font-heading text-xl font-extrabold text-[#0f172a] mb-8">Quản trị dữ liệu</h3>
                   <div className="space-y-6">
                     <div className="flex items-center justify-between p-6 bg-[#f8fafc]/30 rounded-[2rem] border border-[#f8fafc]">
                       <div className="flex items-center gap-4">
@@ -298,8 +298,8 @@ const AdminSettings = () => {
                           <Cloud className="w-6 h-6 text-emerald-500" />
                         </div>
                         <div>
-                          <p className="font-black text-[#0f172a]">Tự động sao lưu</p>
-                          <p className="text-xs font-bold text-slate-400">Bảo mật dữ liệu trên đám mây</p>
+                          <p className="font-heading font-extrabold text-[#0f172a]">Tự động sao lưu</p>
+                          <p className="font-body text-xs font-bold text-slate-400">Bảo mật dữ liệu trên đám mây</p>
                         </div>
                       </div>
                       <button
@@ -315,11 +315,11 @@ const AdminSettings = () => {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Tần suất sao lưu</label>
+                      <label className="font-heading block text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Tần suất sao lưu</label>
                       <select
                         value={settings.backupFrequency}
                         onChange={(e) => setSettings({ ...settings, backupFrequency: e.target.value })}
-                        className="w-full bg-[#f8fafc]/30 border border-[#f8fafc] rounded-2xl px-6 py-4 text-[#0f172a] font-bold focus:outline-none focus:border-[#4f46e5]/50 transition-all"
+                        className="font-body w-full bg-[#f8fafc]/30 border border-[#f8fafc] rounded-2xl px-6 py-4 text-[#0f172a] font-bold focus:outline-none focus:border-[#4f46e5]/50 transition-all"
                       >
                         <option value="hourly">Mỗi giờ</option>
                         <option value="daily">Hàng ngày</option>
@@ -330,7 +330,7 @@ const AdminSettings = () => {
                 </div>
 
                 <div className="border-t border-[#f8fafc] pt-10">
-                  <h3 className="text-xl font-black text-[#0f172a] mb-8">Tình trạng máy chủ</h3>
+                  <h3 className="font-heading text-xl font-extrabold text-[#0f172a] mb-8">Tình trạng máy chủ</h3>
                   <div className="grid gap-6">
                     <div className="flex items-center justify-between p-6 bg-[#f8fafc]/30 rounded-[2rem] border border-[#f8fafc]">
                       <div className="flex items-center gap-4">
@@ -338,11 +338,11 @@ const AdminSettings = () => {
                           <Server className="w-6 h-6 text-indigo-500" />
                         </div>
                         <div>
-                          <p className="font-black text-[#0f172a]">Node Server</p>
-                          <p className="text-xs font-bold text-slate-400">Uptime: 99.9% - Latency: 24ms</p>
+                          <p className="font-heading font-extrabold text-[#0f172a]">Node Server</p>
+                          <p className="font-body text-xs font-bold text-slate-400">Uptime: 99.9% - Latency: 24ms</p>
                         </div>
                       </div>
-                      <span className="flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                      <span className="font-heading flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-extrabold uppercase tracking-widest">
                         <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                         ONLINE
                       </span>
@@ -353,11 +353,11 @@ const AdminSettings = () => {
                           <Database className="w-6 h-6 text-violet-500" />
                         </div>
                         <div>
-                          <p className="font-black text-[#0f172a]">Supabase DB</p>
-                          <p className="text-xs font-bold text-slate-400">PostgreSQL - 100% Availability</p>
+                          <p className="font-heading font-extrabold text-[#0f172a]">Supabase DB</p>
+                          <p className="font-body text-xs font-bold text-slate-400">PostgreSQL - 100% Availability</p>
                         </div>
                       </div>
-                      <span className="flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                      <span className="font-heading flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-extrabold uppercase tracking-widest">
                         <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                         CONNECTED
                       </span>

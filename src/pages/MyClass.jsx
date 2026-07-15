@@ -220,8 +220,8 @@ const MyClass = () => {
             <div className="w-20 h-20 bg-indigo-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-inner">
               <GraduationCap className="w-10 h-10 text-indigo-600 animate-bounce" />
             </div>
-            <h2 className="text-3xl font-black text-slate-900 mb-3">Chưa có lớp học nào</h2>
-            <p className="text-slate-500 font-bold mb-8 leading-relaxed">
+            <h2 className="font-heading text-3xl font-extrabold text-slate-900 mb-3">Chưa có lớp học nào</h2>
+            <p className="font-body text-slate-500 font-bold mb-8 leading-relaxed">
               Kết nối với thầy cô bằng cách nhập mã lớp học (Class Code) được cung cấp để tham gia các buổi thảo luận, nhận thông báo bài học và hoàn thành các thử thách được giao nhé!
             </p>
             <button
@@ -253,7 +253,7 @@ const MyClass = () => {
                   <GraduationCap className="w-7 h-7 text-indigo-600" />
                 </div>
                 <div>
-                  <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{activeClass?.name}</h1>
+                  <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{activeClass?.name}</h1>
                   
                   <div className="flex flex-wrap items-center gap-4 mt-2">
                     {/* Class Code */}
@@ -336,7 +336,7 @@ const MyClass = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-black text-sm transition-all ${
+                      className={`font-heading w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-bold text-sm transition-all ${
                         active 
                         ? 'bg-indigo-50 text-indigo-700' 
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -363,7 +363,7 @@ const MyClass = () => {
                 {activeTab === 'feed' && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-black text-slate-900">Thông báo mới nhất</h2>
+                      <h2 className="font-heading text-xl font-extrabold text-slate-900">Thông báo mới nhất</h2>
                       <span className="text-xs text-slate-400 font-bold">{announcements.length} thông báo</span>
                     </div>
 
@@ -378,8 +378,8 @@ const MyClass = () => {
                           <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-indigo-600" />
                           <div className="flex items-start justify-between gap-4">
                             <div>
-                              <h3 className="font-black text-slate-900 text-lg mb-2">{ann.title}</h3>
-                              <p className="text-slate-600 leading-relaxed text-sm whitespace-pre-line font-medium">{ann.content}</p>
+                              <h3 className="font-heading font-extrabold text-slate-900 text-lg mb-2">{ann.title}</h3>
+                              <p className="font-body text-slate-600 leading-relaxed text-sm whitespace-pre-line font-medium">{ann.content}</p>
                             </div>
                           </div>
                           <div className="flex items-center justify-between border-t border-slate-50 mt-6 pt-4 text-xs font-bold text-slate-400">
@@ -400,7 +400,7 @@ const MyClass = () => {
                 {activeTab === 'assignments' && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-black text-slate-900">Bài tập & Thử thách được giao</h2>
+                      <h2 className="font-heading text-xl font-extrabold text-slate-900">Bài tập & Thử thách được giao</h2>
                       <span className="text-xs text-slate-400 font-bold">{assignments.length} nhiệm vụ</span>
                     </div>
 
@@ -547,7 +547,7 @@ const MyClass = () => {
                 {activeTab === 'meetings' && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-black text-slate-900">Các buổi học trực tuyến</h2>
+                      <h2 className="font-heading text-xl font-extrabold text-slate-900">Các buổi học trực tuyến</h2>
                       <span className="text-xs text-slate-400 font-bold">{meetings.length} buổi học</span>
                     </div>
 
@@ -609,7 +609,7 @@ const MyClass = () => {
                 {activeTab === 'members' && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-black text-slate-900">Danh sách học sinh trong lớp</h2>
+                      <h2 className="font-heading text-xl font-extrabold text-slate-900">Danh sách học sinh trong lớp</h2>
                       <span className="text-xs text-slate-400 font-bold">{members.length} học sinh</span>
                     </div>
 
@@ -654,7 +654,7 @@ const MyClass = () => {
       {showJoinModal && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white border border-slate-100 rounded-[2rem] p-8 w-full max-w-md shadow-2xl relative">
-            <h3 className="text-2xl font-black text-slate-900 mb-2">Tham gia lớp học mới</h3>
+            <h3 className="font-heading text-2xl font-extrabold text-slate-900 mb-2">Tham gia lớp học mới</h3>
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-6">Nhập mã lớp gồm 6 ký tự để kết nối</p>
             
             <form onSubmit={handleJoinClass} className="space-y-6">

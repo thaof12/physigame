@@ -180,8 +180,8 @@ const PendingTeachersTab = () => {
               <Clock className="w-5 h-5 text-indigo-600" />
             </div>
             <div>
-              <p className="text-2xl font-black text-slate-900">{pendingTeachers.length}</p>
-              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Chờ duyệt</p>
+              <p className="font-heading text-2xl font-extrabold text-slate-900">{pendingTeachers.length}</p>
+              <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Chờ duyệt</p>
             </div>
           </div>
         </div>
@@ -196,10 +196,10 @@ const PendingTeachersTab = () => {
               <UserCheck className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <p className="text-2xl font-black text-slate-900">
+              <p className="font-heading text-2xl font-extrabold text-slate-900">
                 {allTeachers.filter(t => t.teacherStatus === 'verified').length}
               </p>
-              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Đã duyệt</p>
+              <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Đã duyệt</p>
             </div>
           </div>
         </div>
@@ -214,10 +214,10 @@ const PendingTeachersTab = () => {
               <UserX className="w-5 h-5 text-rose-600" />
             </div>
             <div>
-              <p className="text-2xl font-black text-slate-900">
+              <p className="font-heading text-2xl font-extrabold text-slate-900">
                 {allTeachers.filter(t => t.teacherStatus === 'rejected').length}
               </p>
-              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Đã từ chối</p>
+              <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Đã từ chối</p>
             </div>
           </div>
         </div>
@@ -232,8 +232,8 @@ const PendingTeachersTab = () => {
               <GraduationCap className="w-5 h-5 text-violet-600" />
             </div>
             <div>
-              <p className="text-2xl font-black text-slate-900">{allTeachers.length}</p>
-              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Tổng hồ sơ</p>
+              <p className="font-heading text-2xl font-extrabold text-slate-900">{allTeachers.length}</p>
+              <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Tổng hồ sơ</p>
             </div>
           </div>
         </div>
@@ -251,7 +251,7 @@ const PendingTeachersTab = () => {
 
       {/* Refresh */}
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-black text-slate-900">
+        <h3 className="font-heading text-base font-extrabold text-slate-900">
           {teacherFilter === 'pending' ? 'Giáo viên chờ duyệt' :
            teacherFilter === 'verified' ? 'Giáo viên đã duyệt' :
            teacherFilter === 'rejected' ? 'Giáo viên bị từ chối' :
@@ -260,7 +260,7 @@ const PendingTeachersTab = () => {
         <button
           onClick={fetchTeachers}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-all font-black text-sm shadow-sm"
+          className="font-heading flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-all font-extrabold text-sm shadow-sm"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           <span>Làm mới</span>
@@ -269,16 +269,16 @@ const PendingTeachersTab = () => {
 
       {/* Teachers list */}
       {loading ? (
-        <div className="bg-white border border-slate-100 rounded-[2rem] p-16 text-center shadow-sm">
+        <div className="bg-white border border-slate-100 rounded-[2rem] p-16 text-center shadow-sm font-body">
           <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-400 font-bold text-sm">Đang tải dữ liệu...</p>
         </div>
       ) : filteredTeachers.length === 0 ? (
-        <div className="bg-white border border-slate-100 rounded-[2rem] p-16 text-center shadow-sm">
+        <div className="bg-white border border-slate-100 rounded-[2rem] p-16 text-center shadow-sm font-body">
           <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <GraduationCap className="w-8 h-8 text-slate-300" />
           </div>
-          <p className="text-slate-500 font-black">
+          <p className="text-slate-500 font-heading font-extrabold">
             {teacherFilter === 'pending' ? 'Không có giáo viên nào đang chờ duyệt' : 'Không có dữ liệu'}
           </p>
         </div>
@@ -296,13 +296,13 @@ const PendingTeachersTab = () => {
                     {teacher.avatar ? (
                       <img src={teacher.avatar} alt={teacher.displayName} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-white font-black text-lg">{(teacher.displayName || teacher.username || 'G')[0].toUpperCase()}</span>
+                      <span className="font-heading text-white font-extrabold text-lg">{(teacher.displayName || teacher.username || 'G')[0].toUpperCase()}</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-black text-slate-900">{teacher.displayName || teacher.username}</h4>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                      <h4 className="font-heading font-extrabold text-slate-900">{teacher.displayName || teacher.username}</h4>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-heading font-extrabold uppercase tracking-widest ${
                         teacher.teacherStatus === 'pending' ? 'bg-indigo-100 text-indigo-600' :
                         teacher.teacherStatus === 'verified' ? 'bg-emerald-100 text-emerald-600' :
                         'bg-rose-100 text-rose-600'
@@ -311,7 +311,7 @@ const PendingTeachersTab = () => {
                          teacher.teacherStatus === 'verified' ? 'Đã duyệt' : 'Từ chối'}
                       </span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-bold text-slate-400">
+                    <div className="font-body flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-bold text-slate-400">
                       <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" />{teacher.email}</span>
                       {teacher.teacherProfile?.school && (
                         <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5" />{teacher.teacherProfile.school}</span>
@@ -320,7 +320,7 @@ const PendingTeachersTab = () => {
                         <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />{teacher.teacherProfile.subject}</span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-300 mt-1">Đăng ký: {formatDate(teacher.teacherProfile?.appliedAt || teacher.createdAt)}</p>
+                    <p className="font-body text-xs text-slate-300 mt-1">Đăng ký: {formatDate(teacher.teacherProfile?.appliedAt || teacher.createdAt)}</p>
                   </div>
                 </div>
 
@@ -380,10 +380,10 @@ const PendingTeachersTab = () => {
               <div className="p-3 bg-rose-50 rounded-xl">
                 <XCircle className="w-6 h-6 text-rose-500" />
               </div>
-              <h3 className="text-xl font-black text-[#274dad]">Từ chối giáo viên</h3>
+              <h3 className="font-heading text-xl font-extrabold text-[#274dad]">Từ chối giáo viên</h3>
             </div>
-            <div className="mb-8">
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
+            <div className="mb-8 font-body">
+              <label className="font-heading block text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3">
                 Lý do từ chối (tùy chọn)
               </label>
               <textarea
@@ -397,14 +397,14 @@ const PendingTeachersTab = () => {
             <div className="flex gap-4">
               <button
                 onClick={() => { setRejectModal(null); setRejectReason(''); }}
-                className="flex-1 px-6 py-4 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest transition-all"
+                className="font-heading flex-1 px-6 py-4 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-2xl font-extrabold text-xs uppercase tracking-widest transition-all"
               >
                 Hủy bỏ
               </button>
               <button
                 onClick={handleReject}
                 disabled={actionLoading === rejectModal}
-                className="flex-1 px-6 py-4 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-rose-500/20 disabled:opacity-50"
+                className="font-heading flex-1 px-6 py-4 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl font-extrabold text-xs uppercase tracking-widest transition-all shadow-lg shadow-rose-500/20 disabled:opacity-50"
               >
                 {actionLoading === rejectModal ? 'ĐANG XỬ LÝ...' : 'XÁC NHẬN'}
               </button>
@@ -657,21 +657,21 @@ const AdminUsers = () => {
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-[#274dad]">Quản lý người dùng</h1>
-          <p className="text-slate-500 font-bold text-sm mt-1">Quản lý học sinh và giáo viên trên hệ thống</p>
+          <h1 className="font-heading text-2xl font-extrabold text-[#274dad]">Quản lý người dùng</h1>
+          <p className="font-body text-slate-500 font-bold text-sm mt-1">Quản lý học sinh và giáo viên trên hệ thống</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-[#e4f2f0] border border-transparent rounded-xl text-slate-500 hover:text-[#2099e9] transition-all font-bold">
+          <button className="font-heading flex items-center gap-2 px-4 py-2.5 bg-[#e4f2f0] border border-transparent rounded-xl text-slate-500 hover:text-[#2099e9] transition-all font-extrabold text-sm">
             <Upload className="w-4 h-4" />
-            <span className="hidden sm:inline text-sm">Nhập</span>
+            <span className="hidden sm:inline">Nhập</span>
           </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-[#e4f2f0] border border-transparent rounded-xl text-slate-500 hover:text-[#2099e9] transition-all font-bold">
+          <button className="font-heading flex items-center gap-2 px-4 py-2.5 bg-[#e4f2f0] border border-transparent rounded-xl text-slate-500 hover:text-[#2099e9] transition-all font-extrabold text-sm">
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline text-sm">Xuất</span>
+            <span className="hidden sm:inline">Xuất</span>
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] rounded-xl text-white text-sm font-black shadow-lg shadow-blue-500/10 hover:brightness-110 transition-all"
+            className="font-heading flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] rounded-xl text-white text-sm font-extrabold shadow-lg shadow-blue-500/10 hover:brightness-110 transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>THÊM MỚI</span>
@@ -683,7 +683,7 @@ const AdminUsers = () => {
       <div className="flex gap-2 p-1 bg-[#e4f2f0] rounded-xl w-fit">
         <button
           onClick={() => setActiveTab('users')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-black transition-all ${
+          className={`font-heading flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-extrabold transition-all ${
             activeTab === 'users' ? 'bg-white text-[#2099e9] shadow-sm' : 'text-slate-400 hover:text-[#2099e9]'
           }`}
         >
@@ -692,7 +692,7 @@ const AdminUsers = () => {
         </button>
         <button
           onClick={() => setActiveTab('pending-teachers')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-black transition-all ${
+          className={`font-heading flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-extrabold transition-all ${
             activeTab === 'pending-teachers' ? 'bg-white text-[#2099e9] shadow-sm' : 'text-slate-400 hover:text-[#2099e9]'
           }`}
         >
@@ -714,8 +714,8 @@ const AdminUsers = () => {
                   <Users className="w-6 h-6 text-indigo-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-[#274dad]">{stats.total}</p>
-                  <p className="text-xs font-bold text-slate-400">Tổng người dùng</p>
+                  <p className="font-heading text-2xl font-extrabold text-[#274dad]">{stats.total}</p>
+                  <p className="font-heading text-xs font-extrabold text-slate-400">Tổng người dùng</p>
                 </div>
               </div>
             </div>
@@ -725,8 +725,8 @@ const AdminUsers = () => {
                   <Users className="w-6 h-6 text-violet-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-[#274dad]">{stats.students}</p>
-                  <p className="text-xs font-bold text-slate-400">Học sinh</p>
+                  <p className="font-heading text-2xl font-extrabold text-[#274dad]">{stats.students}</p>
+                  <p className="font-heading text-xs font-extrabold text-slate-400">Học sinh</p>
                 </div>
               </div>
             </div>
@@ -736,8 +736,8 @@ const AdminUsers = () => {
                   <GraduationCap className="w-6 h-6 text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-[#274dad]">{stats.teachers}</p>
-                  <p className="text-xs font-bold text-slate-400">Giáo viên</p>
+                  <p className="font-heading text-2xl font-extrabold text-[#274dad]">{stats.teachers}</p>
+                  <p className="font-heading text-xs font-extrabold text-slate-400">Giáo viên</p>
                 </div>
               </div>
             </div>
@@ -747,8 +747,8 @@ const AdminUsers = () => {
                   <UserCheck className="w-6 h-6 text-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-[#274dad]">{stats.active}</p>
-                  <p className="text-xs font-bold text-slate-400">Đang hoạt động</p>
+                  <p className="font-heading text-2xl font-extrabold text-[#274dad]">{stats.active}</p>
+                  <p className="font-heading text-xs font-extrabold text-slate-400">Đang hoạt động</p>
                 </div>
               </div>
             </div>
@@ -756,7 +756,7 @@ const AdminUsers = () => {
 
           {/* Filters */}
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#85e4fb]/20">
-            <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-4 font-body">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
@@ -797,22 +797,22 @@ const AdminUsers = () => {
             </div>
             {selectedUsers.length > 0 && (
               <div className="flex items-center gap-3 mt-4 pt-4 border-t border-[#e4f2f0]">
-                <span className="text-sm font-bold text-slate-400">Đã chọn {selectedUsers.length} người dùng</span>
+                <span className="text-sm font-bold text-slate-400 font-body">Đã chọn {selectedUsers.length} người dùng</span>
                 <button 
                   onClick={() => handleBatchStatusUpdate('active')}
-                  className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-black hover:bg-emerald-100 transition-colors"
+                  className="font-heading px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-extrabold hover:bg-emerald-100 transition-colors"
                 >
                   KÍCH HOẠT
                 </button>
                 <button 
                   onClick={() => handleBatchStatusUpdate('inactive')}
-                  className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-black hover:bg-blue-100 transition-colors"
+                  className="font-heading px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-extrabold hover:bg-blue-100 transition-colors"
                 >
                   VÔ HIỆU HÓA
                 </button>
                 <button 
                   onClick={handleBatchDelete}
-                  className="px-3 py-1.5 bg-rose-50 text-rose-600 rounded-lg text-xs font-black hover:bg-rose-100 transition-colors"
+                  className="font-heading px-3 py-1.5 bg-rose-50 text-rose-600 rounded-lg text-xs font-extrabold hover:bg-rose-100 transition-colors"
                 >
                   XÓA
                 </button>
@@ -824,7 +824,7 @@ const AdminUsers = () => {
           {loading && (
             <div className="py-20 flex flex-col items-center justify-center text-slate-400">
                <div className="w-12 h-12 border-4 border-[#2099e9] border-t-transparent rounded-full animate-spin mb-6"></div>
-               <p className="font-black text-[#274dad]">Đang truy vấn dữ liệu học viên...</p>
+               <p className="font-heading font-extrabold text-[#274dad]">Đang truy vấn dữ liệu học viên...</p>
             </div>
           )}
 
@@ -844,18 +844,18 @@ const AdminUsers = () => {
                             className="w-5 h-5 rounded-lg border-[#85e4fb] bg-[#e4f2f0]/30 text-[#2099e9] focus:ring-[#2099e9]/20 transition-all cursor-pointer"
                           />
                         </th>
-                        <th className="w-[35%] px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Người dùng</th>
-                        <th className="w-[15%] px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Vai trò</th>
-                        <th className="w-[15%] px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Trạng thái</th>
-                        <th className="w-[15%] px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiến độ</th>
-                        <th className="w-[10%] px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Hoạt động cuối</th>
-                        <th className="w-[5%] px-6 py-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Thao tác</th>
+                        <th className="font-heading w-[35%] px-6 py-6 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Người dùng</th>
+                        <th className="font-heading w-[15%] px-6 py-6 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Vai trò</th>
+                        <th className="font-heading w-[15%] px-6 py-6 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Trạng thái</th>
+                        <th className="font-heading w-[15%] px-6 py-6 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Tiến độ</th>
+                        <th className="font-heading w-[10%] px-6 py-6 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Hoạt động cuối</th>
+                        <th className="font-heading w-[5%] px-6 py-6 text-right text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#e4f2f0]">
                       {paginatedUsers.map((user) => (
                         <tr key={user.id} className="hover:bg-[#e4f2f0]/20 transition-colors group">
-                          <td className="px-6 py-6">
+                           <td className="px-6 py-6">
                             <input
                               type="checkbox"
                               checked={selectedUsers.includes(user.id)}
@@ -878,17 +878,17 @@ const AdminUsers = () => {
                                 ) : user.role === 'teacher' ? (
                                   <GraduationCap className="w-6 h-6 text-white" />
                                 ) : (
-                                  <span className="text-white font-black text-sm">{user.name[0]?.toUpperCase()}</span>
+                                  <span className="font-heading text-white font-extrabold text-sm">{user.name[0]?.toUpperCase()}</span>
                                 )}
                               </div>
                               <div>
-                                <p className="text-sm font-black text-[#274dad] group-hover/name:text-[#2099e9] transition-colors">{user.name}</p>
-                                <p className="text-xs font-bold text-slate-400">{user.email}</p>
+                                <p className="font-heading text-sm font-extrabold text-[#274dad] group-hover/name:text-[#2099e9] transition-colors">{user.name}</p>
+                                <p className="font-body text-xs font-bold text-slate-400">{user.email}</p>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-6">
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                            <span className={`font-heading inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest ${
                               user.role === 'teacher'
                                 ? (user.status === 'rejected'
                                     ? 'bg-rose-50 text-rose-600 border border-rose-100'
@@ -915,7 +915,7 @@ const AdminUsers = () => {
                             </span>
                           </td>
                           <td className="px-6 py-6">
-                            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                            <span className={`font-heading inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest ${
                               user.status === 'active'
                                 ? 'bg-emerald-50 text-emerald-500'
                                 : user.status === 'pending'
@@ -949,16 +949,16 @@ const AdminUsers = () => {
                           </td>
                           <td className="px-6 py-6">
                             {user.role === 'student' ? (
-                              <div className="text-xs font-bold text-slate-400">
+                              <div className="font-body text-xs font-bold text-slate-400">
                                 <p>{user.lessonsCompleted} BÀI HỌC</p>
                                 <p>{user.exercisesCompleted} BÀI TẬP</p>
                               </div>
                             ) : (
-                              <span className="text-xs text-slate-300">—</span>
+                              <span className="font-body text-xs text-slate-300">—</span>
                             )}
                           </td>
                           <td className="px-6 py-6">
-                            <span className="text-xs font-bold text-slate-400 uppercase">{user.lastActive}</span>
+                            <span className="font-body text-xs font-bold text-slate-400 uppercase">{user.lastActive}</span>
                           </td>
                           <td className="px-6 py-6">
                             <div className="flex items-center justify-end gap-3">
@@ -992,7 +992,7 @@ const AdminUsers = () => {
                 </div>
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between px-8 py-6 border-t border-[#e4f2f0] bg-slate-50/30">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">
                       Hiển thị {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredUsers.length)} / {filteredUsers.length} người dùng
                     </p>
                     <div className="flex items-center gap-2">
@@ -1008,7 +1008,7 @@ const AdminUsers = () => {
                           <button
                             key={page}
                             onClick={() => setCurrentPage(page)}
-                            className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${
+                            className={`font-heading w-10 h-10 rounded-xl text-xs font-extrabold transition-all ${
                               page === currentPage
                                 ? 'bg-[#2099e9] text-white shadow-lg shadow-blue-500/20'
                                 : 'text-slate-400 hover:text-[#274dad] hover:bg-[#e4f2f0]'
@@ -1039,7 +1039,7 @@ const AdminUsers = () => {
         <div className="fixed inset-0 bg-[#274dad]/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-[#85e4fb]/20">
             <div className="flex items-center justify-between p-8 border-b border-[#e4f2f0]">
-              <h3 className="text-xl font-black text-[#274dad]">Chi tiết người dùng</h3>
+              <h3 className="font-heading text-xl font-extrabold text-[#274dad]">Chi tiết người dùng</h3>
               <button
                 onClick={() => setShowUserDetail(null)}
                 className="p-2.5 text-slate-400 hover:text-[#2099e9] hover:bg-[#e4f2f0] rounded-xl transition-all"
@@ -1059,18 +1059,18 @@ const AdminUsers = () => {
                   ) : showUserDetail.role === 'teacher' ? (
                     <GraduationCap className="w-10 h-10" />
                   ) : (
-                    <span>{showUserDetail.name[0]?.toUpperCase()}</span>
+                    <span className="font-heading text-white font-extrabold text-2xl">{showUserDetail.name[0]?.toUpperCase()}</span>
                   )}
                 </div>
                 <div>
-                  <h4 className="text-2xl font-black text-[#274dad]">{showUserDetail.name}</h4>
-                  <p className="text-slate-400 font-bold">{showUserDetail.email}</p>
+                  <h4 className="font-heading text-2xl font-extrabold text-[#274dad]">{showUserDetail.name}</h4>
+                  <p className="font-body text-slate-400 font-bold">{showUserDetail.email}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Vai trò</p>
-                  <p className="font-black text-[#2099e9] text-sm uppercase">
+                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Vai trò</p>
+                  <p className="font-heading font-extrabold text-[#2099e9] text-sm uppercase">
                     {showUserDetail.role === 'teacher' ? (
                       showUserDetail.status === 'rejected'
                         ? 'Giáo viên (Từ chối)'
@@ -1081,8 +1081,8 @@ const AdminUsers = () => {
                   </p>
                 </div>
                 <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Trạng thái</p>
-                  <p className={`font-black text-sm uppercase ${
+                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Trạng thái</p>
+                  <p className={`font-heading font-extrabold text-sm uppercase ${
                     showUserDetail.status === 'active' ? 'text-emerald-500' :
                     showUserDetail.status === 'pending' ? 'text-amber-500' :
                     showUserDetail.status === 'rejected' ? 'text-rose-500' :
@@ -1095,37 +1095,37 @@ const AdminUsers = () => {
                   </p>
                 </div>
                 <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Ngày tham gia</p>
-                  <p className="font-black text-[#274dad] text-sm">{showUserDetail.joinDate}</p>
+                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Ngày tham gia</p>
+                  <p className="font-heading font-extrabold text-[#274dad] text-sm">{showUserDetail.joinDate}</p>
                 </div>
                 <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Hoạt động cuối</p>
-                  <p className="font-black text-[#274dad] text-sm">{showUserDetail.lastActive}</p>
+                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Hoạt động cuối</p>
+                  <p className="font-heading font-extrabold text-[#274dad] text-sm">{showUserDetail.lastActive}</p>
                 </div>
               </div>
               {showUserDetail.role === 'student' && (
                 <div className="bg-[#e4f2f0]/30 rounded-2xl p-6 border border-[#e4f2f0]">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Tiến độ học tập</p>
+                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-4">Tiến độ học tập</p>
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <p className="text-3xl font-black text-[#274dad]">{showUserDetail.lessonsCompleted}</p>
-                      <p className="text-xs font-bold text-slate-400">Bài học hoàn thành</p>
+                      <p className="font-heading text-3xl font-extrabold text-[#274dad]">{showUserDetail.lessonsCompleted}</p>
+                      <p className="font-body text-xs font-bold text-slate-400">Bài học hoàn thành</p>
                     </div>
                     <div>
-                      <p className="text-3xl font-black text-[#274dad]">{showUserDetail.exercisesCompleted}</p>
-                      <p className="text-xs font-bold text-slate-400">Bài tập hoàn thành</p>
+                      <p className="font-heading text-3xl font-extrabold text-[#274dad]">{showUserDetail.exercisesCompleted}</p>
+                      <p className="font-body text-xs font-bold text-slate-400">Bài tập hoàn thành</p>
                     </div>
                   </div>
                 </div>
               )}
             </div>
             <div className="flex items-center gap-4 p-8 border-t border-[#e4f2f0] bg-slate-50/50">
-              <button className="flex-1 py-4 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/10 hover:brightness-110 transition-all">
+              <button className="font-heading flex-1 py-4 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] text-white rounded-2xl font-extrabold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/10 hover:brightness-110 transition-all">
                 Chỉnh sửa
               </button>
               <button
                 onClick={() => setShowUserDetail(null)}
-                className="flex-1 py-4 bg-white border border-[#e4f2f0] text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#e4f2f0]/30 transition-all"
+                className="font-heading flex-1 py-4 bg-white border border-[#e4f2f0] text-slate-500 rounded-2xl font-extrabold text-xs uppercase tracking-widest hover:bg-[#e4f2f0]/30 transition-all"
               >
                 Đóng
               </button>
@@ -1139,12 +1139,12 @@ const AdminUsers = () => {
           <div className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-[#85e4fb]/20">
             <div className="p-8 bg-gradient-to-br from-indigo-500 to-[#274dad] text-white">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-2xl font-black">Chỉnh sửa thành viên</h3>
+                <h3 className="font-heading text-2xl font-extrabold">Chỉnh sửa thành viên</h3>
                 <button onClick={() => setShowEditModal(null)} className="p-2 hover:bg-white/10 rounded-xl transition-all">
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              <p className="font-bold opacity-80">Cập nhật thông tin cho {showEditModal.name}</p>
+              <p className="font-body font-bold opacity-80">Cập nhật thông tin cho {showEditModal.name}</p>
             </div>
             
             <form className="p-8 space-y-6" onSubmit={(e) => {
@@ -1160,21 +1160,21 @@ const AdminUsers = () => {
             }}>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Họ và tên</label>
+                  <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Họ và tên</label>
                   <input 
                     name="name"
                     defaultValue={showEditModal.name}
-                    className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all"
+                    className="font-body w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all"
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Vai trò</label>
+                    <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Vai trò</label>
                     <select 
                       name="role"
                       defaultValue={showEditModal.role}
-                      className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all"
+                      className="font-body w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all"
                     >
                       <option value="student">Học sinh</option>
                       <option value="teacher">Giáo viên</option>
@@ -1182,11 +1182,11 @@ const AdminUsers = () => {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Trạng thái</label>
+                    <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Trạng thái</label>
                     <select 
                       name="status"
                       defaultValue={showEditModal.status}
-                      className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all"
+                      className="font-body w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all"
                     >
                       <option value="active">Hoạt động</option>
                       <option value="pending">Chờ duyệt</option>
@@ -1199,11 +1199,11 @@ const AdminUsers = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Lớp học</label>
+                  <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Lớp học</label>
                   <select 
                     name="grade"
                     defaultValue={showEditModal.grade}
-                    className="w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-black focus:outline-none focus:border-[#2099e9] transition-all"
+                    className="font-body w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all"
                   >
                     {[6, 7, 8, 9, 10, 11, 12].map(g => (
                       <option key={g} value={g}>Lớp {g}</option>
@@ -1217,14 +1217,14 @@ const AdminUsers = () => {
                 <button 
                   type="button"
                   onClick={() => setShowEditModal(null)}
-                  className="flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all"
+                  className="font-heading flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-extrabold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all"
                 >
                   Hủy bỏ
                 </button>
                 <button 
                   type="submit"
                   disabled={actionLoading === showEditModal.id}
-                  className="flex-[2] py-4 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all disabled:opacity-50"
+                  className="font-heading flex-[2] py-4 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] text-white rounded-2xl font-extrabold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all disabled:opacity-50"
                 >
                   {actionLoading === showEditModal.id ? 'ĐANG CẬP NHẬT...' : 'LƯU THAY ĐỔI'}
                 </button>
@@ -1243,20 +1243,20 @@ const AdminUsers = () => {
                 <AlertCircle className="w-10 h-10" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-black text-[#274dad]">Xác nhận xóa?</h3>
-                <p className="text-slate-400 font-bold">Bạn có chắc chắn muốn xóa người dùng <span className="text-[#274dad]">{showDeleteConfirm.name}</span>? Hành động này không thể hoàn tác.</p>
+                <h3 className="font-heading text-2xl font-extrabold text-[#274dad]">Xác nhận xóa?</h3>
+                <p className="font-body text-slate-400 font-bold">Bạn có chắc chắn muốn xóa người dùng <span className="text-[#274dad]">{showDeleteConfirm.name}</span>? Hành động này không thể hoàn tác.</p>
               </div>
               <div className="flex gap-4 pt-4">
                 <button 
                   onClick={() => setShowDeleteConfirm(null)}
-                  className="flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all"
+                  className="font-heading flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-extrabold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all"
                 >
                   Hủy bỏ
                 </button>
                 <button 
                   onClick={() => handleDeleteUser(showDeleteConfirm.id)}
                   disabled={actionLoading === showDeleteConfirm.id}
-                  className="flex-1 py-4 bg-rose-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all disabled:opacity-50"
+                  className="font-heading flex-1 py-4 bg-rose-500 text-white rounded-2xl font-extrabold text-xs uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all disabled:opacity-50"
                 >
                   {actionLoading === showDeleteConfirm.id ? 'ĐANG XÓA...' : 'XÓA NGAY'}
                 </button>

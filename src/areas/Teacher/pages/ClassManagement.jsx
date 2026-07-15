@@ -399,7 +399,7 @@ const ClassManagement = () => {
                     setActiveTab(tab.id);
                     setSelectedAsgProgress(null);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-black text-sm transition-all ${
+                  className={`font-heading w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-extrabold text-sm transition-all ${
                     active 
                     ? 'bg-indigo-50 text-indigo-700' 
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'

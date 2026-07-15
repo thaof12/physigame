@@ -74,8 +74,8 @@ const AdminLayout = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center font-sans text-[#0f172a]">
-        <div className="text-center font-black">
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center font-body text-[#0f172a]">
+        <div className="text-center font-heading font-extrabold">
           <div className="w-16 h-16 border-4 border-[#4f46e5] border-t-transparent rounded-full animate-spin mx-auto mb-6 shadow-xl shadow-blue-500/20"></div>
           <p className="tracking-widest uppercase">Admin System Loading...</p>
         </div>
@@ -96,7 +96,7 @@ const AdminLayout = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex font-sans">
+    <div className="min-h-screen bg-[#f8fafc] flex font-body">
       {/* Mobile menu overlay */}
       {mobileMenuOpen && (
         <div
@@ -163,7 +163,7 @@ const AdminLayout = () => {
               >
                 <IconComponent className={`w-6 h-6 shrink-0 ${active ? 'text-white' : ''}`} />
                 {!sidebarCollapsed && (
-                  <span className="font-black text-sm tracking-tight">{item.label}</span>
+                  <span className="font-heading text-sm font-extrabold tracking-tight">{item.label}</span>
                 )}
               </button>
             );
@@ -178,9 +178,9 @@ const AdminLayout = () => {
                 <span className="text-[#0f172a] font-black text-xl italic">QT</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-black text-[#4f46e5] uppercase tracking-widest mb-0.5">Admin Account</p>
-                <p className="text-sm font-black text-[#0f172a] truncate">{admin?.name}</p>
-                <p className="text-[10px] text-slate-400 font-bold truncate">{admin?.email}</p>
+                <p className="font-heading text-[10px] font-extrabold text-[#4f46e5] uppercase tracking-widest mb-0.5">Admin Account</p>
+                <p className="font-heading text-sm font-extrabold text-[#0f172a] truncate">{admin?.name}</p>
+                <p className="font-body text-[10px] text-slate-400 font-bold truncate">{admin?.email}</p>
               </div>
             </div>
           )}
@@ -189,7 +189,7 @@ const AdminLayout = () => {
             onClick={handleLogout}
             className={`
               w-full flex items-center gap-4 px-5 py-4 rounded-[1.5rem]
-              text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all font-black text-sm
+              text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all font-heading font-extrabold text-sm
               ${sidebarCollapsed ? 'justify-center px-0 ring-0' : ''}
             `}
             title={sidebarCollapsed ? 'Đăng xuất' : ''}
@@ -222,7 +222,7 @@ const AdminLayout = () => {
               <input
                 type="text"
                 placeholder="Truy vấn dữ liệu bài học, người dùng, hệ thống..."
-                className="w-full bg-[#f8fafc]/50 border-2 border-transparent rounded-[1.5rem] pl-16 pr-8 py-4 text-sm text-[#0f172a] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#4f46e5] transition-all font-bold"
+                className="font-body w-full bg-[#f8fafc]/50 border-2 border-transparent rounded-[1.5rem] pl-16 pr-8 py-4 text-sm text-[#0f172a] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#4f46e5] transition-all font-bold"
               />
             </div>
           </div>

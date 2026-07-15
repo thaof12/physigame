@@ -55,12 +55,12 @@ const MyExperiments = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900">Thí nghiệm của tôi</h1>
-          <p className="text-slate-500 font-bold text-sm mt-1">Quản lý các thí nghiệm ảo bạn đã thiết kế</p>
+          <h1 className="font-heading text-3xl font-extrabold text-slate-900">Thí nghiệm của tôi</h1>
+          <p className="font-body text-slate-500 font-bold text-sm mt-1">Quản lý các thí nghiệm ảo bạn đã thiết kế</p>
         </div>
         <button
           onClick={() => navigate('/teacher/create?type=experiment')}
-          className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:brightness-110 text-white text-sm font-black rounded-[1.25rem] shadow-xl shadow-purple-500/20 transition-all uppercase tracking-widest"
+          className="font-heading flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:brightness-110 text-white text-sm font-extrabold rounded-[1.25rem] shadow-xl shadow-purple-500/20 transition-all uppercase tracking-widest"
         >
           <Plus className="w-5 h-5" />
           Tạo thí nghiệm mới
@@ -75,7 +75,7 @@ const MyExperiments = () => {
           placeholder="Tìm kiếm thí nghiệm..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-purple-500 transition-all font-bold"
+          className="font-body w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-purple-500 transition-all font-bold"
         />
       </div>
 
@@ -100,12 +100,12 @@ const MyExperiments = () => {
               <div className="p-6">
                 <div className="flex items-start justify-between mb-3 gap-2">
                   <div>
-                    <h3 className="text-slate-900 font-black text-lg mb-1 group-hover:text-purple-600 transition-colors">{experiment.name || experiment.title}</h3>
-                    <p className="text-sm text-slate-400 font-bold">
+                    <h3 className="font-heading text-slate-900 font-extrabold text-lg mb-1 group-hover:text-purple-600 transition-colors">{experiment.name || experiment.title}</h3>
+                    <p className="font-body text-sm text-slate-400 font-bold">
                       Lớp {experiment.grade || 8} • {experiment.category === 'molecule' ? 'Hóa học Phân tử' : 'Vật lý'}
                     </p>
                   </div>
-                  <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider shrink-0 ${
+                  <span className={`font-heading px-3 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wider shrink-0 ${
                     experiment.status === 'available' || experiment.status === 'published'
                       ? 'bg-emerald-50 text-emerald-600'
                       : 'bg-slate-50 text-slate-400'
@@ -114,7 +114,7 @@ const MyExperiments = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-4 text-sm text-slate-500 font-bold mb-6">
+                <div className="font-body flex items-center gap-4 text-sm text-slate-500 font-bold mb-6">
                   <span className="flex items-center gap-1.5">
                     <Settings className="w-4 h-4 text-slate-400" />
                     {experiment.time || '30 phút'}
@@ -126,7 +126,7 @@ const MyExperiments = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-violet-50 hover:bg-violet-100 border border-violet-100/50 hover:border-violet-200 text-violet-600 font-bold rounded-xl text-sm transition-all">
+                  <button className="font-heading flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-violet-50 hover:bg-violet-100 border border-violet-100/50 hover:border-violet-200 text-violet-600 font-extrabold rounded-xl text-sm transition-all">
                     <Play className="w-4 h-4" />
                     Chạy thử
                   </button>
@@ -150,10 +150,10 @@ const MyExperiments = () => {
       {filteredExperiments.length === 0 && (
         <div className="bg-white border border-slate-100 rounded-2xl py-16 text-center shadow-sm">
           <FlaskConical className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <p className="text-slate-400 font-bold">Chưa có thí nghiệm nào</p>
+          <p className="font-body text-slate-400 font-bold">Chưa có thí nghiệm nào</p>
           <button
             onClick={() => navigate('/teacher/create?type=experiment')}
-            className="mt-4 text-purple-600 hover:text-purple-700 font-black text-sm flex items-center justify-center gap-1.5 mx-auto hover:underline"
+            className="font-heading mt-4 text-purple-600 hover:text-purple-700 font-extrabold text-sm flex items-center justify-center gap-1.5 mx-auto hover:underline"
           >
             + Tạo thí nghiệm đầu tiên
           </button>

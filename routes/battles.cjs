@@ -85,7 +85,7 @@ router.post('/create', async (req, res) => {
     const battle = await Battle.create({
       room_id: roomId,
       game_type: gameType || 'physics',
-      game_mode: gameMode || 'mixed',
+      game_mode: gameMode || 'quiz',
       grade: grade || 'all',
       topic: topic || 'all',
       difficulty: difficulty || 'mixed',

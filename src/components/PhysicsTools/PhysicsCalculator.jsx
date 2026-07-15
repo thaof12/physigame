@@ -388,7 +388,7 @@ const PhysicsCalculator = () => {
   }, [selectedCategory, selectedFormula]);
 
   return (
-    <div className="bg-[#FFFFFF] font-sans min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728] relative overflow-hidden">
+    <div className="bg-[#FFFFFF] font-body min-h-screen selection:bg-[#274dad]/20 selection:text-[#4A3728] relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute inset-0 graph-grid opacity-[0.25] pointer-events-none" />
       <div className="absolute top-0 right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none bg-[#274dad]/10" />
@@ -424,11 +424,11 @@ const PhysicsCalculator = () => {
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </button>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-[#1E293B] tracking-tight flex items-center gap-3">
+              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight flex items-center gap-3">
                 <Calculator className="w-8 h-8 text-[#274dad]" />
                 Máy Trạm Xử Lý Số Liệu
               </h1>
-              <p className="text-slate-500 font-medium mt-1">
+              <p className="font-body text-slate-500 font-medium mt-1">
                 Lập trình và mô phỏng hệ thống đại lượng vật lý
               </p>
             </div>
@@ -444,7 +444,7 @@ const PhysicsCalculator = () => {
                 <Power className="w-6 h-6 text-[#274dad]/20" />
               </div>
 
-              <h2 className="text-lg font-black text-[#1E293B] mb-6 flex items-center gap-2 relative z-10">
+              <h2 className="font-heading text-lg font-extrabold text-[#1E293B] mb-6 flex items-center gap-2 relative z-10">
                 <span className="w-2 h-2 rounded-full bg-[#274dad]" />
                 Bảng Công Tắc Logic
               </h2>
@@ -512,10 +512,10 @@ const PhysicsCalculator = () => {
                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                       Mạch đang mở
                     </div>
-                    <h3 className="text-3xl font-black text-[#1E293B] mb-2 tracking-tight">
+                    <h3 className="font-heading text-3xl font-extrabold text-[#1E293B] mb-2 tracking-tight">
                       {selectedFormula.name}
                     </h3>
-                    <p className="text-slate-500 font-medium">
+                    <p className="font-body text-slate-500 font-medium">
                       {selectedFormula.description}
                     </p>
                   </div>
@@ -581,7 +581,7 @@ const PhysicsCalculator = () => {
             ) : (
               <div className="bg-white rounded-[2rem] border border-[#E5E7EB] border-dashed p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
                 <Terminal className="w-16 h-16 text-slate-200 mb-4" />
-                <p className="text-slate-500 font-medium">Hệ thống đang chờ. Vui lòng nạp chương trình công thức.</p>
+                <p className="font-body text-slate-500 font-medium">Hệ thống đang chờ. Vui lòng nạp chương trình công thức.</p>
               </div>
             )}
 

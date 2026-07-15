@@ -352,7 +352,7 @@ io.on('connection', (socket) => {
         const battle = await Battle.findByRoomId(roomId);
         if (battle) {
           dbGameSettings = {
-            gameMode: battle.game_mode || 'mixed',
+            gameMode: battle.game_mode || 'quiz',
             grade: battle.grade || 'all',
             topic: battle.topic || 'all',
             difficulty: battle.difficulty || 'mixed',
@@ -400,13 +400,12 @@ io.on('connection', (socket) => {
     const room = activeRooms.get(roomId);
     if (room && room.players.length === 2 && room.status === 'waiting') {
       room.status = 'playing';
-      const gameMode = room.gameSettings?.gameMode || 'mixed';
       console.log(`⚔️ Battle starting in room: ${roomId}`);
 
       setTimeout(() => {
         io.to(roomId).emit('pk:game-start', {
           gameSettings: room.gameSettings,
-          questions: gameMode === 'quiz' ? (room.questions?.length ? room.questions : getRandomQuestions(room.gameSettings?.totalQuestions || 10)) : null
+          questions: room.questions?.length ? room.questions : getRandomQuestions(room.gameSettings?.totalQuestions || 10)
         });
       }, 500);
     }
@@ -425,24 +424,6 @@ io.on('connection', (socket) => {
 
       socket.to(roomId).emit('pk:opponent-answered', {
         questionIndex,
-        opponentScore: room.scores[player?.firebaseUid] || 0
-      });
-    }
-  });
-
-  // Submit challenge result
-  socket.on('pk:submit-challenge', (data) => {
-    const { roomId, roundIndex, gameId, completed, score, pointsEarned, responseTime } = data;
-
-    const room = activeRooms.get(roomId);
-    if (room) {
-      const player = playerSockets.get(socket.id);
-      if (player) {
-        room.scores[player.firebaseUid] = (room.scores[player.firebaseUid] || 0) + (pointsEarned || 0);
-      }
-
-      socket.to(roomId).emit('pk:opponent-answered', {
-        questionIndex: roundIndex,
         opponentScore: room.scores[player?.firebaseUid] || 0
       });
     }

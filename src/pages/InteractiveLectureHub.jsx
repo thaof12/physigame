@@ -61,11 +61,11 @@ const InteractiveLectureHub = () => {
               >
                 <ArrowLeft className="w-6 h-6" />
               </button>
-              <h1 className="text-4xl md:text-5xl font-black text-[#1E293B] tracking-tight">
+              <h1 className="font-heading text-4xl md:text-5xl font-extrabold text-[#1E293B] tracking-tight">
                 THƯ VIỆN <span className="text-[#274dad]">BÀI GIẢNG</span>
               </h1>
             </div>
-            <p className="text-slate-500 text-lg font-medium ml-12">
+            <p className="font-body text-slate-500 text-lg font-medium ml-12">
               Tra cứu lý thuyết và video bài giảng theo khối lớp
             </p>
           </div>
@@ -116,11 +116,11 @@ const InteractiveLectureHub = () => {
                     LỚP {lecture.grade} • BÀI {lecture.id.replace('b', '')}
                   </div>
                   
-                  <h3 className="text-xl font-bold text-[#1E293B] mb-4 leading-tight group-hover:text-[#274dad] transition-colors">
+                  <h3 className="font-heading text-xl font-bold text-[#1E293B] mb-4 leading-tight group-hover:text-[#274dad] transition-colors">
                     {lecture.title}
                   </h3>
                   
-                  <p className="text-slate-500 text-sm mb-8 line-clamp-2 font-medium">
+                  <p className="font-body text-slate-500 text-sm mb-8 line-clamp-2 font-medium">
                     {lecture.chapterTitle}
                   </p>
                   

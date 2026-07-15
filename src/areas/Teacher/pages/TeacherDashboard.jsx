@@ -47,15 +47,15 @@ const StatCard = ({ title, value, change, icon: Icon, color }) => (
         <Icon className="w-6 h-6 text-white" />
       </div>
       {change && (
-        <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full text-xs font-black text-emerald-600">
+        <div className="font-heading flex items-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full text-xs font-extrabold text-emerald-600">
           <TrendingUp className="w-3.5 h-3.5" />
           <span>+{change}%</span>
         </div>
       )}
     </div>
     <div className="space-y-1">
-      <p className="text-3xl font-black text-slate-900 mb-1">{value !== undefined ? value.toLocaleString() : 0}</p>
-      <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{title}</p>
+      <p className="font-heading text-3xl font-extrabold text-slate-900 mb-1">{value !== undefined ? value.toLocaleString() : 0}</p>
+      <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">{title}</p>
     </div>
   </div>
 );
@@ -171,8 +171,8 @@ const TeacherDashboard = () => {
           <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
             <div className="flex items-center justify-between mb-10">
               <div className="space-y-1">
-                <h3 className="text-xl font-black text-slate-900">Hoạt động Gần đây</h3>
-                <p className="text-xs font-bold text-slate-400 tracking-widest uppercase">Luồng dữ liệu thời gian thực</p>
+                <h3 className="font-heading text-xl font-extrabold text-slate-900">Hoạt động Gần đây</h3>
+                <p className="font-body text-xs font-bold text-slate-400 tracking-widest uppercase">Luồng dữ liệu thời gian thực</p>
               </div>
               <button className="p-3 bg-slate-50 rounded-xl text-slate-500 border border-slate-100 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all">
                 <MoreVertical className="w-5 h-5" />
@@ -181,7 +181,7 @@ const TeacherDashboard = () => {
 
             <div className="space-y-6">
               {recentActivity.length === 0 ? (
-                <div className="py-10 text-center text-slate-400 font-bold">
+                <div className="font-body py-10 text-center text-slate-400 font-bold">
                   Chưa có hoạt động nào gần đây. Hãy soạn thêm nội dung mới!
                 </div>
               ) : (
@@ -196,8 +196,8 @@ const TeacherDashboard = () => {
                          activity.type === 'exercise' ? <FileQuestion className="w-6 h-6" /> : <FlaskConical className="w-6 h-6" />}
                       </div>
                       <div className="space-y-1">
-                        <h4 className="font-black text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">{activity.title}</h4>
-                        <div className="flex items-center gap-3 text-xs font-bold text-slate-400">
+                        <h4 className="font-heading font-extrabold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">{activity.title}</h4>
+                        <div className="font-body flex items-center gap-3 text-xs font-bold text-slate-400">
                           <span className="flex items-center gap-1">
                             <Eye className="w-3.5 h-3.5" />
                             {activity.views} lượt xem
@@ -212,7 +212,7 @@ const TeacherDashboard = () => {
                     </div>
                     
                     <div className="flex items-center gap-4">
-                       <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                       <span className={`font-heading px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest ${
                          activity.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
                        }`}>
                           {activity.status === 'active' ? 'Hoạt động' : 'Bản nháp'}
@@ -224,7 +224,7 @@ const TeacherDashboard = () => {
               )}
             </div>
             
-            <button className="w-full mt-10 py-5 bg-slate-50 text-slate-600 border border-slate-200 rounded-2xl font-black text-sm hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm">
+            <button className="font-heading w-full mt-10 py-5 bg-slate-50 text-slate-600 border border-slate-200 rounded-2xl font-extrabold text-sm hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm">
                Xem Tất Cả Hoạt Động
             </button>
           </div>
@@ -236,7 +236,7 @@ const TeacherDashboard = () => {
           
           {/* Quick Stats Mini */}
           <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
-            <h3 className="text-xl font-black text-slate-900 mb-8">Vật Lý Chỉ Số</h3>
+            <h3 className="font-heading text-xl font-extrabold text-slate-900 mb-8">Vật Lý Chỉ Số</h3>
             <div className="space-y-8">
               {[
                 { label: 'Tỷ lệ Hoàn thành', value: stats.averageCompletion + '%', icon: Target, color: 'text-indigo-600' },
@@ -249,8 +249,8 @@ const TeacherDashboard = () => {
                       <item.icon className={`w-5 h-5 ${item.color}`} />
                     </div>
                     <div>
-                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
-                      <p className="text-lg font-black text-slate-900">{item.value}</p>
+                      <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">{item.label}</p>
+                      <p className="font-heading text-lg font-extrabold text-slate-900">{item.value}</p>
                     </div>
                   </div>
                 </div>
@@ -264,23 +264,23 @@ const TeacherDashboard = () => {
             
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xl font-black">Thông báo Mới</h3>
+                <h3 className="font-heading text-xl font-extrabold">Thông báo Mới</h3>
                 <Bell className="w-6 h-6 text-indigo-300" />
               </div>
               
               <div className="space-y-6">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-indigo-200 font-bold text-xs">
+                  <div className="font-body p-8 text-center text-indigo-200 font-bold text-xs">
                     Chưa có thông báo mới nào.
                   </div>
                 ) : (
                   notifications.map((notif) => (
                     <div key={notif.id} className="p-5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/5 hover:bg-white/20 transition-all cursor-pointer group">
-                      <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-1">
+                      <p className="font-heading text-[10px] font-extrabold text-indigo-300 uppercase tracking-widest mb-1">
                         {new Date(notif.created_at).toLocaleDateString('vi-VN')} {new Date(notif.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}
                       </p>
-                      <h4 className="font-bold text-sm mb-1 group-hover:text-indigo-200 transition-colors">{notif.title}</h4>
-                      <p className="text-xs text-white/60 leading-relaxed font-semibold">{notif.content}</p>
+                      <h4 className="font-heading font-extrabold text-sm mb-1 group-hover:text-indigo-200 transition-colors">{notif.title}</h4>
+                      <p className="font-body text-xs text-white/60 leading-relaxed font-bold">{notif.content}</p>
                     </div>
                   ))
                 )}
@@ -291,15 +291,15 @@ const TeacherDashboard = () => {
           {/* Quick Calendar Placeholder */}
           <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xl font-black text-slate-900">Lịch Học Thuật</h3>
+                <h3 className="font-heading text-xl font-extrabold text-slate-900">Lịch Học Thuật</h3>
                 <Calendar className="w-6 h-6 text-indigo-600" />
              </div>
              <div className="flex flex-col items-center justify-center py-10 space-y-4 border-2 border-dashed border-slate-100 rounded-[2rem]">
                 <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
                     <AlertCircle className="w-8 h-8 text-slate-300" />
                 </div>
-                <p className="text-sm font-bold text-slate-400">Không có sự kiện sắp tới</p>
-                <button className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-black text-xs hover:brightness-110 transition-all shadow-md shadow-indigo-500/10">
+                <p className="font-body text-sm font-bold text-slate-400">Không có sự kiện sắp tới</p>
+                <button className="font-heading px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-extrabold text-xs hover:brightness-110 transition-all shadow-md shadow-indigo-500/10">
                   Thêm Sự Kiện
                 </button>
              </div>
