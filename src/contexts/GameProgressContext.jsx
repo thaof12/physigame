@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import api from '../config/api';
+import { logSessionActivity } from '../services/activityLogger';
 
 const GameProgressContext = createContext(null);
 
@@ -156,6 +157,15 @@ export const GameProgressProvider = ({ children }) => {
         });
 
         if (response.data.success) {
+          const xpGained = response.data.result?.xpGained || 0;
+          if (xpGained > 0) {
+            logSessionActivity(
+              'game',
+              'Hoàn thành thử thách',
+              `Thử thách ${gameId} - Khối ${grade}`,
+              xpGained
+            );
+          }
           // Cập nhật với data từ server
           if (isPassingScore) {
             setProgressByGrade(prev => ({

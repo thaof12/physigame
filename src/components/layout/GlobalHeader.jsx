@@ -92,12 +92,12 @@ const GlobalHeader = () => {
 
   return (
     <header className="absolute top-0 z-50 w-full bg-transparent">
-      <div className="w-full max-w-7xl mx-auto px-6 sm:px-10 h-24 flex items-center justify-between gap-8">
+      <div className="w-full max-w-[97%] mx-auto px-4 sm:px-6 md:px-10 h-28 flex items-center justify-between gap-8">
 
         {/* Brand & Logo (Left) */}
         <div className="flex-none">
           <Link to="/" className="flex items-center group cursor-pointer transition-transform duration-500 hover:scale-105">
-            <span className="font-premium-serif text-3xl font-bold text-slate-900 italic tracking-tight">Eureka</span>
+            <span className="font-premium-serif text-4xl font-bold text-slate-900 italic tracking-tight">Eureka</span>
           </Link>
         </div>
 
@@ -116,13 +116,13 @@ const GlobalHeader = () => {
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <button
-                  className={`font-heading flex items-center gap-2 px-4 py-2.5 rounded-xl font-extrabold text-[13px] tracking-wide transition-all duration-300 ${
+                  className={`font-heading flex items-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-sm tracking-wide transition-all duration-300 ${
                     parentActive 
                     ? 'bg-[#274dad] text-white shadow-[0_4px_12px_rgba(39,77,173,0.3)]' 
                     : 'text-slate-500 hover:bg-slate-50 hover:text-[#274dad]'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-5 h-5" />
                   {link.name}
                   {hasChildren && <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${activeDropdown === link.name ? 'rotate-180' : ''}`} />}
                 </button>
@@ -174,7 +174,7 @@ const GlobalHeader = () => {
             <Globe className="w-3.5 h-3.5" /> <span>{i18n.language === 'vi' ? 'EN' : 'VI'}</span>
           </button>
 
-          <div className="hidden lg:block h-10 w-px bg-slate-200 mx-1" />
+          <div className="hidden lg:block h-12 w-px bg-slate-200 mx-1" />
 
           {/* Auth Section */}
           <div className="flex items-center">
@@ -184,22 +184,22 @@ const GlobalHeader = () => {
                   className="group flex items-center gap-2 sm:gap-3 bg-white hover:bg-[#FFFFFF] rounded-2xl p-1 pr-2 sm:pr-4 cursor-pointer transition-all border border-slate-100 shadow-sm hover:shadow-md hover:border-[#274dad]/20"
                 >
                   {user?.profile?.avatar ? (
-                    <img src={user.profile.avatar} alt="Avatar" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover shadow-inner border border-slate-200" />
+                    <img src={user.profile.avatar} alt="Avatar" className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover shadow-inner border border-slate-200" />
                   ) : (
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-[#274dad] to-[#4A3728] rounded-xl flex items-center justify-center shadow-inner">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-[#274dad] to-[#4A3728] rounded-xl flex items-center justify-center shadow-inner">
                       <span className="text-white font-bold text-xs sm:text-sm">
                         {user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
                       </span>
                     </div>
                   )}
                   <div className="hidden sm:flex flex-col">
-                    <span className="text-xs font-black text-slate-700 leading-tight mt-1">
+                    <span className="text-sm font-black text-slate-700 leading-tight mt-1">
                       {user?.displayName || user?.email?.split('@')[0]}
                     </span>
                   </div>
                 </Link>
-                <button onClick={handleLogout} className="p-2 sm:p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
-                  <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+                <button onClick={handleLogout} className="p-2.5 sm:p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                  <LogOut className="w-5 h-5" />
                 </button>
               </div>
             ) : (

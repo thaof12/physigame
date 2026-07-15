@@ -208,10 +208,23 @@ router.post('/save-result', async (req, res) => {
 
     await Battle.update(battle.id, updates);
 
-    // Update user XP
+    // Update user XP & add recent activity
     const user = await User.findByAnyId(firebaseUid);
-    if (user && rewards?.xp) {
-      await supabase.rpc('increment_user_xp', { user_uuid: user.id, xp_amount: rewards.xp });
+    if (user) {
+      const xpGained = rewards?.xp || (winner === 'me' ? 100 : 25);
+
+      // Update profile recent activity
+      User.addRecentActivity(user, {
+        type: 'pk',
+        title: winner === 'me' ? 'Chiến thắng PK' : 'Hoàn thành trận PK',
+        detail: `Đối đầu với ${opponentName || 'Người chơi ẩn danh'} (Phòng ${roomId})`,
+        xp: xpGained
+      });
+
+      await User.update(user.id, { profile: user.profile });
+
+      // Increment XP via RPC
+      await supabase.rpc('increment_user_xp', { user_uuid: user.id, xp_amount: xpGained });
     }
 
     console.log('✅ Battle result saved successfully');

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, RotateCcw, Star, Coins, TrendingUp, Award, Target, CheckCircle2, Clock } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { useAuth } from '../../contexts/AuthContext';
+import { logSessionActivity } from '../../services/activityLogger';
 
 const PKResult = () => {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ const PKResult = () => {
             opponentName: opponent?.displayName,
             opponentFirebaseUid: opponent?.firebaseUid,
             winner: finalWinner,
-             correctAnswers: myAnswers.filter(a => a.isCorrect).length,
+            correctAnswers: myAnswers.filter(a => a.isCorrect).length,
             totalQuestions: myAnswers.length || 10,
             avgResponseTime: myAnswers.length > 0
               ? myAnswers.reduce((sum, a) => sum + (a.responseTime || 0), 0) / myAnswers.length
@@ -75,6 +76,14 @@ const PKResult = () => {
         if (response.ok) {
           setSaved(true);
           console.log('Battle result saved successfully');
+
+          const xpGained = rewards?.xp || (finalWinner === 'me' ? 100 : finalWinner === 'draw' ? 50 : 25);
+          logSessionActivity(
+            'pk',
+            finalWinner === 'me' ? 'Chiến thắng PK' : finalWinner === 'draw' ? 'Trận PK hòa' : 'Hoàn thành trận PK',
+            `Đối đầu với ${opponent?.displayName || 'Đối thủ'} (Phòng ${roomId})`,
+            xpGained
+          );
         }
       } catch (error) {
         console.error('Error saving battle result:', error);
@@ -137,10 +146,10 @@ const PKResult = () => {
         {/* Result Header Badge */}
         <div className="text-center mb-4 shrink-0">
           <div className={`inline-flex items-center gap-2 px-4 py-1 rounded-full text-[9px] font-black tracking-[0.2em] mb-2 shadow-sm uppercase ${isVictory
-              ? 'bg-emerald-50 border border-emerald-100 text-emerald-600'
-              : isDraw
-                ? 'bg-amber-50 border border-amber-100 text-amber-600'
-                : 'bg-rose-50 border border-rose-100 text-rose-600'
+            ? 'bg-emerald-50 border border-emerald-100 text-emerald-600'
+            : isDraw
+              ? 'bg-amber-50 border border-amber-100 text-amber-600'
+              : 'bg-rose-50 border border-rose-100 text-rose-600'
             }`}>
             {isVictory ? '🏆 Chiến thắng!' : isDraw ? '🤝 Hòa trận' : '💔 Thua cuộc'}
           </div>
@@ -293,8 +302,8 @@ const PKResult = () => {
                     <div
                       key={idx}
                       className={`flex justify-between items-center px-3 py-1.5 rounded-lg border text-[10px] ${answer.isCorrect
-                          ? 'bg-emerald-50/40 border-emerald-100/50 text-emerald-700'
-                          : 'bg-rose-50/40 border-rose-100/50 text-rose-700'
+                        ? 'bg-emerald-50/40 border-emerald-100/50 text-emerald-700'
+                        : 'bg-rose-50/40 border-rose-100/50 text-rose-700'
                         }`}
                     >
                       <span className="font-bold">
