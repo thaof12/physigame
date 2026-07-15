@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const QuestProgress = require('../models/Quest.cjs');
 const User = require('../models/User.cjs');
+const Battle = require('../models/Battle.cjs');
+const GameResult = require('../models/GameResult.cjs');
 
 // GET /api/quests/:userId
 router.get('/:userId', async (req, res) => {
@@ -33,9 +35,66 @@ router.get('/:userId', async (req, res) => {
       }
     }
 
-    await QuestProgress.save(qp);
-
     const user = await User.findById(userId);
+
+    // Evaluate achievements dynamically
+    if (user) {
+      let lessonsCompleted = 0;
+      let perfectScores = 0;
+      if (Array.isArray(user.programs)) {
+        user.programs.forEach(p => {
+          if (p.progress) {
+            if (Array.isArray(p.progress.completedLessons)) {
+              lessonsCompleted += p.progress.completedLessons.length;
+            }
+            if (p.progress.lessonStars) {
+              Object.values(p.progress.lessonStars).forEach(stars => {
+                if (stars === 3) perfectScores++;
+              });
+            }
+          }
+        });
+      }
+
+      // Fetch PK wins dynamically
+      let pkWins = 0;
+      try {
+        pkWins = await Battle.countWins(userId);
+      } catch (err) {
+        console.error('Error fetching battles for achievements:', err);
+      }
+
+      // Fetch challenges completed
+      let challengesCompleted = 0;
+      try {
+        const challengeStats = await GameResult.getStats(userId);
+        challengesCompleted = challengeStats.totalCompleted || 0;
+      } catch (err) {
+        console.error('Error fetching challenges for achievements:', err);
+      }
+
+      const achievementTemplates = QuestProgress.getAchievementTemplates();
+      achievementTemplates.forEach(template => {
+        const { condition } = template;
+        let shouldUnlock = false;
+
+        switch (condition.type) {
+          case 'lessons_completed': shouldUnlock = lessonsCompleted >= condition.value; break;
+          case 'login_streak': shouldUnlock = (qp.login_streak?.current >= condition.value) || (qp.login_streak?.longest >= condition.value); break;
+          case 'perfect_scores': shouldUnlock = perfectScores >= condition.value; break;
+          case 'total_xp': shouldUnlock = (user.xp || 0) >= condition.value; break;
+          case 'level': shouldUnlock = (user.level || 1) >= condition.value; break;
+          case 'pk_wins': shouldUnlock = pkWins >= condition.value; break;
+          case 'challenges_completed': shouldUnlock = challengesCompleted >= condition.value; break;
+        }
+
+        if (shouldUnlock) {
+          QuestProgress.checkAndUnlockAchievement(qp, template.id);
+        }
+      });
+    }
+
+    await QuestProgress.save(qp);
 
     const dailyTemplates = QuestProgress.getDailyQuestTemplates();
     const weeklyTemplates = QuestProgress.getWeeklyQuestTemplates();

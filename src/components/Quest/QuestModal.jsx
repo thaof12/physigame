@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { X, Maximize2, Gift, Target, Trophy, Clock, Flame, Star, Check, ChevronRight, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../config/api';
+import { logSessionActivity } from '../../services/activityLogger';
 import './QuestModal.css';
 
 const QuestModal = ({ isOpen, onClose }) => {
@@ -56,6 +57,34 @@ const QuestModal = ({ isOpen, onClose }) => {
       });
       
       if (response.data.success) {
+        // Log session activity
+        if (questData) {
+          let questItem = null;
+          let title = '';
+          if (questType === 'daily') {
+            questItem = questData.dailyQuests?.find(q => q.odId === questId);
+            title = 'Nhận thưởng nhiệm vụ ngày';
+          } else if (questType === 'weekly') {
+            questItem = questData.weeklyQuests?.find(q => q.odId === questId);
+            title = 'Nhận thưởng nhiệm vụ tuần';
+          } else if (questType === 'achievement') {
+            questItem = questData.achievements?.find(q => q.id === questId);
+            title = 'Nhận thưởng thành tựu';
+          }
+          
+          if (questItem) {
+            const xpGained = questItem.reward?.xp || 0;
+            if (xpGained > 0) {
+              logSessionActivity(
+                'quest',
+                title,
+                `Hoàn thành: "${questItem.name || questItem.title || questId}"`,
+                xpGained
+              );
+            }
+          }
+        }
+
         // Refresh quest data
         fetchQuests();
         

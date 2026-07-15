@@ -79,7 +79,7 @@ const Battle = {
   // Find battles where a player participated (by checking JSONB players array)
   async findByPlayerUid(firebaseUid, status = null, options = {}) {
     let query = supabase.from(TABLE).select('*')
-      .contains('players', [{ firebaseUid }]);
+      .contains('players', JSON.stringify([{ firebaseUid }]));
     if (status) query = query.eq('status', status);
     if (options.sort) {
       Object.entries(options.sort).forEach(([field, dir]) => {

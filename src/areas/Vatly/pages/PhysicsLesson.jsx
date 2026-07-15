@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../config/api';
+import { logSessionActivity } from '../../../services/activityLogger';
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -217,6 +218,14 @@ const PhysicsLesson = () => {
 
         // Submit to backend
         await axios.post(`${API_BASE_URL}/users/submit-physics-lesson`, progressData);
+
+        // Log session activity
+        logSessionActivity(
+          'lesson',
+          'Hoàn thành bài học',
+          `Bài học ${lessonId} (Chương ${chapterId}) - Lớp ${classId}`,
+          quizScore * 50
+        );
         
         // Update local progress
         const lessonKey = `${classId}-${chapterId}-${lessonId}`;

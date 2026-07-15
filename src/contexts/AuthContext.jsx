@@ -503,6 +503,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('physigame_admin');
+    sessionStorage.clear();
     setUser(null);
 
     try {

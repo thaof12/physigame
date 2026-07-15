@@ -1,6 +1,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import api from '../config/api';
+import { getSessionActivities } from '../services/activityLogger';
 import {
   Trophy, Star, Flame, Target, Zap, Clock,
   BookOpen, Award, Medal, Crown, Shield,
@@ -14,6 +15,8 @@ const Profile = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [questData, setQuestData] = useState(null);
+  const [pkStats, setPkStats] = useState(null);
+  const [pkHistory, setPkHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -37,14 +40,22 @@ const Profile = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch user profile and quest data in parallel
-        const [profileRes, questRes] = await Promise.all([
+        // Fetch user profile, quest data, PK stats and history in parallel
+        const [profileRes, questRes, pkStatsRes, pkHistoryRes] = await Promise.all([
           api.get(`/users/profile/${user.uid}`),
-          api.get(`/quests/${user.uid}`).catch(() => ({ data: null }))
+          api.get(`/quests/${user.uid}`).catch(() => ({ data: null })),
+          api.get(`/battles/stats/${user.uid}`).catch(() => ({ data: null })),
+          api.get(`/battles/history/${user.uid}`).catch(() => ({ data: null }))
         ]);
 
         setUserData(profileRes.data);
         setQuestData(questRes.data);
+        if (pkStatsRes?.data?.success) {
+          setPkStats(pkStatsRes.data.stats);
+        }
+        if (pkHistoryRes?.data?.success) {
+          setPkHistory(pkHistoryRes.data.battles || []);
+        }
 
         setEditForm({
           displayName: profileRes.data?.displayName || '',
@@ -195,14 +206,15 @@ const Profile = () => {
     averageScore: completedLessonIds.length > 0 ? Math.round(totalPoints / completedLessonIds.length) : 0,
     totalXP: userData.xp || 0,
     level: userData.level || 1,
-    pkWins: userData.profile?.pkStats?.wins || 0,
-    pkLosses: userData.profile?.pkStats?.losses || 0,
-    pkRating: userData.profile?.pkStats?.rating || 1000,
+    pkWins: pkStats?.wins || userData.profile?.pkStats?.wins || 0,
+    pkLosses: pkStats?.losses || userData.profile?.pkStats?.losses || 0,
+    pkTotal: pkStats?.totalGames || (userData.profile?.pkStats?.wins || 0) + (userData.profile?.pkStats?.losses || 0),
+    pkRating: pkStats ? (1000 + pkStats.wins * 20 - pkStats.losses * 10) : (userData.profile?.pkStats?.rating || 1000),
     achievementsUnlocked: questData?.achievements?.filter(a => a.unlockedAt)?.length || 0,
     totalAchievements: questData?.achievements?.length || 12,
   } : {
     totalLessons: 36, completedLessons: 0, totalPoints: 0, currentStreak: 0, longestStreak: 0,
-    averageScore: 0, totalXP: 0, level: 1, pkWins: 0, pkLosses: 0, pkRating: 1000,
+    averageScore: 0, totalXP: 0, level: 1, pkWins: 0, pkLosses: 0, pkTotal: 0, pkRating: 1000,
     achievementsUnlocked: 0, totalAchievements: 12
   };
 
@@ -247,14 +259,58 @@ const Profile = () => {
     });
   }
 
-  const allAchievements = questData?.achievements || [
-    { id: 'first_lesson', title: 'Bước Đầu Tiên', icon: <Target />, description: 'Hoàn thành bài học đầu tiên', unlockedAt: stats.completedLessons >= 1 ? new Date() : null },
-    { id: 'streak_7', title: 'Tuần Lễ Rực Lửa', icon: <Flame />, description: '7 ngày học liên tục', unlockedAt: stats.currentStreak >= 7 ? new Date() : null },
-    { id: 'lessons_5', title: 'Học Sinh Chăm Chỉ', icon: <BookOpen />, description: 'Hoàn thành 5 bài học', unlockedAt: stats.completedLessons >= 5 ? new Date() : null },
-    { id: 'perfect_score', title: 'Hoàn Hảo', icon: <Star />, description: 'Đạt điểm tuyệt đối trong bài học', unlockedAt: userData?.progress?.completedLessons?.some(l => l.score === 100) ? new Date() : null },
-    { id: 'lessons_10', title: 'Thám Hiểm Gia', icon: <Trophy />, description: 'Hoàn thành 10 bài học', unlockedAt: stats.completedLessons >= 10 ? new Date() : null },
-    { id: 'streak_14', title: 'Kiên Trì', icon: <TrendingUp />, description: '14 ngày học liên tục', unlockedAt: stats.currentStreak >= 14 ? new Date() : null },
-  ];
+  const ACHIEVEMENT_METADATA = {
+    first_lesson: { title: 'Khởi đầu', icon: <Target className="w-6 h-6 text-emerald-500" /> },
+    lessons_10: { title: 'Học sinh chăm chỉ', icon: <BookOpen className="w-6 h-6 text-blue-500" /> },
+    lessons_50: { title: 'Nhà khoa học trẻ', icon: <Trophy className="w-6 h-6 text-purple-500" /> },
+    streak_7: { title: 'Kiên trì 7 ngày', icon: <Flame className="w-6 h-6 text-orange-500" /> },
+    streak_30: { title: 'Bậc thầy kiên trì', icon: <Crown className="w-6 h-6 text-yellow-500" /> },
+    perfect_scores_5: { title: 'Hoàn hảo', icon: <Star className="w-6 h-6 text-amber-500" /> },
+    xp_1000: { title: 'Tích lũy 1000 XP', icon: <Zap className="w-6 h-6 text-indigo-500" /> },
+    xp_5000: { title: 'Chiến binh XP', icon: <Zap className="w-6 h-6 text-purple-500" /> },
+    level_5: { title: 'Cấp độ 5', icon: <Medal className="w-6 h-6 text-cyan-500" /> },
+    level_10: { title: 'Cấp độ 10', icon: <Award className="w-6 h-6 text-rose-500" /> },
+    pk_winner_5: { title: 'Bậc thầy Đấu trường', icon: <Swords className="w-6 h-6 text-red-500" /> },
+    challenges_10: { title: 'Thử thách gia', icon: <Trophy className="w-6 h-6 text-teal-500" /> }
+  };
+
+  const getAchievements = () => {
+    const backendAchievements = questData?.achievements || [];
+    if (backendAchievements.length === 0) {
+      return Object.keys(ACHIEVEMENT_METADATA).map(id => {
+        const meta = ACHIEVEMENT_METADATA[id];
+        return {
+          id,
+          title: meta.title,
+          icon: meta.icon,
+          description: id === 'first_lesson' ? 'Hoàn thành bài học đầu tiên' :
+                       id === 'lessons_10' ? 'Hoàn thành 10 bài học' :
+                       id === 'lessons_50' ? 'Hoàn thành 50 bài học' :
+                       id === 'streak_7' ? 'Đăng nhập 7 ngày liên tiếp' :
+                       id === 'streak_30' ? 'Đăng nhập 30 ngày liên tiếp' :
+                       id === 'perfect_scores_5' ? 'Đạt 100% trong 5 bài học' :
+                       id === 'xp_1000' ? 'Đạt tổng cộng 1000 XP' :
+                       id === 'xp_5000' ? 'Đạt tổng cộng 5000 XP' :
+                       id === 'level_5' ? 'Đạt level 5' :
+                       id === 'level_10' ? 'Đạt level 10' :
+                       id === 'pk_winner_5' ? 'Giành chiến thắng 5 trận đấu' :
+                       'Hoàn thành 10 mini game',
+          unlockedAt: null
+        };
+      });
+    }
+
+    return backendAchievements.map(ach => {
+      const meta = ACHIEVEMENT_METADATA[ach.id] || { title: ach.name, icon: <Trophy className="w-6 h-6 text-slate-500" /> };
+      return {
+        ...ach,
+        title: meta.title,
+        icon: meta.icon
+      };
+    });
+  };
+
+  const allAchievements = getAchievements();
 
   const getRelativeTime = (isoString) => {
     if (!isoString) return 'Vừa xong';
@@ -269,7 +325,22 @@ const Profile = () => {
     return `${Math.floor(diffInSeconds / 2592000)} tháng trước`;
   };
 
-  const recentActivity = userData?.profile?.recentActivity || [];
+  const getDeduplicatedActivities = (activities) => {
+    const seenPkRooms = new Set();
+    return activities.filter(act => {
+      if (act.type === 'pk' || act.type === 'battle') {
+        const roomMatch = act.detail?.match(/Phòng\s+([A-Z0-9]+)/i);
+        const pkId = roomMatch ? roomMatch[1] : act.detail;
+        if (seenPkRooms.has(pkId)) {
+          return false;
+        }
+        seenPkRooms.add(pkId);
+      }
+      return true;
+    });
+  };
+
+  const recentActivity = getDeduplicatedActivities(getSessionActivities());
 
   if (loading) {
     return (
@@ -625,9 +696,12 @@ const Profile = () => {
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#274dad]/5 blur-[60px] rounded-full" />
                   <div className="space-y-6">
                     {recentActivity.length > 0 ? recentActivity.map((act, i) => (
-                      <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-6 p-6 bg-white rounded-2xl border border-slate-100 hover:border-[#274dad]/20 hover:shadow-md transition-all group">
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-6 py-5 border-b border-slate-100 last:border-b-0 transition-all group">
                         <div className="p-4 bg-[#e4f2f0] rounded-2xl text-[#274dad] transition-colors group-hover:bg-[#274dad] group-hover:text-white border border-[#274dad]/10">
-                          {act.type === 'lesson' ? <BookOpen className="w-6 h-6" /> : act.type === 'achievement' ? <Trophy className="w-6 h-6" /> : <Swords className="w-6 h-6" />}
+                          {act.type === 'lesson' ? <BookOpen className="w-6 h-6" /> : 
+                           act.type === 'quest' || act.type === 'achievement' ? <Trophy className="w-6 h-6" /> : 
+                           act.type === 'game' ? <Star className="w-6 h-6" /> : 
+                           <Swords className="w-6 h-6" />}
                         </div>
                         <div className="flex-1">
                           <h4 className="font-heading font-extrabold text-[#1E293B] text-lg leading-tight mb-1">{act.title}</h4>
@@ -652,18 +726,76 @@ const Profile = () => {
               {activeTab === 'pk' && (
                 <div className="space-y-10">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StatCardAcademic icon={<Swords />} color="text-rose-500" value={stats.pkWins + stats.pkLosses} label="Tổng trận PK" />
+                    <StatCardAcademic icon={<Swords />} color="text-rose-500" value={stats.pkTotal} label="Tổng trận PK" />
                     <StatCardAcademic icon={<Trophy />} color="text-emerald-500" value={stats.pkWins} label="Dành chiến thắng" />
-                    <StatCardAcademic icon={<Target />} color="text-cyan-500" value={stats.pkWins + stats.pkLosses > 0 ? Math.round((stats.pkWins / (stats.pkWins + stats.pkLosses)) * 100) + '%' : '0%'} label="Tỷ lệ thắng" />
+                    <StatCardAcademic icon={<Target />} color="text-cyan-500" value={stats.pkTotal > 0 ? Math.round((stats.pkWins / stats.pkTotal) * 100) + '%' : '0%'} label="Tỷ lệ thắng" />
                     <StatCardAcademic icon={<TrendingUp />} color="text-purple-500" value={stats.pkRating} label="Xếp hạng Elo" />
                   </div>
-                  <div className="bg-white rounded-[2rem] border border-[#E5E7EB] p-16 text-center shadow-sm">
-                    <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-100">
-                      <Users className="w-10 h-10" />
+
+                  {pkHistory.length > 0 ? (
+                    <div className="bg-white rounded-[2rem] border border-[#E5E7EB] p-8 shadow-sm">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-[#e4f2f0] rounded-xl border border-[#274dad]/10">
+                          <Swords className="w-5 h-5 text-[#274dad]" />
+                        </div>
+                        <h3 className="font-heading text-xl font-extrabold text-[#1E293B]">Lịch sử giao đấu</h3>
+                      </div>
+                      <div className="divide-y divide-slate-100">
+                        {pkHistory.map((battle, idx) => {
+                          const me = (battle.players || []).find(p => p.firebaseUid === user.uid);
+                          const opponent = (battle.players || []).find(p => p.firebaseUid !== user.uid);
+                          const isWin = battle.winner?.firebaseUid === user.uid;
+                          const isLoss = battle.winner?.firebaseUid && battle.winner?.firebaseUid !== user.uid;
+
+                          return (
+                            <div key={battle.id || idx} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-heading font-extrabold text-xs shrink-0 ${
+                                  isWin ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                  isLoss ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                                  'bg-slate-50 text-slate-500 border border-slate-100'
+                                }`}>
+                                  {isWin ? 'THẮNG' : isLoss ? 'THUA' : 'HÒA'}
+                                </div>
+                                <div>
+                                  <div className="font-heading font-extrabold text-slate-800 text-sm">
+                                    Đối thủ: {opponent?.displayName || 'Người chơi ẩn danh'}
+                                  </div>
+                                  <div className="font-body text-xs text-slate-400 font-bold mt-0.5">
+                                    Phòng: {battle.room_id} • Khối: {battle.grade === 'all' ? 'Tất cả' : `Lớp ${battle.grade}`} • {new Date(battle.finished_at || battle.created_at).toLocaleString('vi-VN')}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-6 sm:text-right">
+                                <div>
+                                  <div className="font-heading font-black text-sm text-slate-700">
+                                    {me?.score || 0} vs {opponent?.score || 0}
+                                  </div>
+                                  <div className="font-body text-[9px] text-slate-400 font-extrabold uppercase tracking-wider">
+                                    Điểm số
+                                  </div>
+                                </div>
+                                <div className="min-w-[80px] text-right">
+                                  <span className={`font-heading font-black text-xs ${isWin ? 'text-emerald-500' : isLoss ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    {isWin ? `+${battle.rewards?.winnerXP || 100} XP` : `+${battle.rewards?.loserXP || 25} XP`}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <h3 className="font-heading text-2xl font-extrabold text-[#1E293B] mb-3">Sảnh Danh Vọng Đấu Trường</h3>
-                    <p className="font-body text-slate-500 max-w-md mx-auto font-medium">Lịch sử giao đấu chi tiết đang được đồng bộ hóa từ máy chủ trung tâm.</p>
-                  </div>
+                  ) : (
+                    <div className="bg-white rounded-[2rem] border border-[#E5E7EB] p-16 text-center shadow-sm">
+                      <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-100">
+                        <Users className="w-10 h-10" />
+                      </div>
+                      <h3 className="font-heading text-2xl font-extrabold text-[#1E293B] mb-3">Sảnh Danh Vọng Đấu Trường</h3>
+                      <p className="font-body text-slate-500 max-w-md mx-auto font-medium">Lịch sử giao đấu chi tiết đang được đồng bộ hóa từ máy chủ trung tâm.</p>
+                    </div>
+                  )}
                 </div>
               )}
 
