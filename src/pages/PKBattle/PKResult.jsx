@@ -307,7 +307,7 @@ const PKResult = () => {
                         }`}
                     >
                       <span className="font-bold">
-                        Câu {idx + 1}: Trắc nghiệm
+                        Câu {idx + 1}: {answer.type === 'essay' ? 'Tự luận' : 'Trắc nghiệm'}
                       </span>
                       <div className="flex items-center gap-2">
                         <span className="text-[9px] text-slate-400 font-semibold">{answer.responseTime}s</span>

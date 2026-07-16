@@ -101,7 +101,7 @@ const PKMatchmaking = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-[#f8fafc] font-sans flex flex-col items-center justify-center relative overflow-hidden pt-24">
       {/* ── BACKGROUND ELEMENTS ── */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-200/20 blur-[130px] rounded-full"></div>
