@@ -414,14 +414,14 @@ const Profile = () => {
               {/* Login Streak */}
               <div className="mt-8 pt-8 border-t border-[#F1F5F9] flex items-center justify-center gap-6">
                 <div className="text-center group/streak">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#FFF7ED] text-cyan-500 mb-2 border border-cyan-100 group-hover/streak:scale-110 transition-transform">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#FFF7ED] text-cyan-500 mb-2 border border-cyan-100 group-hover/streak:scale-110 transition-transform mx-auto">
                     <Flame className="w-6 h-6 animate-pulse" />
                   </div>
                   <div className="text-lg font-heading font-extrabold text-[#1E293B] leading-none mb-1">{stats.currentStreak}</div>
                   <div className="text-[9px] font-heading font-extrabold text-slate-400 uppercase tracking-tight">Ngày liên tục</div>
                 </div>
                 <div className="text-center group/xp">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 mb-2 border border-indigo-100 group-hover/xp:scale-110 transition-transform">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 mb-2 border border-indigo-100 group-hover/xp:scale-110 transition-transform mx-auto">
                     <Zap className="w-6 h-6" />
                   </div>
                   <div className="text-lg font-heading font-extrabold text-[#1E293B] leading-none mb-1">{stats.level}</div>

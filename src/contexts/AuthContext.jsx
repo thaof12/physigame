@@ -29,13 +29,35 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const fetchingUserRef = useRef(null);
+  const loadingTimeoutRef = useRef(null);
 
   // Check session on mount
   useEffect(() => {
+    // Reset on mount/reload to prevent stale refs blocking profile loads
+    fetchingUserRef.current = null;
+
+    // Safety timeout: force loading=false after 10s to prevent infinite loading screen
+    loadingTimeoutRef.current = setTimeout(() => {
+      setLoading(prev => {
+        if (prev) {
+          console.warn('⚠️ [AuthContext] Loading safety timeout (10s). Using cached data.');
+          const cachedUser = safeGetItem('user');
+          if (cachedUser) {
+            setUser(cachedUser);
+          }
+        }
+        return false;
+      });
+    }, 10000);
+
     const checkAuth = async () => {
       try {
         // Get current Supabase session
-        const { data: { session } } = await supabase.auth.getSession();
+        // Timeout prevents hanging when Supabase token refresh stalls
+        const { data: { session } } = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('getSession timeout')), 8000))
+        ]);
 
         if (session?.user) {
           console.log('✅ Supabase session found:', session.user.email);
@@ -123,8 +145,19 @@ export const AuthProvider = ({ children }) => {
           console.log('ℹ️ No active session');
         }
       } catch (error) {
-        console.error('❌ Auth check error:', error);
+        // getSession timeout is expected on reload - handled gracefully via cached data
+        if (error.message?.includes('timeout')) {
+          console.warn('⚠️ [AuthContext] Session check timed out, using cached data');
+        } else {
+          console.error('❌ Auth check error:', error);
+        }
+        // Fall back to cached user to avoid redirect to login
+        const cachedUser = safeGetItem('user');
+        if (cachedUser) {
+          setUser(cachedUser);
+        }
       } finally {
+        if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
         setLoading(false);
       }
     };
@@ -136,6 +169,19 @@ export const AuthProvider = ({ children }) => {
       async (event, session) => {
         const timestamp = new Date().toLocaleTimeString();
         console.log(`%c🔄 [AuthContext] ${timestamp} - Event: ${event}`, 'color: #2099e9; font-weight: bold', session?.user?.email);
+
+        // Handle TOKEN_REFRESHED - update stored token without re-fetching profile
+        if (event === 'TOKEN_REFRESHED' && session) {
+          console.log('🔄 [AuthContext] Token refreshed, updating stored token');
+          localStorage.setItem('token', session.access_token);
+          return;
+        }
+
+        // INITIAL_SESSION is handled by checkAuth(), skip to avoid double-processing
+        if (event === 'INITIAL_SESSION') {
+          console.log('ℹ️ [AuthContext] INITIAL_SESSION event, handled by checkAuth');
+          return;
+        }
 
         if (event === 'SIGNED_IN' && session) {
           if (fetchingUserRef.current === session.user.id) {
@@ -157,9 +203,12 @@ export const AuthProvider = ({ children }) => {
           try {
             // 2. Fetch existing profile from dual sources for consistency
             console.log('📡 [AuthContext] Fetching profile from dual sources...');
-            const [apiRes, supabaseRes] = await Promise.all([
-              api.get(`/users/firebase/${session.user.id}`).catch(() => null),
-              supabase.from('users').select('*').eq('id', session.user.id).single()
+            const [apiRes, supabaseRes] = await Promise.race([
+              Promise.all([
+                api.get(`/users/firebase/${session.user.id}`).catch(() => null),
+                Promise.resolve(supabase.from('users').select('*').eq('id', session.user.id).single()).catch(() => ({ data: null }))
+              ]),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 8000))
             ]);
 
             const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -289,6 +338,8 @@ export const AuthProvider = ({ children }) => {
               console.log(`%c👤 [AuthContext] Session ready. Role: ${finalUser.role}, Status: ${finalUser.teacherStatus}`, 'color: #2099e9; font-weight: bold');
               localStorage.setItem('user', JSON.stringify(finalUser));
               setUser(finalUser);
+              if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+              setLoading(false);
             } else {
               throw new Error('Profile determination failed');
             }
@@ -318,6 +369,8 @@ export const AuthProvider = ({ children }) => {
             setUser(basicUser);
             localStorage.setItem('user', JSON.stringify(basicUser));
             localStorage.removeItem('pending_role');
+            if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+            setLoading(false);
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('%c👋 [AuthContext] Session terminated', 'color: #ef4444; font-weight: bold');
@@ -331,6 +384,7 @@ export const AuthProvider = ({ children }) => {
 
     return () => {
       subscription.unsubscribe();
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
     };
   }, []);
 

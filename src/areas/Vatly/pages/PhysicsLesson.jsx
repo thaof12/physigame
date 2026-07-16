@@ -52,6 +52,10 @@ const PhysicsLesson = () => {
 
   const currentStation = STATIONS[stationIndex];
 
+  // Safe accessors for content sub-fields (prevents undefined crashes)
+  const exercises = lessonData?.content?.exercises || [];
+  const essay = lessonData?.content?.essay || {};
+
   // Helper: Generate placeholder content if backend is empty
   const generatePlaceholderContent = useMemo(() => {
     return (title) => {
@@ -118,7 +122,15 @@ const PhysicsLesson = () => {
         );
         
         if (response.data && response.data.content) {
-          setLessonData(response.data);
+          // Merge with placeholder to ensure exercises/essay always exist
+          const title = response.data.title || `Bài ${lessonId}`;
+          const placeholder = generatePlaceholderContent(title);
+          const mergedContent = {
+            theory: response.data.content.theory || placeholder.theory,
+            exercises: response.data.content.exercises || placeholder.exercises,
+            essay: response.data.content.essay || placeholder.essay
+          };
+          setLessonData({ ...response.data, content: mergedContent });
         } else {
           const classData = physicsLessons[classId];
           const chapter = classData?.chapters.find(ch => ch.id === parseInt(chapterId));
@@ -150,7 +162,13 @@ const PhysicsLesson = () => {
             content: generatePlaceholderContent(lesson.title)
           });
         } else {
-          console.error('❌ Critical: Even local fallback failed for', classId, chapterId, lessonId);
+          // Ultimate fallback: generate placeholder with generic title
+          const fallbackTitle = `Bài ${lessonId} - Chương ${chapterId}`;
+          console.warn('⚠️ Local fallback not found for', classId, chapterId, lessonId, '- using generic placeholder');
+          setLessonData({
+            title: fallbackTitle,
+            content: generatePlaceholderContent(fallbackTitle)
+          });
         }
       } finally {
         setTimeout(() => setLoading(false), 600);
@@ -179,15 +197,15 @@ const PhysicsLesson = () => {
   };
 
   const checkQuizAnswer = () => {
-    const currentQuiz = lessonData.content.exercises[currentQuizIndex];
-    if (selectedAnswer === currentQuiz.correctAnswer) {
+    const currentQuiz = exercises[currentQuizIndex];
+    if (currentQuiz && selectedAnswer === currentQuiz.correctAnswer) {
       setQuizScore(quizScore + 1);
     }
     setShowQuizResult(true);
   };
 
   const nextQuiz = () => {
-    if (currentQuizIndex < lessonData.content.exercises.length - 1) {
+    if (currentQuizIndex < exercises.length - 1) {
       setCurrentQuizIndex(currentQuizIndex + 1);
       setSelectedAnswer(null);
       setShowQuizResult(false);
@@ -203,7 +221,7 @@ const PhysicsLesson = () => {
       const userId = user?.email || user?.uid;
       
       if (userId) {
-        const totalEx = lessonData.content.exercises.length;
+        const totalEx = exercises.length;
         const progressData = {
           userId,
           programId: 'physics',
@@ -376,23 +394,23 @@ const PhysicsLesson = () => {
                 {currentStation.id === 'assessment' && (
                   <div>
                     <div className="flex justify-between items-center mb-8">
-                       <span className="text-sm font-black text-slate-400">CÂU HỎI {currentQuizIndex + 1} / {lessonData.content.exercises.length}</span>
+                       <span className="text-sm font-black text-slate-400">CÂU HỎI {currentQuizIndex + 1} / {exercises.length}</span>
                        <div className="h-2 w-32 bg-slate-100 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-blue-500 transition-all duration-300" 
-                            style={{ width: `${((currentQuizIndex + 1) / lessonData.content.exercises.length) * 100}%` }}
+                            style={{ width: `${((currentQuizIndex + 1) / exercises.length) * 100}%` }}
                           />
                        </div>
                     </div>
 
                     <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-8 leading-relaxed">
-                       {lessonData.content.exercises[currentQuizIndex].question}
+                       {exercises[currentQuizIndex]?.question}
                     </h3>
 
                     <div className="space-y-4">
-                       {lessonData.content.exercises[currentQuizIndex].options.map((opt, i) => {
+                       {exercises[currentQuizIndex]?.options?.map((opt, i) => {
                           const isSelected = selectedAnswer === i;
-                          const isCorrect = i === lessonData.content.exercises[currentQuizIndex].correctAnswer;
+                          const isCorrect = i === exercises[currentQuizIndex]?.correctAnswer;
                           
                           let className = "w-full p-5 rounded-2xl border-2 text-left transition-all flex items-center gap-4 font-medium ";
                           
@@ -427,7 +445,7 @@ const PhysicsLesson = () => {
                            <Info className="w-4 h-4" /> Giải thích khoa học
                          </h4>
                          <p className="text-slate-600 italic leading-relaxed text-sm">
-                           {lessonData.content.exercises[currentQuizIndex].explanation}
+                           {exercises[currentQuizIndex]?.explanation}
                          </p>
                       </div>
                     )}
@@ -446,7 +464,7 @@ const PhysicsLesson = () => {
                            onClick={nextQuiz}
                            className="flex-1 py-4 bg-[#2a4095] text-white rounded-2xl font-black shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3"
                          >
-                           {currentQuizIndex < lessonData.content.exercises.length - 1 ? 'Câu Tiếp Theo' : 'Hoàn Thành Trạm'}
+                           {currentQuizIndex < exercises.length - 1 ? 'Câu Tiếp Theo' : 'Hoàn Thành Trạm'}
                            <ChevronRight className="w-5 h-5" />
                          </button>
                        )}
@@ -467,7 +485,7 @@ const PhysicsLesson = () => {
 
                      <div className="bg-white border-2 border-slate-100 p-8 rounded-3xl shadow-sm">
                         <p className="text-xl font-bold text-slate-800 mb-6 leading-relaxed">
-                           {lessonData.content.essay?.question || "Dựa vào kiến thức đã học, hãy phân tích tầm quan trọng của bài học này đối với cuộc sống?"}
+                           {essay?.question || "Dựa vào kiến thức đã học, hãy phân tích tầm quan trọng của bài học này đối với cuộc sống?"}
                         </p>
                         
                         <textarea
@@ -511,7 +529,7 @@ const PhysicsLesson = () => {
                              <div className="p-6 bg-slate-50 border-2 border-emerald-500/20 rounded-2xl mb-8">
                                 <h4 className="font-bold text-[#2a4095] mb-4 text-sm uppercase tracking-widest">Gợi ý câu trả lời lý tưởng:</h4>
                                 <p className="text-slate-600 line-relaxed font-medium italic">
-                                  {lessonData.content.essay?.sampleAnswer}
+                                  {essay?.sampleAnswer}
                                 </p>
                              </div>
                              <button
@@ -544,7 +562,7 @@ const PhysicsLesson = () => {
 
                      <div className="grid grid-cols-2 gap-6 max-w-sm mx-auto mb-16">
                         <div className="p-6 bg-white border-2 border-slate-100 rounded-3xl shadow-sm">
-                           <p className="text-[#274dad] text-4xl font-black mb-1">{quizScore}/{lessonData.content.exercises.length}</p>
+                           <p className="text-[#274dad] text-4xl font-black mb-1">{quizScore}/{exercises.length}</p>
                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Độ Chính Xác</p>
                         </div>
                         <div className="p-6 bg-white border-2 border-slate-100 rounded-3xl shadow-sm">

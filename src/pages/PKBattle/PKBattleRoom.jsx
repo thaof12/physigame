@@ -6,120 +6,6 @@ import { Clock, Zap, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { generateBattleRounds } from './pkRoundGenerator';
 import './PKBattle.css';
 
-// Sample physics questions - In production, these would come from the server
-const SAMPLE_QUESTIONS = [
-  {
-    id: 1,
-    question: "Đơn vị của lực trong hệ SI là gì?",
-    options: ["Joule", "Newton", "Watt", "Pascal"],
-    correctAnswer: 1,
-    difficulty: "easy",
-    points: 100,
-    timeLimit: 30
-  },
-  {
-    id: 2,
-    question: "Công thức tính vận tốc trung bình là?",
-    options: ["v = s/t", "v = a.t", "v = s.t", "v = a/t"],
-    correctAnswer: 0,
-    difficulty: "easy",
-    points: 100,
-    timeLimit: 30
-  },
-  {
-    id: 3,
-    question: "Định luật bảo toàn năng lượng phát biểu rằng:",
-    options: [
-      "Năng lượng có thể tự sinh ra",
-      "Năng lượng không thể chuyển hóa",
-      "Năng lượng không tự sinh ra và không tự mất đi",
-      "Năng lượng chỉ tồn tại ở dạng cơ năng"
-    ],
-    correctAnswer: 2,
-    difficulty: "medium",
-    points: 150,
-    timeLimit: 30
-  },
-  {
-    id: 4,
-    question: "Gia tốc trọng trường trên Trái Đất xấp xỉ bằng:",
-    options: ["9.8 m/s²", "10 m/s", "9.8 m/s", "10 m/s²"],
-    correctAnswer: 0,
-    difficulty: "easy",
-    points: 100,
-    timeLimit: 30
-  },
-  {
-    id: 5,
-    question: "Áp suất được tính bằng công thức nào?",
-    options: ["P = F.S", "P = F/S", "P = S/F", "P = F + S"],
-    correctAnswer: 1,
-    difficulty: "easy",
-    points: 100,
-    timeLimit: 30
-  },
-  {
-    id: 6,
-    question: "Công suất của một thiết bị điện có điện trở R khi có dòng điện I chạy qua là:",
-    options: ["P = I.R", "P = I².R", "P = I/R", "P = R/I²"],
-    correctAnswer: 1,
-    difficulty: "medium",
-    points: 150,
-    timeLimit: 30
-  },
-  {
-    id: 7,
-    question: "Hiện tượng khúc xạ ánh sáng xảy ra khi:",
-    options: [
-      "Ánh sáng đi qua lăng kính",
-      "Ánh sáng truyền từ môi trường này sang môi trường khác",
-      "Ánh sáng gặp gương phẳng",
-      "Ánh sáng đi trong chân không"
-    ],
-    correctAnswer: 1,
-    difficulty: "medium",
-    points: 150,
-    timeLimit: 30
-  },
-  {
-    id: 8,
-    question: "Định luật Ôm phát biểu mối quan hệ giữa:",
-    options: [
-      "Điện áp, cường độ dòng điện và công suất",
-      "Điện áp, cường độ dòng điện và điện trở",
-      "Điện trở, công suất và thời gian",
-      "Cường độ dòng điện, thời gian và điện lượng"
-    ],
-    correctAnswer: 1,
-    difficulty: "easy",
-    points: 100,
-    timeLimit: 30
-  },
-  {
-    id: 9,
-    question: "Trong dao động điều hòa, gia tốc có giá trị cực đại khi:",
-    options: [
-      "Vật ở vị trí cân bằng",
-      "Vật ở biên dương",
-      "Vận tốc cực đại",
-      "Vật ở biên (dương hoặc âm)"
-    ],
-    correctAnswer: 3,
-    difficulty: "hard",
-    points: 200,
-    timeLimit: 30
-  },
-  {
-    id: 10,
-    question: "Sóng điện từ truyền trong chân không với vận tốc:",
-    options: ["300,000 m/s", "3 × 10⁸ m/s", "3 × 10⁶ m/s", "30,000 km/s"],
-    correctAnswer: 1,
-    difficulty: "medium",
-    points: 150,
-    timeLimit: 30
-  }
-];
-
 const PKBattleRoom = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -134,11 +20,12 @@ const PKBattleRoom = () => {
   const [countdown, setCountdown] = useState(3);
   const [currentRoundIndex, setCurrentRoundIndex] = useState(0);
   const [rounds, setRounds] = useState([]);
-  const [questions, setQuestions] = useState(initialQuestions || SAMPLE_QUESTIONS); // Legacy fallback
+  const [questions, setQuestions] = useState(initialQuestions || []); // Fallback to empty array instead of legacy questions
   const [timeLeft, setTimeLeft] = useState(30);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [answerStatus, setAnswerStatus] = useState(null); // null, 'correct', 'wrong'
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+  const [essayInput, setEssayInput] = useState('');
   
   // Scores
   const [myScore, setMyScore] = useState(0);
@@ -216,7 +103,7 @@ const PKBattleRoom = () => {
         setQuestions(data.questions);
         const quizRounds = data.questions.map((q, i) => ({
           index: i,
-          type: 'quiz',
+          type: q.type || 'quiz',
           ...q
         }));
         setRounds(quizRounds);
@@ -324,20 +211,71 @@ const PKBattleRoom = () => {
     }
   }, [gameStatus, opponent]);
 
+  const checkEssayAnswer = (userInput, correctAnswer) => {
+    if (!userInput || !correctAnswer) return false;
+    const cleanInput = userInput.trim().toLowerCase().replace(/\s+/g, '');
+    const cleanCorrect = correctAnswer.trim().toLowerCase().replace(/\s+/g, '');
+    return cleanInput === cleanCorrect;
+  };
+
   const handleTimeout = () => {
     setAnswerStatus('timeout');
     setShowCorrectAnswer(true);
     
+    const isEssay = currentQuestion?.type === 'essay';
+    
     setMyAnswers(prev => [...prev, {
       roundIndex: currentRoundIndex,
-      type: 'quiz',
-      selected: null,
+      type: isEssay ? 'essay' : 'quiz',
+      selected: isEssay ? '' : null,
       correct: currentQuestion?.correctAnswer,
       isCorrect: false,
       responseTime: currentQuestion?.timeLimit || 30
     }]);
 
-    setTimeout(() => moveToNextRound(), 2000);
+    setTimeout(() => moveToNextRound(), isEssay ? 3000 : 2000);
+  };
+
+  const handleEssaySubmit = () => {
+    if (selectedAnswer !== null) return;
+    
+    const userInput = essayInput;
+    setSelectedAnswer(userInput);
+    
+    const isCorrect = checkEssayAnswer(userInput, currentQuestion?.correctAnswer);
+    setAnswerStatus(isCorrect ? 'correct' : 'wrong');
+    setShowCorrectAnswer(true);
+
+    // Calculate points based on time left
+    const basePoints = currentQuestion?.points || 100;
+    const timeBonus = Math.floor((timeLeft / (currentQuestion?.timeLimit || 30)) * 50);
+    const pointsEarned = isCorrect ? basePoints + timeBonus : 0;
+    
+    setMyScore(prev => prev + pointsEarned);
+    
+    setMyAnswers(prev => [...prev, {
+      roundIndex: currentRoundIndex,
+      type: 'essay',
+      selected: userInput,
+      correct: currentQuestion?.correctAnswer,
+      isCorrect,
+      responseTime: (currentQuestion?.timeLimit || 30) - timeLeft,
+      pointsEarned
+    }]);
+
+    // Emit answer to server
+    if (socketRef.current) {
+      socketRef.current.emit('pk:submit-answer', {
+        roomId,
+        roundIndex: currentRoundIndex,
+        answer: userInput,
+        isCorrect,
+        pointsEarned,
+        responseTime: (currentQuestion?.timeLimit || 30) - timeLeft
+      });
+    }
+
+    setTimeout(() => moveToNextRound(), 3000);
   };
 
   const handleAnswer = (answerIndex) => {
@@ -395,6 +333,7 @@ const PKBattleRoom = () => {
       setAnswerStatus(null);
       setShowCorrectAnswer(false);
       setOpponentAnswered(false);
+      setEssayInput('');
       
       setTimeLeft(nextRound?.timeLimit || questions[nextRoundIndex]?.timeLimit || 30);
       setGameStatus('playing');
@@ -583,16 +522,19 @@ const PKBattleRoom = () => {
           ></div>
         </div>
 
-        <div className="relative z-10 text-center">
-          <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight mb-10">
+        <div className="relative z-10 text-center flex flex-col items-center justify-center min-h-[350px]">
+          <h2 className="text-xl md:text-2xl font-bold text-slate-400 tracking-wider uppercase mb-6">
             Trận đấu sắp bắt đầu!
           </h2>
           
-          <div className="w-48 h-48 rounded-[2.5rem] bg-gradient-to-br from-[#274dad] to-[#21439b] flex items-center justify-center text-7xl font-black text-white mx-auto shadow-[0_20px_50px_rgba(39,77,173,0.3)] animate-pulse">
+          <div 
+            key={countdown} 
+            className="text-[12rem] md:text-[16rem] font-black text-transparent bg-clip-text bg-gradient-to-br from-[#274dad] via-[#4f46e5] to-[#6366f1] leading-none select-none filter drop-shadow-[0_15px_35px_rgba(79,70,229,0.2)] animate-[pulse_1s_infinite] transition-all duration-300"
+          >
             {countdown}
           </div>
           
-          <p className="text-slate-400 font-bold text-lg mt-10">
+          <p className="text-slate-500 font-semibold text-base mt-6 tracking-wide animate-pulse">
             Chuẩn bị sẵn sàng!
           </p>
         </div>
@@ -605,152 +547,235 @@ const PKBattleRoom = () => {
 
   // Battle screen (Quiz mode)
   return (
-    <div className="pk-battle-room">
+    <div className="min-h-screen bg-gradient-to-b from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] font-sans pt-24 px-4 pb-12 relative overflow-hidden flex flex-col items-center">
+      {/* Ambient background decoration */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-100/40 blur-[130px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[55%] h-[55%] bg-indigo-50/50 blur-[120px] rounded-full"></div>
+        <div className="absolute inset-0 opacity-[0.02]" 
+          style={{ 
+            backgroundImage: 'radial-gradient(#274dad 1px, transparent 1px)', 
+            backgroundSize: '45px 45px' 
+          }}
+        ></div>
+      </div>
+
       {/* Header with scores */}
-      <div className="pk-battle-header">
-        <div className="pk-battle-player">
-          <div className="pk-battle-player-avatar">
-            <img src={avatarUrl} alt="You" />
+      <div className="relative z-10 w-full max-w-4xl bg-white/85 backdrop-blur-md border border-slate-200/60 rounded-3xl p-5 mb-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] flex justify-between items-center transition-all duration-300">
+        {/* Left Player: You */}
+        <div className="flex items-center gap-4 flex-1">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-[#274dad] shadow-md shadow-blue-500/10 shrink-0">
+            <img className="w-full h-full object-cover" src={avatarUrl} alt="You" />
           </div>
-          <div className="pk-battle-player-info">
-            <h4>{playerName}</h4>
-            <div className="score">{myScore}</div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Bạn</span>
+            <span className="text-slate-800 font-extrabold text-sm truncate md:text-base">{playerName}</span>
+            <span className="text-2xl font-black text-[#274dad] leading-none mt-1">{myScore}</span>
           </div>
         </div>
-        
-        <div className="pk-battle-timer">
-          <div className="time" style={{ 
-            color: timeLeft <= 10 ? '#ef4444' : timeLeft <= 20 ? '#f59e0b' : 'white' 
+
+        {/* Center: Timer & Round */}
+        <div className="flex flex-col items-center justify-center px-4 md:px-6 py-2 bg-slate-50 border border-slate-100 rounded-2xl min-w-[120px] md:min-w-[140px] shadow-inner mx-2">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+            Câu {currentRoundIndex + 1}/{totalRounds}
+          </div>
+          <div className="flex items-center gap-1.5 text-xl md:text-2xl font-black transition-all duration-300" style={{ 
+            color: timeLeft <= 10 ? '#ef4444' : timeLeft <= 20 ? '#d97706' : '#0f172a' 
           }}>
-            <Clock size={24} style={{ display: 'inline', marginRight: 8 }} />
-            {timeLeft}s
+            <Clock size={18} className={timeLeft <= 10 ? "animate-pulse" : ""} />
+            <span>{timeLeft}s</span>
           </div>
-          <div className="round">Câu {currentRoundIndex + 1}/{totalRounds}</div>
         </div>
-        
-        <div className="pk-battle-player right">
-          <div className="pk-battle-player-avatar">
+
+        {/* Right Player: Opponent */}
+        <div className="flex items-center gap-4 flex-1 justify-end">
+          <div className="flex flex-col text-right min-w-0">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đối thủ</span>
+            <span className="text-slate-800 font-extrabold text-sm truncate md:text-base">{opponent?.displayName || 'Opponent'}</span>
+            <span className="text-2xl font-black text-[#6366f1] leading-none mt-1">{opponentScore}</span>
+          </div>
+          <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-[#6366f1] shadow-md shadow-indigo-500/10 shrink-0">
             <img 
+              className="w-full h-full object-cover"
               src={opponent?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=opponent&backgroundColor=b6e3f4`} 
               alt="Opponent" 
             />
-          </div>
-          <div className="pk-battle-player-info" style={{ textAlign: 'right' }}>
-            <h4>{opponent?.displayName || 'Opponent'}</h4>
-            <div className="score">{opponentScore}</div>
           </div>
         </div>
       </div>
 
       {/* Question Card */}
-      <div className="pk-battle-content">
-        <div className="pk-question-card">
-          <div className="pk-question-header">
-            <span className="pk-question-number">
-              Câu {currentRoundIndex + 1}
-            </span>
-            <span className={`pk-question-difficulty ${currentQuestion?.difficulty}`}>
-              {currentQuestion?.difficulty === 'easy' ? '🟢 Dễ' :
-               currentQuestion?.difficulty === 'medium' ? '🟡 Trung bình' : '🔴 Khó'}
-            </span>
-            <span style={{ 
-              color: 'var(--pk-accent)', 
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5
-            }}>
-              <Zap size={18} />
-              +{currentQuestion?.points || 100} điểm
-            </span>
-          </div>
+      <div className="relative z-10 w-full max-w-4xl">
+        <div className="w-full bg-white border border-slate-100 rounded-3xl p-6 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.04)] flex flex-col relative">
           
-          <div className="pk-question-text">
-            {currentQuestion?.question}
-          </div>
-          
-          <div className="pk-answers-grid">
-            {currentQuestion?.options.map((option, index) => {
-              let buttonClass = 'pk-answer-btn';
-              
-              if (selectedAnswer === index) {
-                buttonClass += answerStatus === 'correct' ? ' correct' : ' wrong';
-              } else if (showCorrectAnswer && index === currentQuestion.correctAnswer) {
-                buttonClass += ' correct';
-              }
-              
-              return (
-                <button
-                  key={index}
-                  className={buttonClass}
-                  onClick={() => handleAnswer(index)}
-                  disabled={selectedAnswer !== null}
-                >
-                  <span style={{ 
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 30,
-                    height: 30,
-                    borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.1)',
-                    marginRight: 12,
-                    fontWeight: 700
-                  }}>
-                    {String.fromCharCode(65 + index)}
-                  </span>
-                  {option}
-                  
-                  {showCorrectAnswer && index === currentQuestion.correctAnswer && (
-                    <CheckCircle size={20} style={{ marginLeft: 'auto', color: '#10b981' }} />
-                  )}
-                  {selectedAnswer === index && answerStatus === 'wrong' && (
-                    <XCircle size={20} style={{ marginLeft: 'auto', color: '#ef4444' }} />
-                  )}
-                </button>
-              );
-            })}
+          {/* Question Metadata Header */}
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-6 mb-8">
+            <div className="flex items-center gap-3">
+              <span className="px-4 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-md shadow-indigo-600/15">
+                Câu {currentRoundIndex + 1}
+              </span>
+              <span className={`px-4 py-1.5 rounded-xl text-xs font-bold ${
+                currentQuestion?.difficulty === 'easy' 
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' 
+                  : currentQuestion?.difficulty === 'medium' 
+                    ? 'bg-amber-50 text-amber-700 border border-amber-200/50' 
+                    : 'bg-rose-50 text-rose-700 border border-rose-200/50'
+              }`}>
+                {currentQuestion?.difficulty === 'easy' ? '🟢 Dễ' :
+                 currentQuestion?.difficulty === 'medium' ? '🟡 Trung bình' : '🔴 Khó'}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-4 py-1.5 rounded-xl text-xs font-bold border border-amber-200/50">
+              <Zap size={14} className="fill-amber-500 stroke-amber-700" />
+              <span>+{currentQuestion?.points || 100} Điểm</span>
+            </div>
           </div>
 
-          {/* Answer feedback */}
-          {answerStatus && (
-            <div style={{
-              marginTop: 20,
-              padding: 15,
-              borderRadius: 12,
-              background: answerStatus === 'correct' ? 'rgba(16, 185, 129, 0.2)' : 
-                         answerStatus === 'timeout' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-              color: answerStatus === 'correct' ? '#10b981' : 
-                     answerStatus === 'timeout' ? '#f59e0b' : '#ef4444',
-              textAlign: 'center',
-              fontWeight: 700,
-              fontSize: '1.1rem'
-            }}>
-              {answerStatus === 'correct' ? '✓ Chính xác!' : 
-               answerStatus === 'timeout' ? '⏱️ Hết thời gian!' : '✗ Sai rồi!'}
+          {/* Question Body */}
+          <div className="text-slate-800 text-lg md:text-xl font-bold leading-relaxed mb-8 select-none">
+            {currentQuestion?.question}
+          </div>
+
+          {/* Essay Layout */}
+          {currentQuestion?.type === 'essay' ? (
+            <div className="w-full flex flex-col gap-5">
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <input
+                  type="text"
+                  value={essayInput}
+                  onChange={(e) => setEssayInput(e.target.value)}
+                  disabled={selectedAnswer !== null}
+                  placeholder="Nhập câu trả lời ngắn của bạn ở đây..."
+                  className="flex-1 px-5 py-4 rounded-2xl border-2 border-slate-200 bg-slate-50/50 text-slate-800 text-base font-semibold outline-none transition-all duration-300 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-slate-100"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && essayInput.trim() && selectedAnswer === null) {
+                      handleEssaySubmit();
+                    }
+                  }}
+                />
+                <button
+                  onClick={handleEssaySubmit}
+                  disabled={selectedAnswer !== null || !essayInput.trim()}
+                  className="px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold text-base shadow-lg shadow-indigo-600/25 hover:from-indigo-700 hover:to-blue-700 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transition-all duration-300"
+                >
+                  Gửi đáp án
+                </button>
+              </div>
+
+              {/* Essay Explanation and Correct Answer */}
+              {showCorrectAnswer && (
+                <div className="w-full bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-6 text-left shadow-sm animate-fadeIn">
+                  <div className="flex items-center gap-2 font-black text-emerald-800 text-base mb-2">
+                    <CheckCircle size={18} />
+                    <span>Đáp án đúng: {currentQuestion?.correctAnswer}</span>
+                  </div>
+                  {currentQuestion?.explanation && (
+                    <div className="text-sm text-emerald-700/90 leading-relaxed pl-6 border-l-2 border-emerald-300 mt-2">
+                      <strong className="text-emerald-800">Hướng dẫn giải: </strong>
+                      {currentQuestion.explanation}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            /* MCQ Layout */
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {currentQuestion?.options?.map((option, index) => {
+                let btnStyles = "flex items-center w-full p-5 rounded-2xl border text-left text-base font-semibold transition-all duration-300 relative group ";
+                let circleStyles = "flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold mr-4 shrink-0 transition-all duration-300 ";
+
+                if (selectedAnswer === null) {
+                  btnStyles += "bg-white border-slate-200 text-slate-700 hover:bg-slate-50/80 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5";
+                  circleStyles += "bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600";
+                } else if (selectedAnswer === index) {
+                  if (answerStatus === 'correct') {
+                    btnStyles += "bg-emerald-50 border-emerald-500 text-emerald-900 shadow-md shadow-emerald-500/5";
+                    circleStyles += "bg-emerald-500 text-white";
+                  } else {
+                    btnStyles += "bg-rose-50 border-rose-500 text-rose-900 shadow-md shadow-rose-500/5";
+                    circleStyles += "bg-rose-500 text-white";
+                  }
+                } else if (showCorrectAnswer && index === currentQuestion.correctAnswer) {
+                  btnStyles += "bg-emerald-50 border-emerald-500 text-emerald-900";
+                  circleStyles += "bg-emerald-500 text-white";
+                } else {
+                  btnStyles += "bg-slate-50/50 border-slate-100 text-slate-400 opacity-60 cursor-not-allowed";
+                  circleStyles += "bg-slate-200 text-slate-400";
+                }
+
+                return (
+                  <button
+                    key={index}
+                    className={btnStyles}
+                    onClick={() => handleAnswer(index)}
+                    disabled={selectedAnswer !== null}
+                  >
+                    <span className={circleStyles}>
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <span className="flex-1 pr-6">{option}</span>
+                    
+                    {showCorrectAnswer && index === currentQuestion.correctAnswer && (
+                      <CheckCircle size={20} className="text-emerald-500 shrink-0 absolute right-5" />
+                    )}
+                    {selectedAnswer === index && answerStatus === 'wrong' && (
+                      <XCircle size={20} className="text-rose-500 shrink-0 absolute right-5" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
-          
-          {/* Progress Bar */}
-          <div className="pk-progress-container">
-            <div className="pk-progress-bar">
+
+          {/* Feedback Status Pill */}
+          {answerStatus && (
+            <div className={`mt-8 p-4 rounded-2xl flex items-center justify-center gap-2 text-base font-bold text-center border ${
+              answerStatus === 'correct' 
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+                : answerStatus === 'timeout' 
+                  ? 'bg-amber-50 text-amber-800 border-amber-200' 
+                  : 'bg-rose-50 text-rose-800 border-rose-200'
+            }`}>
+              {answerStatus === 'correct' ? (
+                <>
+                  <CheckCircle size={18} />
+                  <span>Chính xác! Bạn đã trả lời đúng.</span>
+                </>
+              ) : answerStatus === 'timeout' ? (
+                <>
+                  <Clock size={18} />
+                  <span>Hết thời gian! Hãy nhanh hơn ở câu sau.</span>
+                </>
+              ) : (
+                <>
+                  <XCircle size={18} />
+                  <span>Sai rồi! Cố gắng thử lại ở câu tiếp theo.</span>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Progress Bar Container */}
+          <div className="w-full mt-10">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tiến trình</span>
+              <span className="text-xs font-black text-[#274dad]">{Math.round(((currentRoundIndex + 1) / totalRounds) * 100)}%</span>
+            </div>
+            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
               <div 
-                className="pk-progress-fill" 
+                className="h-full bg-gradient-to-r from-indigo-500 via-blue-500 to-[#274dad] rounded-full transition-all duration-500 ease-out" 
                 style={{ width: `${((currentRoundIndex + 1) / totalRounds) * 100}%` }}
               ></div>
             </div>
           </div>
 
-          {/* Opponent status */}
+          {/* Opponent Answer Status indicator */}
           {opponentAnswered && !showCorrectAnswer && (
-            <div style={{
-              marginTop: 15,
-              color: 'rgba(255,255,255,0.6)',
-              textAlign: 'center',
-              fontSize: '0.9rem'
-            }}>
-              <AlertCircle size={16} style={{ display: 'inline', marginRight: 5 }} />
-              Đối thủ đã trả lời!
+            <div className="mt-6 flex items-center justify-center gap-2 text-slate-400 text-sm font-semibold animate-pulse">
+              <AlertCircle size={16} className="text-indigo-400" />
+              <span>Đối thủ đã hoàn thành câu hỏi này!</span>
             </div>
           )}
         </div>
