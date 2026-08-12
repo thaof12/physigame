@@ -13,6 +13,7 @@ import {
   Layers,
   Sparkles
 } from 'lucide-react';
+import robotBanner from '../../../assets/images/robot-eureka-banner.jpg';
 
 const AdvancedPhysicsChallenge = () => {
   const navigate = useNavigate();
@@ -28,103 +29,11 @@ const AdvancedPhysicsChallenge = () => {
       tag: 'Cơ học'
     },
     {
-      id: 'water',
-      title: 'Phòng thí nghiệm nước',
-      description: 'Tìm hiểu về các tính chất vật lý của nước và áp suất thủy tĩnh',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/water.png',
-      path: '/advanced-physics-challenge/water',
-      color: 'from-cyan-400 to-blue-500',
-      tag: 'Thủy học'
-    },
-    {
-      id: 'force-world',
-      title: 'Thế giới lực',
-      description: 'Khám phá thế giới của các loại lực và cách chúng tác động lên vật thể',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/globe.png',
-      path: '/advanced-physics-challenge/force-world',
-      color: 'from-blue-600 to-blue-800',
-      tag: 'Lực học'
-    },
-    {
-      id: 'boiling',
-      title: 'Sự sôi',
-      description: 'Mô phỏng quá trình chuyển thể và các yếu tố ảnh hưởng đến sự sôi',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/thermometer.png',
-      path: '/advanced-physics-challenge/boiling',
-      color: 'from-orange-400 to-red-500',
-      tag: 'Nhiệt học'
-    },
-    {
-      id: 'thermal-energy',
-      title: 'Năng lượng nhiệt',
-      description: 'Nghiên cứu về nhiệt lượng và sự truyền nhiệt trong môi trường',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/campfire.png',
-      path: '/advanced-physics-challenge/thermal-energy',
-      color: 'from-red-500 to-orange-600',
-      tag: 'Nhiệt học'
-    },
-    {
-      id: 'light-reflection',
-      title: 'Phản xạ ánh sáng',
-      description: 'Thực hành định luật phản xạ và ứng dụng trong các trò chơi',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/searchlight.png',
-      path: '/advanced-physics-challenge/light-reflection',
-      color: 'from-yellow-400 to-orange-500',
-      tag: 'Quang học'
-    },
-    {
-      id: 'mirror-lab',
-      title: 'Phòng thí nghiệm gương',
-      description: 'Mô phỏng sự tạo ảnh qua các loại gương phẳng, gương cầu',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/mirror.png',
-      path: '/advanced-physics-challenge/mirror-lab',
-      color: 'from-slate-400 to-slate-600',
-      tag: 'Quang học'
-    },
-    {
-      id: 'light-path',
-      title: 'Đường đi của ánh sáng',
-      description: 'Khám phá cách ánh sáng truyền đi và bẻ cong trong môi trường',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/sparkles.png',
-      path: '/advanced-physics-challenge/light-path',
-      color: 'from-indigo-400 to-purple-600',
-      tag: 'Quang học'
-    },
-    {
-      id: 'circuit-builder',
-      title: 'Xây dựng mạch điện',
-      description: 'Tự tay thiết kế và lắp ráp các mạch điện từ cơ bản đến phức tạp',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/plug.png',
-      path: '/advanced-physics-challenge/circuit-builder',
-      color: 'from-yellow-500 to-amber-600',
-      tag: 'Điện học'
-    },
-    {
-      id: 'race-tracker',
-      title: 'Đua xe tốc độ',
-      description: 'Thử thách về vận tốc, gia tốc và quãng đường trên đường đua',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/car.png',
-      path: '/advanced-physics-challenge/race-tracker',
-      color: 'from-red-600 to-rose-700',
-      tag: 'Động lực học'
-    },
-    {
-      id: 'force-arena',
-      title: 'Võ đài lực học',
-      description: 'Sử dụng kiến thức về lực để chiến thắng trong các trận đấu kịch tính',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/stadium.png',
-      path: '/advanced-physics-challenge/force-arena',
-      color: 'from-stone-600 to-neutral-800',
-      tag: 'Cơ học'
-    },
-    {
-      id: 'projectile',
-      title: 'Chuyển động ném xiên',
-      description: 'Tính toán góc bắn và lực để đạt mục tiêu trong chuyển động ném',
-      icon: 'https://img.icons8.com/ios-filled/100/FFFFFF/target.png',
-      path: '/advanced-physics-challenge/projectile',
-      color: 'from-emerald-500 to-teal-600',
-      tag: 'Động học'
+      id: 'robot-eureka',
+      title: 'Robot Physics Eureka',
+      icon: robotBanner,
+      path: 'https://robot-physic-eureka.vercel.app/',
+      isFullWidth: true
     }
   ];
 
@@ -168,7 +77,7 @@ const AdvancedPhysicsChallenge = () => {
                <div className="space-y-3">
                   <div className="flex justify-between text-sm font-bold">
                     <span className="text-slate-500">Tiến độ hoàn thành</span>
-                    <span className="text-[#274dad]">0/12</span>
+                    <span className="text-[#274dad]">0/{challenges.length}</span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-[#274dad] to-[#2099e9] rounded-full w-0 transition-all duration-1000"></div>
@@ -185,30 +94,46 @@ const AdvancedPhysicsChallenge = () => {
           {challenges.map((game, index) => (
             <div
               key={game.id}
-              onClick={() => navigate(game.path)}
+              onClick={() => {
+                if (game.path.startsWith('http')) {
+                  window.open(game.path, '_blank');
+                } else {
+                  navigate(game.path);
+                }
+              }}
               className="group relative bg-white border-2 border-slate-100 rounded-[2.5rem] p-2 transition-all duration-500 hover:border-[#274dad]/30 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(39,77,173,0.1)] cursor-pointer overflow-hidden"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               {/* Inner Card */}
-              <div className="relative bg-white rounded-[2.2rem] h-full flex flex-col p-6">
+              <div className="relative bg-white rounded-[2.2rem] h-full flex flex-col p-6 overflow-hidden">
                 {/* Icon Container */}
-                <div className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${game.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 mb-6 relative overflow-hidden p-3.5`}>
-                  <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
-                  <img src={game.icon} alt={game.title} className="w-9 h-9 relative z-10 object-contain" />
-                </div>
+                {game.isFullWidth ? (
+                  <div className="-mx-6 -mt-6 mb-5 h-52 w-[calc(100%+3rem)] rounded-b-[1.8rem] overflow-hidden relative group-hover:scale-[1.04] transition-transform duration-500">
+                    <img src={game.icon} alt={game.title} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${game.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 mb-6 relative overflow-hidden ${game.fullIcon ? 'p-0' : 'p-3.5'}`}>
+                    <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                    <img src={game.icon} alt={game.title} className={`relative z-10 ${game.fullIcon ? 'w-full h-full object-cover' : 'w-9 h-9 object-contain'}`} />
+                  </div>
+                )}
 
                 {/* Badge */}
-                <div className="font-heading absolute top-8 right-8 px-3 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
-                  {game.tag}
-                </div>
+                {game.tag && (
+                  <div className="font-heading absolute top-8 right-8 px-3 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                    {game.tag}
+                  </div>
+                )}
 
                 {/* Content */}
                 <h3 className="font-heading text-xl font-extrabold text-slate-800 mb-3 group-hover:text-[#274dad] transition-colors line-clamp-1">
                   {game.title}
                 </h3>
-                <p className="font-body text-sm text-slate-500 font-medium leading-relaxed line-clamp-3 mb-6">
-                  {game.description}
-                </p>
+                {game.description && (
+                  <p className="font-body text-sm text-slate-500 font-medium leading-relaxed line-clamp-3 mb-6">
+                    {game.description}
+                  </p>
+                )}
 
                 {/* Footer */}
                 <div className="mt-auto flex items-center justify-between">
