@@ -1,10 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Atom, Activity, Magnet, Orbit, Cpu, Zap } from 'lucide-react';
 import Button from '../components/ui/Button';
 import SolarSystemBackground from '../components/animations/SolarSystemBackground';
 import AuthorSignature from '../components/ui/AuthorSignature';
-import SpacetimeGrid from '../components/animations/SpacetimeGrid';
 
 const ProgramSelection = () => {
   const { user } = useAuth();
@@ -162,52 +160,7 @@ const ProgramSelection = () => {
         </div>
       </section>
 
-      {/* Spacetime Grid Feature Section */}
-      <section className="relative z-10 bg-slate-950 overflow-hidden min-h-[700px] flex items-center py-24">
-        {/* Interactive Spacetime Canvas */}
-        <SpacetimeGrid />
-        
-        {/* Foreground Content */}
-        <div className="container mx-auto px-4 relative z-20 pointer-events-none">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-              Bẻ cong <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">
-                mọi giới hạn
-              </span>
-            </h2>
-            <p className="text-xl md:text-2xl text-indigo-100/70 mb-16 font-light max-w-2xl mx-auto drop-shadow-md">
-              Không gian học tập nơi kiến thức không còn là những dòng chữ khô khan. Tương tác với môi trường, kiểm chứng định luật và khai phá tư duy đa chiều.
-            </p>
-            
-            <div className="grid md:grid-cols-3 gap-8 text-center pointer-events-none">
-               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                 <Orbit className="w-10 h-10 text-indigo-400 mx-auto mb-4" />
-                 <div className="text-2xl font-black text-white mb-2">Mô phỏng 3D</div>
-                 <div className="text-sm font-medium text-indigo-200/60">Tương tác vật lý thực tế</div>
-               </div>
-               
-               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transform md:-translate-y-4">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                 <Cpu className="w-10 h-10 text-purple-400 mx-auto mb-4" />
-                 <div className="text-2xl font-black text-white mb-2">Trợ lý AI</div>
-                 <div className="text-sm font-medium text-purple-200/60">Hỗ trợ giải đáp 24/7</div>
-               </div>
 
-               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                 <Zap className="w-10 h-10 text-cyan-400 mx-auto mb-4" />
-                 <div className="text-2xl font-black text-white mb-2">120Hz Core</div>
-                 <div className="text-sm font-medium text-cyan-200/60">Tính toán chính xác tuyệt đối</div>
-               </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Gradient transition to white at the bottom so it flows smoothly to the CTA */}
-        <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-b from-transparent to-white pointer-events-none"></div>
-      </section>
 
       {/* CTA Section */}
       {!user && (

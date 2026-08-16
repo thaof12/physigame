@@ -1,105 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ChevronRight, Swords, FlaskConical, BookOpen,
-  CircuitBoard, Target, Shield, TrendingUp, Microscope, Compass, CheckCircle2, Play, Map,
-  Sparkles, GraduationCap, School, Users, Magnet, Zap, Activity, Orbit, Cpu
-} from 'lucide-react';
-import SpacetimeGrid from '../../../components/animations/SpacetimeGrid';
+import { ChevronRight, Microscope, Swords, GraduationCap, Play } from 'lucide-react';
 
 // Feature Images
 import utilLab from '../../../assets/images/feature_lab.png';
 import utilArena from '../../../assets/images/feature_arena.png';
 import utilJourney from '../../../assets/images/feature_journey.jpg';
 import utilLectures from '../../../assets/images/feature_lectures.jpg';
-
-/* ────────────────────────────────────────────
-   CON QUAY HỒI CHUYỂN (GOLDEN GYROSCOPE)
-   ──────────────────────────────────────────── */
-const GoldenGyroscope = () => {
-  const outerRing = useRef(null);
-  const midRing = useRef(null);
-  const innerRing = useRef(null);
-  const core = useRef(null);
-
-  useEffect(() => {
-    let raf;
-    let a1 = 0, a2 = 0, a3 = 0, a4 = 0;
-    const tick = () => {
-      a1 += 0.2; // degrees
-      a2 -= 0.3;
-      a3 += 0.45;
-      a4 -= 0.6;
-
-      if (outerRing.current) outerRing.current.style.transform = `rotateX(65deg) rotateY(15deg) rotateZ(${a1}deg)`;
-      if (midRing.current) midRing.current.style.transform = `rotateX(45deg) rotateY(-20deg) rotateZ(${a2}deg)`;
-      if (innerRing.current) innerRing.current.style.transform = `rotateX(75deg) rotateY(30deg) rotateZ(${a3}deg)`;
-      if (core.current) core.current.style.transform = `rotateY(${a4}deg) rotateX(${a4 * 0.5}deg)`;
-
-      raf = requestAnimationFrame(tick);
-    };
-    tick();
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  return (
-    <div className="relative flex items-center justify-center scale-110 group" style={{ perspective: '1200px' }}>
-      <div className="absolute w-[300px] h-[300px] rounded-full blur-[80px] opacity-20 pointer-events-none bg-gradient-to-tr from-[#44b5d7] via-[#274dad] to-transparent group-hover:opacity-40 transition-opacity duration-1000" />
-      <div className="relative w-72 h-72 transition-transform duration-1000 ease-out group-hover:scale-105" style={{ transformStyle: 'preserve-3d' }}>
-        <div ref={core} className="absolute inset-[38%] rounded-full bg-gradient-to-br from-[#FFFFFF] via-[#44b5d7] to-[#4A3728] shadow-[0_0_40px_rgba(212,175,55,0.7),inset_0_0_20px_rgba(255,255,255,0.9)] flex items-center justify-center after:content-[''] after:absolute after:inset-0 after:rounded-full after:border after:border-white/50 after:blur-[1px]" style={{ transformStyle: 'preserve-3d' }}>
-          <Compass className="w-8 h-8 text-[#4A3728]/40 absolute z-10" />
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent rounded-full animate-pulse" />
-        </div>
-        <div ref={outerRing} className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <svg className="w-full h-full drop-shadow-[0_10px_20px_rgba(184,115,51,0.25)]" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="48" stroke="url(#brassOuter)" strokeWidth="1" strokeDasharray="3 4" strokeLinecap="round" className="opacity-80" />
-            <circle cx="50" cy="50" r="45" stroke="#4A3728" strokeWidth="0.5" className="opacity-50" />
-            <circle cx="50" cy="50" r="49.5" stroke="#44b5d7" strokeWidth="0.25" className="opacity-60" />
-            {[...Array(36)].map((_, i) => (
-              <line key={i} x1="50" y1="2" x2="50" y2={i % 3 === 0 ? "6" : "4"} transform={`rotate(${i * 10} 50 50)`} stroke={i % 3 === 0 ? "#2099e9" : "#44b5d7"} strokeWidth={i % 3 === 0 ? "0.6" : "0.3"} />
-            ))}
-            <defs>
-              <linearGradient id="brassOuter" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#44b5d7" /><stop offset="25%" stopColor="#FFF1B8" /><stop offset="50%" stopColor="#2099e9" /><stop offset="75%" stopColor="#FFF1B8" /><stop offset="100%" stopColor="#4A3728" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-        <div ref={midRing} className="absolute inset-5" style={{ transformStyle: 'preserve-3d' }}>
-          <svg className="w-full h-full drop-shadow-[0_0_15px_rgba(184,115,51,0.3)]" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="46" stroke="url(#brassMid)" strokeWidth="2.5" className="opacity-90" />
-            <circle cx="50" cy="50" r="46" stroke="#FFFFFF" strokeWidth="0.5" strokeDasharray="1 10" className="opacity-50" />
-            <circle cx="50" cy="4" r="2.5" fill="url(#nodeGlow)" /><circle cx="50" cy="96" r="2.5" fill="url(#nodeGlow)" />
-            <defs>
-              <linearGradient id="brassMid" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#e4f2f0" /><stop offset="40%" stopColor="#274dad" /><stop offset="100%" stopColor="#2A1B12" />
-              </linearGradient>
-              <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#FFFFFF" /><stop offset="50%" stopColor="#44b5d7" /><stop offset="100%" stopColor="#2099e9" />
-              </radialGradient>
-            </defs>
-          </svg>
-        </div>
-        <div ref={innerRing} className="absolute inset-12" style={{ transformStyle: 'preserve-3d' }}>
-          <svg className="w-full h-full" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="48" stroke="#44b5d7" strokeWidth="1" className="opacity-70" />
-            <circle cx="50" cy="50" r="40" stroke="#2099e9" strokeWidth="0.5" strokeDasharray="6 4" className="opacity-90" />
-            <path d="M50 2 L50 98 M2 50 L98 50" stroke="url(#crosshair)" strokeWidth="0.5" className="opacity-60" />
-            <defs>
-              <linearGradient id="crosshair" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="transparent" /><stop offset="40%" stopColor="#44b5d7" /><stop offset="60%" stopColor="#44b5d7" /><stop offset="100%" stopColor="transparent" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <div className="absolute top-0 left-1/2 w-3 h-3 -mt-1.5 -ml-1.5 rounded-full bg-white shadow-[0_0_15px_2px_#44b5d7]" style={{ transform: 'translateZ(10px)' }} />
-        </div>
-      </div>
-      <div className="absolute top-1/2 left-[-20%] right-[-20%] h-[1px] bg-gradient-to-r from-transparent via-[#44b5d7]/30 to-transparent pointer-events-none -translate-y-1/2" />
-    </div>
-  );
-};
 
 /* ────────────────────────────────────────────
    MAIN COMPONENT
@@ -116,6 +25,62 @@ const PhysicsHome = () => {
     setTimeout(() => setLoading(false), 600);
   }, [user]);
 
+  useEffect(() => {
+    const handleIframeMessage = (event) => {
+      const data = event.data;
+      if (!data) return;
+
+      let isStartEvent = false;
+
+      if (typeof data === 'string') {
+        if (
+          data === 'START_GAME' ||
+          data === 'START' ||
+          data.includes('START_GAME') ||
+          data.includes('NAVIGATE_CHALLENGE') ||
+          data.includes('advanced-physics-challenge')
+        ) {
+          isStartEvent = true;
+        } else {
+          try {
+            const parsed = JSON.parse(data);
+            if (
+              parsed.type === 'START_GAME' ||
+              parsed.type === 'HERO_START' ||
+              parsed.type === 'NAVIGATE_CHALLENGE' ||
+              parsed.action === 'START' ||
+              parsed.target === '/advanced-physics-challenge'
+            ) {
+              isStartEvent = true;
+            }
+          } catch (e) {
+            // Ignored if not JSON
+          }
+        }
+      } else if (typeof data === 'object') {
+        if (
+          data.type === 'START_GAME' ||
+          data.type === 'HERO_START' ||
+          data.type === 'NAVIGATE' ||
+          data.type === 'NAVIGATE_CHALLENGE' ||
+          data.action === 'START' ||
+          data.scene === 'game' ||
+          data.event === 'click_start' ||
+          data.target === '/advanced-physics-challenge'
+        ) {
+          isStartEvent = true;
+        }
+      }
+
+      if (isStartEvent) {
+        navigate('/advanced-physics-challenge');
+      }
+    };
+
+    window.addEventListener('message', handleIframeMessage);
+    return () => window.removeEventListener('message', handleIframeMessage);
+  }, [navigate]);
+
   const handleAction = (path) => {
     if (!user) navigate('/login');
     else navigate(path);
@@ -129,7 +94,7 @@ const PhysicsHome = () => {
 
   return (
     <div className="bg-[#FFFFFF] font-sans overflow-x-hidden min-h-screen">
-      {/* Hero Section */}
+      {/* Landing Page Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white pt-32 pb-32 px-6">
         <div className="absolute inset-0 z-0">
            <div className="absolute top-[-10%] left-[-5%] w-[60%] h-[60%] bg-indigo-50/30 rounded-full blur-[120px]" />
@@ -137,8 +102,6 @@ const PhysicsHome = () => {
         </div>
 
         <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center text-center">
-          
-
           <h1 className="font-premium-serif text-[15vw] sm:text-[12rem] font-bold text-slate-900 italic leading-none tracking-tighter mb-4 select-none">
             Eureka
           </h1>
@@ -257,52 +220,19 @@ const PhysicsHome = () => {
         </div>
       </section>
 
-      {/* Spacetime Grid Feature Section */}
-      <section className="relative z-10 bg-slate-950 overflow-hidden min-h-[700px] flex items-center py-24">
-        {/* Interactive Spacetime Canvas */}
-        <SpacetimeGrid />
-        
-        {/* Foreground Content */}
-        <div className="container mx-auto px-4 relative z-20 pointer-events-none">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="font-heading text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-              {t('home.bend_limits')} <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">
-                {t('home.bend_limits_highlight')}
-              </span>
-            </h2>
-            <p className="font-body text-xl md:text-2xl text-indigo-100/70 mb-16 font-light max-w-2xl mx-auto drop-shadow-md">
-              {t('home.bend_limits_desc')}
-            </p>
-            
-            <div className="grid md:grid-cols-3 gap-8 text-center pointer-events-none">
-               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                 <Orbit className="w-10 h-10 text-indigo-400 mx-auto mb-4" />
-                 <div className="font-heading text-2xl font-extrabold text-white mb-2">{t('home.3d_sim')}</div>
-                 <div className="font-body text-sm font-medium text-indigo-200/60">{t('home.3d_sim_desc')}</div>
-               </div>
-               
-               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transform md:-translate-y-4">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                 <Cpu className="w-10 h-10 text-purple-400 mx-auto mb-4" />
-                 <div className="font-heading text-2xl font-extrabold text-white mb-2">{t('home.ai_assistant')}</div>
-                 <div className="font-body text-sm font-medium text-purple-200/60">{t('home.ai_assistant_desc')}</div>
-               </div>
-
-               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                 <Zap className="w-10 h-10 text-cyan-400 mx-auto mb-4" />
-                 <div className="font-heading text-2xl font-extrabold text-white mb-2">{t('home.120hz_core')}</div>
-                 <div className="font-body text-sm font-medium text-cyan-200/60">{t('home.120hz_core_desc')}</div>
-               </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Gradient transition to white/slate-900 at the bottom to flow smoothly to CTA */}
-        <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-b from-transparent to-white pointer-events-none"></div>
-      </section>
+      {/* Hero Section Container (Old Banner Position) */}
+      <div className="hero-cocos-container bg-white">
+        <iframe 
+          src="https://robot-physic-eureka.vercel.app/?scene=hero" 
+          style={{ width: '100%', height: '100%', border: 'none', outline: 'none', display: 'block', backgroundColor: '#ffffff' }} 
+          frameBorder="0"
+          allow="autoplay"
+          allowtransparency="true"
+          scrolling="no"
+          title="Robot Physics Hero Section"
+          className="hero-cocos-iframe"
+        ></iframe>
+      </div>
 
       {/* Final Call to Action */}
       <section className="py-32 px-6">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -17,6 +17,8 @@ import robotBanner from '../../../assets/images/robot-eureka-banner.jpg';
 
 const AdvancedPhysicsChallenge = () => {
   const navigate = useNavigate();
+  const [activeGameUrl, setActiveGameUrl] = useState(null);
+  const [activeGameTitle, setActiveGameTitle] = useState('');
 
   const challenges = [
     {
@@ -36,6 +38,30 @@ const AdvancedPhysicsChallenge = () => {
       isFullWidth: true
     }
   ];
+
+  if (activeGameUrl) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-black font-body">
+        {/* Floating Back Button */}
+        <button
+          onClick={() => setActiveGameUrl(null)}
+          className="absolute top-5 left-5 z-20 flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-slate-900/80 hover:bg-slate-900 backdrop-blur-md border border-white/20 font-heading text-xs uppercase tracking-wider font-extrabold text-white transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" /> Quay lại
+        </button>
+
+        {/* Embedded Game Iframe */}
+        <iframe
+          id="embedded-game-iframe"
+          src={activeGameUrl}
+          title={activeGameTitle}
+          className="w-full h-full border-0 block"
+          allow="autoplay; fullscreen"
+          style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative bg-[#FFFFFF] pb-20 font-body">
@@ -87,8 +113,6 @@ const AdvancedPhysicsChallenge = () => {
           </div>
         </div>
 
-
-
         {/* Challenges Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {challenges.map((game, index) => (
@@ -96,7 +120,8 @@ const AdvancedPhysicsChallenge = () => {
               key={game.id}
               onClick={() => {
                 if (game.path.startsWith('http')) {
-                  window.open(game.path, '_blank');
+                  setActiveGameUrl(game.path);
+                  setActiveGameTitle(game.title);
                 } else {
                   navigate(game.path);
                 }
@@ -151,8 +176,6 @@ const AdvancedPhysicsChallenge = () => {
             </div>
           ))}
         </div>
-
-
 
       </div>
     </div>
