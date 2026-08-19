@@ -1,45 +1,49 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Lock } from 'lucide-react';
-import { lectureData } from '../data/lectureData';
+import { ArrowLeft, Play } from 'lucide-react';
+import { getPublishedLessons } from '../utils/lessonStorage';
 
 const LectureClassSelector = () => {
   const { subject, grade } = useParams();
   const navigate = useNavigate();
   const [lectures, setLectures] = useState([]);
-  const [subjectName, setSubjectName] = useState('');
+  const [subjectName, setSubjectName] = useState('Vật Lý');
 
   useEffect(() => {
-    // Load lectures for this grade
-    const gradeNum = grade.startsWith('class') ? parseInt(grade.replace('class', '')) : parseInt(grade);
-    const subjectData = lectureData[subject]?.[gradeNum];
-
-    if (subjectData) {
-      const lectureList = Object.entries(subjectData).map(([id, data]) => ({
-        id,
-        ...data
-      }));
-      setLectures(lectureList);
+    const loadLectures = () => {
+      const gradeNum = grade.startsWith('class') ? parseInt(grade.replace('class', ''), 10) : parseInt(grade, 10);
+      const published = getPublishedLessons().filter(l => String(l.grade) === String(gradeNum));
+      setLectures(published);
       setSubjectName('Vật Lý');
-    }
+    };
+
+    loadLectures();
+
+    window.addEventListener('storage', loadLectures);
+    window.addEventListener('admin_lessons_updated', loadLectures);
+
+    return () => {
+      window.removeEventListener('storage', loadLectures);
+      window.removeEventListener('admin_lessons_updated', loadLectures);
+    };
   }, [subject, grade]);
 
   if (lectures.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4 text-6xl">📚</div>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-            Chưa có bài giảng
+      <div className="min-h-screen bg-white flex items-center justify-center font-body pt-24">
+        <div className="text-center p-8 bg-slate-50 rounded-3xl border border-slate-100 max-w-md">
+          <div className="mb-4 text-5xl">📚</div>
+          <h2 className="font-heading text-2xl font-bold text-slate-800 mb-2">
+            Chưa có bài giảng cho Lớp {grade.replace('class', '')}
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Bài giảng cho lớp này sắp được cập nhật
+          <p className="text-slate-500 font-medium mb-6 text-sm">
+            Bài giảng cho lớp này đang được quản trị viên cập nhật.
           </p>
           <button
-            onClick={() => navigate(-1)}
-            className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors"
+            onClick={() => navigate('/interactive-lectures')}
+            className="px-6 py-3 bg-[#274dad] hover:bg-[#2099e9] text-white rounded-2xl font-bold transition-all"
           >
-            Quay lại
+            Quay lại thư viện
           </button>
         </div>
       </div>
@@ -47,91 +51,53 @@ const LectureClassSelector = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 pt-24">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg sticky top-24 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate(`/interactive-lectures/${subject}`)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-            </button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-                {subjectName} - Lớp {grade.replace('class', '')}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Chọn bài giảng để bắt đầu học
-              </p>
-            </div>
+    <div className="min-h-screen bg-[#FFFFFF] pt-28 pb-20 font-body">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={() => navigate('/interactive-lectures')}
+            className="p-3 bg-slate-50 hover:bg-blue-50 text-[#2099e9] rounded-2xl transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div>
+            <h1 className="font-heading text-3xl font-extrabold text-[#1E293B]">
+              {subjectName} - Lớp {grade.replace('class', '')}
+            </h1>
+            <p className="text-slate-500 font-medium text-sm mt-1">
+              Danh sách bài giảng được phát hành từ ban quản trị
+            </p>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {lectures.map((lecture, index) => (
             <div
               key={lecture.id}
-              onClick={() => navigate(`/interactive-lectures/${subject}/${grade}/${lecture.id}`)}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2 overflow-hidden group"
+              onClick={() => navigate(`/interactive-lectures/${subject}/${grade}/${lecture.rawId || lecture.id}`)}
+              className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all cursor-pointer flex flex-col justify-between group"
             >
-              {/* Color Header */}
-              <div className="bg-gradient-to-r from-green-500 to-teal-600 p-6 text-white">
-                <div className="flex items-center justify-between mb-2">
-                  <Play className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                  <div className="text-sm opacity-80">Bài {index + 1}</div>
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-black text-[#274dad] uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-full">
+                    BÀI {lecture.lessonNumber || (index + 1)}
+                  </span>
+                  <Play className="w-5 h-5 text-[#2099e9] group-hover:scale-110 transition-transform" />
                 </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-3">
+                <h3 className="font-heading text-lg font-bold text-[#1E293B] mb-2 group-hover:text-[#274dad] transition-colors leading-snug">
                   {lecture.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
-                  {lecture.description}
+                <p className="text-slate-500 text-xs font-medium line-clamp-2 mb-4">
+                  {lecture.chapterTitle}
                 </p>
+              </div>
 
-                {/* Stats */}
-                <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  <div className="flex items-center gap-2">
-                    <span>📖</span>
-                    <span>{lecture.sections.length} phần nội dung</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>❓</span>
-                    <span>
-                      {lecture.sections.reduce((acc, sec) => acc + (sec.questions?.length || 0), 0)} câu hỏi
-                    </span>
-                  </div>
-                </div>
-
-                {/* Button */}
-                <button className="w-full py-2 px-4 rounded-lg font-semibold transition-all bg-green-500 hover:bg-green-600 text-white">
-                  Bắt đầu bài học →
-                </button>
+              <div className="pt-4 border-t border-slate-50 flex items-center justify-between text-xs font-bold text-[#274dad]">
+                <span>XEM BÀI HỌC</span>
+                <span>→</span>
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Add More Lessons Info */}
-        <div className="mt-12 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-blue-200 dark:border-yellow-800 rounded-xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="text-3xl">💡</div>
-            <div>
-              <h3 className="font-bold text-yellow-900 dark:text-blue-100 mb-2">
-                Bài giảng sẽ được cập nhật thường xuyên
-              </h3>
-              <p className="text-yellow-800 dark:text-blue-200 text-sm">
-                Chúng tôi liên tục bổ sung thêm bài giảng mới với nội dung phong phú để hỗ trợ quá trình học tập của bạn.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -139,4 +105,3 @@ const LectureClassSelector = () => {
 };
 
 export default LectureClassSelector;
-

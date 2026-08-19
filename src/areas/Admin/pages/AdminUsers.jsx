@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Users,
   Search,
@@ -21,11 +21,85 @@ import {
   Mail,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  Check,
+  ShieldCheck
 } from 'lucide-react';
 import { supabase } from '../../../config/supabase';
 import api from '../../../config/api';
 import { sendTeacherStatusEmail } from '../../../services/emailService';
+
+const CustomSelect = ({ value, onChange, options, className = "" }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  const selectedOption = options.find(opt => String(opt.value) === String(value)) || options[0];
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={containerRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-xl px-4 py-2.5 text-sm text-[#274dad] font-bold flex items-center justify-between gap-3 focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all cursor-pointer shadow-sm hover:border-[#2099e9]/40"
+      >
+        <span className="truncate">{selectedOption?.label}</span>
+        <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#2099e9]' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-2 z-[60] bg-white border border-slate-100 shadow-2xl rounded-2xl overflow-hidden p-1.5 animate-in fade-in zoom-in-95 duration-150 min-w-[170px]">
+          <div className="max-h-52 overflow-y-auto overflow-x-hidden space-y-1 pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+            {options.map((opt) => {
+              const isSelected = String(opt.value) === String(value);
+              return (
+                <div
+                  key={opt.value}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                  }}
+                  className={`px-3.5 py-2.5 rounded-xl font-body font-bold text-sm cursor-pointer transition-all flex items-center justify-between ${
+                    isSelected
+                      ? 'bg-blue-50 text-[#2099e9]'
+                      : 'text-slate-700 hover:bg-slate-50 hover:text-[#2099e9]'
+                  }`}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {isSelected && <Check className="w-4 h-4 text-[#2099e9] shrink-0" />}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const roleFilterOptions = [
+  { value: 'all', label: 'Tất cả vai trò' },
+  { value: 'student', label: 'Học sinh' },
+  { value: 'teacher', label: 'Giáo viên' },
+  { value: 'admin', label: 'Quản trị viên' }
+];
+
+const statusFilterOptions = [
+  { value: 'all', label: 'Tất cả trạng thái' },
+  { value: 'active', label: 'Hoạt động' },
+  { value: 'inactive', label: 'Không hoạt động' },
+  { value: 'pending', label: 'Chờ xác nhận' }
+];
 
 // Mock data for users list
 const mockUsers = [
@@ -55,7 +129,6 @@ const PendingTeachersTab = () => {
   const fetchTeachers = async () => {
     setLoading(true);
     setError('');
-    console.log('%c📊 [AdminUsers] Fetching teachers from schema-validated users table...', 'color: #44b5d7; font-weight: bold');
     
     try {
       const { data: usersData, error: usersErr } = await supabase
@@ -65,7 +138,6 @@ const PendingTeachersTab = () => {
 
       if (usersErr) throw usersErr;
 
-      // Map to consistent format
       const formatted = (usersData || []).map(t => ({
         _id: t.id,
         id: t.id,
@@ -85,10 +157,8 @@ const PendingTeachersTab = () => {
 
       setAllTeachers(formatted);
       setPendingTeachers(formatted.filter(t => (t.teacherStatus || '').toLowerCase() === 'pending'));
-      
-      console.log(`✅ [AdminUsers] Loaded ${formatted.length} teachers`);
     } catch (err) {
-      console.error('Error fetching teachers:', err);
+      console.error('Error fetching real teachers:', err);
       setError('Không thể tải danh sách giáo viên từ database');
     } finally {
       setLoading(false);
@@ -416,11 +486,26 @@ const PendingTeachersTab = () => {
   );
 };
 
+const getInitialUsersCache = () => {
+  try {
+    const cached = localStorage.getItem('physigame_admin_users_cache');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return mockUsers.map(u => ({
+    ...u,
+    avatar: u.avatar || null,
+    teacher_status: u.role === 'teacher' ? 'verified' : null
+  }));
+};
+
 // ==================== Main AdminUsers Component ====================
 const AdminUsers = () => {
   const [activeTab, setActiveTab] = useState('users');
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState(() => getInitialUsersCache());
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -429,10 +514,27 @@ const AdminUsers = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUserDetail, setShowUserDetail] = useState(null);
   const [showEditModal, setShowEditModal] = useState(null);
+  const [editFormData, setEditFormData] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
 
   const itemsPerPage = 10;
+
+  useEffect(() => {
+    if (showEditModal) {
+      setEditFormData({
+        id: showEditModal.id,
+        name: showEditModal.name || '',
+        avatar: showEditModal.avatar || '',
+        role: showEditModal.role || 'student',
+        status: showEditModal.status || 'active',
+        grade: showEditModal.grade || '6',
+        email: showEditModal.email || ''
+      });
+    } else {
+      setEditFormData(null);
+    }
+  }, [showEditModal]);
 
   useEffect(() => {
     if (activeTab === 'users') {
@@ -441,7 +543,6 @@ const AdminUsers = () => {
   }, [activeTab]);
 
   const fetchUsers = async () => {
-    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('users')
@@ -450,39 +551,39 @@ const AdminUsers = () => {
 
       if (error) throw error;
 
-      setUsers((data || []).map(u => {
-        let resolvedStatus = u.status || 'active';
-        if (u.role === 'teacher') {
-          if (u.teacher_status === 'pending') resolvedStatus = 'pending';
-          else if (u.teacher_status === 'rejected') resolvedStatus = 'rejected';
-          else if (u.teacher_status === 'verified') resolvedStatus = 'active';
-        }
-        return {
-          id: u.id,
-          name: u.display_name || u.username || 'Người dùng',
-          email: u.email,
-          avatar: u.avatar || null,
-          role: u.role || 'student',
-          teacher_status: u.teacher_status || null,
-          grade: u.profile?.grade || u.grade || '?',
-          status: resolvedStatus,
-          joinDate: new Date(u.created_at).toLocaleDateString('vi-VN'),
-          lastActive: u.updated_at ? new Date(u.updated_at).toLocaleDateString('vi-VN') : '—',
-          lessonsCompleted: u.profile?.lessonsCompleted || 0,
-          exercisesCompleted: u.profile?.exercisesCompleted || 0,
-          originalData: u
-        };
-      }));
+      if (data && data.length > 0) {
+        const formatted = data.map(u => {
+          let resolvedStatus = u.status || 'active';
+          if (u.role === 'teacher') {
+            if (u.teacher_status === 'pending') resolvedStatus = 'pending';
+            else if (u.teacher_status === 'rejected') resolvedStatus = 'rejected';
+            else if (u.teacher_status === 'verified') resolvedStatus = 'active';
+          }
+          const userAvatar = u.avatar || u.avatar_url || u.profile?.avatar || u.teacher_profile?.avatar || null;
+          return {
+            id: u.id,
+            name: u.display_name || u.username || 'Người dùng',
+            email: u.email,
+            avatar: userAvatar,
+            role: u.role || 'student',
+            teacher_status: u.teacher_status || null,
+            grade: u.profile?.grade || u.grade || (u.programs && u.programs[0]?.currentClass) || '?',
+            status: resolvedStatus,
+            joinDate: u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : '—',
+            lastActive: u.updated_at ? new Date(u.updated_at).toLocaleDateString('vi-VN') : '—',
+            lessonsCompleted: u.profile?.lessonsCompleted || (u.programs && u.programs[0]?.progress?.completedLessons?.length) || 0,
+            exercisesCompleted: u.profile?.exercisesCompleted || 0,
+            originalData: u
+          };
+        });
+
+        setUsers(formatted);
+        try {
+          localStorage.setItem('physigame_admin_users_cache', JSON.stringify(formatted));
+        } catch (e) {}
+      }
     } catch (err) {
-      console.error('Error fetching users:', err);
-      // Fallback to mock data for demonstration if DB is empty/fails
-      setUsers(mockUsers.map(u => ({
-        ...u,
-        avatar: u.avatar || null,
-        teacher_status: u.role === 'teacher' ? 'verified' : null
-      })));
-    } finally {
-      setLoading(false);
+      console.error('Error fetching real users from Supabase:', err);
     }
   };
 
@@ -511,9 +612,20 @@ const AdminUsers = () => {
   const handleUpdateUser = async (userData) => {
     setActionLoading(userData.id);
     try {
+      const existingProfile = userData.originalData?.profile || {};
+      const updatedProfile = {
+        ...existingProfile,
+        avatar: userData.avatar || null,
+        grade: userData.grade || existingProfile.grade || null
+      };
+
       const updatePayload = {
         display_name: userData.name,
-        role: userData.role
+        avatar: userData.avatar || null,
+        profile: updatedProfile,
+        role: userData.role,
+        status: userData.status,
+        grade: userData.grade || null
       };
 
       // Handle teacher_status updates based on edited status/role
@@ -529,6 +641,7 @@ const AdminUsers = () => {
         }
       }
 
+      // 1. Update Supabase core users table
       const { error } = await supabase
         .from('users')
         .update(updatePayload)
@@ -536,12 +649,69 @@ const AdminUsers = () => {
 
       if (error) throw error;
 
-      setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData, teacher_status: updatePayload.teacher_status || null } : u));
+      // 2. If teacher role, also update/upsert into 'teacher profile' table
+      if (userData.role === 'teacher') {
+        try {
+          await supabase
+            .from('teacher profile')
+            .upsert({
+              id: userData.id,
+              name: userData.name,
+              teacherStatus: updatePayload.teacher_status || 'pending',
+              createdAt: new Date().toISOString()
+            });
+        } catch (tpErr) {
+          console.warn('Teacher profile table update warning:', tpErr);
+        }
+      }
+
+      // 3. Update localStorage if current active session belongs to this user ID
+      const currentUserStr = localStorage.getItem('user');
+      if (currentUserStr) {
+        try {
+          const currentUser = JSON.parse(currentUserStr);
+          if (currentUser.id === userData.id || currentUser.uid === userData.id) {
+            const updatedCurrentUser = {
+              ...currentUser,
+              displayName: userData.name,
+              display_name: userData.name,
+              avatar_url: userData.avatar,
+              avatar: userData.avatar,
+              profile: {
+                ...(currentUser.profile || {}),
+                avatar: userData.avatar,
+                grade: userData.grade
+              },
+              role: userData.role,
+              status: userData.status,
+              grade: userData.grade,
+              teacherStatus: updatePayload.teacher_status,
+              teacher_status: updatePayload.teacher_status
+            };
+            localStorage.setItem('user', JSON.stringify(updatedCurrentUser));
+            window.dispatchEvent(new Event('storage'));
+          }
+        } catch (e) {
+          console.error('Error updating currentUser in localStorage:', e);
+        }
+      }
+
+      // Update local state in AdminUsers
+      setUsers(prev => prev.map(u => u.id === userData.id ? { 
+        ...u, 
+        ...userData, 
+        name: userData.name,
+        avatar: userData.avatar, 
+        role: userData.role,
+        status: userData.status,
+        grade: userData.grade,
+        teacher_status: updatePayload.teacher_status || null 
+      } : u));
       setShowEditModal(null);
     } catch (err) {
       console.error('Error updating user:', err);
       // Fallback update local state
-      setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData } : u));
+      setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData, avatar: userData.avatar } : u));
       setShowEditModal(null);
     } finally {
       setActionLoading(null);
@@ -660,23 +830,6 @@ const AdminUsers = () => {
           <h1 className="font-heading text-2xl font-extrabold text-[#274dad]">Quản lý người dùng</h1>
           <p className="font-body text-slate-500 font-bold text-sm mt-1">Quản lý học sinh và giáo viên trên hệ thống</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="font-heading flex items-center gap-2 px-4 py-2.5 bg-[#e4f2f0] border border-transparent rounded-xl text-slate-500 hover:text-[#2099e9] transition-all font-extrabold text-sm">
-            <Upload className="w-4 h-4" />
-            <span className="hidden sm:inline">Nhập</span>
-          </button>
-          <button className="font-heading flex items-center gap-2 px-4 py-2.5 bg-[#e4f2f0] border border-transparent rounded-xl text-slate-500 hover:text-[#2099e9] transition-all font-extrabold text-sm">
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Xuất</span>
-          </button>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="font-heading flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] rounded-xl text-white text-sm font-extrabold shadow-lg shadow-blue-500/10 hover:brightness-110 transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            <span>THÊM MỚI</span>
-          </button>
-        </div>
       </div>
 
       {/* Tabs */}
@@ -754,47 +907,43 @@ const AdminUsers = () => {
             </div>
           </div>
 
-          {/* Filters */}
+          {/* Filters with CustomSelect */}
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#85e4fb]/20">
-            <div className="flex flex-col lg:flex-row gap-4 font-body">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="flex flex-col sm:flex-row gap-4 font-body items-center">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm theo tên hoặc email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#274dad] placeholder-slate-400 focus:outline-none focus:border-[#2099e9]/50 font-bold"
+                  className="w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#274dad] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#2099e9] font-bold transition-all"
                 />
               </div>
-              <select
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-                className="bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-xl px-4 py-2.5 text-sm text-[#274dad] focus:outline-none focus:border-[#2099e9]/50 font-bold"
-              >
-                <option value="all">Tất cả vai trò</option>
-                <option value="student">Học sinh</option>
-                <option value="teacher">Giáo viên</option>
-                <option value="admin">Quản trị viên</option>
-              </select>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-xl px-4 py-2.5 text-sm text-[#274dad] focus:outline-none focus:border-[#2099e9]/50 font-bold"
-              >
-                <option value="all">Tất cả trạng thái</option>
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Không hoạt động</option>
-                <option value="pending">Chờ xác nhận</option>
-              </select>
-              <button 
-                onClick={fetchUsers}
-                className="p-2.5 bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-xl text-slate-400 hover:text-[#2099e9] transition-colors"
-                title="Làm mới"
-              >
-                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-              </button>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <CustomSelect
+                  value={filterRole}
+                  onChange={setFilterRole}
+                  options={roleFilterOptions}
+                  className="w-full sm:w-48"
+                />
+                <CustomSelect
+                  value={filterStatus}
+                  onChange={setFilterStatus}
+                  options={statusFilterOptions}
+                  className="w-full sm:w-52"
+                />
+                <button 
+                  onClick={fetchUsers}
+                  className="p-2.5 bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-xl text-slate-400 hover:text-[#2099e9] hover:bg-white transition-all shrink-0"
+                  title="Làm mới"
+                >
+                  <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
             </div>
+
             {selectedUsers.length > 0 && (
               <div className="flex items-center gap-3 mt-4 pt-4 border-t border-[#e4f2f0]">
                 <span className="text-sm font-bold text-slate-400 font-body">Đã chọn {selectedUsers.length} người dùng</span>
@@ -820,109 +969,103 @@ const AdminUsers = () => {
             )}
           </div>
 
-          {/* Loading state */}
-          {loading && (
-            <div className="py-20 flex flex-col items-center justify-center text-slate-400">
-               <div className="w-12 h-12 border-4 border-[#2099e9] border-t-transparent rounded-full animate-spin mb-6"></div>
-               <p className="font-heading font-extrabold text-[#274dad]">Đang truy vấn dữ liệu học viên...</p>
-            </div>
-          )}
-
           {/* Users table */}
-          {!loading && (
-            <>
-              <div className="bg-white rounded-[2.5rem] shadow-sm border border-[#85e4fb]/20 overflow-hidden">
+          <>
+            <div className="bg-white rounded-[2.5rem] shadow-sm border border-[#85e4fb]/20 overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full text-left">
                     <thead>
-                      <tr className="border-b border-[#e4f2f0]">
-                        <th className="w-[5%] px-6 py-6 text-left">
+                      <tr className="bg-slate-50/60 border-b border-[#e4f2f0]">
+                        <th className="w-[4%] px-4 py-4">
                           <input
                             type="checkbox"
                             checked={selectedUsers.length === paginatedUsers.length && paginatedUsers.length > 0}
                             onChange={toggleSelectAll}
-                            className="w-5 h-5 rounded-lg border-[#85e4fb] bg-[#e4f2f0]/30 text-[#2099e9] focus:ring-[#2099e9]/20 transition-all cursor-pointer"
+                            className="w-4 h-4 rounded border-slate-300 text-[#2099e9] focus:ring-[#2099e9]/20 transition-all cursor-pointer"
                           />
                         </th>
-                        <th className="font-heading w-[35%] px-6 py-6 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Người dùng</th>
-                        <th className="font-heading w-[15%] px-6 py-6 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Vai trò</th>
-                        <th className="font-heading w-[15%] px-6 py-6 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Trạng thái</th>
-                        <th className="font-heading w-[15%] px-6 py-6 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Tiến độ</th>
-                        <th className="font-heading w-[10%] px-6 py-6 text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Hoạt động cuối</th>
-                        <th className="font-heading w-[5%] px-6 py-6 text-right text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Thao tác</th>
+                        <th className="font-heading w-[24%] px-4 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Người dùng</th>
+                        <th className="font-heading w-[17%] px-4 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Vai trò</th>
+                        <th className="font-heading w-[17%] px-4 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Trạng thái</th>
+                        <th className="font-heading w-[16%] px-4 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Tiến độ</th>
+                        <th className="font-heading w-[16%] px-4 py-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider whitespace-nowrap">Hoạt động cuối</th>
+                        <th className="font-heading w-[6%] px-4 py-4 text-right text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#e4f2f0]">
                       {paginatedUsers.map((user) => (
-                        <tr key={user.id} className="hover:bg-[#e4f2f0]/20 transition-colors group">
-                           <td className="px-6 py-6">
+                        <tr key={user.id} className="hover:bg-blue-50/30 transition-colors group">
+                           <td className="px-4 py-4">
                             <input
                               type="checkbox"
                               checked={selectedUsers.includes(user.id)}
                               onChange={() => toggleSelectUser(user.id)}
-                              className="w-5 h-5 rounded-lg border-[#85e4fb] bg-[#e4f2f0]/30 text-[#2099e9] focus:ring-[#2099e9]/20 transition-all cursor-pointer"
+                              className="w-4 h-4 rounded border-slate-300 text-[#2099e9] focus:ring-[#2099e9]/20 transition-all cursor-pointer"
                             />
                           </td>
-                          <td className="px-6 py-6">
+                          <td className="px-4 py-4">
                             <div 
                               onClick={() => setShowUserDetail(user)}
-                              className="flex items-center gap-4 cursor-pointer group/name"
+                              className="flex items-center gap-3.5 cursor-pointer group/name"
                             >
-                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/10 overflow-hidden shrink-0 ${
-                                user.role === 'teacher'
-                                  ? 'bg-gradient-to-br from-blue-500 to-orange-600'
-                                  : 'bg-gradient-to-br from-[#2099e9] to-[#85e4fb]'
-                              }`}>
+                              <div className="w-11 h-11 rounded-full bg-white border border-slate-200/90 shadow-sm flex items-center justify-center overflow-hidden shrink-0 group-hover/name:border-[#2099e9] group-hover/name:shadow-md transition-all">
                                 {user.avatar ? (
                                   <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                                 ) : user.role === 'teacher' ? (
-                                  <GraduationCap className="w-6 h-6 text-white" />
+                                  <GraduationCap className="w-5 h-5 text-slate-900" />
                                 ) : (
-                                  <span className="font-heading text-white font-extrabold text-sm">{user.name[0]?.toUpperCase()}</span>
+                                  <span className="font-heading text-slate-900 font-extrabold text-base">
+                                    {user.name ? user.name[0].toUpperCase() : 'U'}
+                                  </span>
                                 )}
                               </div>
                               <div>
-                                <p className="font-heading text-sm font-extrabold text-[#274dad] group-hover/name:text-[#2099e9] transition-colors">{user.name}</p>
-                                <p className="font-body text-xs font-bold text-slate-400">{user.email}</p>
+                                <p className="font-heading text-sm font-extrabold text-[#274dad] group-hover/name:text-[#2099e9] transition-colors">
+                                  {user.name}
+                                </p>
+                                <p className="font-body text-xs font-medium text-slate-400">{user.email}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-6">
-                            <span className={`font-heading inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest ${
+                          <td className="px-4 py-4">
+                            <span className={`font-heading inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
                               user.role === 'teacher'
-                                ? (user.status === 'rejected'
-                                    ? 'bg-rose-50 text-rose-600 border border-rose-100'
-                                    : user.status === 'pending'
-                                    ? 'bg-amber-50 text-amber-600 border border-amber-100'
-                                    : 'bg-blue-50 text-blue-500')
-                                : 'bg-[#e4f2f0] text-[#2099e9]'
+                                ? 'bg-indigo-50 text-indigo-700 border border-indigo-100'
+                                : user.role === 'admin'
+                                ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                                : 'bg-sky-50 text-sky-700 border border-sky-100'
                             }`}>
                               {user.role === 'teacher' ? (
                                 <>
-                                  <GraduationCap className="w-3.5 h-3.5" />
+                                  <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
                                   {user.status === 'rejected'
                                     ? 'Giáo viên (Từ chối)'
                                     : user.status === 'pending'
                                     ? 'Giáo viên (Chờ duyệt)'
                                     : 'Giáo viên'}
                                 </>
+                              ) : user.role === 'admin' ? (
+                                <>
+                                  <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                                  Quản trị viên
+                                </>
                               ) : (
                                 <>
-                                  <Users className="w-3.5 h-3.5" />
-                                  Lớp {user.grade}
+                                  <Users className="w-3.5 h-3.5 text-sky-600" />
+                                  Lớp {user.grade || '?'}
                                 </>
                               )}
                             </span>
                           </td>
-                          <td className="px-6 py-6">
-                            <span className={`font-heading inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest ${
+                          <td className="px-4 py-4">
+                            <span className={`font-heading inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold ${
                               user.status === 'active'
-                                ? 'bg-emerald-50 text-emerald-500'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                                 : user.status === 'pending'
-                                ? 'bg-blue-50 text-blue-500'
+                                ? 'bg-amber-50 text-amber-700 border border-amber-100'
                                 : user.status === 'rejected'
-                                ? 'bg-rose-50 text-rose-500'
-                                : 'bg-slate-50 text-slate-400'
+                                ? 'bg-rose-50 text-rose-700 border border-rose-100'
+                                : 'bg-slate-100 text-slate-500 border border-slate-200'
                             }`}>
                               {user.status === 'active' ? (
                                 <>
@@ -931,7 +1074,7 @@ const AdminUsers = () => {
                                 </>
                               ) : user.status === 'pending' ? (
                                 <>
-                                  <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                                  <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
                                   Chờ duyệt
                                 </>
                               ) : user.status === 'rejected' ? (
@@ -947,41 +1090,42 @@ const AdminUsers = () => {
                               )}
                             </span>
                           </td>
-                          <td className="px-6 py-6">
+                          <td className="px-4 py-4">
                             {user.role === 'student' ? (
-                              <div className="font-body text-xs font-bold text-slate-400">
-                                <p>{user.lessonsCompleted} BÀI HỌC</p>
-                                <p>{user.exercisesCompleted} BÀI TẬP</p>
+                              <div className="font-body text-xs font-bold text-slate-600">
+                                <span>{user.lessonsCompleted || 0} bài học</span>
+                                <span className="mx-1 text-slate-300">•</span>
+                                <span>{user.exercisesCompleted || 0} bài tập</span>
                               </div>
                             ) : (
                               <span className="font-body text-xs text-slate-300">—</span>
                             )}
                           </td>
-                          <td className="px-6 py-6">
-                            <span className="font-body text-xs font-bold text-slate-400 uppercase">{user.lastActive}</span>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <span className="font-body text-xs font-bold text-slate-400">{user.lastActive || '—'}</span>
                           </td>
-                          <td className="px-6 py-6">
-                            <div className="flex items-center justify-end gap-3">
+                          <td className="px-4 py-4 text-right">
+                            <div className="flex items-center justify-end gap-1">
                               <button
                                 onClick={() => setShowUserDetail(user)}
-                                className="p-2.5 text-slate-400 hover:text-[#2099e9] hover:bg-[#e4f2f0] rounded-xl transition-all shadow-sm"
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-[#2099e9] hover:bg-blue-50 transition-all"
                                 title="Xem chi tiết"
                               >
-                                <Eye className="w-5 h-5" />
+                                <Eye className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => setShowEditModal(user)}
-                                className="p-2.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 rounded-xl transition-all shadow-sm"
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
                                 title="Chỉnh sửa"
                               >
-                                <Edit3 className="w-5 h-5" />
+                                <Edit3 className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => setShowDeleteConfirm(user)}
-                                className="p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all shadow-sm"
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
                                 title="Xóa"
                               >
-                                <Trash2 className="w-5 h-5" />
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
@@ -1030,203 +1174,407 @@ const AdminUsers = () => {
                 )}
               </div>
             </>
-          )}
-      </>
-    )}
+          </>
+        )}
 
-      {/* User Detail Modal */}
+      {/* Horizontal User Detail Modal */}
       {showUserDetail && (
         <div className="fixed inset-0 bg-[#274dad]/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-[#85e4fb]/20">
-            <div className="flex items-center justify-between p-8 border-b border-[#e4f2f0]">
-              <h3 className="font-heading text-xl font-extrabold text-[#274dad]">Chi tiết người dùng</h3>
+          <div className="bg-white rounded-[2.5rem] w-full max-w-3xl overflow-hidden shadow-2xl border border-[#85e4fb]/20 animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 px-8 border-b border-slate-100 bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#2099e9]/10 rounded-xl text-[#2099e9]">
+                  <Eye className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-heading text-lg font-extrabold text-[#274dad]">Chi tiết người dùng</h3>
+                  <p className="font-body text-xs font-bold text-slate-400">Thông tin tài khoản và tiến độ học tập</p>
+                </div>
+              </div>
               <button
                 onClick={() => setShowUserDetail(null)}
-                className="p-2.5 text-slate-400 hover:text-[#2099e9] hover:bg-[#e4f2f0] rounded-xl transition-all"
+                className="p-2.5 text-slate-400 hover:text-[#2099e9] hover:bg-white rounded-xl transition-all shadow-sm cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-8 space-y-6">
-              <div className="flex items-center gap-6">
-                <div className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-lg text-white font-black text-2xl overflow-hidden shrink-0 ${
-                  showUserDetail.role === 'teacher'
-                    ? 'bg-gradient-to-br from-blue-500 to-orange-600'
-                    : 'bg-gradient-to-br from-[#2099e9] to-[#85e4fb]'
-                }`}>
+
+            {/* Modal Body: Horizontal Two-Column Layout */}
+            <div className="p-8 flex flex-col md:flex-row gap-8">
+              {/* Left Column: Avatar & Profile Card */}
+              <div className="w-full md:w-64 bg-slate-50/70 border border-slate-100 rounded-3xl p-6 flex flex-col items-center justify-center text-center shrink-0">
+                <div className="w-24 h-24 rounded-full bg-white border-2 border-slate-200 shadow-md flex items-center justify-center overflow-hidden mb-4 shrink-0">
                   {showUserDetail.avatar ? (
                     <img src={showUserDetail.avatar} alt={showUserDetail.name} className="w-full h-full object-cover" />
                   ) : showUserDetail.role === 'teacher' ? (
-                    <GraduationCap className="w-10 h-10" />
+                    <GraduationCap className="w-10 h-10 text-slate-900" />
                   ) : (
-                    <span className="font-heading text-white font-extrabold text-2xl">{showUserDetail.name[0]?.toUpperCase()}</span>
+                    <span className="font-heading text-slate-900 font-black text-3xl">
+                      {showUserDetail.name ? showUserDetail.name[0].toUpperCase() : 'U'}
+                    </span>
                   )}
                 </div>
-                <div>
-                  <h4 className="font-heading text-2xl font-extrabold text-[#274dad]">{showUserDetail.name}</h4>
-                  <p className="font-body text-slate-400 font-bold">{showUserDetail.email}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
-                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Vai trò</p>
-                  <p className="font-heading font-extrabold text-[#2099e9] text-sm uppercase">
-                    {showUserDetail.role === 'teacher' ? (
-                      showUserDetail.status === 'rejected'
-                        ? 'Giáo viên (Từ chối)'
-                        : showUserDetail.status === 'pending'
-                        ? 'Giáo viên (Chờ duyệt)'
-                        : 'Giáo viên'
-                    ) : `Học sinh lớp ${showUserDetail.grade}`}
-                  </p>
-                </div>
-                <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
-                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Trạng thái</p>
-                  <p className={`font-heading font-extrabold text-sm uppercase ${
-                    showUserDetail.status === 'active' ? 'text-emerald-500' :
-                    showUserDetail.status === 'pending' ? 'text-amber-500' :
-                    showUserDetail.status === 'rejected' ? 'text-rose-500' :
-                    'text-slate-400'
+
+                <h4 className="font-heading text-lg font-extrabold text-[#274dad] mb-1 break-words w-full">
+                  {showUserDetail.name}
+                </h4>
+                <p className="font-body text-xs font-bold text-slate-400 mb-4 break-all w-full">
+                  {showUserDetail.email}
+                </p>
+
+                <div className="flex flex-col gap-2 w-full items-center">
+                  <span className={`font-heading inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold ${
+                    showUserDetail.role === 'teacher'
+                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-100'
+                      : showUserDetail.role === 'admin'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                      : 'bg-sky-50 text-sky-700 border border-sky-100'
                   }`}>
-                    {showUserDetail.status === 'active' ? 'Hoạt động' :
-                     showUserDetail.status === 'pending' ? 'Chờ duyệt' :
-                     showUserDetail.status === 'rejected' ? 'Từ chối' :
-                     'Không hoạt động'}
-                  </p>
-                </div>
-                <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
-                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Ngày tham gia</p>
-                  <p className="font-heading font-extrabold text-[#274dad] text-sm">{showUserDetail.joinDate}</p>
-                </div>
-                <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
-                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Hoạt động cuối</p>
-                  <p className="font-heading font-extrabold text-[#274dad] text-sm">{showUserDetail.lastActive}</p>
+                    {showUserDetail.role === 'teacher' ? (
+                      <>
+                        <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
+                        Giáo viên
+                      </>
+                    ) : showUserDetail.role === 'admin' ? (
+                      <>
+                        <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                        Quản trị viên
+                      </>
+                    ) : (
+                      <>
+                        <Users className="w-3.5 h-3.5 text-sky-600" />
+                        Học sinh Lớp {showUserDetail.grade || '?'}
+                      </>
+                    )}
+                  </span>
+
+                  <span className={`font-heading inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold ${
+                    showUserDetail.status === 'active'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                      : showUserDetail.status === 'pending'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                      : showUserDetail.status === 'rejected'
+                      ? 'bg-rose-50 text-rose-700 border border-rose-100'
+                      : 'bg-slate-100 text-slate-500 border border-slate-200'
+                  }`}>
+                    {showUserDetail.status === 'active' ? (
+                      <>
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                        Hoạt động
+                      </>
+                    ) : showUserDetail.status === 'pending' ? (
+                      <>
+                        <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                        Chờ duyệt
+                      </>
+                    ) : showUserDetail.status === 'rejected' ? (
+                      <>
+                        <span className="w-2 h-2 bg-rose-500 rounded-full"></span>
+                        Từ chối
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                        Không hoạt động
+                      </>
+                    )}
+                  </span>
                 </div>
               </div>
-              {showUserDetail.role === 'student' && (
-                <div className="bg-[#e4f2f0]/30 rounded-2xl p-6 border border-[#e4f2f0]">
-                  <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-4">Tiến độ học tập</p>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <p className="font-heading text-3xl font-extrabold text-[#274dad]">{showUserDetail.lessonsCompleted}</p>
-                      <p className="font-body text-xs font-bold text-slate-400">Bài học hoàn thành</p>
-                    </div>
-                    <div>
-                      <p className="font-heading text-3xl font-extrabold text-[#274dad]">{showUserDetail.exercisesCompleted}</p>
-                      <p className="font-body text-xs font-bold text-slate-400">Bài tập hoàn thành</p>
-                    </div>
+
+              {/* Right Column: Detailed Grid Cards */}
+              <div className="flex-1 space-y-4 flex flex-col justify-between">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-[#e4f2f0]/30 rounded-2xl p-4 border border-[#e4f2f0]">
+                    <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Vai trò hệ thống</p>
+                    <p className="font-heading font-extrabold text-[#2099e9] text-sm uppercase">
+                      {showUserDetail.role === 'teacher' ? (
+                        showUserDetail.status === 'rejected'
+                          ? 'Giáo viên (Từ chối)'
+                          : showUserDetail.status === 'pending'
+                          ? 'Giáo viên (Chờ duyệt)'
+                          : 'Giáo viên'
+                      ) : showUserDetail.role === 'admin' ? 'Quản trị viên' : `Học sinh (Lớp ${showUserDetail.grade || '?'})`}
+                    </p>
+                  </div>
+
+                  <div className="bg-[#e4f2f0]/30 rounded-2xl p-4 border border-[#e4f2f0]">
+                    <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Trạng thái tài khoản</p>
+                    <p className={`font-heading font-extrabold text-sm uppercase ${
+                      showUserDetail.status === 'active' ? 'text-emerald-500' :
+                      showUserDetail.status === 'pending' ? 'text-amber-500' :
+                      showUserDetail.status === 'rejected' ? 'text-rose-500' :
+                      'text-slate-400'
+                    }`}>
+                      {showUserDetail.status === 'active' ? 'Hoạt động' :
+                       showUserDetail.status === 'pending' ? 'Chờ duyệt' :
+                       showUserDetail.status === 'rejected' ? 'Từ chối' :
+                       'Không hoạt động'}
+                    </p>
+                  </div>
+
+                  <div className="bg-[#e4f2f0]/30 rounded-2xl p-4 border border-[#e4f2f0]">
+                    <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Ngày tham gia</p>
+                    <p className="font-heading font-extrabold text-[#274dad] text-sm">{showUserDetail.joinDate || '—'}</p>
+                  </div>
+
+                  <div className="bg-[#e4f2f0]/30 rounded-2xl p-4 border border-[#e4f2f0]">
+                    <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Hoạt động cuối</p>
+                    <p className="font-heading font-extrabold text-[#274dad] text-sm">{showUserDetail.lastActive || '—'}</p>
                   </div>
                 </div>
-              )}
+
+                {showUserDetail.role === 'student' && (
+                  <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
+                    <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Tiến độ học tập</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm">
+                        <p className="font-heading text-2xl font-extrabold text-[#274dad]">{showUserDetail.lessonsCompleted || 0}</p>
+                        <p className="font-body text-xs font-bold text-slate-400">Bài học hoàn thành</p>
+                      </div>
+                      <div className="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm">
+                        <p className="font-heading text-2xl font-extrabold text-[#274dad]">{showUserDetail.exercisesCompleted || 0}</p>
+                        <p className="font-body text-xs font-bold text-slate-400">Bài tập hoàn thành</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {showUserDetail.role === 'teacher' && showUserDetail.teacherProfile && (
+                  <div className="bg-[#e4f2f0]/30 rounded-2xl p-5 border border-[#e4f2f0]">
+                    <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Hồ sơ giáo viên</p>
+                    <div className="grid grid-cols-2 gap-4 font-body text-xs font-bold text-slate-600">
+                      <p>Trường: <span className="text-[#274dad]">{showUserDetail.teacherProfile?.school || 'Chưa cập nhật'}</span></p>
+                      <p>Môn dạy: <span className="text-[#274dad]">{showUserDetail.teacherProfile?.subject || 'Vật lý'}</span></p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-4 p-8 border-t border-[#e4f2f0] bg-slate-50/50">
-              <button className="font-heading flex-1 py-4 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] text-white rounded-2xl font-extrabold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/10 hover:brightness-110 transition-all">
-                Chỉnh sửa
-              </button>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 p-6 px-8 border-t border-slate-100 bg-slate-50/50">
               <button
                 onClick={() => setShowUserDetail(null)}
-                className="font-heading flex-1 py-4 bg-white border border-[#e4f2f0] text-slate-500 rounded-2xl font-extrabold text-xs uppercase tracking-widest hover:bg-[#e4f2f0]/30 transition-all"
+                className="font-heading px-6 py-3.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-extrabold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all cursor-pointer shadow-sm"
               >
                 Đóng
+              </button>
+              <button
+                onClick={() => {
+                  const userToEdit = showUserDetail;
+                  setShowUserDetail(null);
+                  setShowEditModal(userToEdit);
+                }}
+                className="font-heading px-6 py-3.5 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] text-white rounded-xl font-extrabold text-xs uppercase tracking-widest shadow-md shadow-blue-500/20 hover:brightness-110 transition-all cursor-pointer flex items-center gap-2"
+              >
+                <Edit3 className="w-4 h-4" />
+                <span>Chỉnh sửa thông tin</span>
               </button>
             </div>
           </div>
         </div>
       )}
-      {/* Edit User Modal */}
-      {showEditModal && (
+
+      {/* Horizontal Edit User Modal */}
+      {showEditModal && editFormData && (
         <div className="fixed inset-0 bg-[#274dad]/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-[#85e4fb]/20">
-            <div className="p-8 bg-gradient-to-br from-indigo-500 to-[#274dad] text-white">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-heading text-2xl font-extrabold">Chỉnh sửa thành viên</h3>
-                <button onClick={() => setShowEditModal(null)} className="p-2 hover:bg-white/10 rounded-xl transition-all">
-                  <X className="w-6 h-6" />
-                </button>
+          <div className="bg-white rounded-[2.5rem] w-full max-w-3xl overflow-hidden shadow-2xl border border-[#85e4fb]/20 animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 px-8 border-b border-slate-100 bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-600">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-heading text-lg font-extrabold text-[#274dad]">Chỉnh sửa thành viên</h3>
+                  <p className="font-body text-xs font-bold text-slate-400">Cập nhật thông tin tài khoản và thông số hệ thống</p>
+                </div>
               </div>
-              <p className="font-body font-bold opacity-80">Cập nhật thông tin cho {showEditModal.name}</p>
+              <button
+                onClick={() => setShowEditModal(null)}
+                className="p-2.5 text-slate-400 hover:text-[#2099e9] hover:bg-white rounded-xl transition-all shadow-sm cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            
-            <form className="p-8 space-y-6" onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              handleUpdateUser({
-                ...showEditModal,
-                name: formData.get('name'),
-                role: formData.get('role'),
-                status: formData.get('status'),
-                grade: formData.get('grade')
-              });
-            }}>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Họ và tên</label>
-                  <input 
-                    name="name"
-                    defaultValue={showEditModal.name}
-                    className="font-body w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Vai trò</label>
-                    <select 
-                      name="role"
-                      defaultValue={showEditModal.role}
-                      className="font-body w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all"
-                    >
-                      <option value="student">Học sinh</option>
-                      <option value="teacher">Giáo viên</option>
-                      <option value="admin">Quản trị viên</option>
-                    </select>
+
+            {/* Modal Body: Horizontal Layout */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleUpdateUser(editFormData);
+              }}
+            >
+              <div className="p-8 flex flex-col md:flex-row gap-8">
+                {/* Left Column: Live Avatar & Profile Card */}
+                <div className="w-full md:w-64 bg-slate-50/70 border border-slate-100 rounded-3xl p-6 flex flex-col items-center justify-center text-center shrink-0">
+                  <div className="w-24 h-24 rounded-full bg-white border-2 border-slate-200 shadow-md flex items-center justify-center overflow-hidden mb-4 shrink-0 transition-all">
+                    {editFormData.avatar ? (
+                      <img src={editFormData.avatar} alt={editFormData.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                    ) : editFormData.role === 'teacher' ? (
+                      <GraduationCap className="w-10 h-10 text-slate-900" />
+                    ) : (
+                      <span className="font-heading text-slate-900 font-black text-3xl">
+                        {editFormData.name ? editFormData.name[0].toUpperCase() : 'U'}
+                      </span>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Trạng thái</label>
-                    <select 
-                      name="status"
-                      defaultValue={showEditModal.status}
-                      className="font-body w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all"
-                    >
-                      <option value="active">Hoạt động</option>
-                      <option value="pending">Chờ duyệt</option>
-                      {showEditModal.role === 'teacher' && (
-                        <option value="rejected">Từ chối</option>
+
+                  <h4 className="font-heading text-base font-extrabold text-[#274dad] mb-1 break-words w-full">
+                    {editFormData.name || 'Chưa nhập tên'}
+                  </h4>
+                  <p className="font-body text-xs font-bold text-slate-400 mb-4 break-all w-full">
+                    {editFormData.email}
+                  </p>
+
+                  <div className="flex flex-col gap-2 w-full items-center">
+                    <span className={`font-heading inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                      editFormData.role === 'teacher'
+                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-100'
+                        : editFormData.role === 'admin'
+                        ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                        : 'bg-sky-50 text-sky-700 border border-sky-100'
+                    }`}>
+                      {editFormData.role === 'teacher' ? (
+                        <>
+                          <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
+                          Giáo viên
+                        </>
+                      ) : editFormData.role === 'admin' ? (
+                        <>
+                          <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                          Quản trị viên
+                        </>
+                      ) : (
+                        <>
+                          <Users className="w-3.5 h-3.5 text-sky-600" />
+                          Học sinh Lớp {editFormData.grade || '?'}
+                        </>
                       )}
-                      <option value="inactive">Khóa</option>
-                    </select>
+                    </span>
+
+                    <span className={`font-heading inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold ${
+                      editFormData.status === 'active'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                        : editFormData.status === 'pending'
+                        ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                        : editFormData.status === 'rejected'
+                        ? 'bg-rose-50 text-rose-700 border border-rose-100'
+                        : 'bg-slate-100 text-slate-500 border border-slate-200'
+                    }`}>
+                      {editFormData.status === 'active' ? (
+                        <>
+                          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                          Hoạt động
+                        </>
+                      ) : editFormData.status === 'pending' ? (
+                        <>
+                          <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                          Chờ duyệt
+                        </>
+                      ) : editFormData.status === 'rejected' ? (
+                        <>
+                          <span className="w-2 h-2 bg-rose-500 rounded-full"></span>
+                          Từ chối
+                        </>
+                      ) : (
+                        <>
+                          <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                          Khóa tài khoản
+                        </>
+                      )}
+                    </span>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Lớp học</label>
-                  <select 
-                    name="grade"
-                    defaultValue={showEditModal.grade}
-                    className="font-body w-full bg-[#e4f2f0]/50 border border-[#e4f2f0] rounded-2xl px-5 py-4 text-[#274dad] font-bold focus:outline-none focus:border-[#2099e9] transition-all"
-                  >
-                    {[6, 7, 8, 9, 10, 11, 12].map(g => (
-                      <option key={g} value={g}>Lớp {g}</option>
-                    ))}
-                    <option value="?">Khác</option>
-                  </select>
+                {/* Right Column: Form Fields */}
+                <div className="flex-1 space-y-4">
+                  <div className="space-y-2">
+                    <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Họ và tên</label>
+                    <input
+                      type="text"
+                      value={editFormData.name}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                      className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-2xl px-5 py-3.5 text-[#274dad] font-bold focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Link ảnh đại diện (URL)</label>
+                    <input
+                      type="text"
+                      value={editFormData.avatar}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, avatar: e.target.value }))}
+                      placeholder="https://example.com/avatar.jpg"
+                      className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-2xl px-5 py-3.5 text-sm text-[#274dad] font-bold focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Vai trò</label>
+                      <select
+                        value={editFormData.role}
+                        onChange={(e) => setEditFormData(prev => ({ ...prev, role: e.target.value }))}
+                        className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-2xl px-5 py-3.5 text-[#274dad] font-bold focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all cursor-pointer"
+                      >
+                        <option value="student">Học sinh</option>
+                        <option value="teacher">Giáo viên</option>
+                        <option value="admin">Quản trị viên</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Trạng thái</label>
+                      <select
+                        value={editFormData.status}
+                        onChange={(e) => setEditFormData(prev => ({ ...prev, status: e.target.value }))}
+                        className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-2xl px-5 py-3.5 text-[#274dad] font-bold focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all cursor-pointer"
+                      >
+                        <option value="active">Hoạt động</option>
+                        <option value="pending">Chờ duyệt</option>
+                        {editFormData.role === 'teacher' && (
+                          <option value="rejected">Từ chối</option>
+                        )}
+                        <option value="inactive">Khóa tài khoản</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Khối lớp học</label>
+                    <select
+                      value={editFormData.grade}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, grade: e.target.value }))}
+                      className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-2xl px-5 py-3.5 text-[#274dad] font-bold focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all cursor-pointer"
+                    >
+                      {[6, 7, 8, 9, 10, 11, 12].map(g => (
+                        <option key={g} value={String(g)}>Lớp {g}</option>
+                      ))}
+                      <option value="?">Khác</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-4 pt-4">
-                <button 
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-3 p-6 px-8 border-t border-slate-100 bg-slate-50/50">
+                <button
                   type="button"
                   onClick={() => setShowEditModal(null)}
-                  className="font-heading flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-extrabold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all"
+                  className="font-heading px-6 py-3.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-extrabold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all cursor-pointer shadow-sm"
                 >
                   Hủy bỏ
                 </button>
-                <button 
+                <button
                   type="submit"
                   disabled={actionLoading === showEditModal.id}
-                  className="font-heading flex-[2] py-4 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] text-white rounded-2xl font-extrabold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all disabled:opacity-50"
+                  className="font-heading px-8 py-3.5 bg-gradient-to-r from-[#2099e9] to-[#85e4fb] text-white rounded-xl font-extrabold text-xs uppercase tracking-widest shadow-md shadow-blue-500/20 hover:brightness-110 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
-                  {actionLoading === showEditModal.id ? 'ĐANG CẬP NHẬT...' : 'LƯU THAY ĐỔI'}
+                  {actionLoading === showEditModal.id ? 'ĐANG LƯU...' : 'LƯU THAY ĐỔI'}
                 </button>
               </div>
             </form>

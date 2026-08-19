@@ -5,7 +5,6 @@ import {
   LayoutGrid,
   Users,
   BookOpen,
-  FileQuestion,
   BarChart3,
   Settings,
   LogOut,
@@ -42,12 +41,6 @@ const menuItems = [
     label: 'Bài Giảng',
     icon: BookOpen,
     path: '/admin/lessons'
-  },
-  {
-    id: 'exercises',
-    label: 'Thử Thách',
-    icon: FileQuestion,
-    path: '/admin/exercises'
   },
   {
     id: 'statistics',
@@ -202,45 +195,19 @@ const AdminLayout = () => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-h-screen relative">
-        {/* Header */}
-        <header className="h-24 bg-white/70 backdrop-blur-md border-b border-[#e2e8f0]/20 flex items-center justify-between px-8 lg:px-12 sticky top-0 z-30">
+        {/* Header - only on mobile */}
+        <header className="lg:hidden h-16 bg-white/70 backdrop-blur-md border-b border-[#e2e8f0]/20 flex items-center justify-between px-6 sticky top-0 z-30">
           {/* Mobile menu toggle */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="lg:hidden flex items-center justify-center w-14 h-14 rounded-2xl bg-white text-[#0f172a] shadow-sm border border-[#f8fafc]"
+            className="flex items-center justify-center w-10 h-10 rounded-xl bg-white text-[#0f172a] shadow-sm border border-[#f8fafc]"
           >
-            <Menu className="w-7 h-7" />
+            <Menu className="w-5 h-5" />
           </button>
-
-          <div className="flex items-center gap-6">
-          </div>
-
-          {/* Search */}
-          <div className="hidden md:flex items-center flex-1 max-w-2xl mx-12">
-            <div className="relative w-full group">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-focus-within:text-[#4f46e5] transition-colors" />
-              <input
-                type="text"
-                placeholder="Truy vấn dữ liệu bài học, người dùng, hệ thống..."
-                className="font-body w-full bg-[#f8fafc]/50 border-2 border-transparent rounded-[1.5rem] pl-16 pr-8 py-4 text-sm text-[#0f172a] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#4f46e5] transition-all font-bold"
-              />
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-5">
-            <button className="relative flex items-center justify-center w-14 h-14 rounded-[1.5rem] bg-white text-[#0f172a] hover:bg-[#f8fafc] transition-all border border-[#f8fafc] shadow-sm group">
-              <Bell className="w-7 h-7" />
-              <span className="absolute top-4 right-4 w-3.5 h-3.5 bg-rose-500 border-2 border-white rounded-full"></span>
-            </button>
-            <button className="hidden sm:flex items-center justify-center w-14 h-14 rounded-[1.5rem] bg-white text-[#0f172a] hover:bg-[#f8fafc] transition-all border border-[#f8fafc] shadow-sm">
-              <HelpCircle className="w-7 h-7" />
-            </button>
-          </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-8 lg:p-12 relative">
+        <main className="flex-1 px-6 lg:px-10 py-6 lg:py-8 relative">
           <Outlet />
         </main>
       </div>

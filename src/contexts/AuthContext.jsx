@@ -388,6 +388,68 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  // Listen for realtime updates from Supabase 'users' table and local storage events
+  useEffect(() => {
+    const currentUserId = user?.id || user?.uid;
+    if (!currentUserId) return;
+
+    const channel = supabase
+      .channel(`public_users_update_${currentUserId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'users',
+          filter: `id=eq.${currentUserId}`
+        },
+        (payload) => {
+          console.log('⚡ [AuthContext] Realtime profile update received from Admin:', payload.new);
+          const updated = payload.new;
+          setUser(prev => {
+            if (!prev) return prev;
+            const newAvatar = updated.avatar || updated.profile?.avatar || updated.avatar_url || prev.avatar;
+            const updatedUser = {
+              ...prev,
+              displayName: updated.display_name || prev.displayName,
+              display_name: updated.display_name || prev.display_name,
+              avatar_url: newAvatar,
+              avatar: newAvatar,
+              profile: {
+                ...(prev.profile || {}),
+                avatar: newAvatar,
+                grade: updated.grade || prev.profile?.grade
+              },
+              role: updated.role || prev.role,
+              status: updated.status || prev.status,
+              grade: updated.grade || prev.grade,
+              teacherStatus: updated.teacher_status || prev.teacherStatus,
+              teacher_status: updated.teacher_status || prev.teacher_status
+            };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            return updatedUser;
+          });
+        }
+      )
+      .subscribe();
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'user' || !e.key) {
+        const cached = safeGetItem('user');
+        if (cached) {
+          setUser(cached);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      supabase.removeChannel(channel);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [user?.id, user?.uid]);
+
   const login = async (email, password) => {
     try {
       // Special check for hardcoded admin
