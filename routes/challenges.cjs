@@ -11,7 +11,9 @@ router.get('/', async (req, res) => {
       .from('challenges')
       .select('*');
 
-    if (teacherId === 'system' || teacherId === 'null' || !teacherId) {
+    if (teacherId === 'all') {
+      // Return all challenges regardless of teacher_id
+    } else if (teacherId === 'system' || teacherId === 'null') {
       query = query.is('teacher_id', null);
     } else if (teacherId) {
       query = query.eq('teacher_id', teacherId);
@@ -87,10 +89,12 @@ router.get('/:id', async (req, res) => {
 // Create new challenge
 router.post('/', async (req, res) => {
   try {
+    console.log('📌 POST /api/challenges payload:', req.body);
     const challenge = await Challenge.create(req.body);
     res.status(201).json(challenge);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating challenge', error: error.message });
+    console.error('❌ Error creating challenge:', error);
+    res.status(500).json({ message: 'Error creating challenge', error: error.message || error, details: error.details, hint: error.hint });
   }
 });
 
@@ -112,9 +116,10 @@ router.delete('/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    const { supabase } = require('../src/config/supabase.cjs');
     
     if (isUuid) {
-      const { error } = await require('../src/config/supabase.cjs').supabase
+      const { error } = await supabase
         .from('challenges')
         .delete()
         .eq('id', id);
@@ -122,6 +127,14 @@ router.delete('/:id', async (req, res) => {
     } else {
       await Challenge.delete(parseInt(id));
     }
+
+    // Clean up related reports, assignments and locks
+    await Promise.all([
+      supabase.from('reports').delete().eq('content_id', id).catch(() => {}),
+      supabase.from('class_assignments').delete().eq('content_id', id).catch(() => {}),
+      supabase.from('assigned_content').delete().eq('content_id', id).catch(() => {})
+    ]).catch(() => {});
+
     res.json({ success: true, message: 'Challenge deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting challenge', error: error.message });

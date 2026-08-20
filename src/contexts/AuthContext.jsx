@@ -389,10 +389,67 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Listen for realtime updates from Supabase 'users' table and local storage events
+  // Listen for realtime updates from Supabase 'users' table and local storage events
+  // Helper for silent instant kickout when deactivated by Admin
+  const logoutSilentKickout = () => {
+    try {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('physigame_admin');
+    } catch (e) {}
+    setUser(null);
+    supabase.auth.signOut().catch(() => {});
+    window.location.href = '/login';
+  };
+
+  // Listen for realtime updates from Supabase 'users' table, BroadcastChannel, and local storage events
   useEffect(() => {
     const currentUserId = user?.id || user?.uid;
-    if (!currentUserId) return;
+    const currentUserEmail = user?.email;
+    if (!currentUserId || currentUserId === 'admin-hardcoded') return;
 
+    // Check immediately if current user is marked inactive in cache or state
+    const isInactiveInCache = () => {
+      try {
+        const cachedAdminUsersStr = localStorage.getItem('physigame_admin_users_cache');
+        if (cachedAdminUsersStr) {
+          const cachedUsers = JSON.parse(cachedAdminUsersStr);
+          const match = cachedUsers.find(u => 
+            (u.id && String(u.id) === String(currentUserId)) ||
+            (u.email && currentUserEmail && u.email.toLowerCase() === currentUserEmail.toLowerCase())
+          );
+          if (match && match.status === 'inactive') return true;
+        }
+      } catch (e) {}
+      return false;
+    };
+
+    if (user?.status === 'inactive' || isInactiveInCache()) {
+      console.warn('⚠️ User account is inactive. Kicking out immediately.');
+      logoutSilentKickout();
+      return;
+    }
+
+    // 1. BroadcastChannel listener for instant cross-tab account locking (1ms latency)
+    let adminBc;
+    try {
+      adminBc = new BroadcastChannel('physigame_admin_actions');
+      adminBc.onmessage = (event) => {
+        const msg = event.data;
+        if (msg && msg.type === 'USER_STATUS_UPDATED') {
+          const isTargetUser = 
+            (msg.id && (String(msg.id) === String(currentUserId))) ||
+            (msg.email && currentUserEmail && msg.email.toLowerCase() === currentUserEmail.toLowerCase());
+
+          if (isTargetUser && msg.status === 'inactive') {
+            console.warn('⚡ Account lock broadcast received! Kicking out immediately without alert.');
+            logoutSilentKickout();
+          }
+        }
+      };
+    } catch (e) {}
+
+    // 2. Supabase Realtime Channel
     const channel = supabase
       .channel(`public_users_update_${currentUserId}`)
       .on(
@@ -400,43 +457,58 @@ export const AuthProvider = ({ children }) => {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'users',
-          filter: `id=eq.${currentUserId}`
+          table: 'users'
         },
         (payload) => {
-          console.log('⚡ [AuthContext] Realtime profile update received from Admin:', payload.new);
           const updated = payload.new;
-          setUser(prev => {
-            if (!prev) return prev;
-            const newAvatar = updated.avatar || updated.profile?.avatar || updated.avatar_url || prev.avatar;
-            const updatedUser = {
-              ...prev,
-              displayName: updated.display_name || prev.displayName,
-              display_name: updated.display_name || prev.display_name,
-              avatar_url: newAvatar,
-              avatar: newAvatar,
-              profile: {
-                ...(prev.profile || {}),
-                avatar: newAvatar,
-                grade: updated.grade || prev.profile?.grade
-              },
-              role: updated.role || prev.role,
-              status: updated.status || prev.status,
-              grade: updated.grade || prev.grade,
-              teacherStatus: updated.teacher_status || prev.teacherStatus,
-              teacher_status: updated.teacher_status || prev.teacher_status
-            };
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-            return updatedUser;
-          });
+          if (updated) {
+            const isMatch = (updated.id && String(updated.id) === String(currentUserId)) ||
+                            (updated.email && currentUserEmail && updated.email.toLowerCase() === currentUserEmail.toLowerCase());
+            if (isMatch && updated.status === 'inactive') {
+              console.warn('⚠️ User account deactivated via Realtime. Kicking out immediately.');
+              logoutSilentKickout();
+              return;
+            }
+          }
         }
       )
       .subscribe();
 
+    // 3. Fast polling backup check every 1 second to enforce Admin status actions immediately
+    const interval = setInterval(async () => {
+      try {
+        if (isInactiveInCache()) {
+          logoutSilentKickout();
+          return;
+        }
+
+        if (currentUserEmail) {
+          const { data: dbUser } = await supabase
+            .from('users')
+            .select('status, teacher_status')
+            .eq('email', currentUserEmail)
+            .maybeSingle();
+
+          if (dbUser && dbUser.status === 'inactive') {
+            console.warn('⚠️ Account found inactive during polling check. Kicking out immediately.');
+            logoutSilentKickout();
+          }
+        }
+      } catch (e) {}
+    }, 1000);
+
     const handleStorageChange = (e) => {
-      if (e.key === 'user' || !e.key) {
+      if (e.key === 'user' || e.key === 'physigame_admin_users_cache' || !e.key) {
+        if (isInactiveInCache()) {
+          logoutSilentKickout();
+          return;
+        }
         const cached = safeGetItem('user');
         if (cached) {
+          if (cached.status === 'inactive') {
+            logoutSilentKickout();
+            return;
+          }
           setUser(cached);
         }
       }
@@ -445,10 +517,12 @@ export const AuthProvider = ({ children }) => {
     window.addEventListener('storage', handleStorageChange);
 
     return () => {
+      if (adminBc) adminBc.close();
       supabase.removeChannel(channel);
+      clearInterval(interval);
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [user?.id, user?.uid]);
+  }, [user?.id, user?.uid, user?.status, user?.email]);
 
   const login = async (email, password) => {
     try {
@@ -473,6 +547,31 @@ export const AuthProvider = ({ children }) => {
         return adminData;
       }
 
+      // Check 1: Check admin users cache in localStorage
+      try {
+        const cachedAdminUsersStr = localStorage.getItem('physigame_admin_users_cache');
+        if (cachedAdminUsersStr) {
+          const cachedUsers = JSON.parse(cachedAdminUsersStr);
+          const cachedTarget = cachedUsers.find(u => u.email?.toLowerCase() === email.toLowerCase());
+          if (cachedTarget && cachedTarget.status === 'inactive') {
+            throw new Error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản trị viên.');
+          }
+        }
+      } catch (e) {
+        if (e.message?.includes('bị khóa')) throw e;
+      }
+
+      // Check 2: Check Supabase Users DB first to verify status by Email
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (dbUser && (dbUser.status === 'inactive' || dbUser.teacher_status === 'inactive')) {
+        throw new Error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản trị viên.');
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -483,14 +582,19 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', data.session.access_token);
 
       // Fetch profile
-      const response = await api.get(`/users/firebase/${data.user.id}`);
-      const userData = { ...response.data, firebaseUid: data.user.id, uid: data.user.id };
+      let userData;
+      try {
+        const response = await api.get(`/users/firebase/${data.user.id}`);
+        userData = { ...response.data, firebaseUid: data.user.id, uid: data.user.id };
+      } catch (err) {
+        userData = dbUser ? { ...dbUser, uid: dbUser.id } : { email: data.user.email, id: data.user.id };
+      }
 
-      if (userData.status === 'inactive') {
-        await supabase.auth.signOut();
+      if (userData.status === 'inactive' || userData.teacher_status === 'inactive') {
+        await supabase.auth.signOut().catch(() => {});
         localStorage.removeItem('user');
         localStorage.removeItem('token');
-        throw new Error('Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.');
+        throw new Error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản trị viên.');
       }
 
       localStorage.setItem('user', JSON.stringify(userData));

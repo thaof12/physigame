@@ -184,9 +184,14 @@ const MyClass = () => {
   };
 
   const navigateToAssignment = (asg) => {
+    const targetUrl = asg.link || asg.resource_id;
+    if (targetUrl && (targetUrl.startsWith('http://') || targetUrl.startsWith('https://'))) {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
     if (asg.type === 'lesson') {
       // Parse resource_id "6-1-1" or similar
-      const parts = asg.resource_id.split('-');
+      const parts = (asg.resource_id || '').split('-');
       if (parts.length >= 3) {
         navigate(`/physics-lesson/${parts[0]}/${parts[1]}/${parts[2]}`);
       } else {
@@ -196,6 +201,8 @@ const MyClass = () => {
     } else if (asg.type === 'challenge') {
       // Navigate to challenge
       navigate(`/advanced-physics-challenge`);
+    } else if (targetUrl) {
+      window.open(targetUrl.startsWith('http') ? targetUrl : 'https://' + targetUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -420,11 +427,13 @@ const MyClass = () => {
                             <div className="space-y-1.5">
                               <div className="flex items-center gap-2">
                                 <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${
-                                  asg.type === 'lesson' 
+                                  asg.type === 'link' || (asg.link && asg.link.startsWith('http'))
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                                  : asg.type === 'lesson' 
                                   ? 'bg-blue-50 text-blue-600 border border-blue-100' 
                                   : 'bg-amber-50 text-amber-600 border border-amber-100'
                                 }`}>
-                                  {asg.type === 'lesson' ? 'BÀI HỌC' : 'THỬ THÁCH'}
+                                  {asg.type === 'link' || (asg.link && asg.link.startsWith('http')) ? 'LINK BÀI TẬP' : asg.type === 'lesson' ? 'BÀI HỌC' : 'THỬ THÁCH'}
                                 </span>
                                 {asg.due_date && (
                                   <span className="text-[10px] text-rose-500 font-bold flex items-center gap-1">

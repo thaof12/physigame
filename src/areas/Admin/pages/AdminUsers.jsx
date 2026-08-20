@@ -610,7 +610,85 @@ const AdminUsers = () => {
   };
 
   const handleUpdateUser = async (userData) => {
-    setActionLoading(userData.id);
+    // Determine teacher_status based on updated role & status
+    let resolvedTeacherStatus = userData.teacher_status;
+    if (userData.role === 'student') {
+      resolvedTeacherStatus = null;
+    } else if (userData.role === 'teacher') {
+      if (userData.status === 'active') resolvedTeacherStatus = 'verified';
+      else if (userData.status === 'pending') resolvedTeacherStatus = 'pending';
+      else if (userData.status === 'rejected') resolvedTeacherStatus = 'rejected';
+      else if (userData.status === 'inactive') resolvedTeacherStatus = 'inactive';
+    }
+
+    const updatedUserObj = {
+      ...userData,
+      name: userData.name,
+      avatar: userData.avatar || null,
+      role: userData.role,
+      status: userData.status,
+      grade: userData.grade || '?',
+      teacher_status: resolvedTeacherStatus
+    };
+
+    // 1. OPTIMISTIC UPDATE: Update Admin users list & save to localStorage cache
+    setUsers(prev => {
+      const nextUsers = prev.map(u => (u.id === userData.id || (u.email && u.email === userData.email)) ? { ...u, ...updatedUserObj } : u);
+      try {
+        localStorage.setItem('physigame_admin_users_cache', JSON.stringify(nextUsers));
+      } catch (e) {}
+      return nextUsers;
+    });
+
+    setShowEditModal(null);
+    setActionLoading(null);
+
+    // 2. BroadcastChannel: Send instant message to all open tabs / teacher sessions (1ms latency)
+    try {
+      const bc = new BroadcastChannel('physigame_admin_actions');
+      bc.postMessage({
+        type: 'USER_STATUS_UPDATED',
+        id: userData.id,
+        email: userData.email,
+        username: userData.username,
+        status: userData.status,
+        role: userData.role
+      });
+      bc.close();
+    } catch (e) {}
+
+    // 3. If editing active user session in localStorage, update it directly or kick out if inactive
+    const currentUserStr = localStorage.getItem('user');
+    if (currentUserStr) {
+      try {
+        const currentUser = JSON.parse(currentUserStr);
+        const isMatch = (currentUser.id && String(currentUser.id) === String(userData.id)) ||
+                        (currentUser.email && userData.email && currentUser.email.toLowerCase() === userData.email.toLowerCase());
+        if (isMatch) {
+          if (userData.status === 'inactive') {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+          } else {
+            const updatedCurrentUser = {
+              ...currentUser,
+              displayName: userData.name,
+              display_name: userData.name,
+              avatar_url: userData.avatar,
+              avatar: userData.avatar,
+              role: userData.role,
+              status: userData.status,
+              grade: userData.grade,
+              teacherStatus: resolvedTeacherStatus,
+              teacher_status: resolvedTeacherStatus
+            };
+            localStorage.setItem('user', JSON.stringify(updatedCurrentUser));
+          }
+          window.dispatchEvent(new Event('storage'));
+        }
+      } catch (e) {}
+    }
+
+    // 4. Supabase DB Update (Target by Email OR ID)
     try {
       const existingProfile = userData.originalData?.profile || {};
       const updatedProfile = {
@@ -625,96 +703,23 @@ const AdminUsers = () => {
         profile: updatedProfile,
         role: userData.role,
         status: userData.status,
-        grade: userData.grade || null
+        grade: userData.grade || null,
+        teacher_status: resolvedTeacherStatus
       };
 
-      // Handle teacher_status updates based on edited status/role
-      if (userData.role === 'student') {
-        updatePayload.teacher_status = null;
-      } else if (userData.role === 'teacher') {
-        if (userData.status === 'active') {
-          updatePayload.teacher_status = 'verified';
-        } else if (userData.status === 'pending') {
-          updatePayload.teacher_status = 'pending';
-        } else if (userData.status === 'rejected') {
-          updatePayload.teacher_status = 'rejected';
-        }
+      if (userData.email) {
+        await supabase
+          .from('users')
+          .update(updatePayload)
+          .eq('email', userData.email);
+      } else if (userData.id) {
+        await supabase
+          .from('users')
+          .update(updatePayload)
+          .eq('id', userData.id);
       }
-
-      // 1. Update Supabase core users table
-      const { error } = await supabase
-        .from('users')
-        .update(updatePayload)
-        .eq('id', userData.id);
-
-      if (error) throw error;
-
-      // 2. If teacher role, also update/upsert into 'teacher profile' table
-      if (userData.role === 'teacher') {
-        try {
-          await supabase
-            .from('teacher profile')
-            .upsert({
-              id: userData.id,
-              name: userData.name,
-              teacherStatus: updatePayload.teacher_status || 'pending',
-              createdAt: new Date().toISOString()
-            });
-        } catch (tpErr) {
-          console.warn('Teacher profile table update warning:', tpErr);
-        }
-      }
-
-      // 3. Update localStorage if current active session belongs to this user ID
-      const currentUserStr = localStorage.getItem('user');
-      if (currentUserStr) {
-        try {
-          const currentUser = JSON.parse(currentUserStr);
-          if (currentUser.id === userData.id || currentUser.uid === userData.id) {
-            const updatedCurrentUser = {
-              ...currentUser,
-              displayName: userData.name,
-              display_name: userData.name,
-              avatar_url: userData.avatar,
-              avatar: userData.avatar,
-              profile: {
-                ...(currentUser.profile || {}),
-                avatar: userData.avatar,
-                grade: userData.grade
-              },
-              role: userData.role,
-              status: userData.status,
-              grade: userData.grade,
-              teacherStatus: updatePayload.teacher_status,
-              teacher_status: updatePayload.teacher_status
-            };
-            localStorage.setItem('user', JSON.stringify(updatedCurrentUser));
-            window.dispatchEvent(new Event('storage'));
-          }
-        } catch (e) {
-          console.error('Error updating currentUser in localStorage:', e);
-        }
-      }
-
-      // Update local state in AdminUsers
-      setUsers(prev => prev.map(u => u.id === userData.id ? { 
-        ...u, 
-        ...userData, 
-        name: userData.name,
-        avatar: userData.avatar, 
-        role: userData.role,
-        status: userData.status,
-        grade: userData.grade,
-        teacher_status: updatePayload.teacher_status || null 
-      } : u));
-      setShowEditModal(null);
     } catch (err) {
-      console.error('Error updating user:', err);
-      // Fallback update local state
-      setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData, avatar: userData.avatar } : u));
-      setShowEditModal(null);
-    } finally {
-      setActionLoading(null);
+      console.warn('Background Supabase update warning:', err.message);
     }
   };
 
@@ -723,39 +728,49 @@ const AdminUsers = () => {
     setLoading(true);
     try {
       const selectedList = users.filter(u => selectedUsers.includes(u.id));
-      const teacherIds = selectedList.filter(u => u.role === 'teacher').map(u => u.id);
-      const studentIds = selectedList.filter(u => u.role !== 'teacher').map(u => u.id);
+      const updatedList = users.map(u => selectedUsers.includes(u.id) ? { ...u, status } : u);
+      setUsers(updatedList);
+      try {
+        localStorage.setItem('physigame_admin_users_cache', JSON.stringify(updatedList));
+      } catch (e) {}
 
-      if (teacherIds.length > 0) {
+      // Broadcast each updated user status
+      selectedList.forEach(u => {
+        try {
+          const bc = new BroadcastChannel('physigame_admin_actions');
+          bc.postMessage({
+            type: 'USER_STATUS_UPDATED',
+            id: u.id,
+            email: u.email,
+            status: status
+          });
+          bc.close();
+        } catch (e) {}
+      });
+
+      const teacherEmails = selectedList.filter(u => u.role === 'teacher').map(u => u.email).filter(Boolean);
+      const studentEmails = selectedList.filter(u => u.role !== 'teacher').map(u => u.email).filter(Boolean);
+
+      if (teacherEmails.length > 0) {
         const payload = { status: status === 'active' ? 'active' : 'inactive' };
-        if (status === 'active') {
-          payload.teacher_status = 'verified';
-        } else {
-          payload.teacher_status = null; // deactivate teacher
-        }
+        payload.teacher_status = status === 'active' ? 'verified' : 'inactive';
 
-        const { error } = await supabase
+        await supabase
           .from('users')
           .update(payload)
-          .in('id', teacherIds);
-
-        if (error) throw error;
+          .in('email', teacherEmails);
       }
 
-      if (studentIds.length > 0) {
-        const { error } = await supabase
+      if (studentEmails.length > 0) {
+        await supabase
           .from('users')
           .update({ status: status === 'active' ? 'active' : 'inactive' })
-          .in('id', studentIds);
-
-        if (error) throw error;
+          .in('email', studentEmails);
       }
 
-      await fetchUsers();
       setSelectedUsers([]);
     } catch (err) {
       console.error('Error during batch status update:', err);
-      alert('Không thể cập nhật trạng thái các tài khoản được chọn.');
     } finally {
       setLoading(false);
     }
@@ -1516,46 +1531,62 @@ const AdminUsers = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Vai trò</label>
-                      <select
+                      <CustomSelect
                         value={editFormData.role}
-                        onChange={(e) => setEditFormData(prev => ({ ...prev, role: e.target.value }))}
-                        className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-2xl px-5 py-3.5 text-[#274dad] font-bold focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all cursor-pointer"
-                      >
-                        <option value="student">Học sinh</option>
-                        <option value="teacher">Giáo viên</option>
-                        <option value="admin">Quản trị viên</option>
-                      </select>
+                        onChange={(val) => setEditFormData(prev => {
+                          let newStatus = prev.status;
+                          if (val !== 'teacher' && prev.status === 'rejected') {
+                            newStatus = 'active';
+                          }
+                          return { ...prev, role: val, status: newStatus };
+                        })}
+                        options={[
+                          { value: 'student', label: 'Học sinh' },
+                          { value: 'teacher', label: 'Giáo viên' },
+                          { value: 'admin', label: 'Quản trị viên' }
+                        ]}
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Trạng thái</label>
-                      <select
+                      <CustomSelect
                         value={editFormData.status}
-                        onChange={(e) => setEditFormData(prev => ({ ...prev, status: e.target.value }))}
-                        className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-2xl px-5 py-3.5 text-[#274dad] font-bold focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all cursor-pointer"
-                      >
-                        <option value="active">Hoạt động</option>
-                        <option value="pending">Chờ duyệt</option>
-                        {editFormData.role === 'teacher' && (
-                          <option value="rejected">Từ chối</option>
-                        )}
-                        <option value="inactive">Khóa tài khoản</option>
-                      </select>
+                        onChange={(val) => setEditFormData(prev => ({ ...prev, status: val }))}
+                        options={
+                          editFormData.role === 'teacher'
+                            ? [
+                                { value: 'active', label: 'Hoạt động' },
+                                { value: 'pending', label: 'Chờ duyệt' },
+                                { value: 'rejected', label: 'Từ chối' },
+                                { value: 'inactive', label: 'Khóa tài khoản' }
+                              ]
+                            : [
+                                { value: 'active', label: 'Hoạt động' },
+                                { value: 'pending', label: 'Chờ duyệt' },
+                                { value: 'inactive', label: 'Khóa tài khoản' }
+                              ]
+                        }
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Khối lớp học</label>
-                    <select
-                      value={editFormData.grade}
-                      onChange={(e) => setEditFormData(prev => ({ ...prev, grade: e.target.value }))}
-                      className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-2xl px-5 py-3.5 text-[#274dad] font-bold focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all cursor-pointer"
-                    >
-                      {[6, 7, 8, 9, 10, 11, 12].map(g => (
-                        <option key={g} value={String(g)}>Lớp {g}</option>
-                      ))}
-                      <option value="?">Khác</option>
-                    </select>
+                    <CustomSelect
+                      value={String(editFormData.grade || '?')}
+                      onChange={(val) => setEditFormData(prev => ({ ...prev, grade: val }))}
+                      options={[
+                        { value: '6', label: 'Lớp 6' },
+                        { value: '7', label: 'Lớp 7' },
+                        { value: '8', label: 'Lớp 8' },
+                        { value: '9', label: 'Lớp 9' },
+                        { value: '10', label: 'Lớp 10' },
+                        { value: '11', label: 'Lớp 11' },
+                        { value: '12', label: 'Lớp 12' },
+                        { value: '?', label: 'Khác' }
+                      ]}
+                    />
                   </div>
                 </div>
               </div>

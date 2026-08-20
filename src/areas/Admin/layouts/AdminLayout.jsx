@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Navigate, Outlet, Link } from 'react-router-dom';
 import { useAdminAuth } from '../contexts/AdminAuthContext';
+import api from '../../../config/api';
 import {
   LayoutGrid,
   Users,
@@ -20,7 +21,8 @@ import {
   Menu,
   X,
   PlusCircle,
-  ShieldAlert
+  ShieldAlert,
+  FileText
 } from 'lucide-react';
 
 const menuItems = [
@@ -37,16 +39,16 @@ const menuItems = [
     path: '/admin/users'
   },
   {
+    id: 'materials',
+    label: 'Học Liệu',
+    icon: FileText,
+    path: '/admin/hoc-lieu'
+  },
+  {
     id: 'lessons',
     label: 'Bài Giảng',
     icon: BookOpen,
     path: '/admin/lessons'
-  },
-  {
-    id: 'statistics',
-    label: 'Đo Lường',
-    icon: BarChart3,
-    path: '/admin/statistics'
   },
   {
     id: 'settings',
@@ -63,6 +65,32 @@ const AdminLayout = () => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [reportCount, setReportCount] = useState(() => {
+    try {
+      const cached = localStorage.getItem('physigame_admin_report_count');
+      return cached ? parseInt(cached, 10) : 0;
+    } catch (e) { return 0; }
+  });
+
+  // Poll report count for sidebar red bell notification
+  useEffect(() => {
+    const fetchReportCount = async () => {
+      try {
+        const res = await api.get('/reports');
+        if (res.data && res.data.success && Array.isArray(res.data.reports)) {
+          const count = res.data.reports.length;
+          setReportCount(count);
+          localStorage.setItem('physigame_admin_report_count', String(count));
+        }
+      } catch (err) {
+        // quiet fallback
+      }
+    };
+
+    fetchReportCount();
+    const interval = setInterval(fetchReportCount, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Show loading state
   if (loading) {
@@ -145,7 +173,7 @@ const AdminLayout = () => {
                   setMobileMenuOpen(false);
                 }}
                 className={`
-                  w-full flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all
+                  w-full flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all relative
                   ${active
                     ? 'bg-[#4f46e5] text-white shadow-xl shadow-blue-500/20'
                     : 'text-slate-500 hover:text-[#0f172a] hover:bg-[#f8fafc]/50'
@@ -154,9 +182,32 @@ const AdminLayout = () => {
                 `}
                 title={sidebarCollapsed ? item.label : ''}
               >
-                <IconComponent className={`w-6 h-6 shrink-0 ${active ? 'text-white' : ''}`} />
+                <div className="relative shrink-0">
+                  <IconComponent className={`w-6 h-6 shrink-0 ${active ? 'text-white' : ''}`} />
+                  {item.id === 'materials' && reportCount > 0 && sidebarCollapsed && (
+                    <span className="absolute -top-2 -right-2 flex h-5 w-5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-5 w-5 bg-gradient-to-r from-rose-600 to-red-600 border-2 border-white items-center justify-center text-[9px] font-black text-white shadow-md">
+                        {reportCount > 99 ? '99+' : reportCount}
+                      </span>
+                    </span>
+                  )}
+                </div>
+
                 {!sidebarCollapsed && (
-                  <span className="font-heading text-sm font-extrabold tracking-tight">{item.label}</span>
+                  <span className="font-heading text-sm font-extrabold tracking-tight flex-1 text-left flex items-center justify-between">
+                    <span>{item.label}</span>
+                    {item.id === 'materials' && reportCount > 0 && (
+                      <span className={`ml-auto flex items-center gap-1.5 px-2.5 py-0.5 text-white font-black text-[11px] rounded-full shadow-md animate-pulse ${
+                        active
+                          ? 'bg-rose-500 text-white shadow-rose-950/40 ring-2 ring-white/40'
+                          : 'bg-gradient-to-r from-rose-600 to-red-600 shadow-rose-500/40'
+                      }`}>
+                        <Bell className="w-3.5 h-3.5 text-white animate-bounce shrink-0" />
+                        <span>{reportCount} BÁO CÁO</span>
+                      </span>
+                    )}
+                  </span>
                 )}
               </button>
             );

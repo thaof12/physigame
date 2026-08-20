@@ -5,7 +5,6 @@ import api from '../../../config/api';
 import {
   LayoutGrid,
   BookOpen,
-  FileQuestion,
   FlaskConical,
   BarChart3,
   Users,
@@ -29,18 +28,6 @@ const menuItems = [
     label: 'Tổng quan',
     icon: LayoutGrid,
     path: '/teacher/dashboard'
-  },
-  {
-    id: 'my-lessons',
-    label: 'Bài học của tôi',
-    icon: BookOpen,
-    path: '/teacher/my-lessons'
-  },
-  {
-    id: 'my-exercises',
-    label: 'Bài tập của tôi',
-    icon: FileQuestion,
-    path: '/teacher/my-exercises'
   },
   {
     id: 'browse',
@@ -141,9 +128,9 @@ const TeacherLayout = () => {
     );
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  // Redirect to login if not authenticated or deactivated
+  if (!isAuthenticated || teacher?.status === 'inactive') {
+    return <Navigate to="/login?error=deactivated" replace />;
   }
 
   // Redirect to pending page if not verified

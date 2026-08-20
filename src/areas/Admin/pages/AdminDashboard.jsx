@@ -32,15 +32,27 @@ const StatCard = ({ title, value, sub, icon: Icon, color }) => (
 );
 
 const AdminDashboard = () => {
-  const [realStats, setRealStats] = useState(() => ({
-    totalUsers: 15,
-    students: 12,
-    teachers: 3,
-    pendingTeachers: 0,
-    newUsers30d: 5,
-    totalLessons: countLessons(),
-  }));
-  const [pendingTeachers, setPendingTeachers] = useState([]);
+  const [realStats, setRealStats] = useState(() => {
+    try {
+      const cached = localStorage.getItem('physigame_admin_dashboard_stats');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {}
+    return {
+      totalUsers: 15,
+      students: 12,
+      teachers: 3,
+      pendingTeachers: 0,
+      newUsers30d: 5,
+      totalLessons: countLessons(),
+    };
+  });
+  const [pendingTeachers, setPendingTeachers] = useState(() => {
+    try {
+      const cached = localStorage.getItem('physigame_admin_pending_teachers');
+      if (cached) return JSON.parse(cached);
+    } catch (e) {}
+    return [];
+  });
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
@@ -68,16 +80,21 @@ const AdminDashboard = () => {
       const newUsersCount = allUsers.filter(u => new Date(u.created_at || 0) >= since30d).length;
       const totalLessons = countLessons();
 
-      setRealStats({
+      const newStats = {
         totalUsers: allUsers.length || 15,
         students: studentsCount || 12,
         teachers: teachersCount || 3,
         pendingTeachers: pendingData.length,
         newUsers30d: newUsersCount || 5,
         totalLessons,
-      });
+      };
 
-      setPendingTeachers(pendingData.map(t => ({
+      setRealStats(newStats);
+      try {
+        localStorage.setItem('physigame_admin_dashboard_stats', JSON.stringify(newStats));
+      } catch (e) {}
+
+      const formattedPending = pendingData.map(t => ({
         id: t.id,
         name: t.display_name || t.username || 'Giáo viên',
         email: t.email || '—',
@@ -85,7 +102,12 @@ const AdminDashboard = () => {
         school: 'Chưa cập nhật',
         joinDate: t.created_at ? new Date(t.created_at).toLocaleDateString('vi-VN') : '—',
         originalData: t,
-      })));
+      }));
+
+      setPendingTeachers(formattedPending);
+      try {
+        localStorage.setItem('physigame_admin_pending_teachers', JSON.stringify(formattedPending));
+      } catch (e) {}
     } catch (err) {
       console.error('Error fetching dashboard real data:', err);
     }

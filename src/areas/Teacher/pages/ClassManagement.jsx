@@ -41,12 +41,11 @@ const ClassManagement = () => {
   const [newPostContent, setNewPostContent] = useState('');
   
   // Assignment form states
-  const [asgType, setAsgType] = useState('lesson'); // 'lesson', 'challenge'
+  const [showAssignModal, setShowAssignModal] = useState(false);
   const [asgTitle, setAsgTitle] = useState('');
+  const [asgLink, setAsgLink] = useState('');
   const [asgDesc, setAsgDesc] = useState('');
-  const [asgResourceId, setAsgResourceId] = useState('');
   const [asgDueDate, setAsgDueDate] = useState('');
-  const [availableResources, setAvailableResources] = useState([]);
 
   // Meeting form states
   const [meetTitle, setMeetTitle] = useState('');
@@ -116,41 +115,14 @@ const ClassManagement = () => {
   useEffect(() => {
     if (activeClass) {
       fetchClassDetails();
-      fetchAvailableResources();
     }
-  }, [activeClass, asgType]);
+  }, [activeClass]);
 
   useEffect(() => {
     if (activeTab === 'discussions') {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [discussions, activeTab]);
-
-  // Load available lessons/challenges
-  const fetchAvailableResources = async () => {
-    try {
-      if (asgType === 'lesson') {
-        const res = await api.get('/lessons');
-        // Filter lessons and format
-        const items = (Array.isArray(res.data) ? res.data : []).map(l => ({
-          id: `${l.class_id}-${l.chapter_id}-${l.lesson_id}`,
-          title: `Lớp ${l.class_id} - ${l.title}`
-        }));
-        setAvailableResources(items);
-        if (items.length > 0) setAsgResourceId(items[0].id);
-      } else {
-        const res = await api.get('/challenges');
-        const items = (Array.isArray(res.data) ? res.data : []).map(c => ({
-          id: c.challenge_id.toString(),
-          title: `[${c.difficulty}] ${c.name}`
-        }));
-        setAvailableResources(items);
-        if (items.length > 0) setAsgResourceId(items[0].id);
-      }
-    } catch (error) {
-      console.error('Error loading resources:', error);
-    }
-  };
 
   const filteredClasses = classes.filter(cls =>
     cls.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -218,25 +190,29 @@ const ClassManagement = () => {
 
   const handleCreateAssignment = async (e) => {
     e.preventDefault();
-    if (!asgTitle.trim() || !asgResourceId || !activeClass?.id) return;
+    if (!asgTitle.trim() || !asgLink.trim() || !activeClass?.id) return;
 
     try {
       const response = await api.post(`/classes/${activeClass.id}/assignments`, {
         title: asgTitle.trim(),
         description: asgDesc.trim(),
-        type: asgType,
-        resourceId: asgResourceId,
-        dueDate: asgDueDate || null
+        link: asgLink.trim(),
+        resourceId: asgLink.trim(),
+        type: 'custom',
+        dueDate: asgDueDate ? asgDueDate : null
       });
 
       if (response.data?.success) {
         setAssignments([response.data.assignment, ...assignments]);
         setAsgTitle('');
+        setAsgLink('');
         setAsgDesc('');
         setAsgDueDate('');
+        setShowAssignModal(false);
       }
     } catch (error) {
       console.error('Error creating assignment:', error);
+      alert('Không thể giao bài tập. Vui lòng thử lại.');
     }
   };
 
@@ -361,20 +337,10 @@ const ClassManagement = () => {
           </div>
 
           <div className="flex gap-4">
-            <div className="text-right hidden sm:block">
+            <div className="text-right">
               <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Học sinh trong lớp</p>
               <p className="text-lg font-black text-indigo-600 mt-0.5">{students.length} học sinh</p>
             </div>
-            <button
-              onClick={() => {
-                if(window.confirm('Học sinh có thể tự tham gia bằng mã lớp ' + activeClass.code + '. Bạn có muốn copy mã lớp không?')) {
-                  copyClassCode(activeClass.code);
-                }
-              }}
-              className="px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all"
-            >
-              Mời học sinh
-            </button>
           </div>
         </div>
 
@@ -477,112 +443,78 @@ const ClassManagement = () => {
               <div className="space-y-6">
                 {!selectedAsgProgress ? (
                   <>
-                    {/* Create Assignment Form */}
-                    <form onSubmit={handleCreateAssignment} className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
-                      <h3 className="text-lg font-black text-slate-900">Giao nhiệm vụ mới cho lớp</h3>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Loại tài nguyên</label>
-                          <select
-                            value={asgType}
-                            onChange={(e) => setAsgType(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 font-bold focus:outline-none focus:bg-white focus:border-indigo-500 transition-all"
-                          >
-                            <option value="lesson">Bài giảng lý thuyết</option>
-                            <option value="challenge">Trò chơi / Thử thách</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Chọn bài trong hệ thống</label>
-                          <select
-                            value={asgResourceId}
-                            onChange={(e) => setAsgResourceId(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 font-bold focus:outline-none focus:bg-white focus:border-indigo-500 transition-all"
-                          >
-                            {availableResources.map(r => (
-                              <option key={r.id} value={r.id}>{r.title}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
+                    {/* Header & Open Modal Button */}
+                    <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Tên nhiệm vụ hiển thị</label>
-                        <input
-                          type="text"
-                          placeholder="VD: Đọc hiểu lực đẩy Ác-si-mét và trả lời câu hỏi"
-                          value={asgTitle}
-                          onChange={(e) => setAsgTitle(e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-semibold"
-                          required
-                        />
+                        <h3 className="text-xl font-black text-slate-900">Danh sách bài tập & Nhiệm vụ</h3>
+                        <p className="text-xs text-slate-400 font-bold mt-1">Giao bài tập cho học sinh qua đường dẫn / tài liệu học tập bên ngoài</p>
                       </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Ghi chú hướng dẫn</label>
-                          <input
-                            type="text"
-                            placeholder="VD: Đọc kỹ phần lý thuyết trước khi làm quiz..."
-                            value={asgDesc}
-                            onChange={(e) => setAsgDesc(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-semibold"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Hạn chót làm bài (Không bắt buộc)</label>
-                          <input
-                            type="date"
-                            value={asgDueDate}
-                            onChange={(e) => setAsgDueDate(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
-                          />
-                        </div>
-                      </div>
-
                       <button
-                        type="submit"
-                        disabled={!asgTitle.trim() || !asgResourceId}
-                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-colors"
+                        onClick={() => setShowAssignModal(true)}
+                        className="px-5 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2 shrink-0 self-start sm:self-auto"
                       >
-                        Giao nhiệm vụ
+                        <Plus className="w-4 h-4" />
+                        Giao bài tập mới
                       </button>
-                    </form>
+                    </div>
 
                     {/* Assignments List */}
                     <div className="space-y-4">
-                      <h4 className="font-black text-slate-900">Các nhiệm vụ đã giao</h4>
+                      <h4 className="font-black text-slate-900">Các nhiệm vụ đã giao ({assignments.length})</h4>
                       {assignments.length === 0 ? (
-                        <div className="bg-white border border-slate-100 rounded-3xl p-8 text-center text-slate-400">
-                          Chưa giao bài tập nào
+                        <div className="bg-white border border-slate-100 rounded-3xl p-12 text-center text-slate-400 shadow-sm">
+                          <BookOpen className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                          <p className="font-bold text-slate-500 text-sm">Chưa có bài tập nào được giao cho lớp này.</p>
+                          <p className="text-xs text-slate-400 mt-1">Bấm nút "Giao bài tập mới" ở trên để đính kèm link bài cho học sinh làm.</p>
                         </div>
                       ) : (
-                        <div className="grid gap-3">
-                          {assignments.map(asg => (
-                            <div 
-                              key={asg.id}
-                              onClick={() => handleViewAsgProgress(asg)}
-                              className="bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between gap-4"
-                            >
-                              <div>
-                                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
-                                  asg.type === 'lesson' ? 'bg-blue-50 text-blue-600' : 'bg-amber-50 text-amber-600'
-                                }`}>
-                                  {asg.type === 'lesson' ? 'BÀI HỌC' : 'THỬ THÁCH'}
-                                </span>
-                                <h5 className="font-black text-slate-900 mt-1 text-sm">{asg.title}</h5>
-                                <p className="text-[10px] text-slate-400 font-bold mt-0.5">
-                                  Hạn nộp: {asg.due_date ? new Date(asg.due_date).toLocaleDateString('vi-VN') : 'Không giới hạn'}
-                                </p>
+                        <div className="grid gap-4">
+                          {assignments.map(asg => {
+                            const link = asg.link || asg.resource_id;
+                            return (
+                              <div 
+                                key={asg.id}
+                                className="bg-white border border-slate-100 hover:border-indigo-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group"
+                              >
+                                <div className="space-y-2 flex-1">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                      LINK BÀI TẬP
+                                    </span>
+                                    {asg.due_date && (
+                                      <span className="text-[10px] text-rose-500 font-bold flex items-center gap-1">
+                                        <Clock className="w-3 h-3" /> Hạn nộp: {new Date(asg.due_date).toLocaleDateString('vi-VN')}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <h5 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">{asg.title}</h5>
+                                  {asg.description && (
+                                    <p className="text-xs text-slate-500 font-medium">{asg.description}</p>
+                                  )}
+                                  {link && (
+                                    <div className="flex items-center gap-2 pt-1">
+                                      <a
+                                        href={link.startsWith('http') ? link : 'https://' + link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-indigo-600 rounded-xl text-xs font-bold transition-all"
+                                      >
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                        Mở link bài tập
+                                      </a>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <button
+                                  onClick={() => handleViewAsgProgress(asg)}
+                                  className="px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-black text-xs rounded-xl transition-colors flex items-center gap-1.5 shrink-0 self-end sm:self-center"
+                                >
+                                  Xem tiến độ <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+                                </button>
                               </div>
-                              <span className="text-xs text-indigo-600 font-black flex items-center gap-1">
-                                Xem tiến độ <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
-                              </span>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -872,6 +804,108 @@ const ClassManagement = () => {
 
           </div>
         </div>
+
+        {/* Assign Homework Popup Modal inside activeClass view */}
+        {showAssignModal && (
+          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl space-y-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-heading text-2xl font-extrabold text-slate-900">Giao bài tập mới</h3>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">Dán liên kết (link) bài tập để giao cho học sinh</p>
+                </div>
+                <button
+                  onClick={() => setShowAssignModal(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all font-black text-lg"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateAssignment} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                    Tên nhiệm vụ / Bài tập <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="VD: Bài tập Lực Ma Sát - Làm quiz trên Google Form"
+                    value={asgTitle}
+                    onChange={(e) => setAsgTitle(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-semibold"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                    Đường dẫn (Link) Bài tập / Tài liệu <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="url"
+                      placeholder="https://... (Google Drive, Form, Youtube, Quizizz...)"
+                      value={asgLink}
+                      onChange={(e) => setAsgLink(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-semibold"
+                      required
+                    />
+                    <ExternalLink className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hướng dẫn / Ghi chú cho học sinh
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="VD: Học sinh nhấp vào link để làm bài và nộp lại theo yêu cầu..."
+                    value={asgDesc}
+                    onChange={(e) => setAsgDesc(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-medium resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hạn chót làm bài (Không bắt buộc)
+                  </label>
+                  <input
+                    type="date"
+                    value={asgDueDate}
+                    onChange={(e) => setAsgDueDate(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAssignModal(false)}
+                    className="flex-1 px-4 py-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold rounded-xl transition-all text-sm"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!asgTitle.trim() || !asgLink.trim()}
+                    className="flex-1 px-4 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white rounded-xl font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-sm shadow-lg shadow-emerald-500/20"
+                  >
+                    Giao bài tập
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {copiedCode && (
+          <div className="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 text-xs font-bold animate-fade-in z-50">
+            <CheckCircle2 className="w-4.5 h-4.5 text-emerald-400" />
+            <span>Đã sao chép mã lớp: {copiedCode}</span>
+          </div>
+        )}
       </div>
     );
   }
@@ -1027,6 +1061,101 @@ const ClassManagement = () => {
                 Tạo lớp
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Homework Popup Modal */}
+      {showAssignModal && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 w-full max-w-lg shadow-2xl space-y-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-heading text-2xl font-extrabold text-slate-900">Giao bài tập mới</h3>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">Dán liên kết (link) bài tập để giao cho học sinh</p>
+              </div>
+              <button
+                onClick={() => setShowAssignModal(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all font-black text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateAssignment} className="space-y-4">
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  Tên nhiệm vụ / Bài tập <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="VD: Bài tập Lực Ma Sát - Làm quiz trên Google Form"
+                  value={asgTitle}
+                  onChange={(e) => setAsgTitle(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-semibold"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  Đường dẫn (Link) Bài tập / Tài liệu <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="url"
+                    placeholder="https://... (Google Drive, Form, Youtube, Quizizz...)"
+                    value={asgLink}
+                    onChange={(e) => setAsgLink(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-semibold"
+                    required
+                  />
+                  <ExternalLink className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  Hướng dẫn / Ghi chú cho học sinh
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="VD: Học sinh nhấp vào link để làm bài và nộp lại theo yêu cầu..."
+                  value={asgDesc}
+                  onChange={(e) => setAsgDesc(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-medium resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  Hạn chót làm bài (Không bắt buộc)
+                </label>
+                <input
+                  type="date"
+                  value={asgDueDate}
+                  onChange={(e) => setAsgDueDate(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAssignModal(false)}
+                  className="flex-1 px-4 py-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold rounded-xl transition-all text-sm"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={!asgTitle.trim() || !asgLink.trim()}
+                  className="flex-1 px-4 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white rounded-xl font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-sm shadow-lg shadow-emerald-500/20"
+                >
+                  Giao bài tập
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

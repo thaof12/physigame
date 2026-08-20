@@ -76,6 +76,7 @@ app.use('/api/lesson-completions', require('./routes/lessonCompletions.cjs'));
 app.use('/api/study-progress', require('./routes/StudyProgress.cjs'));
 app.use('/api/games-progress', require('./routes/GamesProgress.cjs'));
 app.use('/api/classes', require('./routes/classes.cjs'));
+app.use('/api/reports', require('./routes/reports.cjs'));
 
 // API Endpoints
 const SETTINGS_FILE = path.join(__dirname, 'settings.json');

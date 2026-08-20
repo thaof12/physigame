@@ -5,65 +5,17 @@ import {
   BookOpen,
   FileQuestion,
   FlaskConical,
-  Users,
-  TrendingUp,
   Clock,
   Eye,
-  Target,
-  ArrowUpRight,
   ChevronRight,
-  Calendar,
-  RefreshCw,
-  Download,
-  PlusCircle,
-  Zap,
-  Award,
-  Search,
   MoreVertical,
-  Bell,
-  CheckCircle2,
-  AlertCircle
+  Bell
 } from 'lucide-react';
 import api from '../../../config/api';
-
-const mockStats = {
-  lessonsCreated: 0,
-  exercisesCreated: 0,
-  experimentsCreated: 0,
-  totalStudents: 0,
-  totalViews: 0,
-  averageCompletion: 0
-};
-
-const mockNotifications = [
-  { id: 1, title: 'Báo cáo tuần mới', desc: 'Dữ liệu tuần qua đã sẵn sàng.', time: '10:00 AM' },
-  { id: 2, title: 'Học sinh phản hồi', desc: 'Có 5 câu hỏi mới về Bài tập Chương 2.', time: '09:30 AM' },
-];
-
-const StatCard = ({ title, value, change, icon: Icon, color }) => (
-  <div className="bg-white rounded-[2rem] p-7 shadow-sm border border-slate-100 hover:shadow-md transition-all group">
-    <div className="flex items-start justify-between mb-5">
-      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${color} group-hover:scale-110 transition-transform`}>
-        <Icon className="w-6 h-6 text-white" />
-      </div>
-      {change && (
-        <div className="font-heading flex items-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full text-xs font-extrabold text-emerald-600">
-          <TrendingUp className="w-3.5 h-3.5" />
-          <span>+{change}%</span>
-        </div>
-      )}
-    </div>
-    <div className="space-y-1">
-      <p className="font-heading text-3xl font-extrabold text-slate-900 mb-1">{value !== undefined ? value.toLocaleString() : 0}</p>
-      <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">{title}</p>
-    </div>
-  </div>
-);
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
   const { teacher } = useTeacherAuth();
-  const [stats, setStats] = useState(mockStats);
   const [recentActivity, setRecentActivity] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -72,19 +24,13 @@ const TeacherDashboard = () => {
     if (!teacher?.id) return;
     setLoading(true);
     try {
-      // 1. Fetch Stats
-      const statsRes = await api.get(`/users/teacher-stats/${teacher.id}`);
-      if (statsRes.data?.success) {
-        setStats(statsRes.data.stats);
-      }
-
-      // 2. Fetch notifications
+      // 1. Fetch notifications
       const notifRes = await api.get(`/classes/teacher/${teacher.id}/notifications`);
       if (notifRes.data?.success) {
         setNotifications((notifRes.data.notifications || []).slice(0, 3));
       }
 
-      // 3. Fetch Lessons and Challenges to build a dynamic "Recent Activity" list
+      // 2. Fetch Lessons and Challenges to build a dynamic "Recent Activity" list
       const [lessonsRes, challengesRes] = await Promise.all([
         api.get(`/lessons?teacherId=${teacher.id}`),
         api.get(`/challenges?teacherId=${teacher.id}`)
@@ -122,46 +68,8 @@ const TeacherDashboard = () => {
     fetchDashboardData();
   }, [teacher]);
 
-  const refreshData = () => {
-    fetchDashboardData();
-  };
-
   return (
     <div className="space-y-10 pb-20">
-      
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-        <StatCard
-          title="Bài giảng Học viện"
-          value={stats.lessonsCreated}
-          change={15}
-          icon={BookOpen}
-          color="bg-gradient-to-br from-indigo-500 to-violet-600"
-        />
-        <StatCard
-          title="Số lượng Bài tập"
-          value={stats.exercisesCreated}
-          change={22}
-          icon={FileQuestion}
-          color="bg-gradient-to-br from-blue-500 to-cyan-600"
-        />
-        <StatCard
-          title="Học sinh Theo dõi"
-          value={stats.totalStudents}
-          change={12}
-          icon={Users}
-          color="bg-gradient-to-br from-emerald-500 to-teal-600"
-        />
-        <StatCard
-          title="Lượt xem Nội dung"
-          value={stats.totalViews}
-          change={42}
-          icon={Eye}
-          color="bg-gradient-to-br from-amber-500 to-orange-600"
-        />
-      </div>
-
       <div className="grid lg:grid-cols-3 gap-8 lg:gap-10">
         
         {/* Main Activity Area */}
@@ -224,7 +132,10 @@ const TeacherDashboard = () => {
               )}
             </div>
             
-            <button className="font-heading w-full mt-10 py-5 bg-slate-50 text-slate-600 border border-slate-200 rounded-2xl font-extrabold text-sm hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm">
+            <button 
+              onClick={() => navigate('/teacher/browse')}
+              className="font-heading w-full mt-10 py-5 bg-slate-50 text-slate-600 border border-slate-200 rounded-2xl font-extrabold text-sm hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+            >
                Xem Tất Cả Hoạt Động
             </button>
           </div>
@@ -234,30 +145,6 @@ const TeacherDashboard = () => {
         {/* Sidebar Widgets */}
         <div className="space-y-8 lg:space-y-10">
           
-          {/* Quick Stats Mini */}
-          <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
-            <h3 className="font-heading text-xl font-extrabold text-slate-900 mb-8">Vật Lý Chỉ Số</h3>
-            <div className="space-y-8">
-              {[
-                { label: 'Tỷ lệ Hoàn thành', value: stats.averageCompletion + '%', icon: Target, color: 'text-indigo-600' },
-                { label: 'Chất lượng Giảng dạy', value: '4.9/5.0', icon: Award, color: 'text-amber-500' },
-                { label: 'Năng suất Tuần', value: 'Cao', icon: TrendingUp, color: 'text-blue-600' },
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-slate-50 rounded-xl">
-                      <item.icon className={`w-5 h-5 ${item.color}`} />
-                    </div>
-                    <div>
-                      <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">{item.label}</p>
-                      <p className="font-heading text-lg font-extrabold text-slate-900">{item.value}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Notifications */}
           <div className="bg-gradient-to-br from-indigo-600 to-slate-900 rounded-[3rem] p-10 shadow-xl shadow-indigo-500/10 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
@@ -288,23 +175,6 @@ const TeacherDashboard = () => {
             </div>
           </div>
 
-          {/* Quick Calendar Placeholder */}
-          <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
-             <div className="flex items-center justify-between mb-8">
-                <h3 className="font-heading text-xl font-extrabold text-slate-900">Lịch Học Thuật</h3>
-                <Calendar className="w-6 h-6 text-indigo-600" />
-             </div>
-             <div className="flex flex-col items-center justify-center py-10 space-y-4 border-2 border-dashed border-slate-100 rounded-[2rem]">
-                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
-                    <AlertCircle className="w-8 h-8 text-slate-300" />
-                </div>
-                <p className="font-body text-sm font-bold text-slate-400">Không có sự kiện sắp tới</p>
-                <button className="font-heading px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl font-extrabold text-xs hover:brightness-110 transition-all shadow-md shadow-indigo-500/10">
-                  Thêm Sự Kiện
-                </button>
-             </div>
-          </div>
-
         </div>
 
       </div>
@@ -314,5 +184,3 @@ const TeacherDashboard = () => {
 };
 
 export default TeacherDashboard;
-
-

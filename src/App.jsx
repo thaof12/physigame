@@ -79,7 +79,7 @@ const AdminLayout = lazy(() => import('./areas/Admin/layouts/AdminLayout'));
 const AdminDashboard = lazy(() => import('./areas/Admin/pages/AdminDashboard'));
 const AdminUsers = lazy(() => import('./areas/Admin/pages/AdminUsers'));
 const AdminLessons = lazy(() => import('./areas/Admin/pages/AdminLessons'));
-const AdminStatistics = lazy(() => import('./areas/Admin/pages/AdminStatistics'));
+const AdminMaterials = lazy(() => import('./areas/Admin/pages/AdminMaterials'));
 const AdminSettings = lazy(() => import('./areas/Admin/pages/AdminSettings'));
 
 // Teacher Panel
@@ -87,8 +87,6 @@ import { TeacherAuthProvider } from './areas/Teacher/contexts/TeacherAuthContext
 const TeacherLayout = lazy(() => import('./areas/Teacher/layouts/TeacherLayout'));
 const TeacherDashboard = lazy(() => import('./areas/Teacher/pages/TeacherDashboard'));
 const PendingApproval = lazy(() => import('./areas/Teacher/pages/PendingApproval'));
-const MyLessons = lazy(() => import('./areas/Teacher/pages/MyLessons'));
-const MyExercises = lazy(() => import('./areas/Teacher/pages/MyExercises'));
 const BrowseContent = lazy(() => import('./areas/Teacher/pages/BrowseContent'));
 const ClassManagement = lazy(() => import('./areas/Teacher/pages/ClassManagement'));
 const TeacherProfile = lazy(() => import('./areas/Teacher/pages/TeacherProfile'));
@@ -268,8 +266,10 @@ const AppContent = () => {
         }>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="hoc-lieu" element={<AdminMaterials />} />
+          <Route path="materials" element={<AdminMaterials />} />
           <Route path="lessons" element={<AdminLessons />} />
-          <Route path="statistics" element={<AdminStatistics />} />
+          <Route path="statistics" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
@@ -285,8 +285,6 @@ const AppContent = () => {
           </TeacherAuthProvider>
         }>
           <Route path="dashboard" element={<TeacherDashboard />} />
-          <Route path="my-lessons" element={<MyLessons />} />
-          <Route path="my-exercises" element={<MyExercises />} />
           <Route path="browse" element={<BrowseContent />} />
           <Route path="students" element={<Navigate to="/teacher/dashboard" replace />} />
           <Route path="classes" element={<ClassManagement />} />

@@ -12,7 +12,14 @@ router.get('/', async (req, res) => {
     const { teacherId } = req.query;
     
     let lessons;
-    if (teacherId === 'system' || teacherId === 'null' || !teacherId) {
+    if (teacherId === 'all') {
+      const { data, error } = await require('../src/config/supabase.cjs').supabase
+        .from('lessons')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      lessons = data || [];
+    } else if (teacherId === 'system' || teacherId === 'null') {
       const { data, error } = await require('../src/config/supabase.cjs').supabase
         .from('lessons')
         .select('*')
@@ -31,7 +38,15 @@ router.get('/', async (req, res) => {
       if (error) throw error;
       lessons = data || [];
     } else {
-      lessons = await Lesson.findAll();
+      const { data, error } = await require('../src/config/supabase.cjs').supabase
+        .from('lessons')
+        .select('*')
+        .is('teacher_id', null)
+        .order('class_id', { ascending: true })
+        .order('chapter_id', { ascending: true })
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      lessons = data || [];
     }
     res.json(lessons);
   } catch (error) {
@@ -188,8 +203,19 @@ router.patch('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const Lesson = require('../models/Lesson.cjs');
-    await Lesson.delete(req.params.id);
-    res.json({ message: 'Lesson deleted' });
+    const { supabase } = require('../src/config/supabase.cjs');
+    const lessonId = req.params.id;
+
+    await Lesson.delete(lessonId);
+
+    // Clean up related reports, assignments and locks
+    await Promise.all([
+      supabase.from('reports').delete().eq('content_id', lessonId).catch(() => {}),
+      supabase.from('class_assignments').delete().eq('content_id', lessonId).catch(() => {}),
+      supabase.from('assigned_content').delete().eq('content_id', lessonId).catch(() => {})
+    ]).catch(() => {});
+
+    res.json({ success: true, message: 'Lesson deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -456,22 +456,56 @@ router.get('/:classId/assignments', async (req, res) => {
 router.post('/:classId/assignments', async (req, res) => {
   try {
     const { classId } = req.params;
-    const { title, description, type, resourceId, dueDate } = req.body;
+    const { title, description, type, resourceId, link, dueDate } = req.body;
+
+    let validParamType = type;
+    if (!validParamType || validParamType === 'link') {
+      validParamType = 'custom';
+    }
+
+    let formattedDueDate = null;
+    if (dueDate && typeof dueDate === 'string' && dueDate.trim() !== '') {
+      formattedDueDate = dueDate.trim();
+    }
+    
+    const insertPayload = {
+      class_id: classId,
+      title: title ? title.trim() : '',
+      description: description ? description.trim() : null,
+      type: validParamType,
+      resource_id: link || resourceId || '',
+      due_date: formattedDueDate
+    };
+
+    // Store link if column exists in schema
+    if (link) {
+      insertPayload.link = link;
+    }
     
     const { data, error } = await supabase
       .from('class_assignments')
-      .insert({
-        class_id: classId,
-        title,
-        description,
-        type,
-        resource_id: resourceId,
-        due_date: dueDate
-      })
+      .insert(insertPayload)
       .select()
       .single();
       
-    if (error) throw error;
+    if (error) {
+      // If error is due to missing 'link' column in database table, fallback without 'link' field
+      if (error.message && (error.message.includes('link') || error.code === 'PGRST204')) {
+        delete insertPayload.link;
+        const { data: fallbackData, error: fallbackErr } = await supabase
+          .from('class_assignments')
+          .insert(insertPayload)
+          .select()
+          .single();
+        if (fallbackErr) {
+          console.error('Fallback assignment error:', fallbackErr);
+          throw fallbackErr;
+        }
+        return res.json({ success: true, assignment: fallbackData });
+      }
+      console.error('Insert assignment error:', error);
+      throw error;
+    }
     res.json({ success: true, assignment: data });
   } catch (error) {
     console.error('Error creating assignment:', error);
