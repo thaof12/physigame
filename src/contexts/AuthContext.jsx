@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../config/supabase';
 import api from '../config/api';
 
@@ -390,8 +390,19 @@ export const AuthProvider = ({ children }) => {
 
   // Listen for realtime updates from Supabase 'users' table and local storage events
   // Listen for realtime updates from Supabase 'users' table and local storage events
-  // Helper for silent instant kickout when deactivated by Admin
-  const logoutSilentKickout = () => {
+  // State for deactivation warning overlay
+  const [deactivatedWarning, setDeactivatedWarning] = useState(null);
+  const deactivationTimerRef = useRef(null);
+
+  // Show warning overlay with countdown before kicking out
+  const showDeactivationWarning = useCallback((userName) => {
+    // Prevent duplicate triggers
+    if (deactivatedWarning) return;
+    setDeactivatedWarning({ name: userName || 'bạn', countdown: 5 });
+  }, [deactivatedWarning]);
+
+  // Perform actual logout after warning
+  const doForcedLogout = useCallback(() => {
     try {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
@@ -400,113 +411,145 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     supabase.auth.signOut().catch(() => {});
     window.location.href = '/login';
-  };
+  }, []);
+
+  // Countdown effect when warning is shown
+  useEffect(() => {
+    if (!deactivatedWarning) return;
+    if (deactivatedWarning.countdown <= 0) {
+      doForcedLogout();
+      return;
+    }
+    deactivationTimerRef.current = setTimeout(() => {
+      setDeactivatedWarning(prev => prev ? { ...prev, countdown: prev.countdown - 1 } : null);
+    }, 1000);
+    return () => clearTimeout(deactivationTimerRef.current);
+  }, [deactivatedWarning, doForcedLogout]);
+
+  // Legacy helper kept for backward-compat — now shows warning instead of instant kick
+  // Use a ref to always hold the latest version (avoids stale closure in setInterval)
+  const logoutSilentKickoutRef = useRef(null);
+  const logoutSilentKickout = useCallback((userName) => {
+    showDeactivationWarning(userName);
+  }, [showDeactivationWarning]);
+  // Keep ref in sync with latest callback
+  logoutSilentKickoutRef.current = logoutSilentKickout;
 
   // Listen for realtime updates from Supabase 'users' table, BroadcastChannel, and local storage events
   useEffect(() => {
     const currentUserId = user?.id || user?.uid;
     const currentUserEmail = user?.email;
+    const currentUserName = user?.displayName || user?.display_name || user?.username || 'bạn';
     if (!currentUserId || currentUserId === 'admin-hardcoded') return;
 
-    // Check immediately if current user is marked inactive in cache or state
+    // Helper: detect inactive from BOTH status and teacher_status
+    const isDeactivatedRecord = (rec) => {
+      if (!rec) return false;
+      if (rec.status === 'inactive') return true;
+      if (rec.teacher_status === 'inactive') return true;
+      return false;
+    };
+
+    // Check immediately if current user is marked inactive in admin cache
     const isInactiveInCache = () => {
       try {
         const cachedAdminUsersStr = localStorage.getItem('physigame_admin_users_cache');
         if (cachedAdminUsersStr) {
           const cachedUsers = JSON.parse(cachedAdminUsersStr);
-          const match = cachedUsers.find(u => 
+          const match = cachedUsers.find(u =>
             (u.id && String(u.id) === String(currentUserId)) ||
             (u.email && currentUserEmail && u.email.toLowerCase() === currentUserEmail.toLowerCase())
           );
-          if (match && match.status === 'inactive') return true;
+          if (match && isDeactivatedRecord(match)) return true;
         }
       } catch (e) {}
       return false;
     };
 
-    if (user?.status === 'inactive' || isInactiveInCache()) {
-      console.warn('⚠️ User account is inactive. Kicking out immediately.');
-      logoutSilentKickout();
+    if (isDeactivatedRecord(user) || isInactiveInCache()) {
+      console.warn('⚠️ User account is inactive on effect mount. Showing deactivation warning.');
+      logoutSilentKickoutRef.current?.(currentUserName);
       return;
     }
 
-    // 1. BroadcastChannel listener for instant cross-tab account locking (1ms latency)
+    // 1. BroadcastChannel — instant cross-tab/same-browser locking
     let adminBc;
     try {
       adminBc = new BroadcastChannel('physigame_admin_actions');
       adminBc.onmessage = (event) => {
         const msg = event.data;
         if (msg && msg.type === 'USER_STATUS_UPDATED') {
-          const isTargetUser = 
-            (msg.id && (String(msg.id) === String(currentUserId))) ||
+          const isTargetUser =
+            (msg.id && String(msg.id) === String(currentUserId)) ||
             (msg.email && currentUserEmail && msg.email.toLowerCase() === currentUserEmail.toLowerCase());
-
           if (isTargetUser && msg.status === 'inactive') {
-            console.warn('⚡ Account lock broadcast received! Kicking out immediately without alert.');
-            logoutSilentKickout();
+            console.warn('⚡ [AuthContext] BroadcastChannel: account locked. Showing warning.');
+            logoutSilentKickoutRef.current?.(msg.name || msg.username || currentUserName);
           }
         }
       };
     } catch (e) {}
 
-    // 2. Supabase Realtime Channel
+    // 2. Supabase Realtime — cross-browser locking via DB events
     const channel = supabase
       .channel(`public_users_update_${currentUserId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'users'
-        },
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users' },
         (payload) => {
           const updated = payload.new;
-          if (updated) {
-            const isMatch = (updated.id && String(updated.id) === String(currentUserId)) ||
-                            (updated.email && currentUserEmail && updated.email.toLowerCase() === currentUserEmail.toLowerCase());
-            if (isMatch && updated.status === 'inactive') {
-              console.warn('⚠️ User account deactivated via Realtime. Kicking out immediately.');
-              logoutSilentKickout();
-              return;
-            }
+          if (!updated) return;
+          const isMatch =
+            (updated.id && String(updated.id) === String(currentUserId)) ||
+            (updated.email && currentUserEmail && updated.email.toLowerCase() === currentUserEmail.toLowerCase());
+          if (isMatch && isDeactivatedRecord(updated)) {
+            console.warn('⚠️ [AuthContext] Realtime: account deactivated. Showing warning.');
+            logoutSilentKickoutRef.current?.(updated.display_name || currentUserName);
           }
         }
       )
       .subscribe();
 
-    // 3. Fast polling backup check every 1 second to enforce Admin status actions immediately
+    // 3. Polling backup — every 4s, uses backend API (service role, bypasses RLS)
+    //    More reliable than Supabase anon key which can be blocked by RLS
+    let pollActive = true; // prevent multiple triggers after warning shown
     const interval = setInterval(async () => {
+      if (!pollActive) return;
       try {
         if (isInactiveInCache()) {
-          logoutSilentKickout();
+          pollActive = false;
+          logoutSilentKickoutRef.current?.(currentUserName);
           return;
         }
-
         if (currentUserEmail) {
-          const { data: dbUser } = await supabase
-            .from('users')
-            .select('status, teacher_status')
-            .eq('email', currentUserEmail)
-            .maybeSingle();
-
-          if (dbUser && dbUser.status === 'inactive') {
-            console.warn('⚠️ Account found inactive during polling check. Kicking out immediately.');
-            logoutSilentKickout();
+          const response = await api.get('/users/check-status', {
+            params: { email: currentUserEmail }
+          });
+          const statusData = response?.data;
+          console.log(`[AuthContext] Poll check: status=${statusData?.status}, teacher_status=${statusData?.teacher_status}`);
+          if (statusData?.isDeactivated) {
+            pollActive = false;
+            console.warn('⚠️ [AuthContext] Polling (API): account deactivated! Showing warning.');
+            logoutSilentKickoutRef.current?.(statusData.display_name || currentUserName);
           }
         }
-      } catch (e) {}
-    }, 1000);
+      } catch (e) {
+        // If 403 from api interceptor, let it handle it. Log other errors.
+        if (e?.response?.status !== 403) {
+          console.warn('[AuthContext] Poll error (non-fatal):', e?.message);
+        }
+      }
+    }, 4000);
 
+    // 4. localStorage/storage event — same-browser cross-tab via storage events
     const handleStorageChange = (e) => {
       if (e.key === 'user' || e.key === 'physigame_admin_users_cache' || !e.key) {
         if (isInactiveInCache()) {
-          logoutSilentKickout();
+          logoutSilentKickoutRef.current?.(currentUserName);
           return;
         }
         const cached = safeGetItem('user');
         if (cached) {
-          if (cached.status === 'inactive') {
-            logoutSilentKickout();
+          if (isDeactivatedRecord(cached)) {
+            logoutSilentKickoutRef.current?.(cached.displayName || cached.display_name || cached.username || currentUserName);
             return;
           }
           setUser(cached);
@@ -522,7 +565,7 @@ export const AuthProvider = ({ children }) => {
       clearInterval(interval);
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [user?.id, user?.uid, user?.status, user?.email]);
+  }, [user?.id, user?.uid, user?.status, user?.teacher_status, user?.email, user?.role]);
 
   const login = async (email, password) => {
     try {
@@ -871,6 +914,162 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={value}>
       {children}
+
+      {/* ===== Account Deactivation Warning Overlay ===== */}
+      {deactivatedWarning && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            background: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            animation: 'deactivated-fadein 0.3s ease'
+          }}
+        >
+          <style>{`
+            @keyframes deactivated-fadein {
+              from { opacity: 0; transform: scale(0.96); }
+              to   { opacity: 1; transform: scale(1); }
+            }
+            @keyframes deactivated-pulse-ring {
+              0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+              70%  { box-shadow: 0 0 0 18px rgba(239,68,68,0); }
+              100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+            }
+            @keyframes deactivated-countdown {
+              from { stroke-dashoffset: 0; }
+              to   { stroke-dashoffset: 100; }
+            }
+          `}</style>
+
+          <div style={{
+            background: '#fff',
+            borderRadius: '2rem',
+            padding: '2.5rem 2rem',
+            maxWidth: '420px',
+            width: '100%',
+            textAlign: 'center',
+            boxShadow: '0 32px 64px -12px rgba(239,68,68,0.25), 0 4px 16px rgba(0,0,0,0.12)',
+            border: '2px solid #fee2e2',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Red glow bar top */}
+            <div style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0,
+              height: '4px',
+              background: 'linear-gradient(90deg, #ef4444, #f97316, #ef4444)',
+              backgroundSize: '200% 100%',
+              animation: 'deactivated-fadein 0.3s ease'
+            }} />
+
+            {/* Icon */}
+            <div style={{
+              width: '80px',
+              height: '80px',
+              background: 'linear-gradient(135deg, #fee2e2, #fecaca)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.5rem',
+              animation: 'deactivated-pulse-ring 1.5s ease infinite'
+            }}>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h2 style={{
+              fontSize: '1.375rem',
+              fontWeight: '900',
+              color: '#1e293b',
+              marginBottom: '0.75rem',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              lineHeight: 1.2
+            }}>Tài khoản bị vô hiệu hóa</h2>
+
+            {/* Description */}
+            <p style={{
+              fontSize: '0.9375rem',
+              color: '#64748b',
+              fontWeight: '600',
+              lineHeight: 1.6,
+              marginBottom: '0.5rem',
+              fontFamily: 'system-ui, -apple-system, sans-serif'
+            }}>
+              Tài khoản của <strong style={{ color: '#ef4444' }}>{deactivatedWarning.name}</strong> đã bị
+              Quản trị viên <strong>vô hiệu hóa</strong>.
+            </p>
+            <p style={{
+              fontSize: '0.875rem',
+              color: '#94a3b8',
+              marginBottom: '2rem',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              fontWeight: '500'
+            }}>Bạn sẽ tự động đăng xuất khỏi hệ thống.</p>
+
+            {/* Countdown ring */}
+            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+              <svg width="72" height="72" viewBox="0 0 72 72" style={{ transform: 'rotate(-90deg)' }}>
+                <circle cx="36" cy="36" r="30" fill="none" stroke="#fee2e2" strokeWidth="5" />
+                <circle
+                  cx="36" cy="36" r="30"
+                  fill="none"
+                  stroke="#ef4444"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  strokeDasharray="188.5"
+                  strokeDashoffset={188.5 * (1 - deactivatedWarning.countdown / 5)}
+                  style={{ transition: 'stroke-dashoffset 0.9s linear' }}
+                />
+              </svg>
+              <span style={{
+                position: 'absolute',
+                fontSize: '1.5rem',
+                fontWeight: '900',
+                color: '#ef4444',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              }}>{deactivatedWarning.countdown}</span>
+            </div>
+
+            {/* Contact info */}
+            <div style={{
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: '1rem',
+              padding: '0.875rem 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.625rem'
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <p style={{
+                fontSize: '0.8rem',
+                color: '#b91c1c',
+                fontWeight: '700',
+                textAlign: 'left',
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                lineHeight: 1.4
+              }}>Liên hệ Quản trị viên để khiếu nại hoặc mở lại tài khoản.</p>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ================================================ */}
     </AuthContext.Provider>
   );
 };

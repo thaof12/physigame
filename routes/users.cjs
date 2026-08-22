@@ -808,4 +808,147 @@ router.get('/teacher/:teacherId/top-students', async (req, res) => {
   }
 });
 
+// ============ ADMIN USER STATUS MANAGEMENT ============
+// Uses service role key (bypasses RLS) — for Admin panel only
+
+// POST /api/users/update-status — update user status + teacher_status
+router.post('/update-status', async (req, res) => {
+  try {
+    const { id, email, status, teacher_status, name, role } = req.body;
+
+    if (!id && !email) {
+      return res.status(400).json({ success: false, message: 'Cần cung cấp id hoặc email' });
+    }
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'Cần cung cấp trạng thái (status)' });
+    }
+
+    // Find user first
+    let user = null;
+    if (id) user = await User.findById(id);
+    if (!user && email) user = await User.findByEmail(email);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
+    }
+
+    // Build update payload
+    const updates = { status };
+    if (teacher_status !== undefined) updates.teacher_status = teacher_status;
+    if (name !== undefined) updates.display_name = name;
+    if (role !== undefined) updates.role = role;
+
+    console.log(`📡 [Backend] Admin updating user ${user.email}: status=${status}, teacher_status=${teacher_status}`);
+
+    // Use User.update which uses service role key — bypasses RLS
+    const updated = await User.update(user.id, updates);
+
+    console.log(`✅ [Backend] User ${user.email} updated successfully`);
+    res.json({
+      success: true,
+      message: 'Cập nhật trạng thái thành công',
+      user: {
+        id: updated.id,
+        email: updated.email,
+        status: updated.status,
+        teacher_status: updated.teacher_status,
+        display_name: updated.display_name
+      }
+    });
+  } catch (error) {
+    console.error('❌ [Backend] update-status error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi máy chủ', error: error.message });
+  }
+});
+
+// POST /api/users/batch-update-status — update multiple users status
+router.post('/batch-update-status', async (req, res) => {
+  try {
+    const { userIds, status } = req.body;
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'Cần danh sách userIds' });
+    }
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'Cần cung cấp status' });
+    }
+
+    console.log(`📡 [Backend] Batch updating ${userIds.length} users to status=${status}`);
+
+    const results = await Promise.allSettled(
+      userIds.map(async (id) => {
+        const user = await User.findById(id);
+        if (!user) return null;
+        const updates = { status };
+        // For teachers, also update teacher_status
+        if (user.role === 'teacher') {
+          updates.teacher_status = status === 'active' ? 'verified' : status;
+        }
+        return User.update(id, updates);
+      })
+    );
+
+    const succeeded = results.filter(r => r.status === 'fulfilled').length;
+    console.log(`✅ [Backend] Batch update: ${succeeded}/${userIds.length} succeeded`);
+
+    res.json({ success: true, message: `Cập nhật ${succeeded}/${userIds.length} tài khoản thành công` });
+  } catch (error) {
+    console.error('❌ [Backend] batch-update-status error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi máy chủ', error: error.message });
+  }
+});
+
+// DELETE /api/users/delete/:id — delete a user (service role)
+router.delete('/delete/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
+    }
+
+    await User.delete(id);
+    console.log(`✅ [Backend] User ${id} deleted`);
+    res.json({ success: true, message: 'Đã xóa người dùng thành công' });
+  } catch (error) {
+    console.error('❌ [Backend] delete user error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi máy chủ', error: error.message });
+  }
+});
+
+// GET /api/users/check-status — Polling endpoint for client-side inactive detection
+// Uses service role key (bypasses RLS) — safe to call every few seconds
+router.get('/check-status', async (req, res) => {
+  try {
+    const { email, id } = req.query;
+    if (!email && !id) {
+      return res.status(400).json({ success: false, message: 'email hoặc id là bắt buộc' });
+    }
+
+    let user = null;
+    if (id) user = await User.findById(id);
+    if (!user && email) user = await User.findByEmail(email);
+
+    if (!user) {
+      return res.json({ success: true, exists: false, status: 'active', teacher_status: null });
+    }
+
+    const isDeactivated =
+      user.status === 'inactive' ||
+      user.teacher_status === 'inactive';
+
+    return res.json({
+      success: true,
+      exists: true,
+      status: user.status || 'active',
+      teacher_status: user.teacher_status || null,
+      display_name: user.display_name,
+      role: user.role,
+      isDeactivated
+    });
+  } catch (error) {
+    console.error('❌ [Backend] check-status error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi máy chủ', error: error.message });
+  }
+});
+
 module.exports = router;

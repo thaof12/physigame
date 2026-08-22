@@ -553,9 +553,12 @@ const AdminUsers = () => {
 
       if (data && data.length > 0) {
         const formatted = data.map(u => {
+          // Resolve display status — status field takes priority if explicitly 'inactive'
           let resolvedStatus = u.status || 'active';
           if (u.role === 'teacher') {
-            if (u.teacher_status === 'pending') resolvedStatus = 'pending';
+            // Explicit inactive check first (both fields)
+            if (u.status === 'inactive' || u.teacher_status === 'inactive') resolvedStatus = 'inactive';
+            else if (u.teacher_status === 'pending') resolvedStatus = 'pending';
             else if (u.teacher_status === 'rejected') resolvedStatus = 'rejected';
             else if (u.teacher_status === 'verified') resolvedStatus = 'active';
           }
@@ -590,18 +593,15 @@ const AdminUsers = () => {
   const handleDeleteUser = async (userId) => {
     setActionLoading(userId);
     try {
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      setUsers(prev => prev.filter(u => u.id !== userId));
+      // Use backend API (service role) instead of Supabase anon key (blocked by RLS)
+      const response = await api.delete(`/users/delete/${userId}`);
+      if (response.data.success) {
+        setUsers(prev => prev.filter(u => u.id !== userId));
+      }
       setShowDeleteConfirm(null);
     } catch (err) {
       console.error('Error deleting user:', err);
-      // Even if DB fails, remove from local state for UI demonstration if it's mock data
+      // Fallback: remove from local UI even if API fails
       setUsers(prev => prev.filter(u => u.id !== userId));
       setShowDeleteConfirm(null);
     } finally {
@@ -650,6 +650,7 @@ const AdminUsers = () => {
         type: 'USER_STATUS_UPDATED',
         id: userData.id,
         email: userData.email,
+        name: userData.name,
         username: userData.username,
         status: userData.status,
         role: userData.role
@@ -688,38 +689,40 @@ const AdminUsers = () => {
       } catch (e) {}
     }
 
-    // 4. Supabase DB Update (Target by Email OR ID)
+    // 4. Backend API Update (service role — bypasses RLS)
     try {
-      const existingProfile = userData.originalData?.profile || {};
-      const updatedProfile = {
-        ...existingProfile,
-        avatar: userData.avatar || null,
-        grade: userData.grade || existingProfile.grade || null
-      };
-
-      const updatePayload = {
-        display_name: userData.name,
-        avatar: userData.avatar || null,
-        profile: updatedProfile,
-        role: userData.role,
+      let resolvedTeacherStatus2 = resolvedTeacherStatus;
+      const response = await api.post('/users/update-status', {
+        id: userData.id,
+        email: userData.email,
         status: userData.status,
-        grade: userData.grade || null,
-        teacher_status: resolvedTeacherStatus
-      };
-
-      if (userData.email) {
-        await supabase
-          .from('users')
-          .update(updatePayload)
-          .eq('email', userData.email);
-      } else if (userData.id) {
-        await supabase
-          .from('users')
-          .update(updatePayload)
-          .eq('id', userData.id);
+        teacher_status: resolvedTeacherStatus2,
+        name: userData.name,
+        role: userData.role
+      });
+      if (response.data.success) {
+        console.log('✅ [AdminUsers] Backend update succeeded:', response.data.user);
+      } else {
+        console.warn('⚠️ [AdminUsers] Backend update returned failure:', response.data);
       }
     } catch (err) {
-      console.warn('Background Supabase update warning:', err.message);
+      console.error('❌ [AdminUsers] Backend API update failed:', err.message);
+      // Fallback: try direct Supabase (may fail due to RLS)
+      try {
+        const updatePayload = {
+          display_name: userData.name,
+          avatar: userData.avatar || null,
+          role: userData.role,
+          status: userData.status,
+          teacher_status: resolvedTeacherStatus
+        };
+        if (userData.email) {
+          const { error } = await supabase.from('users').update(updatePayload).eq('email', userData.email);
+          if (error) console.warn('Supabase fallback also failed:', error.message);
+        }
+      } catch (fbErr) {
+        console.warn('Both update methods failed');
+      }
     }
   };
 
@@ -742,30 +745,35 @@ const AdminUsers = () => {
             type: 'USER_STATUS_UPDATED',
             id: u.id,
             email: u.email,
+            name: u.name,
             status: status
           });
           bc.close();
         } catch (e) {}
       });
 
-      const teacherEmails = selectedList.filter(u => u.role === 'teacher').map(u => u.email).filter(Boolean);
-      const studentEmails = selectedList.filter(u => u.role !== 'teacher').map(u => u.email).filter(Boolean);
-
-      if (teacherEmails.length > 0) {
-        const payload = { status: status === 'active' ? 'active' : 'inactive' };
-        payload.teacher_status = status === 'active' ? 'verified' : 'inactive';
-
-        await supabase
-          .from('users')
-          .update(payload)
-          .in('email', teacherEmails);
-      }
-
-      if (studentEmails.length > 0) {
-        await supabase
-          .from('users')
-          .update({ status: status === 'active' ? 'active' : 'inactive' })
-          .in('email', studentEmails);
+      // Use batch API endpoint (service role)
+      try {
+        const response = await api.post('/users/batch-update-status', {
+          userIds: selectedUsers,
+          status
+        });
+        if (response.data.success) {
+          console.log('✅ [AdminUsers] Batch update succeeded:', response.data.message);
+        } else {
+          console.warn('⚠️ Batch update issue:', response.data);
+        }
+      } catch (apiErr) {
+        console.error('❌ Batch API failed, trying Supabase fallback:', apiErr.message);
+        // Fallback with Supabase (may be blocked by RLS)
+        const teacherEmails = selectedList.filter(u => u.role === 'teacher').map(u => u.email).filter(Boolean);
+        const studentEmails = selectedList.filter(u => u.role !== 'teacher').map(u => u.email).filter(Boolean);
+        if (teacherEmails.length > 0) {
+          await supabase.from('users').update({ status, teacher_status: status === 'active' ? 'verified' : 'inactive' }).in('email', teacherEmails);
+        }
+        if (studentEmails.length > 0) {
+          await supabase.from('users').update({ status }).in('email', studentEmails);
+        }
       }
 
       setSelectedUsers([]);
