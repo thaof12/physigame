@@ -48,16 +48,59 @@ const User = {
 
   // Find by email, id, or firebaseUid (old) - flexible lookup
   async findByAnyId(idValue) {
+    if (!idValue || idValue === 'null' || idValue === 'undefined') return null;
+
     // Try by email first
     let { data, error } = await supabase
-      .from(TABLE).select('*').eq('email', idValue).single();
+      .from(TABLE).select('*').eq('email', idValue).maybeSingle();
     if (data) return data;
 
     // Try by ID (UUID format)
-    if (idValue && idValue.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (typeof idValue === 'string' && idValue.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       ({ data, error } = await supabase
-        .from(TABLE).select('*').eq('id', idValue).single());
+        .from(TABLE).select('*').eq('id', idValue).maybeSingle());
       if (data) return data;
+
+      // Auto-heal: If not in public.users, check Supabase Auth admin and auto-create!
+      try {
+        const { data: authUser, error: authErr } = await supabase.auth.admin.getUserById(idValue);
+        if (authUser && authUser.user) {
+          const u = authUser.user;
+          const email = u.email;
+          const displayName = u.user_metadata?.display_name || u.user_metadata?.full_name || email?.split('@')[0] || 'User';
+          const username = u.user_metadata?.username || u.user_metadata?.preferred_username || email?.split('@')[0] || `user_${Date.now()}`;
+          const avatar = u.user_metadata?.avatar_url || u.user_metadata?.picture || u.identities?.[0]?.identity_data?.avatar_url || '';
+
+          const newProfile = {
+            id: u.id,
+            email: email,
+            username: username,
+            display_name: displayName,
+            avatar: avatar,
+            role: u.user_metadata?.role || 'student',
+            status: 'active',
+            xp: 0,
+            level: 1,
+            programs: [],
+            created_at: u.created_at || new Date().toISOString()
+          };
+
+          const { data: created, error: insertErr } = await supabase
+            .from(TABLE)
+            .upsert(newProfile)
+            .select()
+            .single();
+
+          if (insertErr) {
+            console.warn('⚠️ findByAnyId auto-heal upsert warning:', insertErr.message);
+          } else if (created) {
+            console.log(`✅ [User.findByAnyId] Auto-created missing public.users record for ${email} (${u.id})`);
+            return created;
+          }
+        }
+      } catch (authException) {
+        console.warn('⚠️ findByAnyId auth admin lookup exception:', authException.message);
+      }
     }
 
     return null;

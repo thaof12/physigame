@@ -6,7 +6,7 @@ const API_BASE_URL = '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000, // 15s timeout to prevent hanging requests
+  timeout: 45000, // 45s timeout for file upload requests
   headers: {
     'Content-Type': 'application/json',
   },

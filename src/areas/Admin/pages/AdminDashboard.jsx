@@ -65,16 +65,31 @@ const AdminDashboard = () => {
 
   const fetchAll = async () => {
     try {
-      const [allUsersRes, pendingTeachersRes] = await Promise.all([
+      // 1. Fetch pending teachers via Backend API (service role) or clean Supabase query
+      let pendingData = [];
+      try {
+        const apiRes = await api.get('/users/pending-teachers');
+        if (apiRes.data?.success && Array.isArray(apiRes.data?.teachers)) {
+          pendingData = apiRes.data.teachers;
+        }
+      } catch (apiErr) {
+        console.warn('⚠️ API pending-teachers fetch failed, falling back to Supabase:', apiErr.message);
+      }
+
+      // Fallback to Supabase if API returned empty/failed
+      const [allUsersRes, fallbackPendingRes] = await Promise.all([
         supabase.from('users').select('id, role, teacher_status, created_at'),
-        supabase.from('users').select('id, display_name, username, email, teacher_status, created_at')
-          .eq('role', 'teacher').eq('teacher_status', 'pending')
+        pendingData.length === 0
+          ? supabase.from('users').select('id, display_name, username, email, avatar, teacher_status, teacher_profile, created_at').eq('teacher_status', 'pending')
+          : Promise.resolve({ data: [] })
       ]);
 
       const allUsers = allUsersRes.data || [];
-      const pendingData = pendingTeachersRes.data || [];
-      const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      if (pendingData.length === 0 && fallbackPendingRes.data) {
+        pendingData = fallbackPendingRes.data;
+      }
 
+      const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const studentsCount = allUsers.filter(u => u.role === 'student').length;
       const teachersCount = allUsers.filter(u => u.role === 'teacher').length;
       const newUsersCount = allUsers.filter(u => new Date(u.created_at || 0) >= since30d).length;
@@ -96,11 +111,12 @@ const AdminDashboard = () => {
 
       const formattedPending = pendingData.map(t => ({
         id: t.id,
-        name: t.display_name || t.username || 'Giáo viên',
+        name: t.display_name || t.displayName || t.username || 'Giáo viên',
         email: t.email || '—',
-        subject: 'Vật lý',
-        school: 'Chưa cập nhật',
-        joinDate: t.created_at ? new Date(t.created_at).toLocaleDateString('vi-VN') : '—',
+        avatar: t.avatar || t.teacher_profile?.avatar || null,
+        subject: t.teacher_profile?.subject || 'Vật lý',
+        school: t.teacher_profile?.school || 'Chưa cập nhật',
+        joinDate: (t.teacher_profile?.applied_at || t.created_at) ? new Date(t.teacher_profile?.applied_at || t.created_at).toLocaleDateString('vi-VN') : '—',
         originalData: t,
       }));
 
@@ -208,8 +224,21 @@ const AdminDashboard = () => {
                 <div key={teacher.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-indigo-200 transition-all group">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <span className="font-heading text-white font-extrabold text-lg">{teacher.name[0].toUpperCase()}</span>
+                      <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden shrink-0">
+                        {teacher.avatar ? (
+                          <img
+                            src={teacher.avatar}
+                            alt={teacher.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                          />
+                        ) : null}
+                        <span
+                          className="font-heading text-white font-extrabold text-lg"
+                          style={{ display: teacher.avatar ? 'none' : 'flex' }}
+                        >
+                          {teacher.name[0].toUpperCase()}
+                        </span>
                       </div>
                       <div>
                         <h4 className="font-heading font-extrabold text-slate-900">{teacher.name}</h4>

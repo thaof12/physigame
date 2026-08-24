@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "node server.cjs",
-    "server:dev": "nodemon server.cjs",
+    "server:dev": "nodemon -e js,cjs,json server.cjs",
     "seed": "node seed.cjs",
     "setup": "npm install && npm run seed"
   },

@@ -85,7 +85,7 @@ const Register = () => {
       );
       
       if (selectedRole === 'teacher') {
-        navigate('/teacher/pending');
+        navigate('/teacher/apply');
       } else {
         navigate('/placement-test/physics');
       }

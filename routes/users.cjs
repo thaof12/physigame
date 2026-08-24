@@ -286,7 +286,23 @@ router.get('/firebase/:firebaseUid', async (req, res) => {
       return res.status(400).json({ message: 'Invalid User ID' });
     }
 
-    const user = await User.findByAnyId(firebaseUid);
+    let user = await User.findByAnyId(firebaseUid);
+    if (!user) {
+      console.warn(`⚠️ [Backend] User record not found for ${firebaseUid} on GET /firebase endpoint. Creating fallback record...`);
+      try {
+        user = await User.upsert({
+          id: firebaseUid,
+          email: `user_${firebaseUid.slice(0, 8)}@example.com`,
+          username: `user_${firebaseUid.slice(0, 8)}`,
+          display_name: 'Người dùng',
+          role: 'student',
+          status: 'active'
+        });
+      } catch (err) {
+        console.error('❌ Failed fallback creation:', err.message);
+      }
+    }
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -461,6 +477,110 @@ router.post('/submit-physics-lesson', async (req, res) => {
 });
 
 // ============ TEACHER MANAGEMENT APIs ============
+
+// POST /api/users/teacher-application — Save teacher profile & change status to pending
+router.post('/teacher-application', async (req, res) => {
+  try {
+    const { userId, fullName, phone, school, subject, experience, degree, reason, certificates } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'Thiếu userId' });
+    }
+
+    let user = await User.findByAnyId(userId);
+    if (!user) {
+      console.warn(`⚠️ [Backend] User record not found for ${userId}. Creating user profile record...`);
+      try {
+        user = await User.upsert({
+          id: userId,
+          email: req.body.email || `user_${userId.slice(0, 8)}@example.com`,
+          username: (fullName?.trim() || 'teacher').toLowerCase().replace(/\s+/g, '_'),
+          display_name: fullName?.trim() || 'Giáo viên',
+          role: 'teacher',
+          teacher_status: 'pending',
+          status: 'active'
+        });
+      } catch (createErr) {
+        console.error('❌ [Backend] Failed to create user profile on teacher-application:', createErr.message);
+      }
+    }
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
+    }
+
+    // Process certificate files using backend Service Role Key (bypasses Storage RLS)
+    const uploadedCerts = [];
+    if (certificates && Array.isArray(certificates)) {
+      for (const cert of certificates) {
+        if (cert.base64) {
+          try {
+            const ext = (cert.name || 'file.png').split('.').pop();
+            const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+            const matches = cert.base64.match(/^data:(.+);base64,(.+)$/);
+            const contentType = matches ? matches[1] : cert.type || 'application/octet-stream';
+            const buffer = Buffer.from(matches ? matches[2] : cert.base64, 'base64');
+
+            const { error: uploadErr } = await supabase.storage
+              .from('teacher-certificates')
+              .upload(filePath, buffer, { contentType, upsert: true });
+
+            if (uploadErr) {
+              console.warn(`⚠️ [Backend] Upload certificate warning for ${cert.name}:`, uploadErr.message);
+              uploadedCerts.push({ name: cert.name, path: filePath, type: contentType });
+            } else {
+              uploadedCerts.push({ name: cert.name, path: filePath, type: contentType });
+            }
+          } catch (fileErr) {
+            console.error(`❌ [Backend] File processing exception:`, fileErr.message);
+          }
+        } else if (cert.path || cert.url) {
+          uploadedCerts.push(cert);
+        }
+      }
+    }
+
+    const teacherProfile = {
+      ...(user.teacher_profile || {}),
+      phone: phone?.trim(),
+      school: school?.trim(),
+      subject: subject || 'Vật lý',
+      experience: experience || '1–3 năm',
+      degree: degree || 'Cử nhân Sư phạm',
+      reason: reason?.trim(),
+      certificates: uploadedCerts,
+      applied_at: new Date().toISOString(),
+      agreed_to_share: true
+    };
+
+    const updates = {
+      display_name: fullName?.trim() || user.display_name,
+      teacher_profile: teacherProfile,
+      teacher_status: 'pending',
+      role: 'teacher',
+      updated_at: new Date().toISOString()
+    };
+
+    console.log(`📋 [Backend] Submitting teacher application for user ${user.email} (${user.id})`);
+    const updated = await User.update(user.id, updates);
+
+    res.json({
+      success: true,
+      message: 'Gửi hồ sơ thành công',
+      user: {
+        id: updated.id,
+        email: updated.email,
+        displayName: updated.display_name,
+        teacherStatus: updated.teacher_status,
+        teacherProfile: updated.teacher_profile,
+        role: updated.role
+      }
+    });
+  } catch (error) {
+    console.error('❌ [Backend] teacher-application error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi máy chủ khi lưu hồ sơ', error: error.message });
+  }
+});
 
 router.get('/pending-teachers', async (req, res) => {
   try {

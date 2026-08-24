@@ -86,6 +86,7 @@ const AdminSettings = lazy(() => import('./areas/Admin/pages/AdminSettings'));
 import { TeacherAuthProvider } from './areas/Teacher/contexts/TeacherAuthContext';
 const TeacherLayout = lazy(() => import('./areas/Teacher/layouts/TeacherLayout'));
 const TeacherDashboard = lazy(() => import('./areas/Teacher/pages/TeacherDashboard'));
+const TeacherApplication = lazy(() => import('./areas/Teacher/pages/TeacherApplication'));
 const PendingApproval = lazy(() => import('./areas/Teacher/pages/PendingApproval'));
 const BrowseContent = lazy(() => import('./areas/Teacher/pages/BrowseContent'));
 const ClassManagement = lazy(() => import('./areas/Teacher/pages/ClassManagement'));
@@ -278,6 +279,15 @@ const AppContent = () => {
           <TeacherAuthProvider>
             <PendingApproval />
           </TeacherAuthProvider>
+        } />
+
+        {/* Teacher Application Form (standalone, no layout needed) */}
+        <Route path="/teacher/apply" element={
+          <ProtectedRoute>
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin" /></div>}>
+              <TeacherApplication />
+            </Suspense>
+          </ProtectedRoute>
         } />
         <Route path="/teacher" element={
           <TeacherAuthProvider>

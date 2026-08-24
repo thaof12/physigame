@@ -201,23 +201,55 @@ router.patch('/:id', async (req, res) => {
 
 // Delete lesson
 router.delete('/:id', async (req, res) => {
+  const { supabase } = require('../src/config/supabase.cjs');
+  const lessonId = req.params.id;
+
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const isUuid = UUID_REGEX.test(lessonId);
+
+  console.log(`🗑️ DELETE /api/lessons/${lessonId} (isUuid: ${isUuid})`);
+
   try {
-    const Lesson = require('../models/Lesson.cjs');
-    const { supabase } = require('../src/config/supabase.cjs');
-    const lessonId = req.params.id;
+    if (isUuid) {
+      // UUID-based lesson (teacher-created content stored in Supabase)
+      const { data, error } = await supabase
+        .from('lessons')
+        .delete()
+        .eq('id', lessonId)
+        .select('id');
 
-    await Lesson.delete(lessonId);
+      if (error) {
+        console.error(`❌ Supabase delete lesson error for id=${lessonId}:`, error);
+        return res.status(500).json({ message: 'Error deleting lesson from database', error: error.message });
+      }
 
-    // Clean up related reports, assignments and locks
-    await Promise.all([
-      supabase.from('reports').delete().eq('content_id', lessonId).catch(() => {}),
-      supabase.from('class_assignments').delete().eq('content_id', lessonId).catch(() => {}),
-      supabase.from('assigned_content').delete().eq('content_id', lessonId).catch(() => {})
-    ]).catch(() => {});
+      if (!data || data.length === 0) {
+        console.warn(`⚠️ Lesson ${lessonId} not found in Supabase (may already be deleted)`);
+        // Still return success so frontend can clean up its state
+      }
+    } else {
+      // Integer-based legacy lesson
+      const Lesson = require('../models/Lesson.cjs');
+      const parsedId = parseInt(lessonId, 10);
+      if (isNaN(parsedId)) {
+        return res.status(400).json({ message: `Invalid lesson ID: "${lessonId}"` });
+      }
+      await Lesson.delete(parsedId);
+    }
 
+    // Always clean up related data — use Promise.allSettled so one failure doesn't abort others
+    // Note: Do NOT call .catch() on Supabase query builders directly; always await them
+    await Promise.allSettled([
+      supabase.from('reports').delete().eq('content_id', lessonId),
+      supabase.from('class_assignments').delete().eq('content_id', lessonId),
+      supabase.from('assigned_content').delete().eq('content_id', lessonId)
+    ]);
+
+    console.log(`✅ Lesson ${lessonId} deleted successfully`);
     res.json({ success: true, message: 'Lesson deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(`❌ Unexpected error deleting lesson ${lessonId}:`, error);
+    res.status(500).json({ message: 'Error deleting lesson', error: error.message });
   }
 });
 

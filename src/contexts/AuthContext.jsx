@@ -75,13 +75,36 @@ export const AuthProvider = ({ children }) => {
           try {
             const response = await api.get(`/users/firebase/${session.user.id}`);
             if (response.data) {
+              // Resolve latest avatar from Google OAuth metadata (may have been updated)
+              const latestAvatar =
+                session.user.user_metadata?.avatar_url ||
+                session.user.user_metadata?.picture ||
+                session.user.identities?.[0]?.identity_data?.avatar_url ||
+                response.data.avatar_url ||
+                response.data.avatar ||
+                null;
+
               const userData = {
                 ...response.data,
                 email: response.data.email || session.user.email,
                 displayName: response.data.displayName || response.data.display_name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
+                avatar_url: latestAvatar,
+                avatar: latestAvatar,
                 firebaseUid: session.user.id,
                 uid: session.user.id
               };
+
+              // If avatar changed (Google user updated photo), silently sync to DB
+              const dbAvatar = response.data.avatar_url || response.data.avatar;
+              if (latestAvatar && latestAvatar !== dbAvatar) {
+                supabase.from('users')
+                  .update({ avatar_url: latestAvatar, avatar: latestAvatar })
+                  .eq('id', session.user.id)
+                  .then(({ error }) => {
+                    if (error) console.warn('⚠️ Avatar sync to DB failed:', error.message);
+                    else console.log('🖼️ Avatar synced to DB from Google OAuth');
+                  });
+              }
               
               const { data: { session: currentSession } } = await supabase.auth.getSession();
               if (!currentSession || currentSession.user.id !== session.user.id) {
@@ -248,6 +271,12 @@ export const AuthProvider = ({ children }) => {
               } else {
                 console.log('%c🚀 [AuthContext] Teacher path triggered. Synchronizing database...', 'color: #2099e9; font-weight: black');
                 
+                const googleAvatarUrl =
+                  session.user.user_metadata?.avatar_url ||
+                  session.user.user_metadata?.picture ||
+                  session.user.identities?.[0]?.identity_data?.avatar_url ||
+                  null;
+
                 const teacherSyncData = {
                    id: session.user.id,
                    username: session.user.user_metadata?.preferred_username || 
@@ -258,6 +287,8 @@ export const AuthProvider = ({ children }) => {
                                  session.user.user_metadata?.full_name || 
                                  session.user.email?.split('@')[0],
                    email: session.user.email,
+                   avatar_url: googleAvatarUrl,
+                   avatar: googleAvatarUrl,
                    role: 'teacher',
                    teacher_status: 'pending',
                    updated_at: new Date().toISOString()
@@ -330,6 +361,15 @@ export const AuthProvider = ({ children }) => {
                 ...userData,
                 email: userData.email || session.user.email,
                 displayName: userData.displayName || userData.display_name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
+                avatar_url: userData.avatar_url || userData.avatar ||
+                  session.user.user_metadata?.avatar_url ||
+                  session.user.user_metadata?.picture ||
+                  session.user.identities?.[0]?.identity_data?.avatar_url ||
+                  null,
+                avatar: userData.avatar || userData.avatar_url ||
+                  session.user.user_metadata?.avatar_url ||
+                  session.user.user_metadata?.picture ||
+                  null,
                 role: isTeacher ? 'teacher' : (userData.role || 'student'),
                 teacherStatus: finalStatus,
                 teacher_status: finalStatus
@@ -340,6 +380,18 @@ export const AuthProvider = ({ children }) => {
               setUser(finalUser);
               if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
               setLoading(false);
+
+              // NEW TEACHER via Google OAuth → redirect to application form
+              // Only if: intent was teacher AND they were NOT already a teacher with existing profile
+              const isNewTeacher = isTeacherIntent && !isAlreadyTeacher;
+              const hasExistingProfile = userData?.teacher_profile?.phone || userData?.teacher_profile?.school;
+              if (isNewTeacher && !hasExistingProfile) {
+                console.log('%c📋 [AuthContext] New Google teacher → redirecting to /teacher/apply', 'color: #7c3aed; font-weight: bold');
+                // Small delay to let React finish state updates before navigating
+                setTimeout(() => {
+                  window.location.href = '/teacher/apply';
+                }, 300);
+              }
             } else {
               throw new Error('Profile determination failed');
             }

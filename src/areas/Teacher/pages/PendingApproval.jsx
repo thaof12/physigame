@@ -18,6 +18,7 @@ const PendingApproval = () => {
   const navigate = useNavigate();
   const { teacher, isAuthenticated, isVerified, isPending, isRejected, logout, refreshTeacher, loading } = useTeacherAuth();
   const [checking, setChecking] = useState(false);
+  const [lastCheckedTime, setLastCheckedTime] = useState(null);
 
   useEffect(() => {
     // If verified, redirect to dashboard
@@ -38,8 +39,15 @@ const PendingApproval = () => {
 
   const handleRefresh = async () => {
     setChecking(true);
+    const startTime = Date.now();
     try {
       await refreshTeacher();
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 500) {
+        await new Promise((r) => setTimeout(r, 500 - elapsed));
+      }
+      const now = new Date();
+      setLastCheckedTime(now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     } catch (err) {
       console.error('Refresh check failed:', err);
     } finally {
@@ -74,17 +82,6 @@ const PendingApproval = () => {
             <Link to="/" className="flex items-center group cursor-pointer transition-transform duration-500 hover:scale-105">
               <span className="font-premium-serif text-4xl md:text-5xl font-bold text-slate-900 italic tracking-tight">Eureka</span>
             </Link>
-          </div>
-
-          <div className={`w-20 h-20 mx-auto rounded-3xl flex items-center justify-center mb-6 shadow-md ${isPending
-              ? 'bg-gradient-to-br from-indigo-500 to-slate-900 shadow-indigo-500/20'
-              : isRejected
-                ? 'bg-gradient-to-br from-rose-500 to-red-600 shadow-rose-500/20'
-                : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20'
-            }`}>
-            {isPending && <Clock className="w-9 h-9 text-white animate-pulse" />}
-            {isRejected && <XCircle className="w-9 h-9 text-white" />}
-            {isVerified && <CheckCircle className="w-9 h-9 text-white" />}
           </div>
 
           <h1 className="font-heading text-2xl md:text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">
@@ -151,7 +148,7 @@ const PendingApproval = () => {
             <div className="flex items-start gap-3 p-5 bg-indigo-50 border border-indigo-100 rounded-2xl text-[#4f46e5] mb-8 shadow-sm">
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
               <p className="font-body text-xs font-semibold leading-relaxed">
-                Quy trình xác minh thường diễn ra trong vòng 24-48h làm việc. Chúng tôi sẽ thông báo ngay khi có kết quả.
+                Quy trình xác minh thường diễn ra trong vòng 24–48h làm việc. Chúng tôi sẽ thông báo ngay khi có kết quả.
               </p>
             </div>
           )}
@@ -170,14 +167,13 @@ const PendingApproval = () => {
 
           {/* Actions */}
           <div className="font-heading grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button
-              onClick={handleRefresh}
-              disabled={checking}
-              className="px-6 py-3.5 bg-gradient-to-r from-[#4f46e5] to-[#0f172a] hover:brightness-110 text-white rounded-xl font-extrabold text-sm transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2.5 active:scale-[0.98] disabled:opacity-70"
+            <Link
+              to="/"
+              className="px-6 py-3.5 bg-gradient-to-r from-[#4f46e5] to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 active:scale-95 text-white rounded-xl font-extrabold text-sm transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2.5"
             >
-              <RefreshCw className={`w-4 h-4 ${checking ? 'animate-spin' : ''}`} />
-              {checking ? 'Đang kiểm tra...' : 'Kiểm tra trạng thái'}
-            </button>
+              <ArrowLeft className="w-4 h-4" />
+              Quay lại Trang Chủ
+            </Link>
 
             <button
               onClick={handleLogout}
@@ -186,14 +182,6 @@ const PendingApproval = () => {
               <LogOut className="w-4 h-4" />
               Đăng xuất hệ thống
             </button>
-
-            <Link
-              to="/"
-              className="sm:col-span-2 px-6 py-3 bg-transparent text-slate-400 hover:text-slate-600 rounded-xl font-extrabold text-sm transition-all flex items-center justify-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Quay lại Trang Chủ
-            </Link>
           </div>
         </div>
 

@@ -31,11 +31,12 @@ export default function MainLayout() {
 
     if (isTeacher) {
       if (isPending) {
-        if (location.pathname !== '/teacher/pending') {
-          console.log('%c🚀 [MainLayout] Pending teacher detected on student route. FORCING REDIRECT...', 'color: #f59e0b; font-weight: black; font-size: 14px');
+        const publicLandingPaths = ['/', '/home', '/support/guide', '/support/faq', '/support/privacy', '/support/terms'];
+        if (!publicLandingPaths.includes(location.pathname) && location.pathname !== '/teacher/pending') {
+          console.log('%c🚀 [MainLayout] Pending teacher detected on protected student route. FORCING REDIRECT...', 'color: #f59e0b; font-weight: black; font-size: 14px');
           navigate('/teacher/pending', { replace: true });
         } else {
-          console.log('%c✅ [MainLayout] Teacher is on the pending page. Guard passed.', 'color: #10b981');
+          console.log('%c✅ [MainLayout] Teacher on permitted public/pending page. Guard passed.', 'color: #10b981');
         }
       } else {
         // Verified teacher - redirect to dashboard if on general student homepage / landing paths
