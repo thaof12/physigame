@@ -73,23 +73,36 @@ const AdminLayout = () => {
   });
 
   // Poll report count for sidebar red bell notification
+  // Key fix: only update count when API succeeds — never reset to 0 on failure
   useEffect(() => {
+    let isMounted = true;
     const fetchReportCount = async () => {
       try {
         const res = await api.get('/reports');
+        if (!isMounted) return;
         if (res.data && res.data.success && Array.isArray(res.data.reports)) {
           const count = res.data.reports.length;
-          setReportCount(count);
-          localStorage.setItem('physigame_admin_report_count', String(count));
+          // Only update state if count actually changed — prevent unnecessary re-renders
+          setReportCount(prev => {
+            if (prev !== count) {
+              localStorage.setItem('physigame_admin_report_count', String(count));
+              return count;
+            }
+            return prev;
+          });
         }
+        // If API fails or returns unexpected shape, keep previous count — don't flash to 0
       } catch (err) {
-        // quiet fallback
+        // Silent fallback — previous cached count remains displayed
       }
     };
 
     fetchReportCount();
-    const interval = setInterval(fetchReportCount, 5000);
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchReportCount, 12000); // 12s to reduce flicker
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   // Show loading state

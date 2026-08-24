@@ -102,8 +102,14 @@ const AdminMaterials = () => {
 
   const showStatus = (type, text) => {
     setStatusNotification({ type, text });
-    setTimeout(() => setStatusNotification(null), 4000);
+    // Success messages auto-dismiss after 5s
+    // Error messages stay until user manually closes them (they need to read why it failed)
+    if (type === 'success') {
+      setTimeout(() => setStatusNotification(prev => prev?.text === text ? null : prev), 5000);
+    }
   };
+
+  const dismissStatus = () => setStatusNotification(null);
 
   const fetchContentAndReports = async () => {
     try {
@@ -271,14 +277,24 @@ const AdminMaterials = () => {
       });
 
       if (res.data && res.data.success) {
-        setLockedIds(res.data.locked_ids || []);
-        if (activeTab === 'lessons') {
-          setLessons(prev => prev.map(item => item.id === editItem.id ? { ...item, is_locked: !currentlyLocked } : item));
+        const newLockedState = !currentlyLocked;
+        // Instant local state update
+        if (res.data.locked_ids) {
+          setLockedIds(res.data.locked_ids);
         } else {
-          setExercises(prev => prev.map(item => item.id === editItem.id ? { ...item, is_locked: !currentlyLocked } : item));
+          setLockedIds(prev =>
+            newLockedState
+              ? [...prev.filter(lid => lid !== String(editItem.id)), String(editItem.id)]
+              : prev.filter(lid => lid !== String(editItem.id))
+          );
         }
-        setEditItem(prev => ({ ...prev, is_locked: !currentlyLocked }));
-        showStatus('success', currentlyLocked ? 'Đã mở khóa bài viết cho giáo viên.' : 'Đã vô hiệu hóa bài viết trong giao diện giáo viên.');
+        if (activeTab === 'lessons') {
+          setLessons(prev => prev.map(item => item.id === editItem.id ? { ...item, is_locked: newLockedState } : item));
+        } else {
+          setExercises(prev => prev.map(item => item.id === editItem.id ? { ...item, is_locked: newLockedState } : item));
+        }
+        setEditItem(prev => ({ ...prev, is_locked: newLockedState }));
+        showStatus('success', newLockedState ? 'Đã vô hiệu hóa bài viết trong giao diện giáo viên.' : 'Đã mở khóa bài viết cho giáo viên.');
       }
     } catch (err) {
       console.error('Error toggling lock:', err);
@@ -297,25 +313,43 @@ const AdminMaterials = () => {
   // Execute actual delete upon Custom Modal confirmation
   const executeDeleteContent = async () => {
     if (!confirmDeleteModalItem) return;
+    const itemToDelete = confirmDeleteModalItem;
 
     setDeleteSubmitting(true);
+    // Optimistic: close modal immediately so admin sees it's working
+    setConfirmDeleteModalItem(null);
+    setEditItem(null);
+
     try {
       if (activeTab === 'lessons') {
-        await api.delete(`/lessons/${confirmDeleteModalItem.id}`);
+        await api.delete(`/lessons/${itemToDelete.id}`);
       } else {
-        await api.delete(`/challenges/${confirmDeleteModalItem.id}`);
+        await api.delete(`/challenges/${itemToDelete.id}`);
       }
 
-      await api.delete(`/reports/content/${confirmDeleteModalItem.id}`).catch(() => { });
+      // Clean up reports for this content
+      await api.delete(`/reports/content/${itemToDelete.id}`).catch(() => {});
 
-      const deletedTitle = confirmDeleteModalItem.name || confirmDeleteModalItem.title;
-      setConfirmDeleteModalItem(null);
-      setEditItem(null);
-      await fetchContentAndReports();
+      const deletedTitle = itemToDelete.name || itemToDelete.title;
+
+      // Instant local state update — don't wait for full fetch to remove item
+      if (activeTab === 'lessons') {
+        setLessons(prev => prev.filter(l => String(l.id) !== String(itemToDelete.id)));
+      } else {
+        setExercises(prev => prev.filter(e => String(e.id) !== String(itemToDelete.id)));
+      }
+      // Remove all reports for this deleted content from local state
+      setReports(prev => prev.filter(r => String(r.content_id) !== String(itemToDelete.id)));
+      // Remove from locked IDs if any
+      setLockedIds(prev => prev.filter(lid => String(lid) !== String(itemToDelete.id)));
+
       showStatus('success', `Đã xóa bài viết "${deletedTitle}" thành công khỏi hệ thống!`);
     } catch (err) {
       console.error('Error deleting item:', err);
-      showStatus('error', 'Không thể xóa bài viết này. Vui lòng thử lại.');
+      // On failure, re-open edit modal so admin can retry
+      setEditItem(itemToDelete);
+      const errorMsg = err?.response?.data?.message || err?.response?.data?.error || 'Không thể xóa bài viết này. Vui lòng thử lại.';
+      showStatus('error', errorMsg);
     } finally {
       setDeleteSubmitting(false);
     }
@@ -328,7 +362,15 @@ const AdminMaterials = () => {
     setResolveSubmitting(true);
     try {
       await api.delete(`/reports/content/${contentId}`);
-      await fetchContentAndReports();
+
+      // Instant local state update — remove reports for this content immediately
+      setReports(prev => prev.filter(r => String(r.content_id) !== String(contentId)));
+
+      // If the edit modal is open for this item, close it
+      if (editItem && String(editItem.id) === String(contentId)) {
+        setEditItem(null);
+      }
+
       showStatus('success', 'Đã đánh dấu xử lý xong và dọn dẹp các báo cáo vi phạm!');
     } catch (err) {
       console.error('Error resolving reports:', err);
@@ -346,13 +388,20 @@ const AdminMaterials = () => {
 
       {/* Status Notification Toast Banner */}
       {statusNotification && (
-        <div className={`fixed top-6 right-6 z-[400] px-5 py-3.5 rounded-2xl shadow-2xl border font-heading font-black text-xs flex items-center gap-2.5 animate-bounce ${
+        <div className={`fixed top-6 right-6 z-[400] px-5 py-3.5 rounded-2xl shadow-2xl border font-heading font-black text-xs flex items-center gap-2.5 max-w-sm ${
           statusNotification.type === 'success'
             ? 'bg-emerald-600 border-emerald-500 text-white'
             : 'bg-rose-600 border-rose-500 text-white'
         }`}>
-          {statusNotification.type === 'success' ? <CheckCircle2 className="w-5 h-5 text-white" /> : <AlertTriangle className="w-5 h-5 text-white" />}
-          <span>{statusNotification.text}</span>
+          {statusNotification.type === 'success' ? <CheckCircle2 className="w-5 h-5 text-white shrink-0" /> : <AlertTriangle className="w-5 h-5 text-white shrink-0" />}
+          <span className="flex-1 leading-snug">{statusNotification.text}</span>
+          <button
+            onClick={dismissStatus}
+            className="ml-1 w-6 h-6 rounded-lg hover:bg-white/20 flex items-center justify-center shrink-0 transition-colors"
+            title="Đóng thông báo"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
         </div>
       )}
 

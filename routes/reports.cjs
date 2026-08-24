@@ -53,13 +53,30 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     try {
-      const { data, error } = await supabase
-        .from('reports')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Fetch reports and locked content IDs in parallel
+      const [reportsResult, lockedLessonsResult, lockedChallengesResult] = await Promise.allSettled([
+        supabase.from('reports').select('*').order('created_at', { ascending: false }),
+        supabase.from('lessons').select('id').eq('is_locked', true),
+        supabase.from('challenges').select('id').eq('is_locked', true)
+      ]);
 
-      if (!error && data) {
-        return res.json({ success: true, reports: data, locked_ids: Array.from(lockedContentSet) });
+      const reportsData = reportsResult.status === 'fulfilled' && !reportsResult.value.error
+        ? reportsResult.value.data || []
+        : null;
+
+      // Build locked IDs set: combine in-memory set with DB-persisted locks
+      const dbLockedIds = [];
+      if (lockedLessonsResult.status === 'fulfilled' && !lockedLessonsResult.value.error) {
+        (lockedLessonsResult.value.data || []).forEach(r => dbLockedIds.push(String(r.id)));
+      }
+      if (lockedChallengesResult.status === 'fulfilled' && !lockedChallengesResult.value.error) {
+        (lockedChallengesResult.value.data || []).forEach(r => dbLockedIds.push(String(r.id)));
+      }
+      // Merge DB locks with in-memory set (in-memory may have locks set during this session)
+      const mergedLockedIds = Array.from(new Set([...Array.from(lockedContentSet), ...dbLockedIds]));
+
+      if (reportsData !== null) {
+        return res.json({ success: true, reports: reportsData, locked_ids: mergedLockedIds });
       }
     } catch (dbErr) {
       console.warn('Supabase reports select fallback:', dbErr.message);

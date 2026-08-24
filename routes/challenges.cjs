@@ -113,30 +113,53 @@ router.put('/:id', async (req, res) => {
 
 // Delete challenge
 router.delete('/:id', async (req, res) => {
+  const id = req.params.id;
+  const { supabase } = require('../src/config/supabase.cjs');
+
+  // UUID v4 regex pattern
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const isUuid = UUID_REGEX.test(id);
+
+  console.log(`🗑️ DELETE /api/challenges/${id} (isUuid: ${isUuid})`);
+
   try {
-    const id = req.params.id;
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
-    const { supabase } = require('../src/config/supabase.cjs');
-    
     if (isUuid) {
-      const { error } = await supabase
+      // UUID-based challenge (teacher-created content stored in Supabase)
+      const { data, error } = await supabase
         .from('challenges')
         .delete()
-        .eq('id', id);
-      if (error) throw error;
+        .eq('id', id)
+        .select('id');
+
+      if (error) {
+        console.error(`❌ Supabase delete challenge error for id=${id}:`, error);
+        return res.status(500).json({ message: 'Error deleting challenge from database', error: error.message });
+      }
+
+      if (!data || data.length === 0) {
+        console.warn(`⚠️ Challenge ${id} not found in Supabase (may already be deleted)`);
+        // Not found — still return success so frontend can clean up its state
+      }
     } else {
-      await Challenge.delete(parseInt(id));
+      // Integer-based legacy challenge
+      const parsedId = parseInt(id, 10);
+      if (isNaN(parsedId)) {
+        return res.status(400).json({ message: `Invalid challenge ID: "${id}"` });
+      }
+      await Challenge.delete(parsedId);
     }
 
-    // Clean up related reports, assignments and locks
-    await Promise.all([
-      supabase.from('reports').delete().eq('content_id', id).catch(() => {}),
-      supabase.from('class_assignments').delete().eq('content_id', id).catch(() => {}),
-      supabase.from('assigned_content').delete().eq('content_id', id).catch(() => {})
-    ]).catch(() => {});
+    // Always clean up related data regardless of whether delete succeeded
+    await Promise.allSettled([
+      supabase.from('reports').delete().eq('content_id', id),
+      supabase.from('class_assignments').delete().eq('content_id', id),
+      supabase.from('assigned_content').delete().eq('content_id', id)
+    ]);
 
+    console.log(`✅ Challenge ${id} deleted successfully`);
     res.json({ success: true, message: 'Challenge deleted successfully' });
   } catch (error) {
+    console.error(`❌ Unexpected error deleting challenge ${id}:`, error);
     res.status(500).json({ message: 'Error deleting challenge', error: error.message });
   }
 });
