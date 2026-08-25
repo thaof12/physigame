@@ -183,6 +183,11 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
     setLoading(true);
     setError('');
     
+    // Safety timer to prevent infinite loading state
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
     try {
       const { data: usersData, error: usersErr } = await supabase
         .from('users')
@@ -194,9 +199,10 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
       const formatted = await Promise.all((usersData || []).map(async (t) => {
         const rawCerts = t.teacher_profile?.certificates || [];
         const certsWithSignedUrls = await Promise.all(
-          rawCerts.map(async (cert) => {
+          (Array.isArray(rawCerts) ? rawCerts : []).map(async (cert) => {
+            if (!cert) return { viewUrl: null, isImage: false };
             let viewUrl = null;
-            let rawPath = cert.path || cert.url || '';
+            let rawPath = typeof cert === 'string' ? cert : (cert.path || cert.url || '');
             if (typeof rawPath === 'string' && rawPath.includes('/teacher-certificates/')) {
               rawPath = rawPath.split('/teacher-certificates/')[1];
             }
@@ -221,10 +227,12 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
 
               if (!viewUrl) {
                 try {
-                  const { data, error } = await supabase.storage
+                  const signedPromise = supabase.storage
                     .from('teacher-certificates')
                     .createSignedUrl(cleanPath, 86400);
-                  if (!error && data?.signedUrl) {
+                  const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve({ data: null }), 1500));
+                  const { data } = await Promise.race([signedPromise, timeoutPromise]);
+                  if (data?.signedUrl) {
                     viewUrl = data.signedUrl;
                   }
                 } catch (e) {}
@@ -232,12 +240,15 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
             }
 
             if (!viewUrl) {
-              viewUrl = cert.viewUrl || cert.url || cert.base64 || cert.preview || null;
+              viewUrl = (typeof cert === 'object' && cert) ? (cert.viewUrl || cert.url || cert.base64 || cert.preview || null) : (typeof cert === 'string' ? cert : null);
             }
 
+            const certName = typeof cert === 'object' && cert ? cert.name : '';
+            const certType = typeof cert === 'object' && cert ? cert.type : '';
+
             const isImage = Boolean(
-              (cert.type && cert.type.startsWith('image/')) ||
-              (cert.name && /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(cert.name)) ||
+              (certType && certType.startsWith('image/')) ||
+              (certName && /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(certName)) ||
               (viewUrl && typeof viewUrl === 'string' && (
                 viewUrl.startsWith('data:image/') ||
                 /\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(viewUrl) ||
@@ -246,7 +257,7 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
             );
 
             return {
-              ...cert,
+              ...(typeof cert === 'object' && cert ? cert : { url: cert }),
               viewUrl,
               isImage
             };
@@ -288,6 +299,7 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
       console.error('Error fetching real teachers:', err);
       setError('Không thể tải danh sách giáo viên từ database');
     } finally {
+      clearTimeout(safetyTimer);
       setLoading(false);
     }
   };
