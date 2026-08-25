@@ -434,7 +434,7 @@ const LensOpticsLab = () => {
               <ArrowLeft size={24} />
             </button>
             <div>
-              <h1 className="text-xl font-bold">🔍 Thí nghiệm: Khảo sát thấu kính</h1>
+              <h1 className="text-xl font-bold">🔍 Thí nghiệm: Sự truyền ánh sáng & Tiêu cự Thấu kính</h1>
               <p className="text-gray-400 text-sm">Sự tạo ảnh qua thấu kính</p>
             </div>
           </div>

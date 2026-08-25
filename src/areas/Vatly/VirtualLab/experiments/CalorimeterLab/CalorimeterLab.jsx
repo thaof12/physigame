@@ -569,7 +569,7 @@ const CalorimeterLab = () => {
             </button>
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
-                <span className="header-emoji">🌡️</span> Thí nghiệm: Nhiệt lượng kế
+                <span className="header-emoji">🌡️</span> Thí nghiệm: Thí nghiệm Cân bằng nhiệt & Nhiệt lượng kế
               </h1>
               <p className="text-gray-400 text-sm">Xác định nhiệt dung riêng • 3D Interactive</p>
             </div>

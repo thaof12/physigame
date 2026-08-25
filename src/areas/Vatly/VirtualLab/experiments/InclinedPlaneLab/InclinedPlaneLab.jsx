@@ -233,7 +233,7 @@ const InclinedPlaneLab = () => {
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
                 <span className="header-emoji">📐</span>
-                Thí nghiệm: Mặt phẳng nghiêng
+                Thí nghiệm: Lực & Máy cơ đơn giản: Mặt phẳng nghiêng
               </h1>
               <p className="text-gray-400 text-sm">Chuyển động có gia tốc</p>
             </div>

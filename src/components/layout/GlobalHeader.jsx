@@ -2,18 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  Atom, 
-  Home, 
-  Wrench, 
-  BookOpen, 
-  FlaskConical, 
-  Trophy, 
-  LogOut, 
-  Globe, 
-  Menu, 
-  X, 
-  Rocket, 
+import {
+  Atom,
+  Home,
+  Wrench,
+  BookOpen,
+  FlaskConical,
+  Trophy,
+  LogOut,
+  Menu,
+  X,
+  Rocket,
   GraduationCap,
   ChevronDown,
   Gamepad2,
@@ -21,23 +20,19 @@ import {
   Compass,
   Library,
   Calculator,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Headphones
 } from 'lucide-react';
 
 import EurekaPremiumLogo from '../ui/EurekaPremiumLogo';
 
 const GlobalHeader = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
-
-  const toggleLanguage = () => {
-    const nextLang = i18n.language === 'vi' ? 'en' : 'vi';
-    i18n.changeLanguage(nextLang);
-  };
 
   const handleLogout = async () => {
     try { await logout(); navigate('/login'); }
@@ -45,8 +40,8 @@ const GlobalHeader = () => {
   };
 
   const navLinks = [
-    { 
-      name: t('header.journey'), 
+    {
+      name: t('header.journey'),
       icon: Compass,
       children: [
         { name: t('header.classes'), path: '/physics-classes', icon: GraduationCap },
@@ -54,8 +49,8 @@ const GlobalHeader = () => {
         { name: t('header.my_class'), path: '/my-class', icon: GraduationCap },
       ]
     },
-    { 
-      name: t('header.treasure'), 
+    {
+      name: t('header.treasure'),
       icon: Library,
       children: [
         { name: t('header.calculator'), path: '/physics-tools/calculator', icon: Calculator },
@@ -63,8 +58,8 @@ const GlobalHeader = () => {
         { name: t('header.converter'), path: '/physics-tools/converter', icon: ArrowLeftRight },
       ]
     },
-    { 
-      name: t('header.challenge'), 
+    {
+      name: t('header.challenge'),
       icon: Trophy,
       children: [
         { name: t('header.games'), path: '/advanced-physics-challenge', icon: Gamepad2 },
@@ -72,6 +67,11 @@ const GlobalHeader = () => {
         { name: t('header.arena'), path: '/pk-battle', icon: Swords },
       ]
     },
+    {
+      name: 'LIÊN HỆ',
+      path: '/support/contact',
+      icon: Headphones
+    }
   ];
 
   const isActive = (path) => {
@@ -80,6 +80,7 @@ const GlobalHeader = () => {
   };
 
   const isParentActive = (children) => {
+    if (!children) return false;
     return children.some(child => isActive(child.path));
   };
 
@@ -106,21 +107,26 @@ const GlobalHeader = () => {
           {navLinks.map((link) => {
             const Icon = link.icon;
             const hasChildren = link.children && link.children.length > 0;
-            const parentActive = hasChildren && isParentActive(link.children);
+            const parentActive = hasChildren ? isParentActive(link.children) : isActive(link.path);
 
             return (
-              <div 
-                key={link.name} 
+              <div
+                key={link.name}
                 className="relative group h-full flex items-center"
-                onMouseEnter={() => setActiveDropdown(link.name)}
-                onMouseLeave={() => setActiveDropdown(null)}
+                onMouseEnter={() => hasChildren && setActiveDropdown(link.name)}
+                onMouseLeave={() => hasChildren && setActiveDropdown(null)}
               >
                 <button
-                  className={`font-heading flex items-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-sm tracking-wide transition-all duration-300 ${
-                    parentActive 
-                    ? 'bg-[#274dad] text-white shadow-[0_4px_12px_rgba(39,77,173,0.3)]' 
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-[#274dad]'
-                  }`}
+                  onClick={() => {
+                    if (!hasChildren && link.path) {
+                      if (!user) navigate('/login');
+                      else navigate(link.path);
+                    }
+                  }}
+                  className={`font-heading flex items-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-sm tracking-wide transition-all duration-300 cursor-pointer ${parentActive
+                    ? 'text-[#274dad]'
+                    : 'text-slate-500 hover:text-[#274dad]'
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   {link.name}
@@ -129,9 +135,8 @@ const GlobalHeader = () => {
 
                 {/* Dropdown Menu */}
                 {hasChildren && (
-                  <div className={`absolute top-full left-0 pt-2 transition-all duration-300 ${
-                    activeDropdown === link.name ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'
-                  }`}>
+                  <div className={`absolute top-full left-0 pt-2 transition-all duration-300 ${activeDropdown === link.name ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'
+                    }`}>
                     <div className="bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-2 min-w-[200px] overflow-hidden">
                       {link.children.map((child) => {
                         const ChildIcon = child.icon;
@@ -144,15 +149,13 @@ const GlobalHeader = () => {
                               else navigate(child.path);
                               setActiveDropdown(null);
                             }}
-                            className={`font-heading w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
-                              active 
-                              ? 'bg-[#274dad]/10 text-[#274dad]' 
+                            className={`font-heading w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${active
+                              ? 'bg-[#274dad]/10 text-[#274dad]'
                               : 'text-slate-600 hover:bg-slate-50 hover:text-[#274dad]'
-                            }`}
+                              }`}
                           >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                              active ? 'bg-[#274dad] text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-white'
-                            }`}>
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${active ? 'bg-[#274dad] text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-white'
+                              }`}>
                               <ChildIcon className="w-4 h-4" />
                             </div>
                             {child.name}
@@ -169,13 +172,6 @@ const GlobalHeader = () => {
 
         {/* Right Actions Area */}
         <div className="flex items-center gap-2 sm:gap-4 ml-auto">
-          {/* Language Toggle */}
-          <button onClick={toggleLanguage} className="hidden sm:flex items-center gap-2 text-slate-500 hover:text-[#274dad] font-bold text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-full bg-white/50 border border-slate-100 transition-all cursor-pointer">
-            <Globe className="w-3.5 h-3.5" /> <span>{i18n.language === 'vi' ? 'EN' : 'VI'}</span>
-          </button>
-
-          <div className="hidden lg:block h-12 w-px bg-slate-200 mx-1" />
-
           {/* Auth Section */}
           <div className="flex items-center">
             {user ? (
@@ -232,7 +228,7 @@ const GlobalHeader = () => {
             {navLinks.map((link) => {
               const Icon = link.icon;
               const hasChildren = link.children && link.children.length > 0;
-              
+
               return (
                 <div key={link.name} className="flex flex-col">
                   {hasChildren ? (
@@ -254,9 +250,8 @@ const GlobalHeader = () => {
                                 if (!user) navigate('/login');
                                 else navigate(child.path);
                               }}
-                              className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold text-sm transition-all ${
-                                active ? 'bg-[#274dad] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
-                              }`}
+                              className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold text-sm transition-all ${active ? 'bg-[#274dad] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
+                                }`}
                             >
                               <ChildIcon className="w-5 h-5" /> {child.name}
                             </button>
@@ -271,9 +266,8 @@ const GlobalHeader = () => {
                         if (!user) navigate('/login');
                         else navigate(link.path);
                       }}
-                      className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-black text-sm transition-all ${
-                        isActive(link.path) ? 'bg-[#274dad] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
-                      }`}
+                      className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl font-black text-sm transition-all ${isActive(link.path) ? 'bg-[#274dad] text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'
+                        }`}
                     >
                       <Icon className="w-5 h-5" /> {link.name}
                     </button>

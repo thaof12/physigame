@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import SolarSystemBackground from '../components/animations/SolarSystemBackground';
@@ -162,46 +162,6 @@ const ProgramSelection = () => {
 
 
 
-      {/* CTA Section */}
-      {!user && (
-        <section className="py-24 bg-white relative z-10 px-4">
-          <div className="container mx-auto max-w-5xl">
-            <div className="bg-slate-950 rounded-[3rem] p-16 md:p-24 text-center relative overflow-hidden shadow-2xl">
-              
-              {/* Subtle background glow */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none"></div>
-
-              <div className="relative z-10">
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-6">Khám phá tiềm năng</div>
-                <h2 className="text-5xl md:text-7xl font-black text-white mb-12 tracking-tight leading-[1.1]">
-                  Sẵn sàng <br />
-                  bắt đầu?
-                </h2>
-                
-                <div className="flex flex-col sm:flex-row justify-center gap-4">
-                  <Link to="/register">
-                    <Button className="w-full sm:w-auto bg-white text-slate-900 hover:bg-slate-100 hover:scale-105 transition-all duration-300 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl border-none">
-                      Bắt đầu ngay
-                    </Button>
-                  </Link>
-                  <Link to="/login">
-                    <Button className="w-full sm:w-auto bg-slate-800 text-white hover:bg-slate-700 hover:scale-105 transition-all duration-300 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm border border-slate-700">
-                      Xem Demo
-                    </Button>
-                  </Link>
-                </div>
-                
-                <div className="mt-16 flex justify-center gap-12 text-slate-600 font-mono text-xs opacity-50">
-                   <span>F = ma</span>
-                   <span>E = mc²</span>
-                   <span>ΔS &gt; 0</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-      
       </div> {/* End Content Wrapper */}
     </div>
   );

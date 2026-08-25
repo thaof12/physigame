@@ -416,7 +416,7 @@ const OhmLawLab = () => {
             </button>
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
-                <span className="header-emoji">⚡</span> Thí nghiệm: Định luật Ôm
+                <span className="header-emoji">⚡</span> Thí nghiệm: Định luật Ôm & Khảo sát đặc tuyến U-I
               </h1>
               <p className="text-gray-400 text-sm">Xác minh I = U/R • 3D Interactive</p>
             </div>

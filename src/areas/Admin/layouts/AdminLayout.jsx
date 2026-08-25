@@ -22,7 +22,8 @@ import {
   X,
   PlusCircle,
   ShieldAlert,
-  FileText
+  FileText,
+  MessageSquare
 } from 'lucide-react';
 
 const menuItems = [
@@ -49,6 +50,12 @@ const menuItems = [
     label: 'Bài Giảng',
     icon: BookOpen,
     path: '/admin/lessons'
+  },
+  {
+    id: 'feedback',
+    label: 'Phản Hồi',
+    icon: MessageSquare,
+    path: '/admin/feedback'
   },
   {
     id: 'settings',

@@ -19,7 +19,8 @@ import {
   Menu,
   X,
   PlusCircle,
-  ShieldCheck
+  ShieldCheck,
+  Headphones
 } from 'lucide-react';
 
 const menuItems = [
@@ -46,6 +47,12 @@ const menuItems = [
     label: 'Hồ sơ cá nhân',
     icon: Settings,
     path: '/teacher/profile'
+  },
+  {
+    id: 'contact',
+    label: 'Liên hệ Admin',
+    icon: Headphones,
+    path: '/teacher/contact'
   }
 ];
 

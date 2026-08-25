@@ -251,7 +251,7 @@ const FreeFallLabExperiment = () => {
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
                 <span className="header-emoji">🍎</span>
-                Thí nghiệm: Đo gia tốc rơi tự do
+                Thí nghiệm: Khảo sát sự Rơi tự do & Gia tốc trọng trường
               </h1>
               <p className="text-gray-400 text-sm">Xác định gia tốc trọng trường g</p>
             </div>

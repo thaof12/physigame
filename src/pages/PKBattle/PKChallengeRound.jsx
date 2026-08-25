@@ -2,27 +2,9 @@ import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { Clock, Gamepad2, Trophy, AlertTriangle, Loader2 } from 'lucide-react';
 import './PKBattle.css';
 
-// Lazy load challenge games - organized by grade
+// Lazy load challenge games
 const challengeComponents = {
-  // Mechanics (Cơ học)
-  'BalanceChallenge': lazy(() => import('../../areas/Vatly/challenges/BalanceChallenge/BalanceChallenge')),
-  'ForceWorldGame': lazy(() => import('../../areas/Vatly/challenges/ForceWorldGame/ForceWorldGame')),
-  'ForceArena': lazy(() => import('../../areas/Vatly/challenges/ForceArena/ForceArena')),
-  'RaceTracker': lazy(() => import('../../areas/Vatly/challenges/RaceTracker/RaceTracker')),
-  'ProjectileMotion': lazy(() => import('../../areas/Vatly/challenges/ProjectileMotion/ProjectileMotion')),
-  
-  // Optics (Quang học)
-  'LightReflectionGame': lazy(() => import('../../areas/Vatly/challenges/LightReflectionGame/LightReflectionGame')),
-  'LightPathGame': lazy(() => import('../../areas/Vatly/challenges/LightPathGame/LightPathGame')),
-  'MirrorLabGame': lazy(() => import('../../areas/Vatly/challenges/MirrorLabGame/MirrorLabGame')),
-  
-  // Thermodynamics (Nhiệt học)
-  'BoilingGame': lazy(() => import('../../areas/Vatly/challenges/BoilingGame/BoilingGame')),
-  'ThermalEnergyGame': lazy(() => import('../../areas/Vatly/challenges/ThermalEnergyGame/ThermalEnergyGame')),
-  'WaterLab': lazy(() => import('../../areas/Vatly/challenges/WaterLab/WaterLab')),
-
-  // Electricity (Điện học)
-  'CircuitBuilderGame': lazy(() => import('../../areas/Vatly/challenges/CircuitBuilderGame/CircuitBuilderGame'))
+  'BalanceChallenge': lazy(() => import('../../areas/Vatly/challenges/BalanceChallenge/BalanceChallenge'))
 };
 
 

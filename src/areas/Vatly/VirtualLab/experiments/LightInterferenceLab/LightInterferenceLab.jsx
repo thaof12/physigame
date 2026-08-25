@@ -501,7 +501,7 @@ const LightInterferenceLab = () => {
               <ArrowLeft size={24} />
             </button>
             <div>
-              <h1 className="text-xl font-bold">🌈 Thí nghiệm: Giao thoa ánh sáng</h1>
+              <h1 className="text-xl font-bold">🌈 Thí nghiệm: Thí nghiệm Giao thoa ánh sáng Khe Y-ăng</h1>
               <p className="text-gray-400 text-sm">Khe Young - Đo bước sóng ánh sáng</p>
             </div>
           </div>

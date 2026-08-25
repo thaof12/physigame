@@ -11,7 +11,6 @@ import {
   Home,
   Search,
   UserPlus,
-  Trophy,
   Sparkles,
   Shuffle,
   Copy,
@@ -178,10 +177,6 @@ const PKLobby = () => {
 
         {/* ── HEADER TITLE ── */}
         <div className="text-center mb-16">
-          <div className="font-heading inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 border border-red-100 rounded-full text-red-500 text-[10px] font-extrabold tracking-[0.2em] mb-6 shadow-sm uppercase">
-            <Swords className="w-3.5 h-3.5" />
-            Arena Competitive Mode
-          </div>
 
           <h1 className="font-heading text-4xl md:text-6xl font-extrabold text-slate-800 leading-tight mb-4 tracking-tighter">
             Đấu Trường <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#21439b] to-[#274dad]">Vật Lý</span>
@@ -231,8 +226,8 @@ const PKLobby = () => {
                         key={style.id}
                         onClick={() => setAvatarStyle(style.id)}
                         className={`w-full aspect-square rounded-xl flex items-center justify-center transition-all ${avatarStyle === style.id
-                            ? 'bg-[#274dad] shadow-lg scale-105'
-                            : 'bg-slate-50 hover:bg-white border border-slate-100'
+                          ? 'bg-[#274dad] shadow-lg scale-105'
+                          : 'bg-slate-50 hover:bg-white border border-slate-100'
                           }`}
                       >
                         <img
@@ -299,21 +294,6 @@ const PKLobby = () => {
                 ))}
               </div>
             </div>
-
-            {/* Promo Card / Tip */}
-            <div className="bg-gradient-to-br from-[#274dad] to-[#21439b] rounded-3xl p-6 text-white flex items-center gap-6 shadow-xl relative overflow-hidden group">
-              <div className="absolute top-[-50%] left-[-10%] w-40 h-40 bg-white/10 blur-[50px] rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
-              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0 animate-bounce">
-                <Trophy className="w-7 h-7 text-yellow-300" />
-              </div>
-              <div>
-                <h4 className="font-heading font-extrabold text-lg">Mẹo đấu trường</h4>
-                <p className="font-body text-white/70 text-sm font-medium">Trả lời nhanh hơn để nhận được điểm thưởng Combo tối đa!</p>
-              </div>
-              <button className="ml-auto w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
-                <ChevronRight />
-              </button>
-            </div>
           </div>
 
           {/* Right: Stats Column (3 Cols) */}
@@ -344,13 +324,6 @@ const PKLobby = () => {
                 <h4 className="font-heading text-xl font-extrabold text-slate-800 mb-1">{stats.rank}</h4>
                 <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest leading-none">HẠNG HIỆN TẠI</p>
               </div>
-
-              <button
-                onClick={() => navigate('/pk-battle/leaderboard')}
-                className="font-heading w-full mt-6 py-4 bg-white border border-slate-200 rounded-2xl text-[11px] font-extrabold tracking-widest text-[#274dad] hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-              >
-                BẢNG XẾP HẠNG <ChevronRight size={16} />
-              </button>
             </div>
           </div>
         </div>
@@ -428,8 +401,8 @@ const PKLobby = () => {
                       key={grade}
                       onClick={() => setGameSettings({ ...gameSettings, grade })}
                       className={`font-heading px-5 py-3 rounded-2xl text-xs font-extrabold transition-all border-2 ${gameSettings.grade === grade
-                          ? 'border-[#274dad] bg-blue-50/50 text-[#21439b]'
-                          : 'border-slate-50 bg-slate-50/50 text-slate-400 hover:border-[#274dad]/20'
+                        ? 'border-[#274dad] bg-blue-50/50 text-[#21439b]'
+                        : 'border-slate-50 bg-slate-50/50 text-slate-400 hover:border-[#274dad]/20'
                         }`}
                     >
                       {grade === 'all' ? 'TẤT CẢ' : `LỚP ${grade}`}

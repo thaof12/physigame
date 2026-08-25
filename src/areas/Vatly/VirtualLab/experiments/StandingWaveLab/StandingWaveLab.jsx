@@ -355,7 +355,7 @@ const StandingWaveLab = () => {
               <ArrowLeft size={24} />
             </button>
             <div>
-              <h1 className="text-xl font-bold">〰️ Thí nghiệm: Khảo sát sóng dừng</h1>
+              <h1 className="text-xl font-bold">〰️ Thí nghiệm: Thí nghiệm Sóng dừng & Đo tốc độ truyền sóng</h1>
               <p className="text-gray-400 text-sm">Sóng dừng trên dây đàn hồi</p>
             </div>
           </div>

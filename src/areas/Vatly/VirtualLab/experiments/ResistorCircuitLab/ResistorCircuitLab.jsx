@@ -412,7 +412,7 @@ const ResistorCircuitLab = () => {
           <div className="flex items-center gap-4">
             <button onClick={() => navigate('/vatly/virtual-lab')} className="p-2 hover:bg-white/10 rounded-lg transition-all"><ArrowLeft size={24} /></button>
             <div>
-              <h1 className="text-xl font-bold flex items-center gap-2"><span className="header-emoji">🔌</span> Thí nghiệm: Mạch điện trở</h1>
+              <h1 className="text-xl font-bold flex items-center gap-2"><span className="header-emoji">🔌</span> Thí nghiệm: Mạch điện nối tiếp và song song</h1>
               <p className="text-gray-400 text-sm">Nối tiếp & Song song • 3D Interactive</p>
             </div>
           </div>

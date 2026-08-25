@@ -11,12 +11,35 @@ export const saveAdminLessons = (lessons) => {
 };
 
 export const getAllLessonsFromStorage = () => {
+  // Helper to map lectureData to a lookup dictionary for content and summary
+  const lectureDataMap = {};
+  if (lectureData?.physics) {
+    Object.entries(lectureData.physics).forEach(([gradeStr, chapters]) => {
+      const grade = parseInt(gradeStr, 10);
+      Object.entries(chapters).forEach(([chapterKey, chapter]) => {
+        (chapter.lessons || []).forEach((l, idx) => {
+          const rawId = l.id || `b${idx + 1}`;
+          const key = `${grade}_${rawId}`;
+          lectureDataMap[key] = l;
+        });
+      });
+    });
+  }
+
   const saved = localStorage.getItem('admin_lessons_data');
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        return parsed.map(l => {
+          const key = `${l.grade}_${l.rawId || l.id}`;
+          const ref = lectureDataMap[key];
+          return {
+            ...l,
+            content: l.content || ref?.content || '',
+            summary: (l.summary && l.summary.length > 0) ? l.summary : (ref?.summary || [])
+          };
+        });
       }
     } catch (e) {
       console.error('Error parsing admin_lessons_data', e);
@@ -40,7 +63,9 @@ export const getAllLessonsFromStorage = () => {
             grade: grade,
             chapterKey: chapterKey,
             chapterTitle: chapter.title,
-            description: chapter.description || `Nội dung chi tiết bài học ${l.title} thuộc ${chapter.title}`,
+            description: l.description || chapter.description || `Nội dung chi tiết bài học ${l.title} thuộc ${chapter.title}`,
+            content: l.content || '',
+            summary: l.summary || [],
             subject: 'physics',
             status: 'published'
           });
@@ -76,7 +101,9 @@ export const getCurriculumStructure = (gradeNum) => {
       videoId: l.videoId,
       grade: l.grade,
       chapterTitle: l.chapterTitle,
-      description: l.description
+      description: l.description,
+      content: l.content,
+      summary: l.summary
     });
   });
   return chapters;

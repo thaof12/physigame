@@ -34,6 +34,7 @@ const UserGuide = lazy(() => import('./pages/support/UserGuide'));
 const FAQ = lazy(() => import('./pages/support/FAQ'));
 const PrivacyPolicy = lazy(() => import('./pages/support/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./pages/support/TermsOfService'));
+const StudentSupportPage = lazy(() => import('./pages/support/StudentSupportPage'));
 
 // Physics area pages
 const PhysicsClassDashboard = lazy(() => import('./areas/Vatly/pages/PhysicsClassDashboard'));
@@ -43,17 +44,6 @@ const AdvancedPhysicsChallenge = lazy(() => import('./areas/Vatly/gamelist/Advan
 
 // Physics challenge games
 const BalanceChallenge = lazy(() => import('./areas/Vatly/challenges/BalanceChallenge/BalanceChallenge'));
-const ForceWorldGame = lazy(() => import('./areas/Vatly/challenges/ForceWorldGame/ForceWorldGame'));
-const WaterLab = lazy(() => import('./areas/Vatly/challenges/WaterLab/WaterLab'));
-const BoilingGame = lazy(() => import('./areas/Vatly/challenges/BoilingGame/BoilingGame'));
-const ThermalEnergyGame = lazy(() => import('./areas/Vatly/challenges/ThermalEnergyGame/ThermalEnergyGame'));
-const LightReflectionGame = lazy(() => import('./areas/Vatly/challenges/LightReflectionGame/LightReflectionGame'));
-const LightPathGame = lazy(() => import('./areas/Vatly/challenges/LightPathGame/LightPathGame'));
-const MirrorLabGame = lazy(() => import('./areas/Vatly/challenges/MirrorLabGame/MirrorLabGame'));
-const RaceTracker = lazy(() => import('./areas/Vatly/challenges/RaceTracker/RaceTracker'));
-const ForceArena = lazy(() => import('./areas/Vatly/challenges/ForceArena/ForceArena'));
-const ProjectileMotion = lazy(() => import('./areas/Vatly/challenges/ProjectileMotion/ProjectileMotion'));
-const CircuitBuilderGame = lazy(() => import('./areas/Vatly/challenges/CircuitBuilderGame/CircuitBuilderGame'));
 
 // PK Battle System
 const PKLobby = lazy(() => import('./pages/PKBattle/PKLobby'));
@@ -81,6 +71,7 @@ const AdminUsers = lazy(() => import('./areas/Admin/pages/AdminUsers'));
 const AdminLessons = lazy(() => import('./areas/Admin/pages/AdminLessons'));
 const AdminMaterials = lazy(() => import('./areas/Admin/pages/AdminMaterials'));
 const AdminSettings = lazy(() => import('./areas/Admin/pages/AdminSettings'));
+const AdminFeedback = lazy(() => import('./areas/Admin/pages/AdminFeedback'));
 
 // Teacher Panel
 import { TeacherAuthProvider } from './areas/Teacher/contexts/TeacherAuthContext';
@@ -91,6 +82,7 @@ const PendingApproval = lazy(() => import('./areas/Teacher/pages/PendingApproval
 const BrowseContent = lazy(() => import('./areas/Teacher/pages/BrowseContent'));
 const ClassManagement = lazy(() => import('./areas/Teacher/pages/ClassManagement'));
 const TeacherProfile = lazy(() => import('./areas/Teacher/pages/TeacherProfile'));
+const TeacherSupportPage = lazy(() => import('./areas/Teacher/pages/TeacherSupportPage'));
 
 
 const ProtectedRoute = ({ children }) => {
@@ -226,6 +218,7 @@ const AppContent = () => {
           <Route path="/support/faq" element={<FAQ />} />
           <Route path="/support/privacy" element={<PrivacyPolicy />} />
           <Route path="/support/terms" element={<TermsOfService />} />
+          <Route path="/support/contact" element={<ProtectedRoute><StudentSupportPage /></ProtectedRoute>} />
         </Route>
 
         {/* PK Battle Room (Keep fullscreen) */}
@@ -244,17 +237,6 @@ const AppContent = () => {
 
         {/* Physics Challenge Games */}
         <Route path="/advanced-physics-challenge/balance" element={<ProtectedRoute><BalanceChallenge /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/projectile" element={<ProtectedRoute><ProjectileMotion /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/water" element={<ProtectedRoute><WaterLab /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/boiling" element={<ProtectedRoute><BoilingGame /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/thermal-energy" element={<ProtectedRoute><ThermalEnergyGame /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/light-reflection" element={<ProtectedRoute><LightReflectionGame /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/mirror-lab" element={<ProtectedRoute><MirrorLabGame /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/light-path" element={<ProtectedRoute><LightPathGame /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/circuit-builder" element={<ProtectedRoute><CircuitBuilderGame /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/race-tracker" element={<ProtectedRoute><RaceTracker /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/force-arena" element={<ProtectedRoute><ForceArena /></ProtectedRoute>} />
-        <Route path="/advanced-physics-challenge/force-world" element={<ProtectedRoute><ForceWorldGame /></ProtectedRoute>} />
 
 
 
@@ -270,6 +252,7 @@ const AppContent = () => {
           <Route path="hoc-lieu" element={<AdminMaterials />} />
           <Route path="materials" element={<AdminMaterials />} />
           <Route path="lessons" element={<AdminLessons />} />
+          <Route path="feedback" element={<AdminFeedback />} />
           <Route path="statistics" element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
@@ -299,6 +282,7 @@ const AppContent = () => {
           <Route path="students" element={<Navigate to="/teacher/dashboard" replace />} />
           <Route path="classes" element={<ClassManagement />} />
           <Route path="profile" element={<TeacherProfile />} />
+          <Route path="contact" element={<TeacherSupportPage />} />
           <Route path="create" element={<TeacherDashboard />} />
         </Route>
       </Routes>

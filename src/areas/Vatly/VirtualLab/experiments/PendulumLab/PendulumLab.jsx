@@ -271,7 +271,7 @@ const PendulumLab = () => {
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
                 <span className="header-emoji">🔬</span>
-                Thí nghiệm: Dao động con lắc đơn
+                Thí nghiệm: Dao động điều hòa của Con lắc đơn
               </h1>
               <p className="text-gray-400 text-sm">Xác định gia tốc trọng trường g</p>
             </div>

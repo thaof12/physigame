@@ -8,8 +8,6 @@ import {
   Circle, 
   ChevronDown, 
   ChevronUp, 
-  MessageSquare, 
-  Edit3,
   BookOpen
 } from 'lucide-react';
 import { getPublishedLessons, getCurriculumStructure } from '../utils/lessonStorage';
@@ -19,8 +17,6 @@ const LectureViewer = () => {
   const navigate = useNavigate();
   const [currentLesson, setCurrentLesson] = useState(null);
   const [expandedChapters, setExpandedChapters] = useState({});
-  const [note, setNote] = useState('');
-  const [activeTab, setActiveTab] = useState('notes'); // 'notes' or 'qa'
   const [searchQuery, setSearchQuery] = useState('');
 
   // Parse grade
@@ -244,67 +240,39 @@ const LectureViewer = () => {
                Nội dung bài học
             </h2>
             <div className="prose prose-slate max-w-none prose-h3:text-[#274dad] prose-h3:font-black prose-p:text-slate-600 prose-p:font-medium prose-li:text-slate-600 prose-li:font-medium">
-              <h3 className="font-heading font-bold text-lg">{currentLesson.title}</h3>
-              <p className="font-body text-slate-600 font-medium mt-2">
-                {currentLesson.chapterDescription || 'Nội dung lý thuyết chi tiết đang được cập nhật cho bài học này. Vui lòng theo dõi video bài giảng để nắm bắt kiến thức đầy đủ.'}
-              </p>
+              <h3 className="font-heading font-bold text-lg mb-4">{currentLesson.title}</h3>
+              
+              {currentLesson.content ? (
+                <div 
+                  dangerouslySetInnerHTML={{ __html: currentLesson.content }} 
+                  className="font-body text-slate-600 font-medium leading-relaxed"
+                />
+              ) : (
+                <p className="font-body text-slate-600 font-medium mt-2">
+                  {currentLesson.chapterDescription || currentLesson.description || 'Nội dung lý thuyết chi tiết đang được cập nhật cho bài học này. Vui lòng theo dõi video bài giảng để nắm bắt kiến thức đầy đủ.'}
+                </p>
+              )}
               
               <div className="mt-8 p-6 bg-blue-50/50 rounded-3xl border border-blue-100/50">
                 <h4 className="font-heading text-[#2099e9] font-bold mb-4 flex items-center gap-2">
                   <CheckCircle className="w-5 h-5" /> Tóm tắt kiến thức
                 </h4>
-                <ul className="space-y-3 font-body font-medium">
-                  <li>Hiểu rõ các khái niệm cơ bản liên quan đến bài học.</li>
-                  <li>Vận dụng các công thức để giải bài tập thực hành.</li>
-                  <li>Liên hệ kiến thức với các hiện tượng thực tiễn đời sống.</li>
+                <ul className="space-y-3 font-body font-medium list-disc pl-5">
+                  {Array.isArray(currentLesson.summary) && currentLesson.summary.length > 0 ? (
+                    currentLesson.summary.map((item, idx) => (
+                      <li key={idx} className="text-slate-700">{item}</li>
+                    ))
+                  ) : (
+                    <>
+                      <li className="text-slate-700">Hiểu rõ các khái niệm cơ bản liên quan đến bài học.</li>
+                      <li className="text-slate-700">Vận dụng các công thức để giải bài tập thực hành.</li>
+                      <li className="text-slate-700">Liên hệ kiến thức với các hiện tượng thực tiễn đời sống.</li>
+                    </>
+                  )}
                 </ul>
               </div>
             </div>
           </section>
-
-          {/* Notes & QA Tabs */}
-          <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-xl shadow-slate-200/50 border border-slate-50">
-            <div className="flex bg-slate-50">
-              <button 
-                onClick={() => setActiveTab('notes')}
-                className={`flex-1 py-5 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'notes' ? 'bg-[#274dad] text-white shadow-inner' : 'text-slate-400 hover:text-slate-600'}`}
-              >
-                <Edit3 className="w-5 h-5" /> Ghi chú
-              </button>
-              <button 
-                onClick={() => setActiveTab('qa')}
-                className={`flex-1 py-5 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'qa' ? 'bg-[#274dad] text-white shadow-inner' : 'text-slate-400 hover:text-slate-600'}`}
-              >
-                <MessageSquare className="w-5 h-5" /> Hỏi đáp
-              </button>
-            </div>
-
-            <div className="p-8">
-              {activeTab === 'notes' ? (
-                <div className="space-y-4">
-                  <textarea 
-                    placeholder="Ghi lại các kiến thức quan trọng của bạn ở đây..."
-                    className="w-full h-40 p-6 bg-slate-50 border border-slate-100 rounded-3xl resize-none outline-none focus:border-blue-200 transition-all font-medium text-slate-600"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                  ></textarea>
-                  <div className="flex justify-end">
-                    <button className="px-8 py-3 bg-[#274dad] text-white font-bold rounded-2xl shadow-lg shadow-blue-900/20 hover:-translate-y-1 transition-all">
-                      Lưu ghi chú
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <MessageSquare className="w-8 h-8 text-slate-300" />
-                   </div>
-                   <h3 className="font-bold text-slate-700">Chưa có câu hỏi nào</h3>
-                   <p className="text-slate-400 text-sm mt-1">Hãy là người đầu tiên đặt câu hỏi cho bài học này!</p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </main>
     </div>

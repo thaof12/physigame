@@ -2,15 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
-  Trophy, 
-  Zap, 
-  Target, 
-  Gamepad2, 
   ChevronRight,
-  Shield,
-  Star,
-  Swords,
-  Layers,
   Sparkles
 } from 'lucide-react';
 import robotBanner from '../../../assets/images/robot-eureka-banner.jpg';
@@ -87,28 +79,6 @@ const AdvancedPhysicsChallenge = () => {
                  Thử thách bản thân với những trò chơi mô phỏng thế giới thực. 
                  Mỗi trò chơi là một vũ trụ kiến thức khác nhau, chứa đầy nhiệm vụ game tương tác.
                </p>
-            </div>
-            
-            {/* Quick Stats Panel */}
-            <div className="bg-white border-2 border-slate-100 p-6 rounded-3xl w-full md:w-80 shadow-[0_8px_30px_rgba(39,77,173,0.05)]">
-               <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center border border-amber-200">
-                    <Star className="w-6 h-6 text-amber-500 fill-amber-500" />
-                  </div>
-                  <div>
-                    <p className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Trình độ của bạn</p>
-                    <p className="font-heading text-xl font-extrabold text-slate-800">Tập Sự Vật Lý</p>
-                  </div>
-               </div>
-               <div className="space-y-3">
-                  <div className="flex justify-between text-sm font-bold">
-                    <span className="text-slate-500">Tiến độ hoàn thành</span>
-                    <span className="text-[#274dad]">0/{challenges.length}</span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-[#274dad] to-[#2099e9] rounded-full w-0 transition-all duration-1000"></div>
-                  </div>
-               </div>
             </div>
           </div>
         </div>
