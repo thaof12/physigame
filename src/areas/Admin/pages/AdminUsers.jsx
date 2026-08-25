@@ -189,12 +189,24 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
     }, 5000);
 
     try {
-      const { data: usersData, error: usersErr } = await supabase
-        .from('users')
-        .select('*')
-        .eq('role', 'teacher');
+      let usersData = null;
+      try {
+        const apiRes = await api.get('/users/teachers');
+        if (apiRes.data?.success && Array.isArray(apiRes.data.teachers)) {
+          usersData = apiRes.data.teachers;
+        }
+      } catch (e) {
+        console.warn('⚠️ [AdminUsers] API /users/teachers failed, falling back to direct Supabase SDK:', e?.message);
+      }
 
-      if (usersErr) throw usersErr;
+      if (!usersData) {
+        const { data: dbData, error: usersErr } = await supabase
+          .from('users')
+          .select('*')
+          .eq('role', 'teacher');
+        if (usersErr) throw usersErr;
+        usersData = dbData;
+      }
 
       const formatted = await Promise.all((usersData || []).map(async (t) => {
         const rawCerts = t.teacher_profile?.certificates || [];

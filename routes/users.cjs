@@ -359,6 +359,30 @@ router.get('/profile/:userId', async (req, res) => {
   }
 });
 
+// GET /users/teachers - Fetch all teacher records via backend Service Role (bypasses RLS & stale client tokens)
+router.get('/teachers', async (req, res) => {
+  try {
+    console.log('📡 [API /users/teachers] Fetching all teachers via service role...');
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('role', 'teacher');
+      
+    if (error) {
+      console.error('❌ Error in /users/teachers:', error);
+      return res.status(500).json({ success: false, message: error.message });
+    }
+
+    return res.json({
+      success: true,
+      teachers: data || []
+    });
+  } catch (err) {
+    console.error('❌ Server error in /users/teachers:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Update user profile
 router.put('/profile/:userId', async (req, res) => {
   try {
