@@ -324,6 +324,7 @@ router.get('/firebase/:firebaseUid', async (req, res) => {
       firebaseUid: user.id,
       role: user.role,
       teacherStatus: user.teacher_status,
+      teacher_status: user.teacher_status,
       teacherProfile: user.teacher_profile,
       status: user.status || 'active'
     });
@@ -476,24 +477,91 @@ router.post('/submit-physics-lesson', async (req, res) => {
   }
 });
 
-// ============ TEACHER MANAGEMENT APIs ============
+const DISPOSABLE_EMAIL_DOMAINS = [
+  'mailinator.com', '10minutemail.com', 'tempmail.com', 'yopmail.com',
+  'guerrillamail.com', 'trashmail.com', 'dispostable.com', 'getnada.com',
+  'sharklasers.com', 'throwawaymail.com', 'mailnesia.com', 'maildrop.cc'
+];
 
-// POST /api/users/teacher-application — Save teacher profile & change status to pending
+function validateTeacherApplicationData({ fullName, email, phone, school, reason }) {
+  // 1. Họ và tên
+  const trimmedName = fullName?.trim() || '';
+  if (!trimmedName) return 'Vui lòng nhập họ và tên đầy đủ.';
+  if (trimmedName.length < 3) return 'Họ và tên phải từ 3 đến 60 ký tự.';
+  if (trimmedName.length > 60) return 'Họ và tên không được vượt quá 60 ký tự.';
+  if (/^\d+$/.test(trimmedName.replace(/\s/g, ''))) {
+    return 'Họ và tên không hợp lệ (không được chứa toàn chữ số). Vui lòng nhập họ tên thật.';
+  }
+  if (!/^[a-zA-ZÀ-ỹ\s'.]+$/u.test(trimmedName)) {
+    return 'Họ và tên chỉ được chứa chữ cái và khoảng trắng (không chứa số hoặc ký tự đặc biệt).';
+  }
+
+  // 2. Email
+  const trimmedEmail = email?.trim() || '';
+  if (!trimmedEmail) return 'Vui lòng nhập email liên hệ.';
+  if (trimmedEmail.length > 100) return 'Email không được vượt quá 100 ký tự.';
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(trimmedEmail)) return 'Định dạng email không hợp lệ (VD: teacher@gmail.com).';
+  const domain = trimmedEmail.split('@')[1]?.toLowerCase();
+  if (domain && DISPOSABLE_EMAIL_DOMAINS.includes(domain)) {
+    return 'Hệ thống không tiếp nhận đăng ký từ địa chỉ email rác/tạm thời.';
+  }
+
+  // 3. Số điện thoại
+  const cleanPhone = phone?.trim().replace(/\s/g, '') || '';
+  if (!cleanPhone) return 'Vui lòng nhập số điện thoại liên hệ.';
+  if (cleanPhone.length > 12) return 'Số điện thoại không được vượt quá 12 ký tự.';
+  const phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+  if (!phoneRegex.test(cleanPhone)) {
+    return 'Số điện thoại không hợp lệ (Phải là SĐT Việt Nam gồm 10 số, bắt đầu bằng 03, 05, 07, 08, 09 hoặc +84).';
+  }
+  const subscriberNumber = cleanPhone.replace(/^(0|\+84)/, '');
+  if (/^(\d)\1{7,}$/.test(subscriberNumber)) {
+    return 'Số điện thoại không hợp lệ (chứa dãy số lặp lại ngẫu nhiên).';
+  }
+
+  // 4. Nơi công tác / Trường
+  const trimmedSchool = school?.trim() || '';
+  if (!trimmedSchool) return 'Vui lòng nhập trường / nơi công tác.';
+  if (trimmedSchool.length < 5) return 'Tên trường/nơi công tác phải từ 5 ký tự trở lên.';
+  if (trimmedSchool.length > 120) return 'Tên trường/nơi công tác không vượt quá 120 ký tự.';
+  if (/^\d+$/.test(trimmedSchool.replace(/\s/g, ''))) {
+    return 'Tên trường/nơi công tác không thể chỉ gồm các con số.';
+  }
+  if (/(.)\1{4,}/.test(trimmedSchool.replace(/\s/g, ''))) {
+    return 'Tên trường/nơi công tác chứa chuỗi ký tự lặp lại bất thường.';
+  }
+
+  // 5. Lý do tham gia
+  const trimmedReason = reason?.trim() || '';
+  if (!trimmedReason || trimmedReason.length < 30) return 'Lý do tham gia cần tối thiểu 30 ký tự.';
+  if (trimmedReason.length > 1000) return 'Lý do tham gia không vượt quá 1000 ký tự.';
+
+  return null;
+}
+
 router.post('/teacher-application', async (req, res) => {
   try {
-    const { userId, fullName, phone, school, subject, experience, degree, reason, certificates } = req.body;
+    const { userId, email, fullName, phone, school, subject, experience, degree, reason, certificates } = req.body;
 
     if (!userId) {
       return res.status(400).json({ success: false, message: 'Thiếu userId' });
     }
 
+    const validationError = validateTeacherApplicationData({ fullName, email, phone, school, reason });
+    if (validationError) {
+      return res.status(400).json({ success: false, message: validationError });
+    }
+
     let user = await User.findByAnyId(userId);
+    const validEmail = email && typeof email === 'string' && email.trim() && !email.includes('@example.com') ? email.trim() : null;
+
     if (!user) {
       console.warn(`⚠️ [Backend] User record not found for ${userId}. Creating user profile record...`);
       try {
         user = await User.upsert({
           id: userId,
-          email: req.body.email || `user_${userId.slice(0, 8)}@example.com`,
+          email: validEmail || (email && !email.includes('@example.com') ? email : null) || `user_${userId.slice(0, 8)}@example.com`,
           username: (fullName?.trim() || 'teacher').toLowerCase().replace(/\s+/g, '_'),
           display_name: fullName?.trim() || 'Giáo viên',
           role: 'teacher',
@@ -507,6 +575,19 @@ router.post('/teacher-application', async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
+    }
+
+    // Ensure storage bucket exists and is set to public
+    try {
+      const { data: buckets } = await supabase.storage.listBuckets();
+      if (!buckets?.find(b => b.name === 'teacher-certificates')) {
+        await supabase.storage.createBucket('teacher-certificates', { public: true });
+        console.log('✅ [Backend] Created storage bucket: teacher-certificates');
+      } else {
+        await supabase.storage.updateBucket('teacher-certificates', { public: true });
+      }
+    } catch (bErr) {
+      console.warn('⚠️ [Backend] Bucket check warning:', bErr.message);
     }
 
     // Process certificate files using backend Service Role Key (bypasses Storage RLS)
@@ -527,21 +608,42 @@ router.post('/teacher-application', async (req, res) => {
 
             if (uploadErr) {
               console.warn(`⚠️ [Backend] Upload certificate warning for ${cert.name}:`, uploadErr.message);
-              uploadedCerts.push({ name: cert.name, path: filePath, type: contentType });
+              uploadedCerts.push({ name: cert.name, type: contentType, url: cert.base64, base64: cert.base64 });
             } else {
-              uploadedCerts.push({ name: cert.name, path: filePath, type: contentType });
+              uploadedCerts.push({ name: cert.name, path: filePath, type: contentType, url: cert.base64, base64: cert.base64 });
             }
           } catch (fileErr) {
             console.error(`❌ [Backend] File processing exception:`, fileErr.message);
+            if (cert.base64) {
+              uploadedCerts.push({ name: cert.name, type: cert.type || 'image/jpeg', url: cert.base64, base64: cert.base64 });
+            }
           }
-        } else if (cert.path || cert.url) {
+        } else if (cert.path || cert.url || cert.base64) {
           uploadedCerts.push(cert);
         }
       }
     }
 
+    let resolvedEmail = validEmail;
+    if (!resolvedEmail && user.email && !user.email.includes('@example.com')) {
+      resolvedEmail = user.email;
+    }
+    if (!resolvedEmail && user.id) {
+      try {
+        const { data: authUserData } = await supabase.auth.admin.getUserById(user.id);
+        if (authUserData?.user?.email && !authUserData.user.email.includes('@example.com')) {
+          resolvedEmail = authUserData.user.email;
+          console.log(`✅ [Backend] Synced email from Supabase Auth: ${resolvedEmail}`);
+        }
+      } catch (authErr) {
+        console.warn('⚠️ [Backend] Auth user lookup warning:', authErr.message);
+      }
+    }
+    if (!resolvedEmail) resolvedEmail = email || user.email;
+
     const teacherProfile = {
       ...(user.teacher_profile || {}),
+      email: resolvedEmail,
       phone: phone?.trim(),
       school: school?.trim(),
       subject: subject || 'Vật lý',
@@ -561,7 +663,18 @@ router.post('/teacher-application', async (req, res) => {
       updated_at: new Date().toISOString()
     };
 
-    console.log(`📋 [Backend] Submitting teacher application for user ${user.email} (${user.id})`);
+    if (resolvedEmail && !resolvedEmail.includes('@example.com')) {
+      updates.email = resolvedEmail;
+      if (user.id && typeof user.id === 'string' && user.id.length > 20) {
+        try {
+          await supabase.auth.admin.updateUserById(user.id, { email: resolvedEmail });
+        } catch (aErr) {
+          console.warn('⚠️ Supabase auth email sync warning:', aErr.message);
+        }
+      }
+    }
+
+    console.log(`📋 [Backend] Submitting teacher application for user ${resolvedEmail} (${user.id})`);
     const updated = await User.update(user.id, updates);
 
     res.json({
@@ -582,13 +695,31 @@ router.post('/teacher-application', async (req, res) => {
   }
 });
 
+async function ensureTeacherEmail(t) {
+  if (!t) return t;
+  const currentEmail = t.teacher_profile?.email || (t.email && !t.email.includes('@example.com') ? t.email : null);
+  if (!currentEmail && t.id) {
+    try {
+      const { data: authUserData } = await supabase.auth.admin.getUserById(t.id);
+      if (authUserData?.user?.email && !authUserData.user.email.includes('@example.com')) {
+        const realEmail = authUserData.user.email;
+        t.email = realEmail;
+        t.teacher_profile = { ...(t.teacher_profile || {}), email: realEmail };
+        supabase.from('users').update({ email: realEmail, teacher_profile: t.teacher_profile }).eq('id', t.id).catch(() => {});
+      }
+    } catch (e) {}
+  }
+  return t;
+}
+
 router.get('/pending-teachers', async (req, res) => {
   try {
     const teachers = await User.find(
       { role: 'teacher', teacher_status: 'pending' },
       { select: 'id,username,email,display_name,avatar,teacher_profile,created_at' }
     );
-    res.json({ success: true, count: teachers.length, teachers });
+    const enriched = await Promise.all(teachers.map(ensureTeacherEmail));
+    res.json({ success: true, count: enriched.length, teachers: enriched });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -601,7 +732,8 @@ router.get('/teachers', async (req, res) => {
     if (status) filters.teacher_status = status;
 
     const teachers = await User.find(filters, { sort: { created_at: -1 } });
-    res.json({ success: true, count: teachers.length, teachers });
+    const enriched = await Promise.all(teachers.map(ensureTeacherEmail));
+    res.json({ success: true, count: enriched.length, teachers: enriched });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
@@ -652,17 +784,21 @@ router.post('/reject-teacher/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-    if (user.role !== 'teacher') return res.status(400).json({ success: false, message: 'User is not a teacher' });
-    if (user.teacher_status !== 'pending') return res.status(400).json({ success: false, message: 'Teacher is not in pending status' });
-
+    
     const teacherProfile = user.teacher_profile || {};
     teacherProfile.rejectedAt = new Date().toISOString();
-    teacherProfile.rejectionReason = req.body.reason || 'Không đáp ứng yêu cầu';
+    teacherProfile.rejectionReason = req.body?.reason || 'Không đáp ứng yêu cầu';
 
-    await User.update(user.id, { teacher_status: 'rejected', teacher_profile: teacherProfile });
+    await User.update(user.id, { 
+      role: 'teacher',
+      teacher_status: 'rejected', 
+      teacher_profile: teacherProfile 
+    });
 
+    console.log(`✅ [Backend] Teacher ${user.email} (${user.id}) set to REJECTED`);
     res.json({ success: true, message: 'Đã từ chối đăng ký giáo viên' });
   } catch (error) {
+    console.error('❌ [Backend] reject-teacher error:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
@@ -956,6 +1092,12 @@ router.post('/update-status', async (req, res) => {
     if (teacher_status !== undefined) updates.teacher_status = teacher_status;
     if (name !== undefined) updates.display_name = name;
     if (role !== undefined) updates.role = role;
+    if (email !== undefined && email !== null && typeof email === 'string' && email.trim() !== '' && !email.includes('@example.com')) {
+      updates.email = email.trim();
+      if (user.teacher_profile) {
+        updates.teacher_profile = { ...user.teacher_profile, email: email.trim() };
+      }
+    }
 
     console.log(`📡 [Backend] Admin updating user ${user.email}: status=${status}, teacher_status=${teacher_status}`);
 
@@ -1063,6 +1205,8 @@ router.get('/check-status', async (req, res) => {
       teacher_status: user.teacher_status || null,
       display_name: user.display_name,
       role: user.role,
+      teacher_profile: user.teacher_profile || null,
+      rejectionReason: user.teacher_profile?.rejectionReason || null,
       isDeactivated
     });
   } catch (error) {

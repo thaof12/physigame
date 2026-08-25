@@ -164,6 +164,7 @@ export const AuthProvider = ({ children }) => {
           const savedUser = safeGetItem('user');
           if (savedUser) {
             setUser(savedUser);
+            setTimeout(() => refreshUser(), 50);
           }
           console.log('ℹ️ No active session');
         }
@@ -178,6 +179,7 @@ export const AuthProvider = ({ children }) => {
         const cachedUser = safeGetItem('user');
         if (cachedUser) {
           setUser(cachedUser);
+          setTimeout(() => refreshUser(), 50);
         }
       } finally {
         if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
@@ -224,14 +226,12 @@ export const AuthProvider = ({ children }) => {
           }
 
           try {
-            // 2. Fetch existing profile from dual sources for consistency
-            console.log('📡 [AuthContext] Fetching profile from dual sources...');
-            const [apiRes, supabaseRes] = await Promise.race([
-              Promise.all([
-                api.get(`/users/firebase/${session.user.id}`).catch(() => null),
-                Promise.resolve(supabase.from('users').select('*').eq('id', session.user.id).single()).catch(() => ({ data: null }))
-              ]),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 8000))
+            // 2. Fetch existing profile from triple sources with Promise.allSettled for fault tolerance
+            console.log('📡 [AuthContext] Fetching profile from triple sources (API, DB, status-check)...');
+            const [apiResResult, supabaseResResult, statusCheckResResult] = await Promise.allSettled([
+              api.get(`/users/firebase/${session.user.id}`).catch(() => null),
+              supabase.from('users').select('*').eq('id', session.user.id).maybeSingle(),
+              api.get('/users/check-status', { params: { id: session.user.id, email: session.user.email } }).catch(() => null)
             ]);
 
             const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -240,21 +240,30 @@ export const AuthProvider = ({ children }) => {
               return;
             }
 
-            const dbUser = supabaseRes?.data;
-            const apiUser = apiRes?.data;
+            const apiUser = apiResResult.status === 'fulfilled' ? apiResResult.value?.data : null;
+            const dbUser = supabaseResResult.status === 'fulfilled' ? supabaseResResult.value?.data : null;
+            const statusCheckData = statusCheckResResult.status === 'fulfilled' ? statusCheckResResult.value?.data : null;
+
+            const resolvedStatus = statusCheckData?.teacher_status || dbUser?.teacher_status || apiUser?.teacher_status || apiUser?.teacherStatus || 'pending';
 
             let userData = null;
-            if (dbUser || apiUser) {
+            if (dbUser || apiUser || statusCheckData) {
               userData = {
                 ...(apiUser || {}),
                 ...(dbUser || {}),
-                displayName: dbUser?.display_name || apiUser?.displayName || apiUser?.display_name || '',
+                displayName: dbUser?.display_name || apiUser?.displayName || apiUser?.display_name || session.user.email?.split('@')[0] || '',
                 id: session.user.id,
                 uid: session.user.id,
                 firebaseUid: session.user.id,
-                role: dbUser?.role || apiUser?.role,
-                teacherStatus: dbUser?.teacher_status || apiUser?.teacherStatus || apiUser?.teacher_status,
-                teacher_status: dbUser?.teacher_status || apiUser?.teacher_status || apiUser?.teacherStatus
+                role: statusCheckData?.role || dbUser?.role || apiUser?.role || 'student',
+                teacherStatus: resolvedStatus,
+                teacher_status: resolvedStatus,
+                teacherProfile: {
+                  ...(apiUser?.teacherProfile || {}),
+                  ...(dbUser?.teacher_profile || {}),
+                  ...(statusCheckData?.teacher_profile || {}),
+                  rejectionReason: statusCheckData?.rejectionReason || dbUser?.teacher_profile?.rejectionReason
+                }
               };
             }
 
@@ -552,9 +561,25 @@ export const AuthProvider = ({ children }) => {
           const isMatch =
             (updated.id && String(updated.id) === String(currentUserId)) ||
             (updated.email && currentUserEmail && updated.email.toLowerCase() === currentUserEmail.toLowerCase());
-          if (isMatch && isDeactivatedRecord(updated)) {
-            console.warn('⚠️ [AuthContext] Realtime: account deactivated. Showing warning.');
-            logoutSilentKickoutRef.current?.(updated.display_name || currentUserName);
+          if (isMatch) {
+            if (isDeactivatedRecord(updated)) {
+              console.warn('⚠️ [AuthContext] Realtime: account deactivated. Showing warning.');
+              logoutSilentKickoutRef.current?.(updated.display_name || currentUserName);
+            } else if (updated.teacher_status) {
+              console.log('⚡ [AuthContext] Realtime: teacher_status updated to:', updated.teacher_status);
+              setUser(prev => {
+                if (!prev) return prev;
+                const nextUser = {
+                  ...prev,
+                  ...updated,
+                  teacherStatus: updated.teacher_status,
+                  teacher_status: updated.teacher_status,
+                  teacherProfile: updated.teacher_profile || prev.teacherProfile
+                };
+                localStorage.setItem('user', JSON.stringify(nextUser));
+                return nextUser;
+              });
+            }
           }
         }
       )
@@ -581,6 +606,30 @@ export const AuthProvider = ({ children }) => {
             pollActive = false;
             console.warn('⚠️ [AuthContext] Polling (API): account deactivated! Showing warning.');
             logoutSilentKickoutRef.current?.(statusData.display_name || currentUserName);
+          } else if (statusData?.success && statusData.teacher_status) {
+            setUser(prev => {
+              if (!prev) return prev;
+              const currentStatus = prev.teacher_status || prev.teacherStatus;
+              const newStatus = statusData.teacher_status;
+              const newReason = statusData.rejectionReason || statusData.teacher_profile?.rejectionReason;
+
+              if (currentStatus !== newStatus || (newStatus === 'rejected' && prev.teacherProfile?.rejectionReason !== newReason)) {
+                console.log(`⚡ [AuthContext] Polling updated teacher_status: ${currentStatus} → ${newStatus}`);
+                const nextUser = {
+                  ...prev,
+                  teacher_status: newStatus,
+                  teacherStatus: newStatus,
+                  teacherProfile: {
+                    ...(prev.teacherProfile || {}),
+                    ...(statusData.teacher_profile || {}),
+                    rejectionReason: newReason || prev.teacherProfile?.rejectionReason
+                  }
+                };
+                localStorage.setItem('user', JSON.stringify(nextUser));
+                return nextUser;
+              }
+              return prev;
+            });
           }
         }
       } catch (e) {
@@ -891,52 +940,95 @@ export const AuthProvider = ({ children }) => {
     };
   }, [user ? 'logged_in' : 'logged_out']);
 
+  // Cross-tab broadcast listener for instant admin status updates
+  useEffect(() => {
+    let bc;
+    try {
+      bc = new BroadcastChannel('physigame_teacher_status_actions');
+      bc.onmessage = (event) => {
+        if (event.data?.type === 'TEACHER_STATUS_UPDATED') {
+          console.log('📡 [AuthContext] Cross-tab Broadcast received. Refreshing status...');
+          refreshUser();
+        }
+      };
+    } catch (e) {}
+
+    return () => {
+      if (bc) bc.close();
+    };
+  }, []);
+
   const refreshUser = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      const currentUserId = user?.id || user?.uid || user?.firebaseUid;
+      const currentUserEmail = user?.email;
+
+      const { data: { session } } = await supabase.auth.getSession().catch(() => ({ data: {} }));
+      const userId = session?.user?.id || currentUserId;
+
+      if (!userId && !currentUserEmail) return null;
 
       console.log('🔄 [AuthContext] Force refreshing user profile from source...');
 
-      // Dual fetch for maximum consistency
-      const [apiRes, supabaseRes] = await Promise.all([
-        api.get(`/users/firebase/${session.user.id}`).catch(() => null),
-        supabase.from('users').select('*').eq('id', session.user.id).single()
+      // Fetch status, API, and direct DB in parallel using Promise.allSettled
+      const [statusCheckRes, apiRes, supabaseRes] = await Promise.allSettled([
+        (currentUserEmail || userId) ? api.get('/users/check-status', { params: { ...(currentUserEmail ? { email: currentUserEmail } : {}), ...(userId ? { id: userId } : {}) } }) : Promise.resolve(null),
+        userId ? api.get(`/users/firebase/${userId}`) : Promise.resolve(null),
+        userId ? supabase.from('users').select('*').eq('id', userId).maybeSingle() :
+        currentUserEmail ? supabase.from('users').select('*').eq('email', currentUserEmail).maybeSingle() : Promise.resolve({ data: null })
       ]);
 
-      const dbUser = supabaseRes.data;
-      const apiUser = apiRes?.data;
+      const statusCheckData = statusCheckRes.status === 'fulfilled' ? statusCheckRes.value?.data : null;
+      const apiUser = apiRes.status === 'fulfilled' ? apiRes.value?.data : null;
+      const dbUser = supabaseRes.status === 'fulfilled' ? supabaseRes.value?.data : null;
 
-      if (dbUser || apiUser) {
-        const mergedUser = {
-          ...(apiUser || {}),
-          ...(dbUser || {}),
-          displayName: dbUser?.display_name || apiUser?.displayName || apiUser?.display_name || '',
-          id: session.user.id,
-          uid: session.user.id,
-          firebaseUid: session.user.id,
-          // Explicitly map status for guards
-          teacherStatus: dbUser?.teacher_status || apiUser?.teacherStatus || 'pending',
-          teacher_status: dbUser?.teacher_status || apiUser?.teacher_status || 'pending'
-        };
+      const latestTeacherStatus =
+        statusCheckData?.teacher_status ||
+        dbUser?.teacher_status ||
+        apiUser?.teacher_status ||
+        apiUser?.teacherStatus ||
+        user?.teacher_status ||
+        user?.teacherStatus ||
+        'pending';
 
-        if (mergedUser.status === 'inactive') {
-          console.warn('⚠️ User account is inactive on refresh. Logging out.');
-          localStorage.removeItem('user');
-          localStorage.removeItem('token');
-          supabase.auth.signOut().finally(() => {
-            window.location.href = '/login?error=deactivated';
-          });
-          return null;
+      const mergedUser = {
+        ...(user || {}),
+        ...(apiUser || {}),
+        ...(dbUser || {}),
+        displayName: dbUser?.display_name || apiUser?.displayName || apiUser?.display_name || user?.displayName || user?.name || '',
+        id: userId || user?.id,
+        uid: userId || user?.uid,
+        firebaseUid: userId || user?.firebaseUid,
+        email: currentUserEmail || dbUser?.email || apiUser?.email || user?.email,
+        role: statusCheckData?.role || dbUser?.role || apiUser?.role || user?.role,
+        teacherStatus: latestTeacherStatus,
+        teacher_status: latestTeacherStatus,
+        teacherProfile: {
+          ...(user?.teacherProfile || {}),
+          ...(dbUser?.teacher_profile || {}),
+          ...(apiUser?.teacherProfile || {}),
+          ...(statusCheckData?.teacher_profile || {}),
+          rejectionReason: statusCheckData?.rejectionReason || dbUser?.teacher_profile?.rejectionReason || user?.teacherProfile?.rejectionReason
         }
+      };
 
-        localStorage.setItem('user', JSON.stringify(mergedUser));
-        setUser(mergedUser);
-        console.log(`✅ [AuthContext] Refresh complete. Status: ${mergedUser.teacher_status}`);
-        return mergedUser;
+      if (mergedUser.status === 'inactive' || mergedUser.teacher_status === 'inactive') {
+        console.warn('⚠️ User account is inactive on refresh. Logging out.');
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        supabase.auth.signOut().finally(() => {
+          window.location.href = '/login?error=deactivated';
+        });
+        return null;
       }
+
+      localStorage.setItem('user', JSON.stringify(mergedUser));
+      setUser(mergedUser);
+      console.log(`✅ [AuthContext] Refresh complete. teacher_status: ${mergedUser.teacher_status}`);
+      return mergedUser;
     } catch (error) {
       console.error('Error refreshing user data:', error);
+      return null;
     }
   };
 

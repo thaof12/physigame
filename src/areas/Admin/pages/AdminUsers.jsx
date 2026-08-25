@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Users,
   Search,
@@ -29,11 +30,14 @@ import {
   FileText,
   ExternalLink,
   Award,
-  MessageSquare
+  MessageSquare,
+  Send,
+  Loader2,
+  CheckCircle2
 } from 'lucide-react';
 import { supabase } from '../../../config/supabase';
 import api from '../../../config/api';
-import { sendTeacherStatusEmail } from '../../../services/emailService';
+import { sendTeacherStatusEmail, sendCustomFeedbackEmail } from '../../../services/emailService';
 
 const CustomSelect = ({ value, onChange, options, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -117,7 +121,7 @@ const mockUsers = [
   { id: 7, name: 'Đỗ Văn G', email: 'dovang@gmail.com', role: 'student', grade: '10', status: 'active', joinDate: '2024-12-20', lastActive: '2025-03-14', lessonsCompleted: 56, exercisesCompleted: 145 },
   { id: 8, name: 'Bùi Thị H', email: 'buithih@gmail.com', role: 'student', grade: '6', status: 'pending', joinDate: '2025-03-16', lastActive: '2025-03-16', lessonsCompleted: 2, exercisesCompleted: 5 },
 ];
-const PendingTeachersTab = () => {
+const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
   const [pendingTeachers, setPendingTeachers] = useState([]);
   const [allTeachers, setAllTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -126,6 +130,50 @@ const PendingTeachersTab = () => {
   const [rejectModal, setRejectModal] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [teacherFilter, setTeacherFilter] = useState('pending');
+  const [selectedTeacherDetail, setSelectedTeacherDetail] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [sendingFeedback, setSendingFeedback] = useState(false);
+  const [feedbackStatus, setFeedbackStatus] = useState(null);
+
+  useEffect(() => {
+    if (selectedTeacherDetail) {
+      setFeedbackText('');
+      setFeedbackStatus(null);
+    }
+  }, [selectedTeacherDetail]);
+
+  const handleSendFeedback = async () => {
+    if (!selectedTeacherDetail || !feedbackText.trim()) return;
+
+    const targetEmail = selectedTeacherDetail.email;
+    if (!targetEmail || targetEmail.includes('@example.com') || targetEmail === 'Chưa cập nhật email') {
+      setFeedbackStatus({ type: 'error', message: 'Ứng viên chưa cập nhật địa chỉ email hợp lệ.' });
+      return;
+    }
+
+    setSendingFeedback(true);
+    setFeedbackStatus(null);
+
+    try {
+      const result = await sendCustomFeedbackEmail(
+        targetEmail,
+        selectedTeacherDetail.displayName || selectedTeacherDetail.username,
+        feedbackText.trim()
+      );
+
+      if (result.success) {
+        setFeedbackStatus({ type: 'success', message: `Đã gửi email phản hồi thành công đến ${targetEmail}!` });
+        setFeedbackText('');
+      } else {
+        setFeedbackStatus({ type: 'error', message: result.error || 'Gửi email phản hồi thất bại.' });
+      }
+    } catch (err) {
+      setFeedbackStatus({ type: 'error', message: 'Lỗi kết nối khi gửi email phản hồi.' });
+    } finally {
+      setSendingFeedback(false);
+    }
+  };
 
   useEffect(() => {
     fetchTeachers();
@@ -147,25 +195,79 @@ const PendingTeachersTab = () => {
         const rawCerts = t.teacher_profile?.certificates || [];
         const certsWithSignedUrls = await Promise.all(
           rawCerts.map(async (cert) => {
-            if (cert.path) {
-              const { data } = await supabase.storage
-                .from('teacher-certificates')
-                .createSignedUrl(cert.path, 3600);
-              return { ...cert, viewUrl: data?.signedUrl || cert.url };
+            let viewUrl = null;
+            let rawPath = cert.path || cert.url || '';
+            if (typeof rawPath === 'string' && rawPath.includes('/teacher-certificates/')) {
+              rawPath = rawPath.split('/teacher-certificates/')[1];
             }
-            return { ...cert, viewUrl: cert.url };
+
+            const isStoragePath = typeof rawPath === 'string' &&
+              rawPath.length > 0 &&
+              !rawPath.startsWith('http://') &&
+              !rawPath.startsWith('https://') &&
+              !rawPath.startsWith('data:') &&
+              !rawPath.startsWith('blob:');
+
+            if (isStoragePath) {
+              const cleanPath = rawPath.replace(/^teacher-certificates\//, '');
+              try {
+                const { data: pubData } = supabase.storage
+                  .from('teacher-certificates')
+                  .getPublicUrl(cleanPath);
+                if (pubData?.publicUrl) {
+                  viewUrl = pubData.publicUrl;
+                }
+              } catch (e) {}
+
+              if (!viewUrl) {
+                try {
+                  const { data, error } = await supabase.storage
+                    .from('teacher-certificates')
+                    .createSignedUrl(cleanPath, 86400);
+                  if (!error && data?.signedUrl) {
+                    viewUrl = data.signedUrl;
+                  }
+                } catch (e) {}
+              }
+            }
+
+            if (!viewUrl) {
+              viewUrl = cert.viewUrl || cert.url || cert.base64 || cert.preview || null;
+            }
+
+            const isImage = Boolean(
+              (cert.type && cert.type.startsWith('image/')) ||
+              (cert.name && /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(cert.name)) ||
+              (viewUrl && typeof viewUrl === 'string' && (
+                viewUrl.startsWith('data:image/') ||
+                /\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(viewUrl) ||
+                viewUrl.includes('teacher-certificates')
+              ))
+            );
+
+            return {
+              ...cert,
+              viewUrl,
+              isImage
+            };
           })
         );
+
+        const rawEmail = (t.teacher_profile?.email && typeof t.teacher_profile.email === 'string' && !t.teacher_profile.email.includes('@example.com'))
+          ? t.teacher_profile.email
+          : (t.email && typeof t.email === 'string' && !t.email.includes('@example.com') ? t.email : null);
+        const resolvedEmail = rawEmail || 'Chưa cập nhật email';
 
         return {
           _id: t.id,
           id: t.id,
           username: t.display_name || t.username || 'Giáo viên',
           displayName: t.display_name || t.username || 'Giáo viên',
-          email: t.email,
+          email: resolvedEmail,
           avatar: t.avatar_url || t.avatar || t.profile?.avatar || t.teacher_profile?.avatar || null,
           teacherStatus: t.teacher_status || 'pending',
           teacherProfile: {
+            email: resolvedEmail,
             school: t.teacher_profile?.school || t.profile?.school || 'Chưa cập nhật',
             subject: t.teacher_profile?.subject || t.profile?.subject || 'Vật lý',
             phone: t.teacher_profile?.phone || null,
@@ -174,7 +276,7 @@ const PendingTeachersTab = () => {
             reason: t.teacher_profile?.reason || null,
             certificates: certsWithSignedUrls,
             appliedAt: t.teacher_profile?.applied_at || t.created_at,
-            rejectionReason: t.profile?.rejectionReason
+            rejectionReason: t.teacher_profile?.rejectionReason || t.profile?.rejectionReason
           },
           originalData: t
         };
@@ -189,6 +291,15 @@ const PendingTeachersTab = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (selectedTeacherIdFromState && allTeachers.length > 0) {
+      const found = allTeachers.find(t => String(t.id) === String(selectedTeacherIdFromState));
+      if (found) {
+        setSelectedTeacherDetail(found);
+      }
+    }
+  }, [selectedTeacherIdFromState, allTeachers]);
 
   const handleVerify = async (teacherId) => {
     const teacher = allTeachers.find(t => t.id === teacherId);
@@ -205,7 +316,16 @@ const PendingTeachersTab = () => {
         await sendTeacherStatusEmail(teacher.email, teacher.displayName, 'verified');
       }
       
+      try {
+        const bc = new BroadcastChannel('physigame_teacher_status_actions');
+        bc.postMessage({ type: 'TEACHER_STATUS_UPDATED', teacherId, status: 'verified' });
+        bc.close();
+      } catch (e) {}
+
       await fetchTeachers();
+      if (selectedTeacherDetail?.id === teacherId) {
+        setSelectedTeacherDetail(null);
+      }
     } catch (err) {
       console.error('Error verifying teacher:', err);
       setError('Lỗi khi duyệt giáo viên');
@@ -234,9 +354,18 @@ const PendingTeachersTab = () => {
         await sendTeacherStatusEmail(teacher.email, teacher.displayName, 'rejected', rejectReason);
       }
 
+      try {
+        const bc = new BroadcastChannel('physigame_teacher_status_actions');
+        bc.postMessage({ type: 'TEACHER_STATUS_UPDATED', teacherId, status: 'rejected' });
+        bc.close();
+      } catch (e) {}
+
       setRejectModal(null);
       setRejectReason('');
       await fetchTeachers();
+      if (selectedTeacherDetail?.id === teacherId) {
+        setSelectedTeacherDetail(null);
+      }
     } catch (err) {
       console.error('Error rejecting teacher:', err);
       setError('Lỗi khi từ chối giáo viên');
@@ -382,150 +511,478 @@ const PendingTeachersTab = () => {
           {filteredTeachers.map((teacher) => (
             <div
               key={teacher._id}
-              className="bg-white border border-slate-100 rounded-[2rem] p-6 hover:border-indigo-200 hover:shadow-md transition-all shadow-sm"
+              onClick={() => setSelectedTeacherDetail(teacher)}
+              className="p-6 bg-white hover:bg-indigo-50/20 rounded-[2rem] border border-slate-100 hover:border-indigo-200 transition-all cursor-pointer group shadow-sm hover:shadow-md space-y-4"
             >
-              <div className="flex flex-col gap-4">
-                {/* Top row: avatar + name + status + actions */}
-                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                  {/* Teacher info */}
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20 overflow-hidden">
-                      {teacher.avatar ? (
-                        <img src={teacher.avatar} alt={teacher.displayName} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="font-heading text-white font-extrabold text-lg">{(teacher.displayName || teacher.username || 'G')[0].toUpperCase()}</span>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center text-white font-heading font-extrabold text-lg shadow-lg shadow-indigo-500/20 overflow-hidden shrink-0 relative">
+                    {teacher.avatar && teacher.avatar !== 'null' && teacher.avatar !== 'undefined' ? (
+                      <img
+                        src={teacher.avatar}
+                        alt=""
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <span className={`${teacher.avatar && teacher.avatar !== 'null' && teacher.avatar !== 'undefined' ? 'hidden' : 'flex'} w-full h-full items-center justify-center`}>
+                      {(teacher.displayName || teacher.username || 'G')[0]?.toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-heading font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                        {teacher.displayName || teacher.username}
+                      </h4>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-heading font-extrabold uppercase tracking-widest ${
+                        teacher.teacherStatus === 'pending' ? 'bg-indigo-100 text-indigo-600' :
+                        teacher.teacherStatus === 'verified' ? 'bg-emerald-100 text-emerald-600' :
+                        'bg-rose-100 text-rose-600'
+                      }`}>
+                        {teacher.teacherStatus === 'pending' ? 'Chờ duyệt' :
+                         teacher.teacherStatus === 'verified' ? 'Đã duyệt' : 'Từ chối'}
+                      </span>
+                    </div>
+                    <div className="font-body flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-bold text-slate-400">
+                      <span className="flex items-center gap-1 text-indigo-600"><Mail className="w-3.5 h-3.5" />{teacher.email}</span>
+                      {teacher.teacherProfile?.phone && (
+                        <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" />{teacher.teacherProfile.phone}</span>
+                      )}
+                      {teacher.teacherProfile?.school && (
+                        <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5" />{teacher.teacherProfile.school}</span>
+                      )}
+                      {teacher.teacherProfile?.subject && (
+                        <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />{teacher.teacherProfile.subject}</span>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-heading font-extrabold text-slate-900">{teacher.displayName || teacher.username}</h4>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-heading font-extrabold uppercase tracking-widest ${
-                          teacher.teacherStatus === 'pending' ? 'bg-indigo-100 text-indigo-600' :
-                          teacher.teacherStatus === 'verified' ? 'bg-emerald-100 text-emerald-600' :
-                          'bg-rose-100 text-rose-600'
-                        }`}>
-                          {teacher.teacherStatus === 'pending' ? 'Chờ duyệt' :
-                           teacher.teacherStatus === 'verified' ? 'Đã duyệt' : 'Từ chối'}
-                        </span>
-                      </div>
-                      <div className="font-body flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-bold text-slate-400">
-                        <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" />{teacher.email}</span>
-                        {teacher.teacherProfile?.phone && (
-                          <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" />{teacher.teacherProfile.phone}</span>
-                        )}
-                        {teacher.teacherProfile?.school && (
-                          <span className="flex items-center gap-1"><Building className="w-3.5 h-3.5" />{teacher.teacherProfile.school}</span>
-                        )}
-                        {teacher.teacherProfile?.subject && (
-                          <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />{teacher.teacherProfile.subject}</span>
-                        )}
-                        {teacher.teacherProfile?.experience && (
-                          <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{teacher.teacherProfile.experience}</span>
-                        )}
-                        {teacher.teacherProfile?.degree && (
-                          <span className="flex items-center gap-1"><Award className="w-3.5 h-3.5" />{teacher.teacherProfile.degree}</span>
-                        )}
-                      </div>
-                      <p className="font-body text-xs text-slate-300 mt-1">Đăng ký: {formatDate(teacher.teacherProfile?.appliedAt || teacher.createdAt)}</p>
-                    </div>
+                    <p className="font-body text-xs text-slate-300 mt-1">Đăng ký: {formatDate(teacher.teacherProfile?.appliedAt || teacher.createdAt)}</p>
                   </div>
+                </div>
 
-                  {/* Actions */}
+                <div className="flex items-center gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => setSelectedTeacherDetail(teacher)}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl font-heading font-extrabold text-xs transition-all"
+                  >
+                    <Eye className="w-4 h-4" />
+                    Chi tiết đơn
+                  </button>
+
                   {teacher.teacherStatus === 'pending' && (
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleVerify(teacher._id)}
                         disabled={actionLoading === teacher._id}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-heading font-extrabold text-xs transition-all shadow-md shadow-emerald-500/20 disabled:opacity-50"
                       >
                         {actionLoading === teacher._id ? (
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
-                          <CheckCircle className="w-4 h-4" />
+                          <CheckCircle className="w-3.5 h-3.5" />
                         )}
-                        Phê duyệt
+                        Duyệt
                       </button>
                       <button
                         onClick={() => setRejectModal(teacher._id)}
                         disabled={actionLoading === teacher._id}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-white border border-rose-200 text-rose-500 hover:bg-rose-50 rounded-xl font-black text-xs uppercase tracking-widest transition-all disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-white border border-rose-200 text-rose-500 hover:bg-rose-50 rounded-xl font-heading font-extrabold text-xs transition-all disabled:opacity-50"
                       >
-                        <XCircle className="w-4 h-4" />
+                        <XCircle className="w-3.5 h-3.5" />
                         Từ chối
                       </button>
                     </div>
                   )}
-                  {teacher.teacherStatus === 'verified' && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl">
-                      <CheckCircle className="w-5 h-5 text-emerald-500" />
-                      <span className="text-sm font-black text-emerald-600">Đã xác minh</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* DETAILED TEACHER APPLICATION MODAL (Horizontal Layout) */}
+      {selectedTeacherDetail && (
+        <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-6xl my-6 overflow-hidden shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+            {/* Modal Header */}
+            <div className="bg-[#faf9f5] border-b border-amber-200/40 px-6 py-4 sm:px-8 sm:py-5 text-slate-900 relative shrink-0">
+              <button
+                onClick={() => setSelectedTeacherDetail(null)}
+                className="absolute top-4 right-6 w-9 h-9 bg-slate-200/60 hover:bg-slate-300/80 rounded-full flex items-center justify-center text-slate-600 transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <span className="px-2.5 py-0.5 bg-amber-100/80 border border-amber-200/80 rounded-full text-[11px] font-heading font-extrabold uppercase tracking-wider text-amber-900">
+                  Chi Tiết Đơn Đăng Ký
+                </span>
+                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-heading font-extrabold uppercase tracking-wider border ${
+                  selectedTeacherDetail.teacherStatus === 'pending' ? 'bg-amber-50 text-amber-800 border-amber-300' :
+                  selectedTeacherDetail.teacherStatus === 'verified' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
+                  'bg-rose-50 text-rose-800 border-rose-300'
+                }`}>
+                  {selectedTeacherDetail.teacherStatus === 'pending' ? 'Chờ xét duyệt' :
+                   selectedTeacherDetail.teacherStatus === 'verified' ? 'Đã duyệt' : 'Từ chối'}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-baseline gap-2 sm:gap-3">
+                <h2 className="font-heading text-lg md:text-xl font-black text-slate-900">
+                  Hồ Sơ Đăng Ký Giảng Viên
+                </h2>
+                <span className="font-body text-slate-500 text-xs md:text-sm font-medium">
+                  Ứng viên: <strong className="text-slate-800 font-extrabold">{selectedTeacherDetail.displayName || selectedTeacherDetail.username}</strong>
+                </span>
+              </div>
+            </div>
+
+            {/* Modal Body: Horizontal 2-Column Grid */}
+            <div className="p-6 sm:p-8 overflow-y-auto font-body flex-1">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                {/* LEFT COLUMN: Applicant Info & Form Response Details (7 Columns) */}
+                <div className="lg:col-span-7 space-y-6">
+                  {/* Applicant Profile Card */}
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-3xl flex items-center justify-center text-white font-heading font-black text-2xl sm:text-3xl shadow-lg shadow-indigo-500/20 shrink-0 overflow-hidden relative">
+                      {selectedTeacherDetail.avatar && selectedTeacherDetail.avatar !== 'null' && selectedTeacherDetail.avatar !== 'undefined' ? (
+                        <img
+                          src={selectedTeacherDetail.avatar}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <span className={`${selectedTeacherDetail.avatar && selectedTeacherDetail.avatar !== 'null' && selectedTeacherDetail.avatar !== 'undefined' ? 'hidden' : 'flex'} w-full h-full items-center justify-center`}>
+                        {(selectedTeacherDetail.displayName || selectedTeacherDetail.username || 'G')[0]?.toUpperCase()}
+                      </span>
                     </div>
-                  )}
-                  {teacher.teacherStatus === 'rejected' && (
-                    <div className="flex flex-col items-end gap-1">
-                      <div className="flex items-center gap-2 px-4 py-2 bg-rose-50 rounded-xl">
-                        <XCircle className="w-5 h-5 text-rose-500" />
-                        <span className="text-sm font-black text-rose-600">Đã từ chối</span>
+                    <div className="space-y-2 text-center sm:text-left flex-1 min-w-0">
+                      <h3 className="font-heading text-xl font-extrabold text-slate-900 truncate">
+                        {selectedTeacherDetail.displayName || selectedTeacherDetail.username}
+                      </h3>
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-xs font-bold text-slate-500">
+                        <div className="flex items-center gap-1.5 text-indigo-600 bg-indigo-50 px-3 py-1 rounded-xl">
+                          <Mail className="w-4 h-4 shrink-0" />
+                          <span className="font-mono text-xs">{selectedTeacherDetail.email}</span>
+                        </div>
+                        {selectedTeacherDetail.teacherProfile?.phone && (
+                          <div className="flex items-center gap-1.5 bg-slate-200/60 px-3 py-1 rounded-xl text-slate-700">
+                            <Phone className="w-4 h-4 shrink-0 text-slate-400" />
+                            <span>{selectedTeacherDetail.teacherProfile.phone}</span>
+                          </div>
+                        )}
                       </div>
-                      {teacher.teacherProfile?.rejectionReason && (
-                        <p className="text-xs text-slate-400 max-w-xs text-right mt-1">Lý do: {teacher.teacherProfile.rejectionReason}</p>
-                      )}
+                      <p className="text-xs text-slate-400 font-medium">
+                        Ngày gửi đơn: {formatDate(selectedTeacherDetail.teacherProfile?.appliedAt || selectedTeacherDetail.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Detailed Form Information Grid */}
+                  <div>
+                    <h4 className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <Building className="w-4 h-4 text-indigo-500" />
+                      Thông Tin Chuyên Môn & Đơn Đăng Ký
+                    </h4>
+                    <div className="grid sm:grid-cols-2 gap-3.5">
+                      <div className="p-4 bg-[#e4f2f0]/30 rounded-2xl border border-[#e4f2f0]">
+                        <span className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider block mb-1">
+                          Trường / Đơn vị công tác
+                        </span>
+                        <span className="font-heading text-sm font-extrabold text-[#274dad]">
+                          {selectedTeacherDetail.teacherProfile?.school || 'Chưa cập nhật'}
+                        </span>
+                      </div>
+
+                      <div className="p-4 bg-[#e4f2f0]/30 rounded-2xl border border-[#e4f2f0]">
+                        <span className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider block mb-1">
+                          Môn giảng dạy
+                        </span>
+                        <span className="font-heading text-sm font-extrabold text-[#274dad]">
+                          {selectedTeacherDetail.teacherProfile?.subject || 'Vật lý'}
+                        </span>
+                      </div>
+
+                      <div className="p-4 bg-[#e4f2f0]/30 rounded-2xl border border-[#e4f2f0]">
+                        <span className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider block mb-1">
+                          Kinh nghiệm giảng dạy
+                        </span>
+                        <span className="font-heading text-sm font-extrabold text-[#274dad]">
+                          {selectedTeacherDetail.teacherProfile?.experience || 'Chưa cập nhật'}
+                        </span>
+                      </div>
+
+                      <div className="p-4 bg-[#e4f2f0]/30 rounded-2xl border border-[#e4f2f0]">
+                        <span className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider block mb-1">
+                          Bằng cấp / Trình độ
+                        </span>
+                        <span className="font-heading text-sm font-extrabold text-[#274dad]">
+                          {selectedTeacherDetail.teacherProfile?.degree || 'Chưa cập nhật'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Application Reason */}
+                  {selectedTeacherDetail.teacherProfile?.reason && (
+                    <div>
+                      <h4 className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-violet-500" />
+                        Lý Do Tham Gia Hệ Thống
+                      </h4>
+                      <div className="p-5 bg-gradient-to-r from-violet-50/70 to-indigo-50/70 rounded-2xl border border-violet-100">
+                        <p className="text-sm text-slate-700 font-medium leading-relaxed italic">
+                          "{selectedTeacherDetail.teacherProfile.reason}"
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
 
-                {/* Reason */}
-                {teacher.teacherProfile?.reason && (
-                  <div className="bg-slate-50 rounded-2xl px-4 py-3 border border-slate-100">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
-                      <span className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Lý do tham gia</span>
-                    </div>
-                    <p className="font-body text-xs text-slate-600 font-medium leading-relaxed">{teacher.teacherProfile.reason}</p>
-                  </div>
-                )}
+                {/* RIGHT COLUMN: Proof Documents & Certificate Photo Gallery (5 Columns) */}
+                <div className="lg:col-span-5 bg-slate-50/80 p-5 rounded-3xl border border-slate-100 space-y-4">
+                  <h4 className="font-heading text-xs font-extrabold text-slate-500 uppercase tracking-widest flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Award className="w-4 h-4 text-emerald-500" />
+                      Ảnh Minh Chứng Xét Duyệt ({selectedTeacherDetail.teacherProfile?.certificates?.length || 0})
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-normal">
+                      Nhấp ảnh để phóng to
+                    </span>
+                  </h4>
 
-                {/* Certificates */}
-                {teacher.teacherProfile?.certificates && teacher.teacherProfile.certificates.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <FileText className="w-3.5 h-3.5 text-violet-400" />
-                      <span className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Tài liệu minh chứng ({teacher.teacherProfile.certificates.length})</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {teacher.teacherProfile.certificates.map((cert, idx) => {
-                        const fileLink = cert.viewUrl || cert.url;
-                        const isImage = (fileLink && fileLink.match(/\.(jpg|jpeg|png|webp)/i)) || (cert.type && cert.type.startsWith('image/'));
+                  {selectedTeacherDetail.teacherProfile?.certificates && selectedTeacherDetail.teacherProfile.certificates.length > 0 ? (
+                    <div className="space-y-3.5">
+                      {selectedTeacherDetail.teacherProfile.certificates.map((cert, idx) => {
+                        const fileLink = cert.viewUrl || cert.url || cert.base64;
+                        const isImg = cert.isImage;
+
                         return (
-                          <a
+                          <div
                             key={idx}
-                            href={fileLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group flex items-center gap-2 px-3 py-2 bg-violet-50 hover:bg-violet-100 border border-violet-200 rounded-xl transition-all"
+                            className="group relative bg-white border border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-between transition-all hover:shadow-md hover:border-indigo-300"
                           >
-                            {isImage ? (
-                              <img src={fileLink} alt={cert.name} className="w-10 h-10 object-cover rounded-lg border border-violet-200" />
+                            {fileLink ? (
+                              isImg ? (
+                                <div
+                                  onClick={() => setPreviewImage({ url: fileLink, fallbackUrl: cert.base64 || cert.url, name: cert.name || `Tài liệu ${idx + 1}` })}
+                                  className="w-full h-44 rounded-xl overflow-hidden bg-slate-900/5 relative cursor-pointer group-hover:opacity-95 transition-opacity"
+                                >
+                                  <img
+                                    src={fileLink}
+                                    alt={cert.name || 'Proof'}
+                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                    onError={(e) => {
+                                      const fallback = cert.base64 || cert.url;
+                                      if (fallback && e.target.src !== fallback && fallback !== fileLink) {
+                                        console.log('🔄 Image load failed, falling back to base64 data');
+                                        e.target.src = fallback;
+                                      } else {
+                                        console.warn('⚠️ Image failed to load:', fileLink);
+                                        e.target.style.display = 'none';
+                                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                      }
+                                    }}
+                                  />
+                                  <div className="hidden w-full h-full items-center justify-center bg-slate-100 text-slate-400 text-xs font-bold p-4 text-center">
+                                    Không thể hiển thị ảnh (File hỏng)
+                                  </div>
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-heading text-xs font-extrabold gap-1.5 backdrop-blur-[2px]">
+                                    <Eye className="w-4 h-4" />
+                                    <span>Xem phóng to</span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <a
+                                  href={fileLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="w-full h-36 rounded-xl bg-violet-50 border border-violet-100 flex flex-col items-center justify-center p-4 text-center group-hover:bg-violet-100 transition-colors"
+                                >
+                                  <FileText className="w-10 h-10 text-violet-500 mb-2" />
+                                  <span className="text-xs font-extrabold text-violet-700 max-w-[180px] truncate">
+                                    {cert.name || `Tài liệu ${idx + 1}`}
+                                  </span>
+                                  <span className="text-[10px] text-violet-400 mt-1 flex items-center gap-1">
+                                    Tải về / Mở file <ExternalLink className="w-3 h-3" />
+                                  </span>
+                                </a>
+                              )
                             ) : (
-                              <FileText className="w-5 h-5 text-violet-500" />
+                              <div className="w-full h-36 rounded-xl bg-slate-100 flex flex-col items-center justify-center text-slate-400 text-xs font-bold p-4 text-center">
+                                Chưa có link tải file
+                              </div>
                             )}
-                            <span className="font-body text-xs font-bold text-violet-700 max-w-[120px] truncate">{cert.name || `File ${idx + 1}`}</span>
-                            <ExternalLink className="w-3 h-3 text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </a>
+
+                            <div className="w-full mt-3 flex items-center justify-between text-xs px-1">
+                              <span className="font-bold text-slate-600 truncate max-w-[160px]">
+                                {cert.name || `Bằng cấp ${idx + 1}`}
+                              </span>
+                              {isImg && fileLink && (
+                                <button
+                                  onClick={() => setPreviewImage({ url: fileLink, name: cert.name || `Tài liệu ${idx + 1}` })}
+                                  className="text-indigo-600 font-extrabold hover:underline text-[11px] shrink-0"
+                                >
+                                  Phóng to
+                                </button>
+                              )}
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
+                  ) : (
+                    <div className="p-6 bg-amber-50 rounded-2xl border border-amber-200 text-amber-700 text-xs font-bold flex items-center gap-3">
+                      <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
+                      <span>Chưa có ảnh minh chứng bằng cấp/chứng chỉ được đính kèm trong đơn này.</span>
+                    </div>
+                  )}
+
+                  {/* DIRECT APPLICANT FEEDBACK CARD */}
+                  <div className="mt-5 pt-4 border-t border-slate-200/80 space-y-3">
+                    <h4 className="font-heading text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-indigo-600" />
+                      Phản Hồi Trực Tiếp Ứng Viên (Qua Email)
+                    </h4>
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      Nhập nội dung để gửi mail trực tiếp đến hòm thư: <strong className="text-indigo-600 font-mono">{selectedTeacherDetail.email}</strong>
+                    </p>
+
+                    <div className="relative">
+                      <textarea
+                        value={feedbackText}
+                        onChange={(e) => setFeedbackText(e.target.value)}
+                        placeholder="Nhập ghi chú, nhận xét hoặc yêu cầu bổ sung thông tin gửi tới ứng viên..."
+                        rows={3}
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                      />
+                    </div>
+
+                    {/* Feedback Status Alert */}
+                    {feedbackStatus && (
+                      <div className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200 ${
+                        feedbackStatus.type === 'success' 
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                          : 'bg-rose-50 text-rose-700 border border-rose-200'
+                      }`}>
+                        {feedbackStatus.type === 'success' ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                        )}
+                        <span>{feedbackStatus.message}</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleSendFeedback}
+                      disabled={sendingFeedback || !feedbackText.trim()}
+                      className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-heading font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 shadow-md shadow-indigo-500/10 transition-all cursor-pointer"
+                    >
+                      {sendingFeedback ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Đang gửi phản hồi...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>Gửi Phản Hồi Đến Email</span>
+                        </>
+                      )}
+                    </button>
                   </div>
-                )}
-                {teacher.teacherProfile?.certificates?.length === 0 && teacher.teacherStatus === 'pending' && (
-                  <div className="flex items-center gap-2 text-xs font-body font-bold text-amber-500">
-                    <AlertCircle className="w-4 h-4" />
-                    Chưa nộp tài liệu minh chứng (hồ sơ chưa đầy đủ)
-                  </div>
-                )}
+                </div>
               </div>
             </div>
-          ))}
+
+            {/* Modal Footer Actions */}
+            <div className="p-6 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4 shrink-0">
+              <button
+                onClick={() => setSelectedTeacherDetail(null)}
+                className="px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-xl font-heading font-extrabold text-xs uppercase tracking-widest transition-all"
+              >
+                Đóng
+              </button>
+
+              {selectedTeacherDetail.teacherStatus === 'pending' && (
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      const tId = selectedTeacherDetail._id;
+                      setSelectedTeacherDetail(null);
+                      setRejectModal(tId);
+                    }}
+                    disabled={actionLoading === selectedTeacherDetail._id}
+                    className="flex items-center gap-2 px-6 py-3 bg-white border border-rose-200 text-rose-500 hover:bg-rose-50 rounded-xl font-heading font-extrabold text-xs uppercase tracking-widest transition-all shadow-sm disabled:opacity-50"
+                  >
+                    <XCircle className="w-4 h-4" />
+                    Từ chối đơn
+                  </button>
+                  <button
+                    onClick={() => {
+                      const tId = selectedTeacherDetail._id;
+                      setSelectedTeacherDetail(null);
+                      handleVerify(tId);
+                    }}
+                    disabled={actionLoading === selectedTeacherDetail._id}
+                    className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-heading font-extrabold text-xs uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Phê duyệt hồ sơ
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FULLSCREEN IMAGE LIGHTBOX MODAL */}
+      {previewImage && (
+        <div
+          onClick={() => setPreviewImage(null)}
+          className="fixed inset-0 bg-black/90 backdrop-blur-md z-[120] flex items-center justify-center p-4 animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-5xl max-h-[90vh] flex flex-col items-center justify-center"
+          >
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-all"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img
+              src={previewImage.url}
+              alt={previewImage.name}
+              className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl border border-white/10"
+              onError={(e) => {
+                if (previewImage.fallbackUrl && e.target.src !== previewImage.fallbackUrl) {
+                  console.log('🔄 Lightbox image failed, trying fallback URL');
+                  e.target.src = previewImage.fallbackUrl;
+                }
+              }}
+            />
+            <div className="mt-4 flex items-center gap-4 text-white">
+              <span className="font-heading font-extrabold text-sm">{previewImage.name}</span>
+              <a
+                href={previewImage.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs font-bold text-cyan-400 hover:underline"
+              >
+                Mở tab mới <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
         </div>
       )}
 
@@ -590,7 +1047,16 @@ const getInitialUsersCache = () => {
 
 // ==================== Main AdminUsers Component ====================
 const AdminUsers = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('users');
+
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    } else if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
   const [users, setUsers] = useState(() => getInitialUsersCache());
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -966,7 +1432,7 @@ const AdminUsers = () => {
 
       {/* Tab content */}
       {activeTab === 'pending-teachers' ? (
-        <PendingTeachersTab />
+        <PendingTeachersTab selectedTeacherIdFromState={location.state?.selectedTeacherId} />
       ) : (
         <>
           {/* Stats cards */}
@@ -1118,16 +1584,27 @@ const AdminUsers = () => {
                               onClick={() => setShowUserDetail(user)}
                               className="flex items-center gap-3.5 cursor-pointer group/name"
                             >
-                              <div className="w-11 h-11 rounded-full bg-white border border-slate-200/90 shadow-sm flex items-center justify-center overflow-hidden shrink-0 group-hover/name:border-[#2099e9] group-hover/name:shadow-md transition-all">
-                                {user.avatar ? (
-                                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                                ) : user.role === 'teacher' ? (
-                                  <GraduationCap className="w-5 h-5 text-slate-900" />
-                                ) : (
-                                  <span className="font-heading text-slate-900 font-extrabold text-base">
-                                    {user.name ? user.name[0].toUpperCase() : 'U'}
-                                  </span>
-                                )}
+                              <div className="w-11 h-11 rounded-full bg-white border border-slate-200/90 shadow-sm flex items-center justify-center overflow-hidden shrink-0 group-hover/name:border-[#2099e9] group-hover/name:shadow-md transition-all relative">
+                                {user.avatar && user.avatar !== 'null' && user.avatar !== 'undefined' ? (
+                                  <img
+                                    src={user.avatar}
+                                    alt={user.name}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                    }}
+                                  />
+                                ) : null}
+                                <div className={`${user.avatar && user.avatar !== 'null' && user.avatar !== 'undefined' ? 'hidden' : 'flex'} w-full h-full items-center justify-center`}>
+                                  {user.role === 'teacher' ? (
+                                    <GraduationCap className="w-5 h-5 text-slate-900" />
+                                  ) : (
+                                    <span className="font-heading text-slate-900 font-extrabold text-base">
+                                      {user.name ? user.name[0].toUpperCase() : 'U'}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                               <div>
                                 <p className="font-heading text-sm font-extrabold text-[#274dad] group-hover/name:text-[#2099e9] transition-colors">
@@ -1314,16 +1791,27 @@ const AdminUsers = () => {
             <div className="p-8 flex flex-col md:flex-row gap-8">
               {/* Left Column: Avatar & Profile Card */}
               <div className="w-full md:w-64 bg-slate-50/70 border border-slate-100 rounded-3xl p-6 flex flex-col items-center justify-center text-center shrink-0">
-                <div className="w-24 h-24 rounded-full bg-white border-2 border-slate-200 shadow-md flex items-center justify-center overflow-hidden mb-4 shrink-0">
-                  {showUserDetail.avatar ? (
-                    <img src={showUserDetail.avatar} alt={showUserDetail.name} className="w-full h-full object-cover" />
-                  ) : showUserDetail.role === 'teacher' ? (
-                    <GraduationCap className="w-10 h-10 text-slate-900" />
-                  ) : (
-                    <span className="font-heading text-slate-900 font-black text-3xl">
-                      {showUserDetail.name ? showUserDetail.name[0].toUpperCase() : 'U'}
-                    </span>
-                  )}
+                <div className="w-24 h-24 rounded-full bg-white border-2 border-slate-200 shadow-md flex items-center justify-center overflow-hidden mb-4 shrink-0 relative">
+                  {showUserDetail.avatar && showUserDetail.avatar !== 'null' && showUserDetail.avatar !== 'undefined' ? (
+                    <img
+                      src={showUserDetail.avatar}
+                      alt={showUserDetail.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div className={`${showUserDetail.avatar && showUserDetail.avatar !== 'null' && showUserDetail.avatar !== 'undefined' ? 'hidden' : 'flex'} w-full h-full items-center justify-center`}>
+                    {showUserDetail.role === 'teacher' ? (
+                      <GraduationCap className="w-10 h-10 text-slate-900" />
+                    ) : (
+                      <span className="font-heading text-slate-900 font-black text-3xl">
+                        {showUserDetail.name ? showUserDetail.name[0].toUpperCase() : 'U'}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <h4 className="font-heading text-lg font-extrabold text-[#274dad] mb-1 break-words w-full">
@@ -1609,6 +2097,17 @@ const AdminUsers = () => {
                       onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
                       className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-2xl px-5 py-3.5 text-[#274dad] font-bold focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all"
                       required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="font-heading text-xs font-extrabold text-slate-400 uppercase tracking-widest">Email người dùng</label>
+                    <input
+                      type="email"
+                      value={editFormData.email}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="user@example.com"
+                      className="font-body w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-2xl px-5 py-3.5 text-[#274dad] font-bold focus:outline-none focus:bg-white focus:border-[#2099e9] transition-all"
                     />
                   </div>
 

@@ -2298,6 +2298,13 @@ if (require.main === module) {
     console.log(`✓ Socket.io enabled for PK Battle`);
     console.log(`✓ Database: Supabase (PostgreSQL)`);
     console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use by another node process.`);
+      console.log(`💡 Automatic cleanup requested or run: Get-Process node | Stop-Process -Force`);
+    } else {
+      console.error('❌ Server error:', err);
+    }
   });
 }
 

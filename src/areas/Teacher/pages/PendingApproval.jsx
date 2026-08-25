@@ -24,13 +24,25 @@ const PendingApproval = () => {
     // If verified, redirect to dashboard
     if (isVerified) {
       navigate('/teacher/dashboard');
+      return;
     }
 
     // If not authenticated as teacher, redirect to login
     if (!isAuthenticated && !loading) {
       navigate('/login');
+      return;
     }
-  }, [isAuthenticated, isVerified, loading, navigate]);
+
+    // Fetch latest status immediately on mount
+    refreshTeacher();
+
+    // Auto-poll status every 4 seconds while pending or checking
+    const pollInterval = setInterval(() => {
+      refreshTeacher();
+    }, 4000);
+
+    return () => clearInterval(pollInterval);
+  }, [isAuthenticated, isVerified, loading, navigate, refreshTeacher]);
 
   const handleLogout = async () => {
     await logout();
@@ -122,7 +134,7 @@ const PendingApproval = () => {
                   <span className="font-heading block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Trạng Thái Hiện Tại</span>
                   <p className={`font-heading font-extrabold text-sm ${isPending ? 'text-[#4f46e5]' : isRejected ? 'text-rose-600' : 'text-emerald-600'
                     }`}>
-                    {isPending ? 'Đang chờ phê duyệt' : isRejected ? 'Rejected' : 'Verified'}
+                    {isPending ? 'Đang chờ phê duyệt' : isRejected ? 'Bị từ chối' : 'Đã xác minh'}
                   </p>
                 </div>
               </div>
@@ -154,14 +166,24 @@ const PendingApproval = () => {
           )}
 
           {isRejected && (
-            <div className="p-5 bg-rose-50 border border-rose-100 rounded-2xl mb-8">
-              <div className="flex items-center gap-2 mb-2 text-rose-700">
-                <AlertCircle className="w-4 h-4" />
-                <h4 className="font-heading font-extrabold text-xs uppercase tracking-wider">Lý do từ chối:</h4>
+            <div className="space-y-4 mb-8">
+              <div className="p-5 bg-rose-50 border border-rose-100 rounded-2xl">
+                <div className="flex items-center gap-2 mb-2 text-rose-700">
+                  <AlertCircle className="w-4 h-4" />
+                  <h4 className="font-heading font-extrabold text-xs uppercase tracking-wider">Lý do từ chối:</h4>
+                </div>
+                <p className="font-body text-xs font-medium text-rose-600 leading-relaxed">
+                  {teacher.teacherProfile?.rejectionReason || 'Thông tin cung cấp không đủ điều kiện xác minh danh tính giảng viên.'}
+                </p>
               </div>
-              <p className="font-body text-xs font-medium text-rose-600 leading-relaxed">
-                {teacher.teacherProfile?.rejectionReason || 'Thông tin cung cấp không đủ điều kiện xác minh danh tính giảng viên.'}
-              </p>
+
+              <button
+                onClick={() => navigate('/teacher/apply')}
+                className="w-full py-3.5 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-heading font-extrabold text-sm transition-all shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>Chỉnh Sửa & Nộp Lại Hồ Sơ</span>
+              </button>
             </div>
           )}
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Mail, Users, BookOpen, FileQuestion, Activity,
   Download, RefreshCw, GraduationCap, Atom,
@@ -32,6 +33,7 @@ const StatCard = ({ title, value, sub, icon: Icon, color }) => (
 );
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [realStats, setRealStats] = useState(() => {
     try {
       const cached = localStorage.getItem('physigame_admin_dashboard_stats');
@@ -109,16 +111,22 @@ const AdminDashboard = () => {
         localStorage.setItem('physigame_admin_dashboard_stats', JSON.stringify(newStats));
       } catch (e) {}
 
-      const formattedPending = pendingData.map(t => ({
-        id: t.id,
-        name: t.display_name || t.displayName || t.username || 'Giáo viên',
-        email: t.email || '—',
-        avatar: t.avatar || t.teacher_profile?.avatar || null,
-        subject: t.teacher_profile?.subject || 'Vật lý',
-        school: t.teacher_profile?.school || 'Chưa cập nhật',
-        joinDate: (t.teacher_profile?.applied_at || t.created_at) ? new Date(t.teacher_profile?.applied_at || t.created_at).toLocaleDateString('vi-VN') : '—',
-        originalData: t,
-      }));
+      const formattedPending = pendingData.map(t => {
+        const rawEmail = (t.teacher_profile?.email && typeof t.teacher_profile.email === 'string' && !t.teacher_profile.email.includes('@example.com'))
+          ? t.teacher_profile.email
+          : (t.email && typeof t.email === 'string' && !t.email.includes('@example.com') ? t.email : null);
+        const resolvedEmail = rawEmail || 'Chưa cập nhật email';
+        return {
+          id: t.id,
+          name: t.display_name || t.displayName || t.username || 'Giáo viên',
+          email: resolvedEmail,
+          avatar: t.avatar || t.teacher_profile?.avatar || null,
+          subject: t.teacher_profile?.subject || 'Vật lý',
+          school: t.teacher_profile?.school || 'Chưa cập nhật',
+          joinDate: (t.teacher_profile?.applied_at || t.created_at) ? new Date(t.teacher_profile?.applied_at || t.created_at).toLocaleDateString('vi-VN') : '—',
+          originalData: t,
+        };
+      });
 
       setPendingTeachers(formattedPending);
       try {
@@ -135,6 +143,11 @@ const AdminDashboard = () => {
       const response = await api.post(`/users/verify-teacher/${teacher.id}`);
       if (!response.data.success) throw new Error(response.data.message);
       await sendTeacherStatusEmail(teacher.email, teacher.name, 'verified');
+      try {
+        const bc = new BroadcastChannel('physigame_teacher_status_actions');
+        bc.postMessage({ type: 'TEACHER_STATUS_UPDATED', teacherId: teacher.id, status: 'verified' });
+        bc.close();
+      } catch (e) {}
       await fetchAll();
     } catch (err) {
       console.error('Approval failed:', err);
@@ -157,6 +170,11 @@ const AdminDashboard = () => {
       const response = await api.post(`/users/reject-teacher/${selectedTeacher.id}`, { reason: rejectionReason });
       if (!response.data.success) throw new Error(response.data.message);
       await sendTeacherStatusEmail(selectedTeacher.email, selectedTeacher.name, 'rejected', rejectionReason);
+      try {
+        const bc = new BroadcastChannel('physigame_teacher_status_actions');
+        bc.postMessage({ type: 'TEACHER_STATUS_UPDATED', teacherId: selectedTeacher.id, status: 'rejected' });
+        bc.close();
+      } catch (e) {}
       await fetchAll();
     } catch (err) {
       console.error('Rejection failed:', err);
@@ -221,7 +239,11 @@ const AdminDashboard = () => {
           {pendingTeachers.length > 0 ? (
             <div className="space-y-4">
               {pendingTeachers.map((teacher) => (
-                <div key={teacher.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-indigo-200 transition-all group">
+                <div
+                  key={teacher.id}
+                  onClick={() => navigate('/admin/users', { state: { activeTab: 'pending-teachers', selectedTeacherId: teacher.id } })}
+                  className="p-6 bg-slate-50 hover:bg-indigo-50/40 rounded-[2rem] border border-slate-100 hover:border-indigo-300 transition-all cursor-pointer group shadow-sm hover:shadow-md"
+                >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden shrink-0">
@@ -241,7 +263,7 @@ const AdminDashboard = () => {
                         </span>
                       </div>
                       <div>
-                        <h4 className="font-heading font-extrabold text-slate-900">{teacher.name}</h4>
+                        <h4 className="font-heading font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">{teacher.name}</h4>
                         <div className="font-body flex items-center gap-2 text-xs font-bold text-slate-400 mt-1">
                           <Mail className="w-3.5 h-3.5" />
                           <span>{teacher.email}</span>
@@ -249,23 +271,9 @@ const AdminDashboard = () => {
                         <p className="font-body text-xs text-slate-300 mt-0.5">Đăng ký: {teacher.joinDate}</p>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleApprove(teacher)}
-                        disabled={actionLoading === teacher.id}
-                        className="font-heading flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl font-extrabold text-xs hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/20 disabled:opacity-50"
-                      >
-                        {actionLoading === teacher.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                        PHÊ DUYỆT
-                      </button>
-                      <button
-                        onClick={() => openRejectModal(teacher)}
-                        disabled={actionLoading === teacher.id}
-                        className="font-heading flex items-center gap-2 px-4 py-2 bg-white text-rose-500 border border-rose-100 rounded-xl font-extrabold text-xs hover:bg-rose-50 transition-all disabled:opacity-50"
-                      >
-                        <XCircle className="w-3.5 h-3.5" />
-                        TỪ CHỐI
-                      </button>
+                    <div className="flex items-center gap-1.5 px-4 py-2 bg-white border border-indigo-100 text-indigo-600 rounded-xl font-heading font-extrabold text-xs group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                      <span>Xem chi tiết hồ sơ</span>
+                      <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                     </div>
                   </div>
                 </div>
@@ -314,14 +322,20 @@ const AdminDashboard = () => {
 
         {/* Pending alert */}
         {realStats.pendingTeachers > 0 && (
-          <div className="p-6 bg-amber-50 border border-amber-200 rounded-[2rem] flex items-center gap-4">
-            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
-              <UserX className="w-5 h-5 text-amber-600" />
+          <div
+            onClick={() => navigate('/admin/users', { state: { activeTab: 'pending-teachers' } })}
+            className="p-6 bg-amber-50 border border-amber-200 rounded-[2rem] flex items-center justify-between cursor-pointer hover:bg-amber-100/80 transition-all group shadow-sm"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+                <UserX className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="font-heading font-extrabold text-amber-800 text-sm">Cần phê duyệt</p>
+                <p className="font-body text-amber-600 text-xs font-bold">{realStats.pendingTeachers} giáo viên đang chờ xác nhận</p>
+              </div>
             </div>
-            <div>
-              <p className="font-heading font-extrabold text-amber-800 text-sm">Cần phê duyệt</p>
-              <p className="font-body text-amber-600 text-xs font-bold">{realStats.pendingTeachers} giáo viên đang chờ xác nhận</p>
-            </div>
+            <ArrowUpRight className="w-4 h-4 text-amber-600 group-hover:translate-x-0.5 transition-transform" />
           </div>
         )}
 

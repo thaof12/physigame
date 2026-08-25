@@ -6,7 +6,7 @@ import api from '../../../config/api';
 import {
   GraduationCap, Phone, Building, BookOpen, Award,
   Upload, ArrowRight, X, FileText, Lock, ChevronDown, Check,
-  User, Sparkles, AlertCircle, Image as ImageIcon, Clock
+  User, Sparkles, AlertCircle, Image as ImageIcon, Clock, Mail
 } from 'lucide-react';
 
 const DEGREE_OPTIONS = [
@@ -25,6 +25,69 @@ const EXPERIENCE_OPTIONS = [
   '5–10 năm',
   'Trên 10 năm'
 ];
+
+const DISPOSABLE_EMAIL_DOMAINS = [
+  'mailinator.com', '10minutemail.com', 'tempmail.com', 'yopmail.com',
+  'guerrillamail.com', 'trashmail.com', 'dispostable.com', 'getnada.com',
+  'sharklasers.com', 'throwawaymail.com', 'mailnesia.com', 'maildrop.cc'
+];
+
+export const validateTeacherApplication = ({ fullName, email, phone, school, reason }) => {
+  // 1. Họ và tên
+  const trimmedName = fullName?.trim() || '';
+  if (!trimmedName) return 'Vui lòng nhập họ và tên đầy đủ.';
+  if (trimmedName.length < 3) return 'Họ và tên phải từ 3 đến 60 ký tự.';
+  if (trimmedName.length > 60) return 'Họ và tên không được vượt quá 60 ký tự.';
+  if (/^\d+$/.test(trimmedName.replace(/\s/g, ''))) {
+    return 'Họ và tên không hợp lệ (không được chứa toàn chữ số). Vui lòng nhập họ và tên thật.';
+  }
+  if (!/^[a-zA-ZÀ-ỹ\s'.]+$/u.test(trimmedName)) {
+    return 'Họ và tên chỉ được chứa chữ cái và khoảng trắng (không chứa số hoặc ký tự đặc biệt).';
+  }
+
+  // 2. Email
+  const trimmedEmail = email?.trim() || '';
+  if (!trimmedEmail) return 'Vui lòng nhập email liên hệ.';
+  if (trimmedEmail.length > 100) return 'Email không được vượt quá 100 ký tự.';
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(trimmedEmail)) return 'Định dạng email không hợp lệ (VD: teacher@gmail.com).';
+  const domain = trimmedEmail.split('@')[1]?.toLowerCase();
+  if (domain && DISPOSABLE_EMAIL_DOMAINS.includes(domain)) {
+    return 'Hệ thống không tiếp nhận đăng ký từ địa chỉ email rác/tạm thời.';
+  }
+
+  // 3. Số điện thoại
+  const cleanPhone = phone?.trim().replace(/\s/g, '') || '';
+  if (!cleanPhone) return 'Vui lòng nhập số điện thoại liên hệ.';
+  if (cleanPhone.length > 12) return 'Số điện thoại không được vượt quá 12 ký tự.';
+  const phoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+  if (!phoneRegex.test(cleanPhone)) {
+    return 'Số điện thoại không hợp lệ. Phải là SĐT Việt Nam (10 số, bắt đầu bằng 03, 05, 07, 08, 09 hoặc +84).';
+  }
+  const subscriberNumber = cleanPhone.replace(/^(0|\+84)/, '');
+  if (/^(\d)\1{7,}$/.test(subscriberNumber)) {
+    return 'Số điện thoại nghi vấn spam (chứa dãy số lặp lại ngẫu nhiên).';
+  }
+
+  // 4. Trường / Nơi công tác
+  const trimmedSchool = school?.trim() || '';
+  if (!trimmedSchool) return 'Vui lòng nhập trường / nơi công tác.';
+  if (trimmedSchool.length < 5) return 'Tên trường/nơi công tác phải từ 5 ký tự trở lên.';
+  if (trimmedSchool.length > 120) return 'Tên trường/nơi công tác không vượt quá 120 ký tự.';
+  if (/^\d+$/.test(trimmedSchool.replace(/\s/g, ''))) {
+    return 'Tên trường/nơi công tác không thể chỉ gồm các con số.';
+  }
+  if (/(.)\1{4,}/.test(trimmedSchool.replace(/\s/g, ''))) {
+    return 'Tên trường/nơi công tác chứa chuỗi ký tự lặp lại bất thường.';
+  }
+
+  // 5. Lý do tham gia
+  const trimmedReason = reason?.trim() || '';
+  if (!trimmedReason || trimmedReason.length < 30) return 'Lý do tham gia cần tối thiểu 30 ký tự.';
+  if (trimmedReason.length > 1000) return 'Lý do tham gia không vượt quá 1000 ký tự.';
+
+  return null;
+};
 
 const labelClass = `block font-heading text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2`;
 
@@ -71,11 +134,10 @@ const CustomSelect = ({ label, icon: Icon, options, value, onChange, placeholder
                     onChange(opt);
                     setOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2.5 font-body text-sm font-bold flex items-center justify-between transition-colors ${
-                    isSelected
-                      ? 'bg-indigo-50 text-indigo-600 font-extrabold'
-                      : 'text-slate-700 hover:bg-slate-50 hover:text-indigo-600'
-                  }`}
+                  className={`w-full text-left px-4 py-2.5 font-body text-sm font-bold flex items-center justify-between transition-colors ${isSelected
+                    ? 'bg-indigo-50 text-indigo-600 font-extrabold'
+                    : 'text-slate-700 hover:bg-slate-50 hover:text-indigo-600'
+                    }`}
                 >
                   <span>{opt}</span>
                   {isSelected && <Check className="w-4 h-4 text-indigo-600 shrink-0" />}
@@ -89,13 +151,20 @@ const CustomSelect = ({ label, icon: Icon, options, value, onChange, placeholder
   );
 };
 
+const getCleanInitialName = (u) => {
+  const name = u?.displayName || u?.display_name || '';
+  if (name && /^\d+$/.test(name.trim())) return ''; // Clear pure digits
+  return name;
+};
+
 const TeacherApplication = () => {
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
-    fullName: user?.displayName || user?.display_name || '',
+    fullName: getCleanInitialName(user),
+    email: user?.email && !user.email.includes('@example.com') ? user.email : '',
     phone: '',
     school: '',
     subject: 'Vật lý', // Hardcoded Physics
@@ -103,6 +172,16 @@ const TeacherApplication = () => {
     degree: 'Cử nhân Sư phạm',
     reason: ''
   });
+
+  useEffect(() => {
+    if (user) {
+      setForm(prev => ({
+        ...prev,
+        fullName: prev.fullName || getCleanInitialName(user),
+        email: prev.email || (user?.email && !user.email.includes('@example.com') ? user.email : '')
+      }));
+    }
+  }, [user]);
 
   const [files, setFiles] = useState([]); // array of {file, preview, name}
   const [agreed, setAgreed] = useState(false);
@@ -112,6 +191,17 @@ const TeacherApplication = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === 'phone') {
+      let cleaned = value.replace(/(?!^\+)[^\d]/g, '');
+      if (cleaned.startsWith('+')) {
+        if (cleaned.length > 12) cleaned = cleaned.slice(0, 12);
+      } else {
+        if (cleaned.length > 10) cleaned = cleaned.slice(0, 10);
+      }
+      setForm(prev => ({ ...prev, [name]: cleaned }));
+      setError('');
+      return;
+    }
     setForm(prev => ({ ...prev, [name]: value }));
     setError('');
   };
@@ -160,7 +250,7 @@ const TeacherApplication = () => {
       try {
         const ext = entry.file.name.split('.').pop();
         const filePath = `${userId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-        
+
         // Timeout storage upload after 8s per file so it never hangs
         const uploadPromise = supabase.storage
           .from('teacher-certificates')
@@ -171,7 +261,7 @@ const TeacherApplication = () => {
         );
 
         const res = await Promise.race([uploadPromise, timeoutPromise]);
-        
+
         if (res?.error) {
           console.warn('⚠️ Storage upload warning for', entry.name, res.error.message);
           continue;
@@ -232,12 +322,9 @@ const TeacherApplication = () => {
     e.preventDefault();
     setError('');
 
-    if (!form.fullName.trim()) return setError('Vui lòng nhập họ tên đầy đủ.');
-    if (!form.phone.trim() || !/^(0|\+84)\d{9,10}$/.test(form.phone.replace(/\s/g, '')))
-      return setError('Số điện thoại không hợp lệ (VD: 0901234567).');
-    if (!form.school.trim()) return setError('Vui lòng nhập tên trường / nơi công tác.');
-    if (!form.reason.trim() || form.reason.trim().length < 30)
-      return setError('Vui lòng nhập lý do tham gia (ít nhất 30 ký tự).');
+    const validationErr = validateTeacherApplication(form);
+    if (validationErr) return setError(validationErr);
+
     if (files.length === 0)
       return setError('Vui lòng upload ít nhất 1 file minh chứng (ảnh bằng cấp, thẻ GV...).');
     if (!agreed)
@@ -260,6 +347,7 @@ const TeacherApplication = () => {
       // 2. Submit application via Backend API
       const payload = {
         userId,
+        email: form.email.trim() || user?.email || '',
         fullName: form.fullName.trim(),
         phone: form.phone.trim(),
         school: form.school.trim(),
@@ -277,21 +365,24 @@ const TeacherApplication = () => {
       }
 
       // 3. Update local user state
+      const submittedEmail = form.email.trim() || user?.email;
       const updatedUser = {
         ...user,
+        email: submittedEmail && !submittedEmail.includes('@example.com') ? submittedEmail : user?.email,
         displayName: form.fullName.trim(),
         display_name: form.fullName.trim(),
         role: 'teacher',
         teacherStatus: 'pending',
         teacher_status: 'pending',
         teacherProfile: {
+          email: submittedEmail,
           phone: form.phone.trim(),
           school: form.school.trim(),
           subject: 'Vật lý',
           experience: form.experience,
           degree: form.degree,
           reason: form.reason.trim(),
-          certificates: response.data.user?.teacherProfile?.certificates || []
+          certificates: response.data.user?.teacherProfile?.certificates || certsPayload || []
         }
       };
       localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -305,34 +396,43 @@ const TeacherApplication = () => {
       try {
         // Fallback: try uploading files or direct profile update to Supabase
         const uploadedFiles = await uploadFilesToSupabase(userId);
+        const submittedEmail = form.email.trim() || user?.email;
 
         const fallbackProfile = {
+          email: submittedEmail,
           phone: form.phone.trim(),
           school: form.school.trim(),
           subject: 'Vật lý',
           experience: form.experience,
           degree: form.degree,
           reason: form.reason.trim(),
-          certificates: uploadedFiles,
+          certificates: uploadedFiles.length > 0 ? uploadedFiles : certsPayload,
           applied_at: new Date().toISOString(),
           agreed_to_share: true
         };
 
+        const sbUpdates = {
+          display_name: form.fullName.trim(),
+          teacher_profile: fallbackProfile,
+          teacher_status: 'pending',
+          role: 'teacher',
+          updated_at: new Date().toISOString()
+        };
+
+        if (submittedEmail && !submittedEmail.includes('@example.com')) {
+          sbUpdates.email = submittedEmail;
+        }
+
         const { error: sbErr } = await supabase
           .from('users')
-          .update({
-            display_name: form.fullName.trim(),
-            teacher_profile: fallbackProfile,
-            teacher_status: 'pending',
-            role: 'teacher',
-            updated_at: new Date().toISOString()
-          })
+          .update(sbUpdates)
           .eq('id', userId);
 
         if (sbErr) throw sbErr;
 
         const updatedUser = {
           ...user,
+          email: submittedEmail && !submittedEmail.includes('@example.com') ? submittedEmail : user?.email,
           displayName: form.fullName.trim(),
           display_name: form.fullName.trim(),
           role: 'teacher',
@@ -401,10 +501,29 @@ const TeacherApplication = () => {
                 name="fullName"
                 value={form.fullName}
                 onChange={handleChange}
-                placeholder="Nguyễn Thị Thu Hương"
+                maxLength={60}
+                placeholder="Nhập họ và tên của bạn"
                 className={inputClass}
                 required
               />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className={labelClass}>Email liên hệ *</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  maxLength={100}
+                  placeholder="teacher@gmail.com"
+                  className={`${inputClass} pl-11`}
+                  required
+                />
+              </div>
             </div>
 
             {/* Phone */}
@@ -417,7 +536,8 @@ const TeacherApplication = () => {
                   name="phone"
                   value={form.phone}
                   onChange={handleChange}
-                  placeholder="0901 234 567"
+                  maxLength={12}
+                  placeholder="0901234567 (10 chữ số)"
                   className={`${inputClass} pl-11`}
                   required
                 />
@@ -434,6 +554,7 @@ const TeacherApplication = () => {
                   name="school"
                   value={form.school}
                   onChange={handleChange}
+                  maxLength={120}
                   placeholder="VD: THPT Lê Hồng Phong, TP.HCM"
                   className={`${inputClass} pl-11`}
                   required
@@ -512,11 +633,10 @@ const TeacherApplication = () => {
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onClick={() => fileInputRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
-                dragOver
-                  ? 'border-indigo-400 bg-indigo-50/50'
-                  : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50/50'
-              }`}
+              className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${dragOver
+                ? 'border-indigo-400 bg-indigo-50/50'
+                : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50/50'
+                }`}
             >
               <input
                 ref={fileInputRef}
@@ -578,12 +698,11 @@ const TeacherApplication = () => {
               onClick={() => setAgreed(prev => !prev)}
               className="flex items-start gap-4 w-full text-left group"
             >
-              <div className={`mt-0.5 shrink-0 w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-all ${
-                agreed ? 'bg-indigo-500 border-indigo-500' : 'border-slate-300 group-hover:border-indigo-400'
-              }`}>
+              <div className={`mt-0.5 shrink-0 w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-all ${agreed ? 'bg-indigo-500 border-indigo-500' : 'border-slate-300 group-hover:border-indigo-400'
+                }`}>
                 {agreed && (
                   <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 12 10" fill="none">
-                    <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M1 5L4.5 8.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </div>

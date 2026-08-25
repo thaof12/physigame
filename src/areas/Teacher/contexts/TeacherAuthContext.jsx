@@ -63,13 +63,18 @@ export const TeacherAuthProvider = ({ children }) => {
     }
   };
 
+  const effectiveStatus = teacher?.teacher_status || teacher?.teacherStatus || user?.teacher_status || user?.teacherStatus || 'pending';
+  const isTeacherVerified = effectiveStatus === 'verified';
+  const isTeacherRejected = effectiveStatus === 'rejected';
+  const isTeacherPending = !isTeacherVerified && !isTeacherRejected;
+
   const value = {
     teacher,
     loading,
     isAuthenticated,
-    isVerified,
-    isPending: teacher?.teacherStatus === 'pending' || teacher?.teacher_status === 'pending',
-    isRejected: teacher?.teacherStatus === 'rejected' || teacher?.teacher_status === 'rejected',
+    isVerified: isTeacherVerified,
+    isPending: isTeacherPending,
+    isRejected: isTeacherRejected,
     logout,
     refreshTeacher,
     checkTeacherAuth
