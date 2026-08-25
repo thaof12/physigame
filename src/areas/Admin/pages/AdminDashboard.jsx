@@ -34,27 +34,15 @@ const StatCard = ({ title, value, sub, icon: Icon, color }) => (
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [realStats, setRealStats] = useState(() => {
-    try {
-      const cached = localStorage.getItem('physigame_admin_dashboard_stats');
-      if (cached) return JSON.parse(cached);
-    } catch (e) {}
-    return {
-      totalUsers: 15,
-      students: 12,
-      teachers: 3,
-      pendingTeachers: 0,
-      newUsers30d: 5,
-      totalLessons: countLessons(),
-    };
+  const [realStats, setRealStats] = useState({
+    totalUsers: 0,
+    students: 0,
+    teachers: 0,
+    pendingTeachers: 0,
+    newUsers30d: 0,
+    totalLessons: countLessons(),
   });
-  const [pendingTeachers, setPendingTeachers] = useState(() => {
-    try {
-      const cached = localStorage.getItem('physigame_admin_pending_teachers');
-      if (cached) return JSON.parse(cached);
-    } catch (e) {}
-    return [];
-  });
+  const [pendingTeachers, setPendingTeachers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
@@ -62,56 +50,74 @@ const AdminDashboard = () => {
   const [rejectionReason, setRejectionReason] = useState('');
 
   useEffect(() => {
+    try {
+      localStorage.removeItem('physigame_admin_pending_teachers');
+      localStorage.removeItem('physigame_admin_dashboard_stats');
+    } catch (e) {}
     fetchAll();
   }, []);
 
   const fetchAll = async () => {
+    setLoading(true);
     try {
-      // 1. Fetch pending teachers via Backend API (service role) or clean Supabase query
-      let pendingData = [];
+      // 1. Fetch real stats and pending teachers via Backend Service Role APIs
+      let statsData = null;
+      let pendingList = [];
+
       try {
-        const apiRes = await api.get('/users/pending-teachers');
-        if (apiRes.data?.success && Array.isArray(apiRes.data?.teachers)) {
-          pendingData = apiRes.data.teachers;
+        const [statsRes, pendingRes] = await Promise.all([
+          api.get('/users/dashboard-stats'),
+          api.get('/users/pending-teachers')
+        ]);
+
+        if (statsRes.data?.success && statsRes.data?.stats) {
+          statsData = statsRes.data.stats;
+        }
+
+        if (pendingRes.data?.success && Array.isArray(pendingRes.data?.teachers)) {
+          pendingList = pendingRes.data.teachers;
         }
       } catch (apiErr) {
-        console.warn('⚠️ API pending-teachers fetch failed, falling back to Supabase:', apiErr.message);
+        console.warn('⚠️ API stats/pending-teachers fetch failed, falling back to Supabase:', apiErr.message);
       }
 
-      // Fallback to Supabase if API returned empty/failed
-      const [allUsersRes, fallbackPendingRes] = await Promise.all([
-        supabase.from('users').select('id, role, teacher_status, created_at'),
-        pendingData.length === 0
-          ? supabase.from('users').select('id, display_name, username, email, avatar, teacher_status, teacher_profile, created_at').eq('teacher_status', 'pending')
-          : Promise.resolve({ data: [] })
-      ]);
+      // Fallback to Supabase SDK if API didn't return data
+      if (!statsData || pendingList.length === 0) {
+        const [allUsersRes, fallbackTeachersRes] = await Promise.all([
+          supabase.from('users').select('id, role, status, teacher_status, created_at'),
+          supabase.from('users').select('id, display_name, username, email, avatar, teacher_status, teacher_profile, created_at').eq('role', 'teacher')
+        ]);
 
-      const allUsers = allUsersRes.data || [];
-      if (pendingData.length === 0 && fallbackPendingRes.data) {
-        pendingData = fallbackPendingRes.data;
+        const allUsers = allUsersRes.data || [];
+        const allTeachers = fallbackTeachersRes.data || [];
+        const realPendingFromDb = allTeachers.filter(t => t.teacher_status === 'pending' || !t.teacher_status);
+
+        if (pendingList.length === 0) {
+          pendingList = realPendingFromDb;
+        }
+
+        if (!statsData) {
+          const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+          const studentsCount = allUsers.filter(u => u.role === 'student').length;
+          const teachersCount = allUsers.filter(u => u.role === 'teacher').length;
+          const newUsersCount = allUsers.filter(u => new Date(u.created_at || 0) >= since30d).length;
+
+          statsData = {
+            totalUsers: allUsers.length,
+            students: studentsCount,
+            teachers: teachersCount,
+            pendingTeachers: pendingList.length,
+            newUsers30d: newUsersCount,
+          };
+        }
       }
 
-      const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const studentsCount = allUsers.filter(u => u.role === 'student').length;
-      const teachersCount = allUsers.filter(u => u.role === 'teacher').length;
-      const newUsersCount = allUsers.filter(u => new Date(u.created_at || 0) >= since30d).length;
-      const totalLessons = countLessons();
+      setRealStats({
+        ...statsData,
+        totalLessons: countLessons(),
+      });
 
-      const newStats = {
-        totalUsers: allUsers.length || 15,
-        students: studentsCount || 12,
-        teachers: teachersCount || 3,
-        pendingTeachers: pendingData.length,
-        newUsers30d: newUsersCount || 5,
-        totalLessons,
-      };
-
-      setRealStats(newStats);
-      try {
-        localStorage.setItem('physigame_admin_dashboard_stats', JSON.stringify(newStats));
-      } catch (e) {}
-
-      const formattedPending = pendingData.map(t => {
+      const formattedPending = pendingList.map(t => {
         const rawEmail = (t.teacher_profile?.email && typeof t.teacher_profile.email === 'string' && !t.teacher_profile.email.includes('@example.com'))
           ? t.teacher_profile.email
           : (t.email && typeof t.email === 'string' && !t.email.includes('@example.com') ? t.email : null);
@@ -129,11 +135,10 @@ const AdminDashboard = () => {
       });
 
       setPendingTeachers(formattedPending);
-      try {
-        localStorage.setItem('physigame_admin_pending_teachers', JSON.stringify(formattedPending));
-      } catch (e) {}
     } catch (err) {
-      console.error('Error fetching dashboard real data:', err);
+      console.error('Error fetching dashboard stats:', err);
+    } finally {
+      setLoading(false);
     }
   };
 

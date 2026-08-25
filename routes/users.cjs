@@ -383,6 +383,65 @@ router.get('/teachers', async (req, res) => {
   }
 });
 
+// GET /users/dashboard-stats - Real DB stats for Admin Dashboard via Service Role Key
+router.get('/dashboard-stats', async (req, res) => {
+  try {
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('id, role, status, teacher_status, created_at');
+
+    if (error) throw error;
+
+    const allUsers = users || [];
+    const students = allUsers.filter(u => u.role === 'student').length;
+    const teachers = allUsers.filter(u => u.role === 'teacher').length;
+    const pendingTeachers = allUsers.filter(u => u.role === 'teacher' && (u.teacher_status === 'pending' || !u.teacher_status)).length;
+    const rejectedTeachers = allUsers.filter(u => u.role === 'teacher' && u.teacher_status === 'rejected').length;
+    const verifiedTeachers = allUsers.filter(u => u.role === 'teacher' && u.teacher_status === 'verified').length;
+
+    const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const newUsers30d = allUsers.filter(u => new Date(u.created_at || 0) >= since30d).length;
+
+    return res.json({
+      success: true,
+      stats: {
+        totalUsers: allUsers.length,
+        students,
+        teachers,
+        pendingTeachers,
+        rejectedTeachers,
+        verifiedTeachers,
+        newUsers30d
+      }
+    });
+  } catch (err) {
+    console.error('❌ Server error in /users/dashboard-stats:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// GET /users/pending-teachers - Real pending teacher applications via Service Role Key
+router.get('/pending-teachers', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('role', 'teacher');
+
+    if (error) throw error;
+
+    const pending = (data || []).filter(u => u.teacher_status === 'pending' || !u.teacher_status);
+
+    return res.json({
+      success: true,
+      teachers: pending
+    });
+  } catch (err) {
+    console.error('❌ Server error in /users/pending-teachers:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Update user profile
 router.put('/profile/:userId', async (req, res) => {
   try {

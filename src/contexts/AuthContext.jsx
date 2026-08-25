@@ -244,6 +244,20 @@ export const AuthProvider = ({ children }) => {
             const dbUser = supabaseResResult.status === 'fulfilled' ? supabaseResResult.value?.data : null;
             const statusCheckData = statusCheckResResult.status === 'fulfilled' ? statusCheckResResult.value?.data : null;
 
+            const isJwtExpired = (supabaseResResult.status === 'rejected' && String(supabaseResResult.reason)?.toLowerCase().includes('jwt')) ||
+              (supabaseResResult.value?.error?.message?.toLowerCase().includes('jwt'));
+
+            if (isJwtExpired) {
+              console.warn('⚠️ [AuthContext] Expired Supabase JWT token detected. Purging stale storage keys...');
+              try {
+                Object.keys(localStorage).forEach(k => {
+                  if (k.startsWith('sb-') && k.endsWith('-auth-token')) {
+                    localStorage.removeItem(k);
+                  }
+                });
+              } catch (e) {}
+            }
+
             const resolvedStatus = statusCheckData?.teacher_status || dbUser?.teacher_status || apiUser?.teacher_status || apiUser?.teacherStatus || 'pending';
 
             let userData = null;
