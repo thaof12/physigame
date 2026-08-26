@@ -32,20 +32,8 @@ const Leaderboard = ({ isOpen, onClose }) => {
       setUserRank(response.data.userRank);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
-      // Mock data for demo
-      setLeaderboardData([
-        { rank: 1, username: 'ProGamer123', displayName: 'Minh Anh', xp: 15420, streak: 45, pkRating: 2150, avatar: null },
-        { rank: 2, username: 'ScienceLover', displayName: 'Hương Giang', xp: 14850, streak: 38, pkRating: 2080, avatar: null },
-        { rank: 3, username: 'PhysicsKing', displayName: 'Đức Anh', xp: 13200, streak: 52, pkRating: 1950, avatar: null },
-        { rank: 4, username: 'StarStudent', displayName: 'Thảo Linh', xp: 12100, streak: 28, pkRating: 1890, avatar: null },
-        { rank: 5, username: 'QuizMaster', displayName: 'Hoàng Nam', xp: 11500, streak: 21, pkRating: 1820, avatar: null },
-        { rank: 6, username: 'LearnDaily', displayName: 'Mai Chi', xp: 10800, streak: 35, pkRating: 1750, avatar: null },
-        { rank: 7, username: 'SmartKid', displayName: 'Tuấn Kiệt', xp: 9500, streak: 19, pkRating: 1680, avatar: null },
-        { rank: 8, username: 'BrainPower', displayName: 'Lan Anh', xp: 8900, streak: 15, pkRating: 1620, avatar: null },
-        { rank: 9, username: 'EduExplorer', displayName: 'Minh Châu', xp: 8200, streak: 12, pkRating: 1550, avatar: null },
-        { rank: 10, username: 'KnowledgeSeeker', displayName: 'Quốc Bảo', xp: 7800, streak: 10, pkRating: 1500, avatar: null },
-      ]);
-      setUserRank({ rank: 25, xp: 2500, streak: 5, pkRating: 1200 });
+      setLeaderboardData([]);
+      setUserRank(null);
     } finally {
       setLoading(false);
     }
@@ -160,9 +148,9 @@ const Leaderboard = ({ isOpen, onClose }) => {
                   const actualIndex = positions[index];
                   const podiumItem = leaderboardData[actualIndex];
                   if (!podiumItem) return null;
-                  
+
                   const valueData = getValue(podiumItem);
-                  
+
                   return (
                     <div key={podiumItem.rank} className={`podium-item podium-${actualIndex + 1}`}>
                       <div className="podium-avatar">
@@ -187,7 +175,7 @@ const Leaderboard = ({ isOpen, onClose }) => {
               <div className="leaderboard-list">
                 {leaderboardData.slice(3).map((item) => {
                   const valueData = getValue(item);
-                  
+
                   return (
                     <div key={item.rank} className={`leaderboard-item ${getRankClass(item.rank)}`}>
                       <div className="leaderboard-item-rank">
@@ -238,8 +226,8 @@ const Leaderboard = ({ isOpen, onClose }) => {
                     <div className="leaderboard-item-value font-heading">
                       {getValue({ ...userRank }).icon}
                       <span className="value">
-                        {activeTab === 'xp' ? userRank.xp?.toLocaleString() : 
-                         activeTab === 'streak' ? userRank.streak : userRank.pkRating}
+                        {activeTab === 'xp' ? userRank.xp?.toLocaleString() :
+                          activeTab === 'streak' ? userRank.streak : userRank.pkRating}
                       </span>
                       <span className="label font-body">{getValue({ ...userRank }).label}</span>
                     </div>
