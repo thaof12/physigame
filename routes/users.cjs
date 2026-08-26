@@ -359,6 +359,26 @@ router.get('/profile/:userId', async (req, res) => {
   }
 });
 
+// GET /users/all - Fetch all user records via backend Service Role (bypasses RLS)
+router.get('/all', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
+      
+    if (error) throw error;
+
+    return res.json({
+      success: true,
+      users: data || []
+    });
+  } catch (err) {
+    console.error('❌ Server error in /users/all:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // GET /users/teachers - Fetch all teacher records via backend Service Role (bypasses RLS & stale client tokens)
 router.get('/teachers', async (req, res) => {
   try {

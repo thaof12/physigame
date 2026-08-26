@@ -110,17 +110,8 @@ const statusFilterOptions = [
   { value: 'pending', label: 'Chờ xác nhận' }
 ];
 
-// Mock data for users list
-const mockUsers = [
-  { id: 1, name: 'Nguyễn Văn A', email: 'nguyenvana@gmail.com', role: 'student', grade: '10', status: 'active', joinDate: '2025-01-15', lastActive: '2025-03-17', lessonsCompleted: 45, exercisesCompleted: 120 },
-  { id: 2, name: 'Trần Thị B', email: 'tranthib@gmail.com', role: 'student', grade: '9', status: 'active', joinDate: '2025-02-20', lastActive: '2025-03-16', lessonsCompleted: 32, exercisesCompleted: 85 },
-  { id: 3, name: 'Lê Minh C', email: 'leminhc@gmail.com', role: 'teacher', grade: null, status: 'active', joinDate: '2024-11-10', lastActive: '2025-03-17', lessonsCompleted: 0, exercisesCompleted: 0 },
-  { id: 4, name: 'Phạm Hồng D', email: 'phamhongd@gmail.com', role: 'student', grade: '8', status: 'inactive', joinDate: '2025-01-05', lastActive: '2025-02-28', lessonsCompleted: 18, exercisesCompleted: 42 },
-  { id: 5, name: 'Hoàng Văn E', email: 'hoangvane@gmail.com', role: 'student', grade: '7', status: 'active', joinDate: '2025-03-01', lastActive: '2025-03-15', lessonsCompleted: 12, exercisesCompleted: 28 },
-  { id: 6, name: 'Vũ Thị F', email: 'vuthif@gmail.com', role: 'teacher', grade: null, status: 'active', joinDate: '2024-09-15', lastActive: '2025-03-17', lessonsCompleted: 0, exercisesCompleted: 0 },
-  { id: 7, name: 'Đỗ Văn G', email: 'dovang@gmail.com', role: 'student', grade: '10', status: 'active', joinDate: '2024-12-20', lastActive: '2025-03-14', lessonsCompleted: 56, exercisesCompleted: 145 },
-  { id: 8, name: 'Bùi Thị H', email: 'buithih@gmail.com', role: 'student', grade: '6', status: 'pending', joinDate: '2025-03-16', lastActive: '2025-03-16', lessonsCompleted: 2, exercisesCompleted: 5 },
-];
+// Empty mock data array - Real data only
+const mockUsers = [];
 const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
   const [pendingTeachers, setPendingTeachers] = useState([]);
   const [allTeachers, setAllTeachers] = useState([]);
@@ -1059,14 +1050,15 @@ const getInitialUsersCache = () => {
     const cached = localStorage.getItem('physigame_admin_users_cache');
     if (cached) {
       const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Filter out legacy mock users
+        const realOnly = parsed.filter(u => typeof u.id === 'string' && u.id.length > 10 && !u.name?.startsWith('Nguyễn Văn'));
+        if (realOnly.length > 0) return realOnly;
+        localStorage.removeItem('physigame_admin_users_cache');
+      }
     }
   } catch (e) {}
-  return mockUsers.map(u => ({
-    ...u,
-    avatar: u.avatar || null,
-    teacher_status: u.role === 'teacher' ? 'verified' : null
-  }));
+  return [];
 };
 
 // ==================== Main AdminUsers Component ====================
@@ -1120,16 +1112,29 @@ const AdminUsers = () => {
   }, [activeTab]);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let rawUsers = null;
+      try {
+        const apiRes = await api.get('/users/all');
+        if (apiRes.data?.success && Array.isArray(apiRes.data.users)) {
+          rawUsers = apiRes.data.users;
+        }
+      } catch (e) {
+        console.warn('⚠️ API /users/all failed, falling back to direct Supabase SDK:', e?.message);
+      }
 
-      if (error) throw error;
+      if (!rawUsers) {
+        const { data: dbData, error } = await supabase
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        rawUsers = dbData;
+      }
 
-      if (data && data.length > 0) {
-        const formatted = data.map(u => {
+      if (rawUsers && Array.isArray(rawUsers)) {
+        const formatted = rawUsers.map(u => {
           // Resolve display status — status field takes priority if explicitly 'inactive'
           let resolvedStatus = u.status || 'active';
           if (u.role === 'teacher') {
@@ -1143,7 +1148,7 @@ const AdminUsers = () => {
           return {
             id: u.id,
             name: u.display_name || u.username || 'Người dùng',
-            email: u.email,
+            email: u.email || 'Chưa cập nhật email',
             avatar: userAvatar,
             role: u.role || 'student',
             teacher_status: u.teacher_status || null,
@@ -1163,7 +1168,9 @@ const AdminUsers = () => {
         } catch (e) {}
       }
     } catch (err) {
-      console.error('Error fetching real users from Supabase:', err);
+      console.error('Error fetching real users from backend/Supabase:', err);
+    } finally {
+      setLoading(false);
     }
   };
 

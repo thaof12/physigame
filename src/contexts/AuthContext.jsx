@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
               const dbAvatar = response.data.avatar_url || response.data.avatar;
               if (latestAvatar && latestAvatar !== dbAvatar) {
                 supabase.from('users')
-                  .update({ avatar_url: latestAvatar, avatar: latestAvatar })
+                  .update({ avatar: latestAvatar })
                   .eq('id', session.user.id)
                   .then(({ error }) => {
                     if (error) console.warn('⚠️ Avatar sync to DB failed:', error.message);
@@ -310,7 +310,6 @@ export const AuthProvider = ({ children }) => {
                                  session.user.user_metadata?.full_name || 
                                  session.user.email?.split('@')[0],
                    email: session.user.email,
-                   avatar_url: googleAvatarUrl,
                    avatar: googleAvatarUrl,
                    role: 'teacher',
                    teacher_status: 'pending',

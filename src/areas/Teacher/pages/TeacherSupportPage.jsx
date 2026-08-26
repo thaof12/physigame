@@ -5,9 +5,7 @@ import {
    User,
    ShieldCheck,
    HelpCircle,
-   Clock,
    CheckCircle2,
-   Sparkles,
    Headphones,
    Bot,
    BookOpen,
@@ -27,19 +25,6 @@ const QUICK_TOPICS = [
    { id: 'account_perms', label: 'Thắc mắc tài khoản & Quyền hạn', icon: Zap, tag: 'Tài khoản' }
 ];
 
-const INITIAL_MESSAGES = [
-   {
-      id: 'msg_welcome_teacher',
-      sender: 'admin',
-      senderName: 'Admin Eureka',
-      avatar: null,
-      topic: 'Hệ thống',
-      text: 'Kính chào Quý Thầy/Cô! Ban Quản Trị Eureka hân hạnh hỗ trợ Thầy/Cô. Thầy/Cô cần góp ý bài giảng, hỗ trợ quản lý lớp học hay báo lỗi kỹ thuật gì không ạ?',
-      timestamp: 'Hôm nay',
-      isSystem: true
-   }
-];
-
 const TeacherSupportPage = () => {
    const { teacher } = useTeacherAuth();
    const [messages, setMessages] = useState([]);
@@ -55,87 +40,169 @@ const TeacherSupportPage = () => {
       const displayName = teacher?.displayName || teacher?.username || teacher?.email?.split('@')[0] || '';
       setTeacherName(displayName);
 
-      try {
-         const cached = localStorage.getItem('eureka_teacher_admin_messages');
-         if (cached) {
-            const parsed = JSON.parse(cached);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-               setMessages(parsed);
-               return;
+      const loadMessages = async () => {
+         const tName = displayName ? `Thầy/Cô ${displayName}` : 'Giảng viên Eureka';
+         const uId = teacher?.id || teacher?.email || tName;
+         try {
+            // First fetch from backend API for persistent real database storage
+            const res = await fetch(`/api/support/messages?role=teacher&userId=${encodeURIComponent(uId)}`);
+            if (res.ok) {
+               const data = await res.json();
+               if (data.success && Array.isArray(data.messages)) {
+                  setMessages(data.messages);
+                  localStorage.setItem('eureka_teacher_admin_messages', JSON.stringify(data.messages));
+                  return;
+               }
             }
+         } catch (e) {
+            console.warn('API fetch error, fallback to localStorage cache:', e);
          }
-      } catch (e) {
-         console.warn('Error reading cached teacher support messages:', e);
-      }
-      setMessages(INITIAL_MESSAGES);
+
+         // Fallback to localStorage cache
+         try {
+            const cached = localStorage.getItem('eureka_teacher_admin_messages');
+            if (cached) {
+               const parsed = JSON.parse(cached);
+               if (Array.isArray(parsed)) {
+                  setMessages(parsed);
+                  return;
+               }
+            }
+         } catch (e) {
+            console.warn('Error reading cached teacher support messages:', e);
+         }
+         setMessages([]);
+      };
+
+      loadMessages();
+
+      const handleStorage = (e) => {
+         if (!e || !e.key || e.key === 'eureka_teacher_admin_messages') {
+            loadMessages();
+         }
+      };
+      window.addEventListener('storage', handleStorage);
+      window.addEventListener('eureka_support_updated', handleStorage);
+
+      const intervalId = setInterval(() => {
+         loadMessages();
+      }, 2000);
+
+      return () => {
+         window.removeEventListener('storage', handleStorage);
+         window.removeEventListener('eureka_support_updated', handleStorage);
+         clearInterval(intervalId);
+      };
    }, [teacher]);
+
+   // Sync latest avatar to teacher's messages
+   useEffect(() => {
+      const currentAv = teacher?.avatar || teacher?.photoURL || teacher?.profile?.avatar || localStorage.getItem('eureka_teacher_avatar') || null;
+      if (currentAv) {
+         setMessages(prev => {
+            const needsUpdate = prev.some(m => m.sender === 'teacher' && m.avatar !== currentAv);
+            if (needsUpdate) {
+               const updated = prev.map(m => m.sender === 'teacher' ? { ...m, avatar: currentAv } : m);
+               try {
+                  localStorage.setItem('eureka_teacher_admin_messages', JSON.stringify(updated));
+                  window.dispatchEvent(new Event('eureka_support_updated'));
+               } catch (e) {}
+               fetch('/api/support/update-avatar', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                     userId: teacher?.id || teacher?.email,
+                     senderName: teacherName,
+                     avatar: currentAv
+                  })
+               }).catch(e => {});
+               return updated;
+            }
+            return prev;
+         });
+      }
+   }, [teacher, teacherName]);
 
    // Save messages to localStorage
    const saveMessages = (newMessages) => {
       setMessages(newMessages);
       try {
          localStorage.setItem('eureka_teacher_admin_messages', JSON.stringify(newMessages));
+         window.dispatchEvent(new Event('eureka_support_updated'));
       } catch (e) {
          console.warn('Error saving teacher support messages:', e);
       }
    };
 
-   // Auto scroll chat feed
+   // Scroll internal chat container ONLY (prevents pulling the whole browser page down)
+   const chatContainerRef = useRef(null);
    useEffect(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-   }, [messages]);
+      if (chatContainerRef.current && messages.length > 0) {
+         chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
+   }, [messages.length]);
 
    const handleSelectTopic = (topicObj) => {
       setSelectedTopic(topicObj.tag);
    };
 
-   const handleSendMessage = (e) => {
+   const handleSendMessage = async (e) => {
       e.preventDefault();
       if (!inputMessage.trim()) return;
 
       const now = new Date();
       const timeString = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      const currentAv = teacher?.avatar || teacher?.photoURL || teacher?.profile?.avatar || localStorage.getItem('eureka_teacher_avatar') || null;
+      const tName = teacherName.trim() ? `Thầy/Cô ${teacherName.trim()}` : 'Giảng viên Eureka';
+      const uId = teacher?.id || teacher?.email || tName;
 
       const newTeacherMsg = {
          id: `teacher_msg_${Date.now()}`,
+         role: 'teacher',
+         userId: uId,
+         senderId: uId,
          sender: 'teacher',
-         senderName: teacherName.trim() ? `Thầy/Cô ${teacherName.trim()}` : 'Giảng viên Eureka',
-         avatar: teacher?.avatar || null,
+         senderName: tName,
+         avatar: currentAv,
          topic: selectedTopic,
          text: inputMessage.trim(),
-         timestamp: timeString,
-         isSystem: false
+         timestamp: timeString
       };
 
       const updatedList = [...messages, newTeacherMsg];
       saveMessages(updatedList);
+      const messageText = inputMessage.trim();
       setInputMessage('');
-      setIsSubmitting(true);
       setSuccessBanner(true);
+
+      // Send to Backend database API
+      try {
+         await fetch('/api/support/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+               role: 'teacher',
+               userId: uId,
+               senderId: uId,
+               senderName: tName,
+               avatar: currentAv,
+               topic: selectedTopic,
+               text: messageText,
+               sender: 'teacher',
+               timestamp: timeString
+            })
+         });
+      } catch (err) {
+         console.warn('Error syncing message to backend database:', err);
+      }
 
       setTimeout(() => {
          setSuccessBanner(false);
       }, 4000);
-
-      // Automated Admin Reply tailored for Teachers
-      setTimeout(() => {
-         const adminReply = {
-            id: `admin_reply_${Date.now()}`,
-            sender: 'admin',
-            senderName: 'Admin Eureka',
-            avatar: null,
-            topic: selectedTopic,
-            text: `Cảm ơn Quý Thầy/Cô ${newTeacherMsg.senderName}! Ban Quản Trị Eureka đã ghi nhận thông tin về [${selectedTopic}]. Chuyên viên kỹ thuật sẽ phản hồi trực tiếp tới Thầy/Cô trong thời gian sớm nhất!`,
-            timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-            isSystem: false
-         };
-         saveMessages([...updatedList, adminReply]);
-         setIsSubmitting(false);
-      }, 1200);
    };
 
    const handleResetChat = () => {
-      saveMessages(INITIAL_MESSAGES);
+      saveMessages([]);
    };
 
    return (
@@ -173,21 +240,6 @@ const TeacherSupportPage = () => {
                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
                            Trực tuyến ưu tiên Giảng viên
                         </p>
-                     </div>
-                  </div>
-
-                  <div className="space-y-3 pt-4 border-t border-slate-100 text-xs text-slate-600">
-                     <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-2 text-slate-500">
-                           <Clock className="w-4 h-4 text-[#4f46e5]" /> Phản hồi ưu tiên:
-                        </span>
-                        <span className="font-bold text-slate-900">&lt; 10 phút</span>
-                     </div>
-                     <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-2 text-slate-500">
-                           <Sparkles className="w-4 h-4 text-amber-500" /> Tỷ lệ hỗ trợ thành công:
-                        </span>
-                        <span className="font-bold text-slate-900">100%</span>
                      </div>
                   </div>
                </div>
@@ -229,17 +281,17 @@ const TeacherSupportPage = () => {
             </div>
 
             {/* Right Column: Live Chat Interface */}
-            <div className="lg:col-span-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-900/5 overflow-hidden flex flex-col min-h-[540px]">
+            <div className="lg:col-span-8 bg-white rounded-[2.5rem] border-2 border-indigo-200 shadow-xl shadow-slate-900/5 overflow-hidden flex flex-col min-h-[540px]">
 
                {/* Chat Header Bar */}
-               <div className="px-6 py-4 bg-[#0f172a] text-white flex items-center justify-between">
+               <div className="px-6 py-4 bg-[#faf8f5] border-b border-slate-200/80 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                      <div className="w-10 h-10 rounded-2xl bg-[#4f46e5] text-white flex items-center justify-center shadow-md">
                         <MessageSquare className="w-5 h-5" />
                      </div>
                      <div>
-                        <h3 className="font-heading font-extrabold text-white text-sm sm:text-base">Kênh Hội Thoại Giảng Viên & Admin</h3>
-                        <p className="text-xs text-slate-300">Đang chọn: <span className="font-bold text-indigo-400">{selectedTopic}</span></p>
+                        <h3 className="font-heading font-extrabold text-black text-sm sm:text-base">Kênh Hội Thoại Giảng Viên & Admin</h3>
+                        <p className="text-xs text-slate-600">Đang chọn: <span className="font-bold text-indigo-600">{selectedTopic}</span></p>
                      </div>
                   </div>
 
@@ -247,7 +299,7 @@ const TeacherSupportPage = () => {
                      type="button"
                      onClick={handleResetChat}
                      title="Tải lại đoạn chat"
-                     className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-heading font-bold"
+                     className="p-2 rounded-xl text-slate-600 hover:text-black hover:bg-slate-200/60 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-heading font-bold"
                   >
                      <RefreshCw className="w-3.5 h-3.5" />
                      <span>Làm mới</span>
@@ -255,7 +307,7 @@ const TeacherSupportPage = () => {
                </div>
 
                {/* Messages Feed */}
-               <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-gradient-to-b from-slate-50/60 to-white min-h-[320px]">
+               <div ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-4 bg-gradient-to-b from-slate-50/60 to-white min-h-[320px]">
                   {messages.map((msg) => {
                      const isAdmin = msg.sender === 'admin';
                      return (
@@ -264,11 +316,32 @@ const TeacherSupportPage = () => {
                            className={`flex gap-3 max-w-[88%] ${isAdmin ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
                         >
                            {/* Avatar */}
-                           <div className={`w-9 h-9 rounded-2xl flex-shrink-0 flex items-center justify-center text-xs font-bold font-heading shadow-sm ${isAdmin
-                                 ? 'bg-[#4f46e5] text-white'
-                                 : 'bg-[#0f172a] text-white'
-                              }`}>
-                              {isAdmin ? <Bot className="w-5 h-5" /> : (msg.senderName[0]?.toUpperCase() || <GraduationCap className="w-4 h-4" />)}
+                           <div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold font-heading shadow-sm overflow-hidden bg-[#0f172a] text-white">
+                              {isAdmin ? (
+                                 <div className="w-full h-full bg-[#4f46e5] flex items-center justify-center text-white rounded-full">
+                                    <Bot className="w-5 h-5" />
+                                 </div>
+                              ) : (
+                                 <>
+                                    {msg.avatar && (
+                                       <img
+                                          src={msg.avatar}
+                                          alt={msg.senderName}
+                                          className="w-full h-full rounded-full object-cover"
+                                          onError={(e) => {
+                                             e.currentTarget.onerror = null;
+                                             e.currentTarget.style.display = 'none';
+                                             if (e.currentTarget.nextElementSibling) {
+                                                e.currentTarget.nextElementSibling.style.display = 'flex';
+                                             }
+                                          }}
+                                       />
+                                    )}
+                                    <div className={`w-full h-full bg-[#0f172a] flex items-center justify-center text-white rounded-full ${msg.avatar ? 'hidden' : 'flex'}`}>
+                                       {msg.senderName[0]?.toUpperCase() || <GraduationCap className="w-4 h-4" />}
+                                    </div>
+                                 </>
+                              )}
                            </div>
 
                            {/* Bubble Content */}
