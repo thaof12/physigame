@@ -69,3 +69,6 @@ out/
 
 # Local envs
 local-*.env
+
+# AI tool internal files
+.gemini/
