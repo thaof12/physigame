@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: physigame-backend
+    env: node
+    region: singapore    # Gần Việt Nam nhất, giảm latency
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: node server.cjs
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # Các biến sau cần điền thủ công trên Render Dashboard:
+      # SUPABASE_URL
+      # SUPABASE_ANON_KEY
+      # SUPABASE_SERVICE_ROLE_KEY
+      # JWT_SECRET
+      # GMAIL_USER
+      # GMAIL_PASS
