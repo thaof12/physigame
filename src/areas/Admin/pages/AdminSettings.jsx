@@ -90,14 +90,14 @@ const AdminSettings = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={handleRestore}
-            className="font-heading flex items-center gap-2 px-6 py-3 bg-[#f8fafc] border border-transparent rounded-[1.25rem] text-slate-500 hover:text-[#4f46e5] transition-all font-extrabold text-xs uppercase tracking-widest shadow-sm"
+            className="font-heading flex items-center gap-2 px-6 py-3 bg-slate-50 border border-slate-200 rounded-[1.25rem] text-slate-700 hover:text-[#4f46e5] hover:border-indigo-200 hover:bg-indigo-50/50 transition-all font-extrabold text-xs uppercase tracking-widest shadow-sm"
           >
             <RotateCcw className="w-4 h-4" />
             <span>Khôi phục</span>
           </button>
           <button
             onClick={handleSave}
-            className="font-heading flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#4f46e5] to-[#e2e8f0] rounded-[1.25rem] text-white text-sm font-extrabold shadow-xl shadow-blue-500/10 hover:brightness-110 transition-all uppercase tracking-widest"
+            className="font-heading flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#4f46e5] to-[#6366f1] rounded-[1.25rem] text-white text-sm font-extrabold shadow-xl shadow-indigo-500/25 hover:brightness-110 active:scale-95 transition-all uppercase tracking-widest"
           >
             {saved ? <Check className="w-5 h-5" /> : <Save className="w-5 h-5" />}
             <span>{saved ? 'Đã lưu' : 'Lưu thay đổi'}</span>
@@ -108,7 +108,7 @@ const AdminSettings = () => {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Tabs */}
         <div className="lg:w-80 shrink-0">
-          <div className="bg-white rounded-[2.5rem] p-4 shadow-sm border border-[#e2e8f0]/20 space-y-2">
+          <div className="bg-white rounded-[2.5rem] p-4 shadow-sm border border-slate-200/80 space-y-2">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -117,11 +117,11 @@ const AdminSettings = () => {
                    onClick={() => setActiveTab(tab.id)}
                    className={`font-heading w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${
                      activeTab === tab.id
-                       ? 'bg-[#4f46e5] text-white shadow-lg shadow-blue-500/20'
-                       : 'text-slate-400 hover:text-[#0f172a] hover:bg-[#f8fafc]/50 font-extrabold'
+                       ? 'bg-[#4f46e5] text-white shadow-lg shadow-indigo-500/25'
+                       : 'text-slate-700 hover:text-[#4f46e5] hover:bg-indigo-50/60 font-extrabold'
                    }`}
                 >
-                  <Icon className={`w-6 h-6 ${activeTab === tab.id ? 'text-white' : ''}`} />
+                  <Icon className={`w-6 h-6 ${activeTab === tab.id ? 'text-white' : 'text-slate-500'}`} />
                   <span className="font-extrabold text-sm uppercase tracking-tight">{tab.label}</span>
                 </button>
               );

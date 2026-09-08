@@ -193,17 +193,17 @@ const AdminLayout = () => {
                   setMobileMenuOpen(false);
                 }}
                 className={`
-                  w-full flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all relative
+                  w-full flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all relative group
                   ${active
-                    ? 'bg-[#4f46e5] text-white shadow-xl shadow-blue-500/20'
-                    : 'text-slate-500 hover:text-[#0f172a] hover:bg-[#f8fafc]/50'
+                    ? 'bg-[#4f46e5] text-white shadow-xl shadow-indigo-500/20 font-black'
+                    : 'text-slate-700 hover:text-[#4f46e5] hover:bg-indigo-50/60 font-extrabold'
                   }
                   ${sidebarCollapsed ? 'justify-center' : ''}
                 `}
                 title={sidebarCollapsed ? item.label : ''}
               >
                 <div className="relative shrink-0">
-                  <IconComponent className={`w-6 h-6 shrink-0 ${active ? 'text-white' : ''}`} />
+                  <IconComponent className={`w-6 h-6 shrink-0 ${active ? 'text-white' : 'text-slate-500 group-hover:text-[#4f46e5]'}`} />
                   {item.id === 'materials' && reportCount > 0 && sidebarCollapsed && (
                     <span className="absolute -top-2 -right-2 flex h-5 w-5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
@@ -215,7 +215,7 @@ const AdminLayout = () => {
                 </div>
 
                 {!sidebarCollapsed && (
-                  <span className="font-heading text-sm font-extrabold tracking-tight flex-1 text-left flex items-center justify-between">
+                  <span className="font-heading text-sm tracking-tight flex-1 text-left flex items-center justify-between">
                     <span>{item.label}</span>
                     {item.id === 'materials' && reportCount > 0 && (
                       <span className={`ml-auto flex items-center gap-1.5 px-2.5 py-0.5 text-white font-black text-[11px] rounded-full shadow-md animate-pulse ${
@@ -238,13 +238,13 @@ const AdminLayout = () => {
         <div className="p-8 border-t border-[#f8fafc] shrink-0">
           {!sidebarCollapsed && (
             <div className="flex items-center gap-4 px-2 mb-8">
-              <div className="w-14 h-14 bg-white border-2 border-[#f8fafc] rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-[#0f172a]/5 shrink-0">
+              <div className="w-14 h-14 bg-white border-2 border-slate-200 rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-[#0f172a]/5 shrink-0">
                 <span className="text-[#0f172a] font-black text-xl italic">QT</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-heading text-[10px] font-extrabold text-[#4f46e5] uppercase tracking-widest mb-0.5">Admin Account</p>
                 <p className="font-heading text-sm font-extrabold text-[#0f172a] truncate">{admin?.name}</p>
-                <p className="font-body text-[10px] text-slate-400 font-bold truncate">{admin?.email}</p>
+                <p className="font-body text-[10px] text-slate-500 font-bold truncate">{admin?.email}</p>
               </div>
             </div>
           )}
@@ -253,12 +253,12 @@ const AdminLayout = () => {
             onClick={handleLogout}
             className={`
               w-full flex items-center gap-4 px-5 py-4 rounded-[1.5rem]
-              text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all font-heading font-extrabold text-sm
+              text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-all font-heading font-extrabold text-sm
               ${sidebarCollapsed ? 'justify-center px-0 ring-0' : ''}
             `}
             title={sidebarCollapsed ? 'Đăng xuất' : ''}
           >
-            <LogOut className="w-6 h-6 shrink-0" />
+            <LogOut className="w-6 h-6 shrink-0 text-slate-500 group-hover:text-rose-600" />
             {!sidebarCollapsed && <span>Ngắt Kết Nối</span>}
           </button>
         </div>
