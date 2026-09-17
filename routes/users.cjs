@@ -1173,7 +1173,7 @@ router.get('/teacher/:teacherId/top-students', async (req, res) => {
 // POST /api/users/update-status — update user status + teacher_status
 router.post('/update-status', async (req, res) => {
   try {
-    const { id, email, status, teacher_status, name, role } = req.body;
+    const { id, email, status, teacher_status, name, role, avatar } = req.body;
 
     if (!id && !email) {
       return res.status(400).json({ success: false, message: 'Cần cung cấp id hoặc email' });
@@ -1195,6 +1195,7 @@ router.post('/update-status', async (req, res) => {
     if (teacher_status !== undefined) updates.teacher_status = teacher_status;
     if (name !== undefined) updates.display_name = name;
     if (role !== undefined) updates.role = role;
+    if (avatar !== undefined) updates.avatar = avatar;
     if (email !== undefined && email !== null && typeof email === 'string' && email.trim() !== '' && !email.includes('@example.com')) {
       updates.email = email.trim();
       if (user.teacher_profile) {

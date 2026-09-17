@@ -143,20 +143,29 @@ const Profile = () => {
 
           setUserData(prev => ({
             ...prev,
+            avatar: compressedBase64,
+            avatar_url: compressedBase64,
             profile: {
               ...prev?.profile,
               ...updatedProfile
             }
           }));
 
-          // Cập nhật AuthContext để thay đổi hiển thị trên header ngay lập tức
-          setUser(prev => ({
-            ...prev,
-            profile: {
-              ...prev?.profile,
-              ...updatedProfile
-            }
-          }));
+          // Cập nhật AuthContext & localStorage để thay đổi hiển thị ngay lập tức và bền vững qua refresh
+          setUser(prev => {
+            const nextUser = {
+              ...prev,
+              avatar: compressedBase64,
+              avatar_url: compressedBase64,
+              profile: {
+                ...prev?.profile,
+                ...updatedProfile
+              }
+            };
+            localStorage.setItem('user', JSON.stringify(nextUser));
+            localStorage.setItem('eureka_user_avatar', compressedBase64);
+            return nextUser;
+          });
         } catch (apiErr) {
           console.error('Error uploading avatar:', apiErr);
           alert('Đã có lỗi xảy ra khi lưu ảnh lên máy chủ. Vui lòng thử lại sau.');

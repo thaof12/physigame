@@ -5,7 +5,7 @@ import {
   ChevronRight,
   Sparkles
 } from 'lucide-react';
-import robotBanner from '../../../assets/images/robot-eureka-banner.jpg';
+import robotBanner from '../../../assets/images/welcom-scene.png';
 
 const AdvancedPhysicsChallenge = () => {
   const navigate = useNavigate();

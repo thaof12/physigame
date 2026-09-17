@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { supabase } = require('../src/config/supabase.cjs');
 
+// In-memory status map for tracking join approval state: `${classId}_${studentId}` -> 'pending' | 'approved' | 'rejected'
+const statusMap = new Map();
+
 // Generate a random class code: 6 uppercase characters
 function generateClassCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -12,12 +15,152 @@ function generateClassCode() {
   return code;
 }
 
+// In-memory grade map for tracking class grades when DB column 'grade' is absent
+const classGradeMap = new Map();
+
+function cleanDescription(desc) {
+  if (!desc) return '';
+  return desc.replace(/\[GRADE:\d+\]\s*/gi, '').trim();
+}
+
+// Helper to reliably determine class grade (from grade column, in-memory map, description tag, or parsed from class name)
+function parseGrade(clsGrade, className, classId = null, classCode = null, description = null) {
+  if (clsGrade && !isNaN(parseInt(clsGrade))) {
+    const parsed = parseInt(clsGrade);
+    if (parsed >= 6 && parsed <= 12) return parsed;
+  }
+  if (classId && classGradeMap.has(String(classId))) {
+    return classGradeMap.get(String(classId));
+  }
+  if (classCode && classGradeMap.has(String(classCode))) {
+    return classGradeMap.get(String(classCode));
+  }
+  if (description) {
+    const descMatch = description.match(/\[GRADE:(\d{1,2})\]/i);
+    if (descMatch && descMatch[1]) {
+      const g = parseInt(descMatch[1]);
+      if (g >= 6 && g <= 12) return g;
+    }
+  }
+  if (className) {
+    const match = className.match(/(?:Lớp|Khối|K)\s*(\d{1,2})/i) || className.match(/\b([6-9]|1[0-2])\b/i);
+    if (match && match[1]) {
+      const g = parseInt(match[1]);
+      if (g >= 6 && g <= 12) return g;
+    }
+  }
+  return 10; // Default fallback
+}
+
+// Helper to get student's membership status for a class
+function getMembershipStatus(classId, studentId, dbStatus) {
+  const key = `${String(classId)}_${String(studentId)}`;
+  if (statusMap.has(key)) {
+    return statusMap.get(key);
+  }
+  if (dbStatus && ['pending', 'approved', 'rejected'].includes(dbStatus)) {
+    return dbStatus;
+  }
+  // Default for existing memberships in class_members without explicit status tag is 'approved'
+  return 'approved';
+}
+
+// GET /api/classes/all - Get all available/featured classes for browsing & discovery
+router.get('/all', async (req, res) => {
+  try {
+    const { grade, search, studentId } = req.query;
+
+    const { data: classes, error } = await supabase
+      .from('classes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    let filteredClasses = classes || [];
+
+    // Filter by grade
+    if (grade && grade !== 'all') {
+      const targetGrade = parseInt(grade);
+      filteredClasses = filteredClasses.filter(c => parseGrade(c.grade, c.name, c.id, c.code, c.description) === targetGrade);
+    }
+
+    // Filter by search query (name or code)
+    if (search && search.trim() !== '') {
+      const q = search.trim().toLowerCase();
+      filteredClasses = filteredClasses.filter(c =>
+        (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.code && c.code.toLowerCase().includes(q))
+      );
+    }
+
+    // Get student's current memberships if studentId provided
+    let myMembershipsMap = {};
+    if (studentId) {
+      try {
+        const { data: mData } = await supabase
+          .from('class_members')
+          .select('*')
+          .eq('student_id', studentId);
+
+        (mData || []).forEach(m => {
+          myMembershipsMap[m.class_id] = getMembershipStatus(m.class_id, studentId, m.status);
+        });
+      } catch (mErr) {
+        console.warn('Membership check warning:', mErr.message);
+      }
+    }
+
+    // Enrich classes with teacher info and student count
+    const enriched = await Promise.all(filteredClasses.map(async (cls) => {
+      let teacher = null;
+      try {
+        const { data: tData } = await supabase
+          .from('users')
+          .select('id, display_name, email, avatar')
+          .eq('id', cls.teacher_id)
+          .maybeSingle();
+        teacher = tData;
+      } catch (tErr) {}
+
+      let count = 0;
+      try {
+        const { count: cVal } = await supabase
+          .from('class_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('class_id', cls.id);
+        count = cVal || 0;
+      } catch (cErr) {}
+
+      return {
+        id: cls.id,
+        name: cls.name,
+        code: cls.code,
+        grade: parseGrade(cls.grade, cls.name, cls.id, cls.code, cls.description),
+        description: cleanDescription(cls.description),
+        created: cls.created_at ? cls.created_at.split('T')[0] : '',
+        studentsCount: count,
+        teacher: teacher ? {
+          name: teacher.display_name || (teacher.email ? teacher.email.split('@')[0] : 'Giáo viên'),
+          email: teacher.email,
+          avatar: teacher.avatar
+        } : null,
+        myStatus: myMembershipsMap[cls.id] || null
+      };
+    }));
+
+    res.json({ success: true, classes: enriched });
+  } catch (error) {
+    console.error('Error fetching all classes:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
 // GET /api/classes/teacher/:teacherId - Get classes for a teacher
 router.get('/teacher/:teacherId', async (req, res) => {
   try {
     const { teacherId } = req.params;
     
-    // Fetch classes
     const { data: classes, error } = await supabase
       .from('classes')
       .select('*')
@@ -26,32 +169,50 @@ router.get('/teacher/:teacherId', async (req, res) => {
 
     if (error) throw error;
 
-    // For each class, fetch members count dynamically
     const classesWithCounts = await Promise.all((classes || []).map(async (cls) => {
-      const { count, error: countError } = await supabase
-        .from('class_members')
-        .select('*', { count: 'exact', head: true })
-        .eq('class_id', cls.id);
+      let count = 0;
+      let pendingCount = 0;
 
-      // Also get the number of lessons assigned to this class/teacher
-      const { count: lessonsCount, error: lessonsCountError } = await supabase
-        .from('lessons')
-        .select('*', { count: 'exact', head: true })
-        .eq('teacher_id', teacherId);
+      try {
+        const { data: mList } = await supabase
+          .from('class_members')
+          .select('*')
+          .eq('class_id', cls.id);
+
+        if (mList) {
+          mList.forEach(m => {
+            const st = getMembershipStatus(cls.id, m.student_id, m.status);
+            if (st === 'approved') count++;
+            if (st === 'pending') pendingCount++;
+          });
+        }
+      } catch (err) {}
+
+      let lessonsCount = 0;
+      try {
+        const { count: lCount } = await supabase
+          .from('lessons')
+          .select('*', { count: 'exact', head: true })
+          .eq('teacher_id', teacherId);
+        lessonsCount = lCount || 0;
+      } catch (err) {}
 
       return {
         id: cls.id,
         name: cls.name,
         code: cls.code,
-        students: count || 0,
-        lessons: lessonsCount || 0,
+        grade: parseGrade(cls.grade, cls.name, cls.id, cls.code, cls.description),
+        description: cleanDescription(cls.description),
+        students: count,
+        pendingCount,
+        lessons: lessonsCount,
         created: cls.created_at ? cls.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
       };
     }));
 
     res.json({ success: true, classes: classesWithCounts });
   } catch (error) {
-    console.error('Error fetching classes:', error);
+    console.error('Error fetching teacher classes:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
@@ -59,17 +220,18 @@ router.get('/teacher/:teacherId', async (req, res) => {
 // POST /api/classes - Create a new class
 router.post('/', async (req, res) => {
   try {
-    const { teacherId, name } = req.body;
+    const { teacherId, name, grade, description } = req.body;
     if (!teacherId || !name) {
       return res.status(400).json({ success: false, message: 'Missing teacherId or name' });
     }
 
-    // Generate unique class code
+    const selectedGrade = grade ? parseInt(grade) : parseGrade(null, name);
+
     let code = generateClassCode();
     let isUnique = false;
     let attempts = 0;
     while (!isUnique && attempts < 10) {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('classes')
         .select('id')
         .eq('code', code)
@@ -82,18 +244,53 @@ router.post('/', async (req, res) => {
       attempts++;
     }
 
-    const { data: newClass, error } = await supabase
-      .from('classes')
-      .insert({
-        teacher_id: teacherId,
-        name,
-        code,
-        lessons_count: 0
-      })
-      .select()
-      .single();
+    const rawDescription = description ? description.trim() : '';
+    const descWithTag = `[GRADE:${selectedGrade}] ${rawDescription}`.trim();
 
-    if (error) throw error;
+    const insertPayload = {
+      teacher_id: teacherId,
+      name: name.trim(),
+      code,
+      grade: selectedGrade,
+      description: descWithTag,
+      lessons_count: 0
+    };
+
+    let newClass;
+    const { data, error } = await supabase
+      .from('classes')
+      .insert(insertPayload)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      delete insertPayload.grade;
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('classes')
+        .insert(insertPayload)
+        .select()
+        .single();
+      
+      if (fallbackError) {
+        delete insertPayload.description;
+        const { data: minData, error: minError } = await supabase
+          .from('classes')
+          .insert(insertPayload)
+          .select()
+          .single();
+        if (minError) throw minError;
+        newClass = minData;
+      } else {
+        newClass = fallbackData;
+      }
+    } else {
+      newClass = data;
+    }
+
+    if (newClass) {
+      if (newClass.id) classGradeMap.set(String(newClass.id), selectedGrade);
+      if (newClass.code) classGradeMap.set(String(newClass.code), selectedGrade);
+    }
 
     res.status(201).json({
       success: true,
@@ -101,6 +298,8 @@ router.post('/', async (req, res) => {
         id: newClass.id,
         name: newClass.name,
         code: newClass.code,
+        grade: selectedGrade,
+        description: rawDescription,
         students: 0,
         lessons: 0,
         created: newClass.created_at ? newClass.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
@@ -130,39 +329,123 @@ router.delete('/:classId', async (req, res) => {
   }
 });
 
-// POST /api/classes/join - Join a class via class code
+// POST /api/classes/join - Join a class via class code or class id (sets status='pending')
 router.post('/join', async (req, res) => {
   try {
-    const { studentId, classCode } = req.body;
-    if (!studentId || !classCode) {
-      return res.status(400).json({ success: false, message: 'Missing studentId or classCode' });
+    const { studentId, classCode, classId } = req.body;
+    if (!studentId || (!classCode && !classId)) {
+      return res.status(400).json({ success: false, message: 'Thiếu thông tin mã lớp hoặc mã học sinh' });
     }
 
-    // Find class
-    const { data: cls, error: findError } = await supabase
-      .from('classes')
-      .select('*')
-      .eq('code', classCode.trim().toUpperCase())
-      .maybeSingle();
+    let cls = null;
+    if (classCode) {
+      const { data } = await supabase
+        .from('classes')
+        .select('*')
+        .eq('code', classCode.trim().toUpperCase())
+        .maybeSingle();
+      cls = data;
+    } else if (classId) {
+      const { data } = await supabase
+        .from('classes')
+        .select('*')
+        .eq('id', classId)
+        .maybeSingle();
+      cls = data;
+    }
 
-    if (findError) throw findError;
     if (!cls) {
-      return res.status(404).json({ success: false, message: 'Mã lớp không chính xác' });
+      return res.status(404).json({ success: false, message: 'Lớp học không tồn tại hoặc mã lớp không chính xác' });
     }
 
-    // Join
-    const { error: joinError } = await supabase
+    const key = `${String(cls.id)}_${String(studentId)}`;
+
+    // Check existing membership in database
+    let existingMember = null;
+    try {
+      const { data } = await supabase
+        .from('class_members')
+        .select('*')
+        .eq('class_id', cls.id)
+        .eq('student_id', studentId)
+        .maybeSingle();
+      existingMember = data;
+    } catch (e) {}
+
+    if (existingMember) {
+      const currentStatus = getMembershipStatus(cls.id, studentId, existingMember.status);
+      if (currentStatus === 'approved') {
+        return res.status(400).json({ success: false, message: 'Bạn đã là thành viên chính thức của lớp này rồi. Hãy nhấn "Vào Lớp Học" để học!' });
+      } else if (currentStatus === 'pending') {
+        return res.status(400).json({ success: false, message: 'Yêu cầu tham gia của bạn đang chờ giáo viên duyệt' });
+      } else if (currentStatus === 'rejected') {
+        statusMap.set(key, 'pending');
+        try {
+          await supabase
+            .from('class_members')
+            .update({ status: 'pending', joined_at: new Date() })
+            .eq('id', existingMember.id);
+        } catch (upErr) {}
+
+        // Send teacher notification for re-submitted join request
+        try {
+          const { data: studentUser } = await supabase
+            .from('users')
+            .select('display_name, username')
+            .eq('id', studentId)
+            .maybeSingle();
+          const studentName = studentUser?.display_name || studentUser?.username || 'Học sinh';
+
+          await supabase
+            .from('teacher_notifications')
+            .insert({
+              teacher_id: cls.teacher_id,
+              title: 'Yêu cầu gia nhập lớp mới',
+              content: `Học sinh ${studentName} đã gửi lại yêu cầu tham gia vào lớp "${cls.name}" của bạn.`,
+              is_read: false
+            });
+        } catch (notifErr) {}
+
+        return res.json({
+          success: true,
+          message: 'Đã gửi lại yêu cầu tham gia lớp học. Vui lòng chờ giáo viên duyệt!',
+          status: 'pending',
+          class: cls
+        });
+      }
+    }
+
+    // Mark status as 'pending' in server statusMap FIRST
+    statusMap.set(key, 'pending');
+
+    // Try inserting into database table
+    let joinError = null;
+    const { error: insErr } = await supabase
       .from('class_members')
       .insert({
         class_id: cls.id,
-        student_id: studentId
+        student_id: studentId,
+        status: 'pending'
       });
+
+    if (insErr) {
+      // Fallback if status column is missing in DB
+      const { error: insFallbackErr } = await supabase
+        .from('class_members')
+        .insert({
+          class_id: cls.id,
+          student_id: studentId
+        });
+      joinError = insFallbackErr;
+    }
 
     if (joinError) {
       if (joinError.code === '23505') {
-        return res.status(400).json({ success: false, message: 'Bạn đã tham gia lớp này rồi' });
+        // Unique constraint - member already present
+        return res.status(400).json({ success: false, message: 'Yêu cầu gia nhập của bạn đang chờ giáo viên duyệt.' });
       }
-      throw joinError;
+      console.error('Error joining class:', joinError);
+      return res.status(400).json({ success: false, message: joinError.message || 'Không thể gửi yêu cầu tham gia' });
     }
 
     // Create teacher notification asynchronously
@@ -178,39 +461,63 @@ router.post('/join', async (req, res) => {
         .from('teacher_notifications')
         .insert({
           teacher_id: cls.teacher_id,
-          title: 'Học sinh mới tham gia lớp',
-          content: `Học sinh ${studentName} đã tham gia vào lớp "${cls.name}" của bạn.`,
+          title: 'Yêu cầu gia nhập lớp mới',
+          content: `Học sinh ${studentName} đã gửi yêu cầu tham gia vào lớp "${cls.name}" của bạn.`,
           is_read: false
         });
-    } catch (notifErr) {
-      console.error('Error creating teacher notification for join:', notifErr);
-    }
+    } catch (notifErr) {}
 
-    res.json({ success: true, message: 'Tham gia lớp thành công', class: cls });
+    res.json({
+      success: true,
+      message: 'Đã gửi yêu cầu tham gia lớp học. Vui lòng chờ giáo viên chấp nhận!',
+      status: 'pending',
+      class: cls
+    });
   } catch (error) {
-    console.error('Error joining class:', error);
+    console.error('Error in /api/classes/join:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
 
-// GET /api/classes/:classId/students - Get students enrolled in a class
+// GET /api/classes/:classId/students - Get students enrolled or pending in a class
 router.get('/:classId/students', async (req, res) => {
   try {
     const { classId } = req.params;
+    const { status } = req.query; // 'approved', 'pending', 'all'
 
     const { data: members, error } = await supabase
       .from('class_members')
-      .select('student_id, joined_at')
+      .select('*')
       .eq('class_id', classId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching class_members:', error);
+      return res.json({ success: true, students: [] });
+    }
 
-    const studentIds = (members || []).map(m => m.student_id);
+    if (!members || members.length === 0) {
+      return res.json({ success: true, students: [] });
+    }
+
+    // Filter by status in memory using getMembershipStatus
+    let filteredMembers = members;
+    if (status && status !== 'all') {
+      filteredMembers = members.filter(m => getMembershipStatus(classId, m.student_id, m.status) === status);
+    }
+
+    const memberMap = {};
+    filteredMembers.forEach(m => {
+      memberMap[m.student_id] = {
+        status: getMembershipStatus(classId, m.student_id, m.status),
+        joinedAt: m.joined_at
+      };
+    });
+
+    const studentIds = Object.keys(memberMap);
     if (studentIds.length === 0) {
       return res.json({ success: true, students: [] });
     }
 
-    // Fetch student profile details from public.users
     const { data: students, error: studentsError } = await supabase
       .from('users')
       .select('id, username, email, display_name, avatar, xp, level, created_at')
@@ -218,60 +525,69 @@ router.get('/:classId/students', async (req, res) => {
 
     if (studentsError) throw studentsError;
 
-    // Get completions/stats for each student
     const studentsWithStats = await Promise.all((students || []).map(async (student) => {
-      // Count completions from lesson_completions
-      const { count: lessonsCompleted, error: lcError } = await supabase
-        .from('lesson_completions')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', student.id)
-        .eq('completed', true);
+      const mInfo = memberMap[student.id] || { status: 'approved', joinedAt: null };
 
-      // Average score from lesson_completions
-      const { data: lcScores, error: lcSerror } = await supabase
-        .from('lesson_completions')
-        .select('score, total_questions')
-        .eq('user_id', student.id);
+      let lessonsCompleted = 0;
+      try {
+        const { count } = await supabase
+          .from('lesson_completions')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', student.id)
+          .eq('completed', true);
+        lessonsCompleted = count || 0;
+      } catch (e) {}
 
       let avgScore = 0;
-      if (lcScores && lcScores.length > 0) {
-        const totalPct = lcScores.reduce((sum, item) => sum + (item.score / (item.total_questions || 1) * 100), 0);
-        avgScore = Math.round(totalPct / lcScores.length);
-      }
+      try {
+        const { data: lcScores } = await supabase
+          .from('lesson_completions')
+          .select('score, total_questions')
+          .eq('user_id', student.id);
 
-      // Last active: get from lesson_completions or users.updated_at
-      const { data: latestCompletion, error: lCompError } = await supabase
-        .from('lesson_completions')
-        .select('completed_at')
-        .eq('user_id', student.id)
-        .order('completed_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        if (lcScores && lcScores.length > 0) {
+          const totalPct = lcScores.reduce((sum, item) => sum + (item.score / (item.total_questions || 1) * 100), 0);
+          avgScore = Math.round(totalPct / lcScores.length);
+        }
+      } catch (e) {}
 
       let lastActive = 'Không hoạt động';
-      if (latestCompletion && latestCompletion.completed_at) {
-        const diff = Date.now() - new Date(latestCompletion.completed_at).getTime();
-        const mins = Math.floor(diff / 60000);
-        const hours = Math.floor(mins / 60);
-        const days = Math.floor(hours / 24);
+      try {
+        const { data: latestCompletion } = await supabase
+          .from('lesson_completions')
+          .select('completed_at')
+          .eq('user_id', student.id)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-        if (mins < 60) {
-          lastActive = `${mins} phút trước`;
-        } else if (hours < 24) {
-          lastActive = `${hours} giờ trước`;
-        } else {
-          lastActive = `${days} ngày trước`;
+        if (latestCompletion && latestCompletion.completed_at) {
+          const diff = Date.now() - new Date(latestCompletion.completed_at).getTime();
+          const mins = Math.floor(diff / 60000);
+          const hours = Math.floor(mins / 60);
+          const days = Math.floor(hours / 24);
+
+          if (mins < 60) {
+            lastActive = `${mins} phút trước`;
+          } else if (hours < 24) {
+            lastActive = `${hours} giờ trước`;
+          } else {
+            lastActive = `${days} ngày trước`;
+          }
         }
-      }
+      } catch (e) {}
 
       return {
         id: student.id,
-        name: student.display_name || student.username || student.email.split('@')[0],
+        name: student.display_name || student.username || (student.email ? student.email.split('@')[0] : 'Học sinh'),
         email: student.email,
+        avatar: student.avatar,
         xp: student.xp || 0,
         level: student.level || 1,
-        lessonsCompleted: lessonsCompleted || 0,
-        avgScore: avgScore || 0,
+        status: mInfo.status,
+        joinedAt: mInfo.joinedAt,
+        lessonsCompleted,
+        avgScore,
         lastActive
       };
     }));
@@ -283,14 +599,83 @@ router.get('/:classId/students', async (req, res) => {
   }
 });
 
-// GET /api/classes/student/:studentId - Get classes enrolled by a student
+// POST /api/classes/:classId/students/:studentId/approve - Teacher accepts student join request
+router.post('/:classId/students/:studentId/approve', async (req, res) => {
+  try {
+    const { classId, studentId } = req.params;
+
+    const key = `${String(classId)}_${String(studentId)}`;
+    statusMap.set(key, 'approved');
+
+    try {
+      await supabase
+        .from('class_members')
+        .update({ status: 'approved' })
+        .eq('class_id', classId)
+        .eq('student_id', studentId);
+    } catch (e) {}
+
+    res.json({ success: true, message: 'Đã chấp nhận học sinh vào lớp' });
+  } catch (error) {
+    console.error('Error approving student:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// POST /api/classes/:classId/students/:studentId/reject - Teacher rejects student join request
+router.post('/:classId/students/:studentId/reject', async (req, res) => {
+  try {
+    const { classId, studentId } = req.params;
+
+    const key = `${String(classId)}_${String(studentId)}`;
+    statusMap.set(key, 'rejected');
+
+    try {
+      await supabase
+        .from('class_members')
+        .update({ status: 'rejected' })
+        .eq('class_id', classId)
+        .eq('student_id', studentId);
+    } catch (e) {}
+
+    res.json({ success: true, message: 'Đã từ chối yêu cầu gia nhập của học sinh' });
+  } catch (error) {
+    console.error('Error rejecting student:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// DELETE /api/classes/:classId/students/:studentId - Teacher kicks/removes student from class
+router.delete('/:classId/students/:studentId', async (req, res) => {
+  try {
+    const { classId, studentId } = req.params;
+
+    const key = `${String(classId)}_${String(studentId)}`;
+    statusMap.delete(key);
+
+    const { error } = await supabase
+      .from('class_members')
+      .delete()
+      .eq('class_id', classId)
+      .eq('student_id', studentId);
+
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Đã xóa học sinh khỏi lớp thành công' });
+  } catch (error) {
+    console.error('Error removing student from class:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// GET /api/classes/student/:studentId - Get classes enrolled or requested by a student
 router.get('/student/:studentId', async (req, res) => {
   try {
     const { studentId } = req.params;
     
     const { data: memberships, error: memberError } = await supabase
       .from('class_members')
-      .select('class_id, joined_at')
+      .select('*')
       .eq('student_id', studentId);
       
     if (memberError) throw memberError;
@@ -298,6 +683,11 @@ router.get('/student/:studentId', async (req, res) => {
     if (!memberships || memberships.length === 0) {
       return res.json({ success: true, classes: [] });
     }
+
+    const membershipMap = {};
+    memberships.forEach(m => {
+      membershipMap[m.class_id] = getMembershipStatus(m.class_id, studentId, m.status);
+    });
     
     const classIds = memberships.map(m => m.class_id);
     
@@ -310,27 +700,36 @@ router.get('/student/:studentId', async (req, res) => {
     if (classError) throw classError;
     
     const enrichedClasses = await Promise.all((classes || []).map(async (cls) => {
-      // Get teacher profile details
-      const { data: teacher, error: teacherError } = await supabase
-        .from('users')
-        .select('id, display_name, email, avatar')
-        .eq('id', cls.teacher_id)
-        .maybeSingle();
+      let teacher = null;
+      try {
+        const { data: tData } = await supabase
+          .from('users')
+          .select('id, display_name, email, avatar')
+          .eq('id', cls.teacher_id)
+          .maybeSingle();
+        teacher = tData;
+      } catch (e) {}
         
-      // Get student count in class
-      const { count, error: countError } = await supabase
-        .from('class_members')
-        .select('*', { count: 'exact', head: true })
-        .eq('class_id', cls.id);
+      let count = 0;
+      try {
+        const { count: cVal } = await supabase
+          .from('class_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('class_id', cls.id);
+        count = cVal || 0;
+      } catch (e) {}
         
       return {
         id: cls.id,
         name: cls.name,
         code: cls.code,
+        grade: parseGrade(cls.grade, cls.name, cls.id, cls.code, cls.description),
+        description: cleanDescription(cls.description),
         created: cls.created_at ? cls.created_at.split('T')[0] : '',
-        studentsCount: count || 0,
+        studentsCount: count,
+        membershipStatus: membershipMap[cls.id] || 'pending',
         teacher: teacher ? {
-          name: teacher.display_name || teacher.email.split('@')[0],
+          name: teacher.display_name || (teacher.email ? teacher.email.split('@')[0] : 'Giáo viên'),
           email: teacher.email,
           avatar: teacher.avatar
         } : null
@@ -428,7 +827,6 @@ router.get('/:classId/assignments', async (req, res) => {
           score = comp.score;
         }
       } else if (asg.type === 'challenge') {
-        // Find in game_results
         const { data: resObj } = await supabase
           .from('game_results')
           .select('completed, score')
@@ -477,7 +875,6 @@ router.post('/:classId/assignments', async (req, res) => {
       due_date: formattedDueDate
     };
 
-    // Store link if column exists in schema
     if (link) {
       insertPayload.link = link;
     }
@@ -489,7 +886,6 @@ router.post('/:classId/assignments', async (req, res) => {
       .single();
       
     if (error) {
-      // If error is due to missing 'link' column in database table, fallback without 'link' field
       if (error.message && (error.message.includes('link') || error.code === 'PGRST204')) {
         delete insertPayload.link;
         const { data: fallbackData, error: fallbackErr } = await supabase
@@ -497,13 +893,9 @@ router.post('/:classId/assignments', async (req, res) => {
           .insert(insertPayload)
           .select()
           .single();
-        if (fallbackErr) {
-          console.error('Fallback assignment error:', fallbackErr);
-          throw fallbackErr;
-        }
+        if (fallbackErr) throw fallbackErr;
         return res.json({ success: true, assignment: fallbackData });
       }
-      console.error('Insert assignment error:', error);
       throw error;
     }
     res.json({ success: true, assignment: data });
@@ -632,14 +1024,12 @@ router.post('/:classId/discussions', async (req, res) => {
       
     if (error) throw error;
     
-    // Fetch posting user info
     const { data: userObj } = await supabase
       .from('users')
       .select('id, display_name, email, avatar, role')
       .eq('id', userId)
       .single();
       
-    // Create teacher notification asynchronously
     try {
       const { data: cls } = await supabase
         .from('classes')
@@ -658,9 +1048,7 @@ router.post('/:classId/discussions', async (req, res) => {
             is_read: false
           });
       }
-    } catch (notifErr) {
-      console.error('Error creating teacher notification for discussion:', notifErr);
-    }
+    } catch (notifErr) {}
       
     res.json({
       success: true,

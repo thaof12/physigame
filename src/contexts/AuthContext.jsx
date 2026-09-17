@@ -75,36 +75,35 @@ export const AuthProvider = ({ children }) => {
           try {
             const response = await api.get(`/users/firebase/${session.user.id}`);
             if (response.data) {
-              // Resolve latest avatar from Google OAuth metadata (may have been updated)
-              const latestAvatar =
+              // Database-stored avatar is the authoritative source!
+              // Fall back to Google OAuth metadata ONLY if database avatar is completely empty.
+              const effectiveAvatar =
+                response.data.avatar ||
+                response.data.avatar_url ||
+                response.data.profile?.avatar ||
+                response.data.teacher_profile?.avatar ||
                 session.user.user_metadata?.avatar_url ||
                 session.user.user_metadata?.picture ||
                 session.user.identities?.[0]?.identity_data?.avatar_url ||
-                response.data.avatar_url ||
-                response.data.avatar ||
                 null;
 
               const userData = {
                 ...response.data,
                 email: response.data.email || session.user.email,
                 displayName: response.data.displayName || response.data.display_name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
-                avatar_url: latestAvatar,
-                avatar: latestAvatar,
+                avatar_url: effectiveAvatar,
+                avatar: effectiveAvatar,
+                profile: {
+                  ...(response.data.profile || {}),
+                  avatar: effectiveAvatar
+                },
+                teacher_profile: {
+                  ...(response.data.teacher_profile || {}),
+                  avatar: effectiveAvatar
+                },
                 firebaseUid: session.user.id,
                 uid: session.user.id
               };
-
-              // If avatar changed (Google user updated photo), silently sync to DB
-              const dbAvatar = response.data.avatar_url || response.data.avatar;
-              if (latestAvatar && latestAvatar !== dbAvatar) {
-                supabase.from('users')
-                  .update({ avatar: latestAvatar })
-                  .eq('id', session.user.id)
-                  .then(({ error }) => {
-                    if (error) console.warn('⚠️ Avatar sync to DB failed:', error.message);
-                    else console.log('🖼️ Avatar synced to DB from Google OAuth');
-                  });
-              }
               
               const { data: { session: currentSession } } = await supabase.auth.getSession();
               if (!currentSession || currentSession.user.id !== session.user.id) {
@@ -379,19 +378,26 @@ export const AuthProvider = ({ children }) => {
                 }
               }
 
+              const resolvedAvatar = userData.avatar || userData.avatar_url || userData.profile?.avatar || userData.teacher_profile?.avatar ||
+                session.user.user_metadata?.avatar_url ||
+                session.user.user_metadata?.picture ||
+                session.user.identities?.[0]?.identity_data?.avatar_url ||
+                null;
+
               const finalUser = {
                 ...userData,
                 email: userData.email || session.user.email,
                 displayName: userData.displayName || userData.display_name || session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
-                avatar_url: userData.avatar_url || userData.avatar ||
-                  session.user.user_metadata?.avatar_url ||
-                  session.user.user_metadata?.picture ||
-                  session.user.identities?.[0]?.identity_data?.avatar_url ||
-                  null,
-                avatar: userData.avatar || userData.avatar_url ||
-                  session.user.user_metadata?.avatar_url ||
-                  session.user.user_metadata?.picture ||
-                  null,
+                avatar_url: resolvedAvatar,
+                avatar: resolvedAvatar,
+                profile: {
+                  ...(userData.profile || {}),
+                  avatar: resolvedAvatar
+                },
+                teacher_profile: {
+                  ...(userData.teacher_profile || {}),
+                  avatar: resolvedAvatar
+                },
                 role: isTeacher ? 'teacher' : (userData.role || 'student'),
                 teacherStatus: finalStatus,
                 teacher_status: finalStatus
@@ -585,6 +591,8 @@ export const AuthProvider = ({ children }) => {
                 const nextUser = {
                   ...prev,
                   ...updated,
+                  avatar: updated.avatar || prev.avatar,
+                  avatar_url: updated.avatar || prev.avatar_url,
                   teacherStatus: updated.teacher_status,
                   teacher_status: updated.teacher_status,
                   teacherProfile: updated.teacher_profile || prev.teacherProfile

@@ -93,33 +93,30 @@ const Login = () => {
           </Link>
 
           <div className="relative z-10 flex flex-col h-full justify-center">
-            <div className="mb-10">
-              <span className="font-premium-serif text-4xl font-bold text-white italic tracking-tight">Eureka</span>
+            <div className="mb-8">
+              <span className="font-premium-serif text-6xl lg:text-7xl font-extrabold text-white italic tracking-tight">Eureka</span>
             </div>
 
-            <h1 className="font-heading text-4xl lg:text-5xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-              Khám Phá <br />
+            <h1 className="font-heading text-2xl lg:text-3xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+              Phát triển bản thân, <br />
               <span className="text-gray-300">
-                Bí Mật Vũ Trụ
+                tích lũy kiến thức
               </span>
             </h1>
-            <p className="font-body text-white/70 text-lg mb-12 max-w-sm leading-relaxed">
-              Trở thành nhà vật lý tương lai với nền tảng học tập 3D sinh động. Chinh phục tri thức, khai thác tiềm năng.
-            </p>
 
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-6 mt-6">
               {[
-                { title: 'Tương tác 3D', desc: 'Thí nghiệm vật lý chân thực ngay trong trình duyệt.' },
-                { title: 'Học tập cá nhân', desc: 'Lộ trình phát triển riêng biệt cho mỗi học viên.' },
-                { title: 'Chứng nhận uy tín', desc: 'Đánh giá năng lực theo chuẩn giáo dục hiện đại.' }
+                { title: 'Thí nghiệm vật lý ngay trong trình duyệt.' },
+                { title: 'Game vật lý thao tác' },
+                { title: 'Đấu trường vật lý' }
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group">
                   <div className="mt-1 bg-white/10 p-1.5 rounded-lg shrink-0 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
                     <CheckCircle2 className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-heading text-white font-extrabold text-base group-hover:text-gray-300 transition-colors">{item.title}</h3>
-                    <p className="font-body text-white/50 text-sm mt-0.5">{item.desc}</p>
+                    {item.title && <h3 className="font-heading text-white font-extrabold text-base group-hover:text-gray-300 transition-colors">{item.title}</h3>}
+                    {item.desc && <p className="font-body text-white/50 text-sm mt-0.5">{item.desc}</p>}
                   </div>
                 </div>
               ))}

@@ -9,10 +9,16 @@ CREATE TABLE IF NOT EXISTS public.classes (
   teacher_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   code TEXT UNIQUE NOT NULL,
+  grade INTEGER DEFAULT 10,
+  description TEXT,
   lessons_count INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add grade and description columns if classes table already exists
+ALTER TABLE public.classes ADD COLUMN IF NOT EXISTS grade INTEGER DEFAULT 10;
+ALTER TABLE public.classes ADD COLUMN IF NOT EXISTS description TEXT;
 
 -- Enable RLS for classes
 ALTER TABLE public.classes ENABLE ROW LEVEL SECURITY;
@@ -38,9 +44,13 @@ CREATE TABLE IF NOT EXISTS public.class_members (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   class_id UUID NOT NULL REFERENCES public.classes(id) ON DELETE CASCADE,
   student_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   joined_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(class_id, student_id)
 );
+
+-- Add status column if class_members table already exists
+ALTER TABLE public.class_members ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
 
 -- Enable RLS for class_members
 ALTER TABLE public.class_members ENABLE ROW LEVEL SECURITY;

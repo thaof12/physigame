@@ -18,7 +18,12 @@ import {
   Video,
   Calendar,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  ShieldAlert,
+  UserX,
+  AlertTriangle,
+  ChevronDown,
+  Check
 } from 'lucide-react';
 import { useTeacherAuth } from '../contexts/TeacherAuthContext';
 import api from '../../../config/api';
@@ -28,8 +33,35 @@ const ClassManagement = () => {
   const [classes, setClasses] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  // Form states
   const [newClassName, setNewClassName] = useState('');
+  const [newClassGrade, setNewClassGrade] = useState(10);
+  const [showGradeDropdown, setShowGradeDropdown] = useState(false);
+  const gradeDropdownRef = useRef(null);
+  const [studentSubTab, setStudentSubTab] = useState('approved'); // 'approved' or 'pending'
   const [copiedCode, setCopiedCode] = useState('');
+
+  // Close grade dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (gradeDropdownRef.current && !gradeDropdownRef.current.contains(e.target)) {
+        setShowGradeDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Custom Confirmation Modal state (Replaces default browser window.confirm)
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'danger', // 'danger' | 'warning'
+    confirmText: 'Xác nhận',
+    cancelText: 'Hủy',
+    onConfirm: null
+  });
 
   // Active workspace state
   const [activeClass, setActiveClass] = useState(null);
@@ -104,8 +136,8 @@ const ClassManagement = () => {
       const discRes = await api.get(`/classes/${activeClass.id}/discussions`);
       setDiscussions(discRes.data?.discussions || []);
 
-      // Fetch students
-      const studRes = await api.get(`/classes/${activeClass.id}/students`);
+      // Fetch all students (approved and pending)
+      const studRes = await api.get(`/classes/${activeClass.id}/students?status=all`);
       setStudents(studRes.data?.students || []);
     } catch (error) {
       console.error('Error loading class details:', error);
@@ -134,11 +166,13 @@ const ClassManagement = () => {
     try {
       const response = await api.post('/classes', {
         teacherId: teacher.id,
-        name: newClassName
+        name: newClassName,
+        grade: newClassGrade
       });
       if (response.data?.success) {
         setClasses([response.data.class, ...classes]);
         setNewClassName('');
+        setNewClassGrade(10);
         setShowCreateModal(false);
       }
     } catch (error) {
@@ -147,8 +181,7 @@ const ClassManagement = () => {
     }
   };
 
-  const handleDeleteClass = async (classId) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa lớp học này? Tất cả học sinh sẽ bị ngắt kết nối.')) return;
+  const executeDeleteClass = async (classId) => {
     try {
       const response = await api.delete(`/classes/${classId}`);
       if (response.data?.success) {
@@ -157,8 +190,87 @@ const ClassManagement = () => {
       }
     } catch (error) {
       console.error('Error deleting class:', error);
-      alert('Không thể xóa lớp học.');
     }
+  };
+
+  const handleDeleteClass = (classId, className) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Xóa lớp học vĩnh viễn',
+      message: `Bạn có chắc chắn muốn xóa lớp học "${className || 'này'}"? Tất cả học sinh sẽ bị ngắt kết nối và bài học trong lớp sẽ bị loại bỏ.`,
+      type: 'danger',
+      confirmText: 'Xóa lớp học',
+      cancelText: 'Hủy',
+      onConfirm: () => executeDeleteClass(classId)
+    });
+  };
+
+  // Accept student join request
+  const handleApproveStudent = async (studentId) => {
+    if (!activeClass?.id) return;
+    try {
+      const response = await api.post(`/classes/${activeClass.id}/students/${studentId}/approve`);
+      if (response.data?.success) {
+        setStudents(students.map(s => s.id === studentId ? { ...s, status: 'approved' } : s));
+        fetchClasses(); // update header badge counts
+      }
+    } catch (error) {
+      console.error('Error approving student:', error);
+    }
+  };
+
+  const executeRejectStudent = async (studentId) => {
+    if (!activeClass?.id) return;
+    try {
+      const response = await api.post(`/classes/${activeClass.id}/students/${studentId}/reject`);
+      if (response.data?.success) {
+        setStudents(students.filter(s => s.id !== studentId));
+        fetchClasses();
+      }
+    } catch (error) {
+      console.error('Error rejecting student:', error);
+    }
+  };
+
+  // Reject student join request with Custom Confirmation Modal
+  const handleRejectStudent = (studentId, studentName) => {
+    if (!activeClass?.id) return;
+    setConfirmModal({
+      isOpen: true,
+      title: 'Từ chối yêu cầu gia nhập',
+      message: `Bạn có chắc chắn muốn từ chối yêu cầu gia nhập của học sinh "${studentName || 'này'}"? Học sinh sẽ nhận được thông báo bị từ chối.`,
+      type: 'warning',
+      confirmText: 'Từ chối yêu cầu',
+      cancelText: 'Hủy',
+      onConfirm: () => executeRejectStudent(studentId)
+    });
+  };
+
+  const executeKickStudent = async (studentId) => {
+    if (!activeClass?.id) return;
+    try {
+      const response = await api.delete(`/classes/${activeClass.id}/students/${studentId}`);
+      if (response.data?.success) {
+        setStudents(students.filter(s => s.id !== studentId));
+        fetchClasses();
+      }
+    } catch (error) {
+      console.error('Error kicking student:', error);
+    }
+  };
+
+  // Kick / Remove student from class with Custom Confirmation Modal
+  const handleKickStudent = (studentId, studentName) => {
+    if (!activeClass?.id) return;
+    setConfirmModal({
+      isOpen: true,
+      title: 'Xóa học sinh khỏi lớp',
+      message: `Bạn có chắc chắn muốn xóa/kick học sinh "${studentName}" khỏi lớp học này? Học sinh sẽ bị rời khỏi lớp và phải gửi lại yêu cầu nếu muốn gia nhập lại.`,
+      type: 'danger',
+      confirmText: 'Xóa khỏi lớp',
+      cancelText: 'Hủy',
+      onConfirm: () => executeKickStudent(studentId)
+    });
   };
 
   const copyClassCode = (code) => {
@@ -300,6 +412,65 @@ const ClassManagement = () => {
     } finally {
       setLoadingProgress(false);
     }
+  };
+
+  // Helper to render custom confirmation modal in both Active Class View & Grid View
+  const renderConfirmModal = () => {
+    if (!confirmModal.isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md flex items-center justify-center z-[300] p-4 animate-fade-in">
+        <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl relative space-y-6 animate-scale-up">
+          <div className="flex items-start gap-4">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner ${
+              confirmModal.type === 'danger'
+                ? 'bg-rose-50 border border-rose-100 text-rose-600'
+                : 'bg-amber-50 border border-amber-100 text-amber-600'
+            }`}>
+              {confirmModal.type === 'danger' ? (
+                <UserX className="w-7 h-7" />
+              ) : (
+                <AlertTriangle className="w-7 h-7" />
+              )}
+            </div>
+
+            <div className="space-y-1 pt-1">
+              <h3 className="font-heading text-xl font-extrabold text-slate-900 leading-tight">
+                {confirmModal.title}
+              </h3>
+              <p className="font-body text-xs font-semibold text-slate-500 leading-relaxed">
+                {confirmModal.message}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+              className="flex-1 px-5 py-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-2xl transition-all text-xs uppercase tracking-wider cursor-pointer"
+            >
+              {confirmModal.cancelText || 'Hủy'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const action = confirmModal.onConfirm;
+                setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                if (action) action();
+              }}
+              className={`flex-1 px-5 py-3.5 font-black text-white rounded-2xl shadow-lg transition-all text-xs uppercase tracking-wider active:scale-95 cursor-pointer ${
+                confirmModal.type === 'danger'
+                  ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-600/20'
+                  : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-amber-500/20'
+              }`}
+            >
+              {confirmModal.confirmText || 'Xác nhận'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Render detail view if a class is selected
@@ -744,63 +915,177 @@ const ClassManagement = () => {
               </div>
             )}
 
-            {/* TAB 5: STUDENTS */}
-            {activeTab === 'students' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-black text-slate-900">Chi tiết kết quả học tập của học sinh</h3>
-                  <span className="text-xs text-slate-400 font-bold">{students.length} học sinh</span>
-                </div>
+            {/* TAB 5: STUDENTS & MEMBERS MANAGEMENT */}
+            {activeTab === 'students' && (() => {
+              const approvedStudents = students.filter(s => (s.status || 'approved') === 'approved');
+              const pendingStudents = students.filter(s => s.status === 'pending');
 
-                {students.length === 0 ? (
-                  <div className="bg-white border border-slate-100 rounded-3xl p-8 text-center text-slate-400">
-                    Chưa có học sinh nào tham gia lớp học
+              return (
+                <div className="space-y-6">
+                  {/* Header & Sub-tab navigation */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900">Quản lý thành viên lớp học</h3>
+                      <p className="text-xs text-slate-400 font-bold mt-0.5">Duyệt học sinh mới xin tham gia hoặc quản lý danh sách học sinh chính thức</p>
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl shrink-0">
+                      <button
+                        onClick={() => setStudentSubTab('approved')}
+                        className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                          studentSubTab === 'approved'
+                          ? 'bg-white text-indigo-600 shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        Học sinh chính thức ({approvedStudents.length})
+                      </button>
+                      <button
+                        onClick={() => setStudentSubTab('pending')}
+                        className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+                          studentSubTab === 'pending'
+                          ? 'bg-amber-500 text-white shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        <span>Chờ duyệt ({pendingStudents.length})</span>
+                        {pendingStudents.length > 0 && (
+                          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/50">
-                          <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Học sinh</th>
-                          <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Cấp độ (XP)</th>
-                          <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Bài học đã làm</th>
-                          <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Điểm trung bình</th>
-                          <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Hoạt động cuối</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 font-medium text-slate-700 text-sm">
-                        {students.map(stud => (
-                          <tr key={stud.id} className="hover:bg-slate-50/30 transition-colors">
-                            <td className="p-4">
-                              <p className="font-black text-slate-900">{stud.name}</p>
-                              <p className="text-[10px] text-slate-400 font-bold mt-0.5">{stud.email}</p>
-                            </td>
-                            <td className="p-4">
-                              <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded text-xs font-bold text-indigo-600">
-                                Lvl {stud.level} ({stud.xp} XP)
-                              </span>
-                            </td>
-                            <td className="p-4 font-bold text-slate-800">{stud.lessonsCompleted} bài</td>
-                            <td className="p-4">
-                              <span className={`px-2 py-0.5 rounded text-xs font-black ${
-                                stud.avgScore >= 80 
-                                ? 'bg-emerald-50 text-emerald-700' 
-                                : stud.avgScore >= 50 
-                                ? 'bg-amber-50 text-amber-700' 
-                                : 'bg-rose-50 text-rose-700'
-                              }`}>
-                                {stud.avgScore}%
-                              </span>
-                            </td>
-                            <td className="p-4 text-xs text-slate-400 font-bold">{stud.lastActive}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            )}
+
+                  {/* SUB-TAB 1: PENDING REQUESTS */}
+                  {studentSubTab === 'pending' && (
+                    <div className="space-y-4">
+                      {pendingStudents.length === 0 ? (
+                        <div className="bg-white border border-slate-100 rounded-3xl p-12 text-center text-slate-400 shadow-sm">
+                          <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                          <p className="font-bold text-slate-600 text-sm">Không có yêu cầu tham gia lớp nào đang chờ duyệt.</p>
+                          <p className="text-xs text-slate-400 mt-1">Khi học sinh chọn lớp hoặc nhập mã lớp, yêu cầu của học sinh sẽ xuất hiện ở đây.</p>
+                        </div>
+                      ) : (
+                        <div className="grid gap-4">
+                          {pendingStudents.map(stud => (
+                            <div key={stud.id} className="bg-white border border-amber-200/60 rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                              <div className="flex items-center gap-4">
+                                {stud.avatar ? (
+                                  <img src={stud.avatar} alt="Avatar" className="w-12 h-12 rounded-2xl object-cover border border-slate-100" />
+                                ) : (
+                                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 font-black text-base flex items-center justify-center border border-amber-200 uppercase">
+                                    {stud.name.charAt(0)}
+                                  </div>
+                                )}
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="font-black text-slate-900 text-base">{stud.name}</h4>
+                                    <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[10px] font-black uppercase">Chờ duyệt</span>
+                                  </div>
+                                  <p className="text-xs text-slate-400 font-semibold">{stud.email}</p>
+                                  <p className="text-[10px] text-slate-400 font-bold mt-1">Gửi yêu cầu ngày: {stud.joinedAt ? new Date(stud.joinedAt).toLocaleDateString('vi-VN') : 'Gần đây'}</p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                                <button
+                                  onClick={() => handleRejectStudent(stud.id, stud.name)}
+                                  className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-black text-xs rounded-xl transition-colors"
+                                >
+                                  Từ chối
+                                </button>
+                                <button
+                                  onClick={() => handleApproveStudent(stud.id)}
+                                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all uppercase tracking-wider"
+                                >
+                                  Chấp nhận vào lớp
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* SUB-TAB 2: APPROVED STUDENTS */}
+                  {studentSubTab === 'approved' && (
+                    <div className="space-y-4">
+                      {approvedStudents.length === 0 ? (
+                        <div className="bg-white border border-slate-100 rounded-3xl p-12 text-center text-slate-400 shadow-sm">
+                          <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                          <p className="font-bold text-slate-600 text-sm">Chưa có học sinh chính thức nào trong lớp.</p>
+                        </div>
+                      ) : (
+                        <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-x-auto">
+                          <table className="w-full text-left border-collapse">
+                            <thead>
+                              <tr className="border-b border-slate-100 bg-slate-50/50">
+                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Học sinh</th>
+                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Cấp độ (XP)</th>
+                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Bài học đã làm</th>
+                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Điểm TB</th>
+                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Hoạt động cuối</th>
+                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider text-right">Hành động</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 font-medium text-slate-700 text-sm">
+                              {approvedStudents.map(stud => (
+                                <tr key={stud.id} className="hover:bg-slate-50/30 transition-colors">
+                                  <td className="p-4">
+                                    <div className="flex items-center gap-3">
+                                      {stud.avatar ? (
+                                        <img src={stud.avatar} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
+                                      ) : (
+                                        <div className="w-8 h-8 bg-indigo-50 text-indigo-600 font-black rounded-full flex items-center justify-center text-xs">
+                                          {stud.name.charAt(0)}
+                                        </div>
+                                      )}
+                                      <div>
+                                        <p className="font-black text-slate-900">{stud.name}</p>
+                                        <p className="text-[10px] text-slate-400 font-bold">{stud.email}</p>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="p-4">
+                                    <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded text-xs font-bold text-indigo-600">
+                                      Lvl {stud.level} ({stud.xp} XP)
+                                    </span>
+                                  </td>
+                                  <td className="p-4 font-bold text-slate-800">{stud.lessonsCompleted} bài</td>
+                                  <td className="p-4">
+                                    <span className={`px-2 py-0.5 rounded text-xs font-black ${
+                                      stud.avgScore >= 80 
+                                      ? 'bg-emerald-50 text-emerald-700' 
+                                      : stud.avgScore >= 50 
+                                      ? 'bg-amber-50 text-amber-700' 
+                                      : 'bg-rose-50 text-rose-700'
+                                    }`}>
+                                      {stud.avgScore}%
+                                    </span>
+                                  </td>
+                                  <td className="p-4 text-xs text-slate-400 font-bold">{stud.lastActive}</td>
+                                  <td className="p-4 text-right">
+                                    <button
+                                      onClick={() => handleKickStudent(stud.id, stud.name)}
+                                      className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs rounded-xl transition-colors inline-flex items-center gap-1"
+                                      title="Kick / Xóa học sinh khỏi lớp"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                      <span>Xóa khỏi lớp</span>
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
           </div>
         </div>
@@ -900,6 +1185,8 @@ const ClassManagement = () => {
           </div>
         )}
 
+        {renderConfirmModal()}
+
         {copiedCode && (
           <div className="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 text-xs font-bold animate-fade-in z-50">
             <CheckCircle2 className="w-4.5 h-4.5 text-emerald-400" />
@@ -920,7 +1207,7 @@ const ClassManagement = () => {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white text-sm font-black rounded-[1.25rem] shadow-xl shadow-emerald-500/20 transition-all uppercase tracking-widest"
+          className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 text-white text-sm font-black rounded-[1.25rem] shadow-xl shadow-blue-500/20 transition-all uppercase tracking-widest cursor-pointer active:scale-95"
         >
           <Plus className="w-5 h-5" />
           Tạo lớp mới
@@ -948,11 +1235,17 @@ const ClassManagement = () => {
           >
             <div>
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/10">
-                  <Users className="w-6 h-6 text-white" />
+                <div className="flex items-center gap-2">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-50 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/10">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="px-2.5 py-0.5 bg-indigo-50 border border-indigo-100 rounded-lg text-indigo-700 font-black text-[10px] uppercase">
+                    Khối {cls.grade || 10}
+                  </span>
                 </div>
+
                 <button 
-                  onClick={() => handleDeleteClass(cls.id)}
+                  onClick={() => handleDeleteClass(cls.id, cls.name)}
                   className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                   title="Xóa lớp học"
                 >
@@ -974,6 +1267,12 @@ const ClassManagement = () => {
                 >
                   <Copy className="w-3.5 h-3.5" />
                 </button>
+
+                {cls.pendingCount > 0 && (
+                  <span className="px-2 py-0.5 bg-amber-500 text-white rounded-full text-[10px] font-black animate-pulse">
+                    {cls.pendingCount} chờ duyệt
+                  </span>
+                )}
               </div>
 
               {/* Stats */}
@@ -1022,7 +1321,7 @@ const ClassManagement = () => {
               <Plus className="w-6 h-6" />
             </div>
             <p className="text-slate-400 mb-1 font-bold">Chưa có lớp học nào</p>
-            <p className="text-emerald-600 text-sm font-black">Tạo lớp đầu tiên của bạn</p>
+            <p className="text-indigo-600 text-sm font-black">Tạo lớp đầu tiên của bạn</p>
           </div>
         )}
       </div>
@@ -1030,33 +1329,84 @@ const ClassManagement = () => {
       {/* Create Class Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white border border-slate-100 rounded-[2rem] p-8 w-full max-w-md shadow-2xl">
-            <h2 className="text-2xl font-black text-slate-900 mb-4">Tạo lớp học mới</h2>
+          <div className="bg-white border border-slate-100 rounded-[2rem] p-8 w-full max-w-md shadow-2xl space-y-6">
+            <h2 className="text-2xl font-black text-slate-900">Tạo lớp học mới</h2>
 
-            <div className="mb-6">
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">
-                Tên lớp học
-              </label>
-              <input
-                type="text"
-                value={newClassName}
-                onChange={(e) => setNewClassName(e.target.value)}
-                placeholder="VD: Lớp 10A1 - Vật lý nâng cao"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 transition-all font-bold"
-              />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
+                  Tên lớp học <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newClassName}
+                  onChange={(e) => setNewClassName(e.target.value)}
+                  placeholder="VD: Lớp 10A1 - Vật lý nâng cao"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
+                  Khối lớp <span className="text-slate-400 font-semibold lowercase">(phân loại cho học sinh tìm kiếm)</span>
+                </label>
+                <div className="relative" ref={gradeDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setShowGradeDropdown(prev => !prev)}
+                    className="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl px-4 py-3 text-slate-900 font-bold text-sm focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer flex items-center justify-between shadow-xs"
+                  >
+                    <span>Khối {newClassGrade} {newClassGrade <= 9 ? '(THCS)' : '(THPT)'}</span>
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showGradeDropdown ? 'rotate-180 text-indigo-600' : ''}`} />
+                  </button>
+
+                  {showGradeDropdown && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 overflow-hidden py-1.5 animate-scale-up">
+                      {[
+                        { value: 6, label: 'Khối 6 (THCS)' },
+                        { value: 7, label: 'Khối 7 (THCS)' },
+                        { value: 8, label: 'Khối 8 (THCS)' },
+                        { value: 9, label: 'Khối 9 (THCS)' },
+                        { value: 10, label: 'Khối 10 (THPT)' },
+                        { value: 11, label: 'Khối 11 (THPT)' },
+                        { value: 12, label: 'Khối 12 (THPT)' }
+                      ].map(opt => {
+                        const selected = newClassGrade === opt.value;
+                        return (
+                          <div
+                            key={opt.value}
+                            onClick={() => {
+                              setNewClassGrade(opt.value);
+                              setShowGradeDropdown(false);
+                            }}
+                            className={`px-4 py-2.5 text-xs font-black transition-colors flex items-center justify-between cursor-pointer ${
+                              selected 
+                                ? 'bg-indigo-50/80 text-indigo-600' 
+                                : 'text-slate-700 hover:bg-slate-50'
+                            }`}
+                          >
+                            <span>{opt.label}</span>
+                            {selected && <Check className="w-4 h-4 text-indigo-600" />}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="flex-1 px-4 py-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold rounded-xl transition-all"
+                className="flex-1 px-4 py-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold rounded-2xl transition-all text-sm cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleCreateClass}
                 disabled={!newClassName.trim()}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white rounded-xl font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-sm"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 text-white rounded-2xl font-black transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-sm shadow-md shadow-blue-500/20 cursor-pointer active:scale-95"
               >
                 Tạo lớp
               </button>
@@ -1159,6 +1509,9 @@ const ClassManagement = () => {
           </div>
         </div>
       )}
+
+      {/* CUSTOM CONFIRMATION MODAL (Replaces default browser window.confirm) */}
+      {renderConfirmModal()}
 
       {copiedCode && (
         <div className="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 text-xs font-bold animate-fade-in z-50">

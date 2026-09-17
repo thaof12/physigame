@@ -1,3 +1,4 @@
+import { supabase } from '../../../config/supabase';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Navigate, Outlet, Link } from 'react-router-dom';
 import { useTeacherAuth } from '../contexts/TeacherAuthContext';
@@ -82,12 +83,46 @@ const TeacherLayout = () => {
   };
 
   useEffect(() => {
-    if (teacher?.id) {
-      fetchNotifications();
-      // Poll every 30 seconds for live notifications
-      const interval = setInterval(fetchNotifications, 30000);
-      return () => clearInterval(interval);
+    if (!teacher?.id) return;
+
+    fetchNotifications();
+
+    // 1. Fast polling fallback every 3 seconds for near-instant updates
+    const interval = setInterval(fetchNotifications, 3000);
+
+    // 2. Fetch immediately when window focuses or tab visibility changes
+    const handleFocus = () => fetchNotifications();
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    // 3. Supabase Realtime WebSocket subscription for sub-second push updates
+    let channel;
+    try {
+      channel = supabase
+        .channel(`teacher-notif-push-${teacher.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'teacher_notifications',
+            filter: `teacher_id=eq.${teacher.id}`
+          },
+          () => {
+            fetchNotifications();
+          }
+        )
+        .subscribe();
+    } catch (err) {
+      console.warn('Realtime subscription warning:', err);
     }
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [teacher?.id]);
 
   // Handle click outside to close dropdown
@@ -302,6 +337,7 @@ const TeacherLayout = () => {
             <div className="relative" ref={dropdownRef}>
               <button 
                 onClick={() => {
+                  fetchNotifications();
                   setShowNotifDropdown(!showNotifDropdown);
                   if (!showNotifDropdown) {
                     handleMarkAllAsRead();

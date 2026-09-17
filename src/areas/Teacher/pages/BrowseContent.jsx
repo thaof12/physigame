@@ -26,6 +26,7 @@ import {
   Trash2,
   Flag,
   AlertTriangle,
+  AlertCircle,
   Lock
 } from 'lucide-react';
 import api from '../../../config/api';
@@ -352,13 +353,13 @@ const BrowseContent = () => {
   };
 
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState({
+    isOpen: false,
+    item: null
+  });
 
-  const handleDeleteContent = async (item, e) => {
-    if (e) e.stopPropagation();
-    const itemTitle = item.name || item.title || 'bài viết này';
-    const confirmDelete = window.confirm(`Bạn có chắc chắn muốn xóa "${itemTitle}" khỏi hệ thống không? Hành động này không thể hoàn tác.`);
-    if (!confirmDelete) return;
-
+  const executeDeleteContent = async (item) => {
+    if (!item) return;
     setDeleteSubmitting(true);
     try {
       if (activeTab === 'lessons') {
@@ -369,10 +370,15 @@ const BrowseContent = () => {
       await fetchSystemContent();
     } catch (err) {
       console.error('Error deleting content:', err);
-      alert('Không thể xóa bài viết này. Vui lòng thử lại.');
     } finally {
       setDeleteSubmitting(false);
+      setDeleteConfirmModal({ isOpen: false, item: null });
     }
+  };
+
+  const handleDeleteContent = (item, e) => {
+    if (e) e.stopPropagation();
+    setDeleteConfirmModal({ isOpen: true, item });
   };
 
   // ── Report content state ───────────────────────────────────────────
@@ -1332,6 +1338,42 @@ const BrowseContent = () => {
                 </form>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* CUSTOM CONFIRMATION MODAL FOR DELETING CONTENT */}
+      {deleteConfirmModal.isOpen && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl relative space-y-6 animate-scale-up">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center flex-shrink-0 shadow-inner">
+                <Trash2 className="w-7 h-7" />
+              </div>
+              <div className="space-y-1 pt-1">
+                <h3 className="font-heading text-xl font-extrabold text-slate-900 leading-tight">Xóa học liệu khỏi hệ thống</h3>
+                <p className="font-body text-xs font-semibold text-slate-500 leading-relaxed">
+                  Bạn có chắc chắn muốn xóa bài "{deleteConfirmModal.item?.name || deleteConfirmModal.item?.title || 'này'}"? Hành động này không thể hoàn tác.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmModal({ isOpen: false, item: null })}
+                className="flex-1 px-5 py-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-2xl transition-all text-xs uppercase tracking-wider"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={() => executeDeleteContent(deleteConfirmModal.item)}
+                disabled={deleteSubmitting}
+                className="flex-1 px-5 py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-black rounded-2xl shadow-lg shadow-rose-600/20 transition-all text-xs uppercase tracking-wider disabled:opacity-50 active:scale-95"
+              >
+                {deleteSubmitting ? 'Đang xóa...' : 'Xóa vĩnh viễn'}
+              </button>
+            </div>
           </div>
         </div>
       )}

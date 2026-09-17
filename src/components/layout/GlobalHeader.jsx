@@ -179,15 +179,29 @@ const GlobalHeader = () => {
                 <Link to="/profile"
                   className="group flex items-center gap-2 sm:gap-3 bg-white hover:bg-[#FFFFFF] rounded-2xl p-1 pr-2 sm:pr-4 cursor-pointer transition-all border border-slate-100 shadow-sm hover:shadow-md hover:border-[#274dad]/20"
                 >
-                  {user?.profile?.avatar ? (
-                    <img src={user.profile.avatar} alt="Avatar" className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover shadow-inner border border-slate-200" />
-                  ) : (
-                    <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-[#274dad] to-[#4A3728] rounded-xl flex items-center justify-center shadow-inner">
-                      <span className="text-white font-bold text-xs sm:text-sm">
-                        {user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
+                  {(() => {
+                    const avatarSrc = user?.avatar || user?.avatar_url || user?.profile?.avatar;
+                    return avatarSrc ? (
+                      <img
+                        src={avatarSrc}
+                        alt="Avatar"
+                        className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover shadow-inner border border-slate-200"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          if (e.currentTarget.nextElementSibling) {
+                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                          }
+                        }}
+                      />
+                    ) : null;
+                  })()}
+                  <div className={`w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-[#274dad] to-[#4A3728] rounded-xl flex items-center justify-center shadow-inner ${
+                    (user?.avatar || user?.avatar_url || user?.profile?.avatar) ? 'hidden' : 'flex'
+                  }`}>
+                    <span className="text-white font-bold text-xs sm:text-sm uppercase">
+                      {user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
                   <div className="hidden sm:flex flex-col">
                     <span className="text-sm font-black text-slate-700 leading-tight mt-1">
                       {user?.displayName || user?.email?.split('@')[0]}

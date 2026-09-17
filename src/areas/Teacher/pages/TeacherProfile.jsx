@@ -110,6 +110,21 @@ const TeacherProfile = () => {
         try {
           setSaving(true);
           await api.put(`/users/profile/${teacher.id}`, { avatar: compressedBase64 });
+          
+          if (teacher) {
+            const updatedTeacher = {
+              ...teacher,
+              avatar: compressedBase64,
+              avatar_url: compressedBase64,
+              teacher_profile: {
+                ...(teacher?.teacher_profile || {}),
+                avatar: compressedBase64
+              }
+            };
+            localStorage.setItem('user', JSON.stringify(updatedTeacher));
+            localStorage.setItem('eureka_teacher_avatar', compressedBase64);
+          }
+
           await refreshTeacher();
           setSaved(true);
         } catch (apiErr) {
