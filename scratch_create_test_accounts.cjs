@@ -185,7 +185,11 @@ async function runCompleteSeeding() {
       console.log('✅ Student enrolled in PHYS10 and PHYS11.');
     }
 
-    // 6. Seed Student Learning History & Game Results
+    // 6. Link Lessons & Challenges to Teacher
+    await supabase.from('lessons').update({ teacher_id: teacherId, students_count: 8, views: 125 }).eq('class_id', 10);
+    await supabase.from('challenges').update({ teacher_id: teacherId, completions_count: 12, avg_score: 95 }).in('challenge_id', [2000, 2001, 2002]);
+
+    // 7. Seed Student Learning History & Game Results
     console.log('\n--- Seeding Student Learning History & Game Results ---');
     await supabase.from('lesson_completions').delete().eq('user_id', studentId);
     await supabase.from('lesson_completions').insert([
@@ -233,7 +237,7 @@ async function runCompleteSeeding() {
     });
     console.log('✅ Seeded physics & overall progress.');
 
-    // 7. Seed Arena Battles
+    // 8. Seed Arena Battles (Including Teacher vs Student match)
     console.log('\n--- Seeding Arena Battles (Đấu Trường PK) ---');
     const battleIds = [
       'a0000001-0000-4000-8000-000000000001',
@@ -241,7 +245,8 @@ async function runCompleteSeeding() {
       'a0000003-0000-4000-8000-000000000003',
       'a0000004-0000-4000-8000-000000000004',
       'a0000005-0000-4000-8000-000000000005',
-      'a0000006-0000-4000-8000-000000000006'
+      'a0000006-0000-4000-8000-000000000006',
+      'a0000007-0000-4000-8000-000000000007'
     ];
     await supabase.from('battles').delete().in('id', battleIds);
 
@@ -347,11 +352,28 @@ async function runCompleteSeeding() {
         winner: { firebaseUid: 'opponent_top', displayName: 'Đặng Bích Ngọc', avatar: '' },
         total_questions: 10,
         finished_at: new Date(Date.now() - 3600000 * 3).toISOString()
+      },
+      {
+        id: battleIds[6],
+        room_id: 'TS_PK01',
+        status: 'finished',
+        game_type: 'physics',
+        game_mode: 'mixed',
+        grade: '10',
+        topic: 'Thi Đấu Giao Lưu Thầy & Trò (Cơ Học)',
+        difficulty: 'hard',
+        players: [
+          { firebaseUid: studentId, displayName: 'Nguyễn Văn Học Sinh', avatar: studentAvatar, score: 960, correctAnswers: 10, wrongAnswers: 0, isHost: true },
+          { firebaseUid: teacherId, displayName: 'Thầy Nguyễn Văn Đức', avatar: teacherAvatar, score: 920, correctAnswers: 9, wrongAnswers: 1, isHost: false }
+        ],
+        winner: { firebaseUid: studentId, displayName: 'Nguyễn Văn Học Sinh', avatar: studentAvatar },
+        total_questions: 10,
+        finished_at: new Date(Date.now() - 1800000).toISOString()
       }
     ]);
-    console.log('✅ Seeded 6 arena matches (5 Wins, 1 Loss).');
+    console.log('✅ Seeded 7 arena matches (including direct Teacher vs Student PK match).');
 
-    // 8. Seed Badges & Quests
+    // 9. Seed Badges & Quests
     console.log('\n--- Seeding Badges & Quest Achievements ---');
     const achievementsPayload = [
       { id: 'first_lesson', unlockedAt: '2026-09-02T09:00:00.000Z' },
@@ -390,7 +412,7 @@ async function runCompleteSeeding() {
     });
     console.log('✅ Seeded quest progress & 8 earned badges for Student.');
 
-    console.log('\n✨ DONE! ALL ACCOUNTS AND REAL DATABASE RECORDS ARE FULLY PREPARED AND STORED! ✨');
+    console.log('\n✨ DONE! ALL ACCOUNTS AND INTERCONNECTED REAL DATABASE RECORDS ARE FULLY PREPARED! ✨');
     process.exit(0);
   } catch (err) {
     console.error('💥 Error in seeding script:', err);
