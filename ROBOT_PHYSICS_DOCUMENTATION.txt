@@ -1,0 +1,115 @@
+================================================================================
+                      TÀI LIỆU DỰ ÁN GAME "ROBOT EUREKA" (Robot_Physic)
+================================================================================
+
+I. TỔNG QUAN DỰ ÁN (PROJECT OVERVIEW)
+--------------------------------------------------------------------------------
+1. Tên dự án: Robot Eureka (Tên thư mục project: Robot_Physic)
+2. Thể loại game: 2D Physics Puzzle / Educational Science Game (Game giải đố vật lý 2D tích hợp kiến thức khoa học giáo dục).
+3. Công nghệ & Engine: 
+   - Game Engine: Cocos Creator 3.8.8
+   - Ngôn ngữ lập trình: TypeScript (ES6+)
+   - Định dạng xuất bản: HTML5 / Web-Desktop / WebGL
+4. Cốt truyện & Mục tiêu:
+   Người chơi nhập vai chú Robot thông minh tên là "Bolt". Bolt vượt qua các căn phòng thử thách mang tính vật lý (Lò xo - Định luật Hooke, Quang học - Tia Laser & Thấu kính, Cơ học - Dây cáp, Ròng rọc & Thang máy) để thu thập nguồn điện Pin và Hộp đen nhằm sửa chữa chiếc Phi thuyền không gian và trốn thoát khỏi hành tinh.
+
+--------------------------------------------------------------------------------
+II. CÁC MÀN CHƠI VÀ CƠ CHẾ VẬT LÝ (GAME SCENES & PUZZLE MECHANICS)
+--------------------------------------------------------------------------------
+1. Scene Welcome (Cảnh Menu chính - `scene-welcome.scene`):
+   - Màn hình bắt đầu game chuyên nghiệp với các nút: Bắt Đầu (Start), Cài Đặt (Setting), Hướng Dẫn (Instruct).
+   - Hiệu ứng nút bấm sống động: Phóng to khi Hover (`cubicOut`), nảy khi Click (`backOut`).
+   - Modal Popups: Popup Hướng dẫn chơi & Popup Cài đặt âm thanh (BGM & SFX).
+   - Tính năng Nhúng Iframe: Tự động phát hiện tham số URL (`?scene=hero` hoặc `?hero=true`) để nạp thẳng cảnh giới thiệu mà không cần qua Menu.
+
+2. Scene 1 (Giải đố Lò xo - Định luật Hooke - `scene.scene`):
+   - Cơ chế vật lý: Khai thác Định luật Hooke ($F = k \cdot x$).
+   - Hành vi người chơi: Khái niệm kéo dãn lò xo (`Loxo-1`, `Loxo-2`). Màn hình LED (`black_screen`) đưa ra lực ngẫu nhiên $F$ (từ 10N đến 50N, $k = 10\text{ N/cm}$).
+   - Người chơi điều khiển Bolt kéo lò xo đạt đúng độ biến dạng $x = F / k$. Hoàn thành đủ 3 lượt kéo chính xác sẽ kích hoạt mở hai cánh cửa trượt (`Left_door` & `Right_door`) để sang cảnh tiếp theo.
+
+3. Scene 2 (Giải đố Quang học & Tia Laser - `scene-2.scene`):
+   - Cơ chế vật lý: Phản xạ và khúc xạ ánh sáng qua lăng kính/thấu kính (`Lens`).
+   - Súng phát tia sáng (`LightEmitter` / `light-gun`) chiếu chùm tia laser.
+   - Người chơi bấm vào các thấu kính (`Scope-1`, `Scope-2`, `Scope-3`) để xoay góc (6 nấc góc tương ứng 6 frames sprite `2-Scope0` đến `2-Scope5`).
+   - Thuật toán Raycasting & Đổi màu tia sáng: 
+     * Luồng đường đi chuẩn: Light-gun (White) -> Scope-2 (Green) -> Scope-3 (Red) -> Scope-1 (Yellow) -> `black_screen` (Mở cửa & Cảm biến mèo `Cat-sensor` đổi màu Xanh Lá).
+     * Luồng đường đi bẫy (Trap route): Phát ra tia Cam (`Orange`), cảm biến `Cat-sensor` báo Đỏ (`Red`) và cửa bị khóa chặt.
+
+4. Scene 3 (Cơ học Dây cáp, Ròng rọc & Thang máy - `scene-3.scene`):
+   - Cơ chế vật lý: Truyền lực qua Dây cáp (`RopeControllerScene3`), Hệ thống Ròng rọc (`Pulley`) và Bệ nâng đối trọng (`3-delivery`).
+   - Người chơi điều khiển Bolt nhặt Dây cáp nối vào hệ thống ròng rọc để kích hoạt thang máy (`3_elevator`).
+   - Vận chuyển các vật phẩm quan trọng: Pin năng lượng (`battery`) và Hộp đen (`Blackbox`) đặt lên bệ nâng để đưa lên tầng cao.
+
+5. Scene Final (Sửa chữa & Phóng Phi Thuyền - `scene-final.scene`):
+   - Mục tiêu cuối cùng: Bolt mang Pin năng lượng và Hộp đen nạp vào Phi thuyền (`spaceship`).
+   - Khi đủ linh kiện, hệ thống kích hoạt hiệu ứng Lửa đuôi phi thuyền (`Fire_spaceship`).
+   - Bolt bước vào cabin, phi thuyền khởi động quy trình cất cánh gồm 2 giai đoạn: Bay thẳng đứng (Vertical Lift) và Bay vọt vào không gian (Departure Flight) kèm hiệu ứng âm thanh phi thuyền chân thực.
+
+6. Scene Hero (Cảnh giới thiệu Banner / Iframe Preview - `scene-hero.scene`):
+   - Phục vụ xem trước hoạt cảnh nhân vật, các tương tác cơ bản cho việc nhúng demo trên website.
+
+--------------------------------------------------------------------------------
+III. TÍNH NĂNG FRONTEND (FRONTEND FEATURES)
+--------------------------------------------------------------------------------
+1. Kiến trúc Component-Driven (Cocos Creator 3.8.8):
+   - Mã nguồn phát triển theo mô hình Hướng đối tượng & Component (`@ccclass`, `@property`).
+   - Tách biệt rõ ràng trách nhiệm giữa Controller nhân vật (`PlayerController`), Controller môi trường (`DoorController`, `RopeControllerScene3`), và Controller hệ thống (`AudioManager`, `SettingsController`).
+
+2. Hệ thống Vật lý 2D (Physics 2D Engine):
+   - Sử dụng BoxCollider2D, CircleCollider2D kết hợp RigidBody2D (`Dynamic`, `Kinematic`, `Static`).
+   - Thuật toán Ground-Check và di chuyển chuẩn xác, xử lý lực nhảy (`jumpForce`) và tốc độ chạy (`moveSpeed`).
+
+3. Đồ họa Động & Render Tia sáng (Dynamic Graphics & Raycasting):
+   - Sử dụng component `Graphics` vẽ tia Laser 2 lớp (Lớp lõi sáng rực rỡ + Lớp viền tỏa sáng Glow) theo tọa độ thế giới (World Space conversion).
+   - Render sợi dây cáp vật lý uốn lượn tự nhiên nối giữa nhân vật, ròng rọc và thang máy.
+
+4. Animation System & State Machine:
+   - Quản lý trạng thái hoạt hình nhân vật (`robot_idle`, `robot_run`, `robot_jump`) bằng `Animation` component, tự động lật Scale mặt nhân vật theo hướng di chuyển.
+
+5. Hệ thống UI Interactive & Notification:
+   - Dynamic Floating Prompt UI: Tự động hiển thị bảng gợi ý thao tác phím (VD: "Nhấn E để Nhặt/Thả", "Kéo Lò xo") lơ lửng trên đầu nhân vật hoặc vật thể.
+   - Bảng Hint Board tương tác: Cho phép mở xem gợi ý hướng dẫn giải đố vật lý trong từng màn chơi.
+
+6. Âm thanh Hệ thống (Audio System):
+   - Quản lý tập trung qua `AudioManager` Singleton, sử dụng `director.addPersistRootNode` để giữ âm thanh liên tục giữa các màn.
+   - Bao gồm đầy đủ bộ âm thanh sống động: Nhạc nền BGM, Tiếng bước chân Robot, Tiếng nhảy, Tiếng kéo kim loại, Tiếng mở cửa, Tiếng cất cánh phi thuyền, Tiếng click nút bấm.
+
+--------------------------------------------------------------------------------
+IV. TÍNH NĂNG BACKEND & HẠ TẦNG (BACKEND & INFRASTRUCTURE FEATURES)
+--------------------------------------------------------------------------------
+1. Đóng gói Web-Desktop HTML5 / WebGL Client:
+   - Dự án là game chạy trực tiếp trên trình duyệt Web (Cross-platform Browser Game).
+   - Tối ưu hóa dung lượng asset và tự động tương thích với màn hình Desktop & Mobile.
+
+2. Lưu trữ Dữ liệu Cấu hình phía Client (Client Data Persistence):
+   - Sử dụng `sys.localStorage` của Cocos Creator để lưu lại thiết lập của người dùng:
+     * `robot_eureka_music_enabled`: Trạng thái bật/tắt nhạc nền.
+     * `robot_eureka_sfx_enabled`: Trạng thái bật/tắt hiệu ứng âm thanh.
+
+3. Triển khai Tự động lên Vercel Serverless Platform:
+   - Cấu hình file `vercel.json` sẵn sàng cho việc Deploy một chạm:
+     * Directory Output: `build/web-desktop`
+     * Clean URLs: `true`
+
+4. Tích hợp URL Routing Parameter (Iframe & Direct Scene Jumping):
+   - Xử lý đọc URL Query Parameter phía client (`window.location.search`).
+   - Hỗ trợ nhúng game vào các hệ thống LMS, Website Giáo dục hoặc Iframe hiển thị Demo mà không bị gián đoạn nhạc hay sai lệch luồng chơi.
+
+--------------------------------------------------------------------------------
+V. KIẾN TRÚC & THIẾT KẾ CHI TIẾT (ARCHITECTURE & DESIGN PATTERNS)
+--------------------------------------------------------------------------------
+1. Singleton Pattern:
+   - Áp dụng trong `AudioManager.ts` giúp quản lý duy nhất 1 instance âm thanh toàn cục xuyên suốt vòng đời của game.
+
+2. Event-Driven Architecture:
+   - Sử dụng hệ thống sự kiện của Cocos Creator (`input.on(Input.EventType.KEY_DOWN)`, `TOUCH_START`, `MOUSE_ENTER`) để lắng nghe thao tác người dùng một cách mượt mà và không gây giật lag (Zero-lag input handling).
+
+3. State Pattern & Enumerations:
+   - Định nghĩa các trạng thái vật phẩm cầm trên tay (`CarriedItemType`), loại thấu kính (`LensType`), nấc góc thấu kính (`targetStep`, `currentStep`), giai đoạn phi thuyền cất cánh (`flightPhase`).
+
+4. Tween Animations Math:
+   - Áp dụng công thức Easing Math (`cubicOut`, `backOut`, `quadOut`) cho chuyển động UI, tạo cảm giác đồ họa cao cấp (Premium Responsive Feel).
+
+================================================================================
+                              HẾT TÀI LIỆU
+================================================================================

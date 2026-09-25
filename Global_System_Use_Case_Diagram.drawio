@@ -1,0 +1,205 @@
+<mxfile host="Electron" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="eureka-global-usecase" name="Global System Use Case Diagram">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2100" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- CLIENT ACTORS CONTAINER -->
+        <mxCell id="box_client_actors" value="CLIENT ACTORS" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=30;horizontal=1;fillColor=#f8fafc;strokeColor=#64748b;strokeWidth=2;fontStyle=1;fontSize=14;fontColor=#0f172a;rounded=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="220" h="950" as="geometry" />
+        </mxCell>
+
+        <!-- ACTORS -->
+        <mxCell id="actor_guest" value="👤 Guest&#10;(Visitor)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#f8fafc;strokeColor=#1e293b;strokeWidth=2;fontStyle=1;fontSize=13;fontColor=#0f172a;" vertex="1" parent="box_client_actors">
+          <mxGeometry x="80" y="60" width="60" h="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="actor_student" value="🎓 Student&#10;(Learner)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#f8fafc;strokeColor=#1e293b;strokeWidth=2;fontStyle=1;fontSize=13;fontColor=#0f172a;" vertex="1" parent="box_client_actors">
+          <mxGeometry x="80" y="320" width="60" h="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="actor_teacher" value="👨‍🏫 Teacher&#10;(Educator)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#f8fafc;strokeColor=#1e293b;strokeWidth=2;fontStyle=1;fontSize=13;fontColor=#0f172a;" vertex="1" parent="box_client_actors">
+          <mxGeometry x="80" y="720" width="60" h="90" as="geometry" />
+        </mxCell>
+
+        <!-- SYSTEM BOUNDARY -->
+        <mxCell id="sys_boundary" value="EUREKA PHYSICS PLATFORM SYSTEM BOUNDARY" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=40;fillColor=#ffffff;strokeColor=#2563eb;strokeWidth=2.5;fontStyle=1;fontSize=16;fontColor=#1e3a8a;rounded=1;arcSize=4;" vertex="1" parent="1">
+          <mxGeometry x="300" y="40" width="1410" h="1280" as="geometry" />
+        </mxCell>
+
+        <!-- SUBSYSTEM 1 -->
+        <mxCell id="sub1" value="1. Auth &amp; Core Learning" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=30;fillColor=#eff6ff;strokeColor=#3b82f6;strokeWidth=1.5;fontStyle=1;fontSize=13;fontColor=#1d4ed8;rounded=1;arcSize=6;strokeDasharray=4 4;" vertex="1" parent="sys_boundary">
+          <mxGeometry x="30" y="60" width="420" h="1180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc01" value="UC01: Register Account" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;strokeWidth=2;fontColor=#1e3a8a;fontStyle=1;fontSize=12;" vertex="1" parent="sub1">
+          <mxGeometry x="30" y="50" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc02" value="UC02: Login / Logout" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;strokeWidth=2;fontColor=#1e3a8a;fontStyle=1;fontSize=12;" vertex="1" parent="sub1">
+          <mxGeometry x="30" y="150" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc03" value="UC03: Profile &amp; Avatar" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;strokeWidth=2;fontColor=#1e3a8a;fontStyle=1;fontSize=12;" vertex="1" parent="sub1">
+          <mxGeometry x="30" y="250" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc05" value="UC05: View Lectures" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;strokeWidth=2;fontColor=#1e3a8a;fontStyle=1;fontSize=12;" vertex="1" parent="sub1">
+          <mxGeometry x="30" y="350" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc06" value="UC06: Study Content" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;strokeWidth=2;fontColor=#1e3a8a;fontStyle=1;fontSize=12;" vertex="1" parent="sub1">
+          <mxGeometry x="30" y="450" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc07" value="UC07: Assessment Test" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;strokeWidth=2;fontColor=#1e3a8a;fontStyle=1;fontSize=12;" vertex="1" parent="sub1">
+          <mxGeometry x="30" y="550" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc08" value="UC08: View Enrolled Classes" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;strokeWidth=2;fontColor=#1e3a8a;fontStyle=1;fontSize=12;" vertex="1" parent="sub1">
+          <mxGeometry x="30" y="650" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc18" value="UC18: User Guide &amp; FAQ" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2563eb;strokeWidth=2;fontColor=#1e3a8a;fontStyle=1;fontSize=12;" vertex="1" parent="sub1">
+          <mxGeometry x="30" y="750" width="360" h="65" as="geometry" />
+        </mxCell>
+
+        <!-- SUBSYSTEM 2 -->
+        <mxCell id="sub2" value="2. Virtual Lab, Tools &amp; PK Arena" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=30;fillColor=#f0fdf4;strokeColor=#22c55e;strokeWidth=1.5;fontStyle=1;fontSize=13;fontColor=#15803d;rounded=1;arcSize=6;strokeDasharray=4 4;" vertex="1" parent="sys_boundary">
+          <mxGeometry x="480" y="60" width="430" h="1180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc09" value="UC09: Access Virtual Lab Hub" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;strokeWidth=2;fontColor=#14532d;fontStyle=1;fontSize=12;" vertex="1" parent="sub2">
+          <mxGeometry x="35" y="50" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc10" value="UC10: Virtual Lab Experiments" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;strokeWidth=2;fontColor=#14532d;fontStyle=1;fontSize=12;" vertex="1" parent="sub2">
+          <mxGeometry x="35" y="150" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc11" value="UC11: Physics Calculator" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;strokeWidth=2;fontColor=#14532d;fontStyle=1;fontSize=12;" vertex="1" parent="sub2">
+          <mxGeometry x="35" y="250" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc12" value="UC12: Physical Constants" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;strokeWidth=2;fontColor=#14532d;fontStyle=1;fontSize=12;" vertex="1" parent="sub2">
+          <mxGeometry x="35" y="350" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc13" value="UC13: Unit Converter" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;strokeWidth=2;fontColor=#14532d;fontStyle=1;fontSize=12;" vertex="1" parent="sub2">
+          <mxGeometry x="35" y="450" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc14" value="UC14: Matchmaking Lobby" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;strokeWidth=2;fontColor=#14532d;fontStyle=1;fontSize=12;" vertex="1" parent="sub2">
+          <mxGeometry x="35" y="550" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc15" value="UC15: PK Battle &amp; Results" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;strokeWidth=2;fontColor=#14532d;fontStyle=1;fontSize=12;" vertex="1" parent="sub2">
+          <mxGeometry x="35" y="650" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc16" value="UC16: Balance Challenge" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;strokeWidth=2;fontColor=#14532d;fontStyle=1;fontSize=12;" vertex="1" parent="sub2">
+          <mxGeometry x="35" y="750" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc17" value="UC17: XP Leaderboard" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#16a34a;strokeWidth=2;fontColor=#14532d;fontStyle=1;fontSize=12;" vertex="1" parent="sub2">
+          <mxGeometry x="35" y="850" width="360" h="65" as="geometry" />
+        </mxCell>
+
+        <!-- SUBSYSTEM 3 -->
+        <mxCell id="sub3" value="3. Admin &amp; Teaching Management" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=30;fillColor=#fff7ed;strokeColor=#ea580c;strokeWidth=1.5;fontStyle=1;fontSize=13;fontColor=#c2410c;rounded=1;arcSize=6;strokeDasharray=4 4;" vertex="1" parent="sys_boundary">
+          <mxGeometry x="940" y="60" width="440" h="1180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uc04" value="UC04: Apply Teacher Role" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="50" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc19" value="UC19: Send Support Ticket" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="140" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc20" value="UC20: Teacher Classes" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="230" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc21" value="UC21: Learning Materials" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="320" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc22" value="UC22: Teacher Support Ticket" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="410" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc23" value="UC23: Admin Login" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="500" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc24" value="UC24: System Analytics" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="590" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc25" value="UC25: Approve Teachers &amp; Users" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="680" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc26" value="UC26: Manage Content" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="770" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc27" value="UC27: Manage Materials" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="860" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc28" value="UC28: Resolve Chat Support" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="950" width="360" h="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc29" value="UC29: Maintenance Mode" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ea580c;strokeWidth=2;fontColor=#9a3412;fontStyle=1;fontSize=12;" vertex="1" parent="sub3">
+          <mxGeometry x="40" y="1040" width="360" h="65" as="geometry" />
+        </mxCell>
+
+        <!-- ADMIN ACTOR CONTAINER -->
+        <mxCell id="box_admin_actor" value="SYSTEM GOVERNANCE" style="shape=swimlane;whiteSpace=wrap;html=1;startSize=30;horizontal=1;fillColor=#f1f5f9;strokeColor=#475569;strokeWidth=2;fontStyle=1;fontSize=14;fontColor=#0f172a;rounded=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="1750" y="550" width="220" h="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="actor_admin" value="👑 System Admin" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#f1f5f9;strokeColor=#334155;strokeWidth=2;fontStyle=1;fontSize=13;fontColor=#0f172a;" vertex="1" parent="box_admin_actor">
+          <mxGeometry x="80" y="80" width="60" h="90" as="geometry" />
+        </mxCell>
+
+        <!-- CONNECTIONS - GENERALIZATION -->
+        <mxCell id="edge_gen_student_guest" value="kế thừa" style="endArrow=block;endFill=0;html=1;rounded=0;strokeColor=#0284c7;strokeWidth=2;fontColor=#0284c7;fontStyle=1;fontSize=11;" edge="1" parent="1" source="actor_student" target="actor_guest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- CONNECTIONS - GUEST -->
+        <mxCell id="e_g_1" style="endArrow=none;html=1;strokeColor=#64748b;strokeWidth=1.5;" edge="1" parent="1" source="actor_guest" target="uc01"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_g_2" style="endArrow=none;html=1;strokeColor=#64748b;strokeWidth=1.5;" edge="1" parent="1" source="actor_guest" target="uc02"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_g_5" style="endArrow=none;html=1;strokeColor=#64748b;strokeWidth=1.5;" edge="1" parent="1" source="actor_guest" target="uc05"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_g_18" style="endArrow=none;html=1;strokeColor=#64748b;strokeWidth=1.5;" edge="1" parent="1" source="actor_guest" target="uc18"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- CONNECTIONS - STUDENT -->
+        <mxCell id="e_s_3" style="endArrow=none;html=1;strokeColor=#2563eb;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc03"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_6" style="endArrow=none;html=1;strokeColor=#2563eb;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc06"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_7" style="endArrow=none;html=1;strokeColor=#2563eb;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc07"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_8" style="endArrow=none;html=1;strokeColor=#2563eb;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc08"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="e_s_9" style="endArrow=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc09"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_10" style="endArrow=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc10"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_11" style="endArrow=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc11"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_12" style="endArrow=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc12"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_13" style="endArrow=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc13"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_14" style="endArrow=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc14"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_15" style="endArrow=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc15"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_16" style="endArrow=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc16"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_17" style="endArrow=none;html=1;strokeColor=#16a34a;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc17"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <mxCell id="e_s_4" style="endArrow=none;html=1;strokeColor=#ea580c;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc04"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_s_19" style="endArrow=none;html=1;strokeColor=#ea580c;strokeWidth=1.5;" edge="1" parent="1" source="actor_student" target="uc19"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- CONNECTIONS - TEACHER -->
+        <mxCell id="e_t_2" style="endArrow=none;html=1;strokeColor=#ea580c;strokeWidth=1.5;" edge="1" parent="1" source="actor_teacher" target="uc02"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_t_3" style="endArrow=none;html=1;strokeColor=#ea580c;strokeWidth=1.5;" edge="1" parent="1" source="actor_teacher" target="uc03"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_t_20" style="endArrow=none;html=1;strokeColor=#ea580c;strokeWidth=1.5;" edge="1" parent="1" source="actor_teacher" target="uc20"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_t_21" style="endArrow=none;html=1;strokeColor=#ea580c;strokeWidth=1.5;" edge="1" parent="1" source="actor_teacher" target="uc21"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_t_22" style="endArrow=none;html=1;strokeColor=#ea580c;strokeWidth=1.5;" edge="1" parent="1" source="actor_teacher" target="uc22"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- CONNECTIONS - ADMIN -->
+        <mxCell id="e_a_23" style="endArrow=none;html=1;strokeColor=#475569;strokeWidth=1.5;" edge="1" parent="1" source="actor_admin" target="uc23"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_a_24" style="endArrow=none;html=1;strokeColor=#475569;strokeWidth=1.5;" edge="1" parent="1" source="actor_admin" target="uc24"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_a_25" style="endArrow=none;html=1;strokeColor=#475569;strokeWidth=1.5;" edge="1" parent="1" source="actor_admin" target="uc25"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_a_26" style="endArrow=none;html=1;strokeColor=#475569;strokeWidth=1.5;" edge="1" parent="1" source="actor_admin" target="uc26"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_a_27" style="endArrow=none;html=1;strokeColor=#475569;strokeWidth=1.5;" edge="1" parent="1" source="actor_admin" target="uc27"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_a_28" style="endArrow=none;html=1;strokeColor=#475569;strokeWidth=1.5;" edge="1" parent="1" source="actor_admin" target="uc28"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e_a_29" style="endArrow=none;html=1;strokeColor=#475569;strokeWidth=1.5;" edge="1" parent="1" source="actor_admin" target="uc29"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- CONNECTIONS - INCLUDES -->
+        <mxCell id="e_inc_4_25" value="&amp;laquo;include&amp;raquo;" style="endArrow=open;endSize=10;dashed=1;html=1;strokeColor=#dc2626;strokeWidth=1.5;fontColor=#dc2626;fontStyle=2;fontSize=11;" edge="1" parent="1" source="uc04" target="uc25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_inc_19_28" value="&amp;laquo;include&amp;raquo;" style="endArrow=open;endSize=10;dashed=1;html=1;strokeColor=#dc2626;strokeWidth=1.5;fontColor=#dc2626;fontStyle=2;fontSize=11;" edge="1" parent="1" source="uc19" target="uc28">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_inc_22_28" value="&amp;laquo;include&amp;raquo;" style="endArrow=open;endSize=10;dashed=1;html=1;strokeColor=#dc2626;strokeWidth=1.5;fontColor=#dc2626;fontStyle=2;fontSize=11;" edge="1" parent="1" source="uc22" target="uc28">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
