@@ -293,17 +293,17 @@ const Profile = () => {
           title: meta.title,
           icon: meta.icon,
           description: id === 'first_lesson' ? 'Hoàn thành bài học đầu tiên' :
-                       id === 'lessons_10' ? 'Hoàn thành 10 bài học' :
-                       id === 'lessons_50' ? 'Hoàn thành 50 bài học' :
-                       id === 'streak_7' ? 'Đăng nhập 7 ngày liên tiếp' :
-                       id === 'streak_30' ? 'Đăng nhập 30 ngày liên tiếp' :
-                       id === 'perfect_scores_5' ? 'Đạt 100% trong 5 bài học' :
-                       id === 'xp_1000' ? 'Đạt tổng cộng 1000 XP' :
-                       id === 'xp_5000' ? 'Đạt tổng cộng 5000 XP' :
-                       id === 'level_5' ? 'Đạt level 5' :
-                       id === 'level_10' ? 'Đạt level 10' :
-                       id === 'pk_winner_5' ? 'Giành chiến thắng 5 trận đấu' :
-                       'Hoàn thành 10 mini game',
+            id === 'lessons_10' ? 'Hoàn thành 10 bài học' :
+              id === 'lessons_50' ? 'Hoàn thành 50 bài học' :
+                id === 'streak_7' ? 'Đăng nhập 7 ngày liên tiếp' :
+                  id === 'streak_30' ? 'Đăng nhập 30 ngày liên tiếp' :
+                    id === 'perfect_scores_5' ? 'Đạt 100% trong 5 bài học' :
+                      id === 'xp_1000' ? 'Đạt tổng cộng 1000 XP' :
+                        id === 'xp_5000' ? 'Đạt tổng cộng 5000 XP' :
+                          id === 'level_5' ? 'Đạt level 5' :
+                            id === 'level_10' ? 'Đạt level 10' :
+                              id === 'pk_winner_5' ? 'Giành chiến thắng 5 trận đấu' :
+                                'Hoàn thành 10 mini game',
           unlockedAt: null
         };
       });
@@ -703,13 +703,10 @@ const Profile = () => {
               {activeTab === 'activity' && (
                 <div className="bg-white rounded-[2.5rem] border border-[#E5E7EB] p-8 sm:p-10 shadow-sm relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#274dad]/5 blur-[60px] rounded-full pointer-events-none" />
-                  
+
                   {/* Header / Session badge */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-4">
                     <div>
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e4f2f0] text-[#2099e9] text-[11px] font-extrabold uppercase tracking-wider mb-2 border border-[#274dad]/10">
-                        <Clock className="w-3.5 h-3.5" /> Phiên làm việc hiện tại
-                      </div>
                       <h3 className="font-heading text-2xl font-extrabold text-[#1E293B]">Nhật Ký Hoạt Động</h3>
                       <p className="font-body text-xs sm:text-sm text-slate-500 mt-1">
                         Ghi nhận các bài tập & bài học bạn đã hoàn thành trong phiên đăng nhập này.
@@ -726,10 +723,10 @@ const Profile = () => {
                     {recentActivity.length > 0 ? recentActivity.map((act, i) => (
                       <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-5 p-5 rounded-2xl bg-white border border-slate-100 hover:border-[#274dad]/30 hover:shadow-md transition-all group">
                         <div className="w-12 h-12 rounded-2xl bg-[#e4f2f0] text-[#274dad] flex items-center justify-center transition-colors group-hover:bg-[#274dad] group-hover:text-white border border-[#274dad]/10 flex-shrink-0">
-                          {act.type === 'lesson' ? <BookOpen className="w-6 h-6" /> : 
-                           act.type === 'quest' || act.type === 'achievement' ? <Trophy className="w-6 h-6" /> : 
-                           act.type === 'game' ? <Star className="w-6 h-6" /> : 
-                           <Swords className="w-6 h-6" />}
+                          {act.type === 'lesson' ? <BookOpen className="w-6 h-6" /> :
+                            act.type === 'quest' || act.type === 'achievement' ? <Trophy className="w-6 h-6" /> :
+                              act.type === 'game' ? <Star className="w-6 h-6" /> :
+                                <Swords className="w-6 h-6" />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -788,11 +785,10 @@ const Profile = () => {
                           return (
                             <div key={battle.id || idx} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                               <div className="flex items-center gap-4">
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-heading font-extrabold text-xs shrink-0 ${
-                                  isWin ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                                  isLoss ? 'bg-rose-50 text-rose-600 border border-rose-100' :
-                                  'bg-slate-50 text-slate-500 border border-slate-100'
-                                }`}>
+                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-heading font-extrabold text-xs shrink-0 ${isWin ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                    isLoss ? 'bg-rose-50 text-rose-600 border border-rose-100' :
+                                      'bg-slate-50 text-slate-500 border border-slate-100'
+                                  }`}>
                                   {isWin ? 'THẮNG' : isLoss ? 'THUA' : 'HÒA'}
                                 </div>
                                 <div>
