@@ -3,6 +3,11 @@ const router = express.Router();
 const User = require('../models/User.cjs');
 const { supabase } = require('../src/config/supabase.cjs');
 
+// In-memory cache for leaderboard
+let cachedLeaderboardData = null;
+let cachedLeaderboardTime = 0;
+const LEADERBOARD_CACHE_TTL = 15000; // 15 seconds
+
 // GET /api/leaderboard
 router.get('/', async (req, res) => {
   try {
@@ -12,14 +17,25 @@ router.get('/', async (req, res) => {
     if (type === 'streak') sortField = 'xp'; // Streak stored in JSONB, sort by XP as fallback
     if (type === 'pk') sortField = 'xp';
 
+    let leaderboard = null;
+    let total = 0;
+    const now = Date.now();
+
+    // Use cached list if available and default params
+    if (!userId && type === 'xp' && cachedLeaderboardData && (now - cachedLeaderboardTime < LEADERBOARD_CACHE_TTL)) {
+      leaderboard = cachedLeaderboardData.leaderboard.slice(0, parseInt(limit));
+      total = cachedLeaderboardData.total;
+      return res.json({ success: true, leaderboard, userRank: null, total });
+    }
+
     const { data: users, error } = await supabase
       .from('users').select('id,username,display_name,email,xp,level,profile,avatar')
       .order(sortField, { ascending: false })
-      .limit(parseInt(limit));
+      .limit(Math.max(parseInt(limit), 50));
 
     if (error) throw error;
 
-    const leaderboard = (users || []).map((user, index) => ({
+    leaderboard = (users || []).map((user, index) => ({
       rank: index + 1,
       username: user.username || user.email?.split('@')[0] || 'Anonymous',
       displayName: user.display_name || user.username || user.email?.split('@')[0],
@@ -31,6 +47,15 @@ router.get('/', async (req, res) => {
       pkWins: 0,
       pkLosses: 0
     }));
+
+    const { count: totalCount } = await supabase
+      .from('users').select('id', { count: 'exact', head: true });
+    total = totalCount || 0;
+
+    if (type === 'xp') {
+      cachedLeaderboardData = { leaderboard, total };
+      cachedLeaderboardTime = now;
+    }
 
     let userRank = null;
     if (userId) {
@@ -50,10 +75,7 @@ router.get('/', async (req, res) => {
       }
     }
 
-    const { count: total } = await supabase
-      .from('users').select('id', { count: 'exact', head: true });
-
-    res.json({ success: true, leaderboard, userRank, total: total || 0 });
+    res.json({ success: true, leaderboard: leaderboard.slice(0, parseInt(limit)), userRank, total });
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch leaderboard', message: error.message });

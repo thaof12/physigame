@@ -27,6 +27,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import api from '../config/api';
+import { openDocumentInNewTab } from '../utils/documentViewer';
+import { logSessionActivity } from '../services/activityLogger';
 
 const MyClass = () => {
   const { user } = useAuth();
@@ -65,6 +67,7 @@ const MyClass = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const [warningMsg, setWarningMsg] = useState('');
   const [copiedCode, setCopiedCode] = useState('');
+  const [togglingAsgId, setTogglingAsgId] = useState(null);
 
   // Scroll ref for chat
   const chatEndRef = useRef(null);
@@ -207,8 +210,12 @@ const MyClass = () => {
 
   const navigateToAssignment = (asg) => {
     const targetUrl = asg.link || asg.resource_id;
+    if (targetUrl && targetUrl.startsWith('data:')) {
+      openDocumentInNewTab(targetUrl);
+      return;
+    }
     if (targetUrl && (targetUrl.startsWith('http://') || targetUrl.startsWith('https://'))) {
-      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      openDocumentInNewTab(targetUrl);
       return;
     }
     if (asg.type === 'lesson') {
@@ -221,7 +228,46 @@ const MyClass = () => {
     } else if (asg.type === 'challenge') {
       navigate(`/advanced-physics-challenge`);
     } else if (targetUrl) {
-      window.open(targetUrl.startsWith('http') ? targetUrl : 'https://' + targetUrl, '_blank', 'noopener,noreferrer');
+      openDocumentInNewTab(targetUrl);
+    }
+  };
+
+  const handleToggleAssignmentComplete = async (e, asg) => {
+    e.stopPropagation();
+    if (!user?.id || !activeClass?.id) return;
+
+    const targetCompleted = !asg.completed;
+    setTogglingAsgId(asg.id);
+
+    // Optimistic UI update
+    setAssignments(prev => prev.map(a => a.id === asg.id ? { ...a, completed: targetCompleted, score: targetCompleted ? 100 : null } : a));
+
+    try {
+      const res = await api.post(`/classes/${activeClass.id}/assignments/${asg.id}/toggle-complete`, {
+        studentId: user.id,
+        completed: targetCompleted
+      });
+
+      if (res.data?.success) {
+        if (targetCompleted) {
+          logSessionActivity(
+            'lesson',
+            `Hoàn thành bài tập: ${asg.title}`,
+            `Lớp: ${activeClass?.name || 'Vật lý'} • Giao diện bài tập`,
+            50
+          );
+          setSuccessMsg(res.data.message || 'Đã báo cáo hoàn thành bài tập tới giáo viên!');
+          setTimeout(() => setSuccessMsg(''), 4000);
+        }
+      } else {
+        // Revert on failure
+        setAssignments(prev => prev.map(a => a.id === asg.id ? { ...a, completed: asg.completed, score: asg.score } : a));
+      }
+    } catch (error) {
+      console.error('Error toggling assignment complete:', error);
+      setAssignments(prev => prev.map(a => a.id === asg.id ? { ...a, completed: asg.completed, score: asg.score } : a));
+    } finally {
+      setTogglingAsgId(null);
     }
   };
 
@@ -275,11 +321,11 @@ const MyClass = () => {
 
           {/* Top Class Header with BACK BUTTON */}
           <div className="bg-white border border-slate-100 rounded-[2.5rem] p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
+            <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
               {/* BACK BUTTON TO RETURN TO EXPLORE DASHBOARD */}
               <button
                 onClick={() => setActiveClass(null)}
-                className="p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-600 hover:text-indigo-600 rounded-2xl transition-all shadow-sm flex items-center gap-2 font-black text-xs group"
+                className="p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-600 hover:text-indigo-600 rounded-2xl transition-all shadow-sm flex items-center gap-2 font-black text-xs group shrink-0"
                 title="Quay lại danh sách lớp học"
               >
                 <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
@@ -290,15 +336,22 @@ const MyClass = () => {
                 <GraduationCap className="w-7 h-7 text-indigo-600" />
               </div>
 
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 bg-indigo-100/70 border border-indigo-200/50 rounded-lg text-[10px] font-black text-indigo-700 uppercase tracking-wider">
+              <div className="flex-1 min-w-0 space-y-1.5">
+                {/* Grade Badge & status tag */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 bg-indigo-100/90 border border-indigo-200/80 rounded-lg text-[10px] font-black text-indigo-700 uppercase tracking-wider">
                     Khối {activeClass.grade || 10}
                   </span>
-                  <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{activeClass.name}</h1>
+                  <span className="text-[11px] font-bold text-slate-400">Lớp học chính thức</span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 mt-2">
+                {/* Class Title - Full width, wraps cleanly without awkward truncation */}
+                <h1 className="font-heading text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-snug break-words">
+                  {activeClass.name}
+                </h1>
+
+                {/* Class Code & Teacher Meta Row */}
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-0.5">
                   {/* Class Code */}
                   <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-xl px-3 py-1 text-xs font-bold text-slate-500 shadow-sm">
                     <span className="font-mono text-slate-700 tracking-wider">Mã lớp: {activeClass.code}</span>
@@ -318,11 +371,11 @@ const MyClass = () => {
                         <img 
                           src={activeClass.teacher.avatar} 
                           alt="Teacher" 
-                          className="w-6 h-6 rounded-full object-cover border border-white shadow-sm flex-shrink-0" 
+                          className="w-5 h-5 rounded-full object-cover border border-white shadow-sm flex-shrink-0" 
                         />
                       ) : (
-                        <div className="w-6 h-6 bg-indigo-100 border border-indigo-200 rounded-full flex items-center justify-center flex-shrink-0">
-                          <User className="w-3.5 h-3.5 text-indigo-600" />
+                        <div className="w-5 h-5 bg-indigo-100 border border-indigo-200 rounded-full flex items-center justify-center flex-shrink-0">
+                          <User className="w-3 h-3 text-indigo-600" />
                         </div>
                       )}
                       <span>GV: {activeClass.teacher.name}</span>
@@ -457,12 +510,13 @@ const MyClass = () => {
                       {assignments.map(asg => (
                         <div 
                           key={asg.id} 
-                          onClick={() => navigateToAssignment(asg)}
-                          className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm hover:shadow-md hover:border-slate-200 transition-all cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+                          className={`bg-white border rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 group ${
+                            asg.completed ? 'border-emerald-100 bg-emerald-50/20' : 'border-slate-100 hover:border-slate-200'
+                          }`}
                         >
-                          <div className="space-y-1.5">
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${
+                          <div className="space-y-2 flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${
                                 asg.type === 'link' || (asg.link && asg.link.startsWith('http'))
                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                                 : asg.type === 'lesson' 
@@ -472,30 +526,54 @@ const MyClass = () => {
                                 {asg.type === 'link' || (asg.link && asg.link.startsWith('http')) ? 'LINK BÀI TẬP' : asg.type === 'lesson' ? 'BÀI HỌC' : 'THỬ THÁCH'}
                               </span>
                               {asg.due_date && (
-                                <span className="text-[10px] text-rose-500 font-bold flex items-center gap-1">
-                                  <Clock className="w-3 h-3" /> Hạn: {new Date(asg.due_date).toLocaleDateString('vi-VN')}
+                                <span className="text-[10px] text-rose-600 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
+                                  <Clock className="w-3 h-3 text-rose-500" /> Hạn nộp: {new Date(asg.due_date).toLocaleDateString('vi-VN')}
+                                </span>
+                              )}
+                              {asg.completed && (
+                                <span className="text-[10px] text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Đã gửi kết quả cho GV
                                 </span>
                               )}
                             </div>
-                            <h3 className="font-black text-slate-900 group-hover:text-indigo-600 transition-colors text-base">{asg.title}</h3>
+                            <h3 
+                              onClick={() => navigateToAssignment(asg)}
+                              className="font-black text-slate-900 hover:text-indigo-600 transition-colors text-base cursor-pointer break-words"
+                            >
+                              {asg.title}
+                            </h3>
                             {asg.description && (
-                              <p className="text-xs text-slate-400 font-semibold">{asg.description}</p>
+                              <p className="text-xs text-slate-500 font-medium leading-relaxed break-words">{asg.description}</p>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-4 self-end sm:self-auto">
-                            {asg.completed ? (
-                              <span className="flex items-center gap-1 text-emerald-600 font-black text-xs bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl">
-                                <CheckCircle2 className="w-4 h-4" /> Đã làm {asg.score !== null && `(${asg.score}đ)`}
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-1 text-slate-500 font-black text-xs bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl">
-                                Chưa hoàn thành
-                              </span>
-                            )}
-                            <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-indigo-50 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 transition-colors">
-                              <ChevronRight className="w-4 h-4" />
-                            </div>
+                          <div className="flex flex-wrap items-center gap-3 shrink-0 self-start lg:self-center pt-2 lg:pt-0">
+                            {/* Action: Open assignment */}
+                            <button
+                              type="button"
+                              onClick={() => navigateToAssignment(asg)}
+                              className="px-3.5 py-2 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-600 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                              title="Mở nội dung bài tập để làm"
+                            >
+                              <span>Làm bài</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Action: Toggle completion status */}
+                            <button
+                              type="button"
+                              onClick={(e) => handleToggleAssignmentComplete(e, asg)}
+                              disabled={togglingAsgId === asg.id}
+                              className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95 group/btn ${
+                                asg.completed
+                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
+                                  : 'bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300'
+                              } ${togglingAsgId === asg.id ? 'opacity-70 cursor-wait' : ''}`}
+                              title={asg.completed ? 'Bấm để hủy trạng thái hoàn thành nếu muốn' : 'Bấm để đánh dấu hoàn thành và gửi báo cáo kết quả tới giáo viên'}
+                            >
+                              <CheckCircle2 className={`w-4 h-4 ${asg.completed ? 'text-white' : 'text-slate-400 group-hover/btn:text-emerald-600'}`} />
+                              <span>{asg.completed ? '✓ Đã hoàn thành' : 'Đánh dấu đã hoàn thành'}</span>
+                            </button>
                           </div>
                         </div>
                       ))}

@@ -5,11 +5,23 @@ const path = require('path');
 // Note: Lessons are primarily loaded from filesystem (areas/Vatly/classX/index.cjs)
 // The Supabase lessons table is used as a secondary source
 
+// In-memory cache for lessons
+const lessonsCache = new Map();
+const LESSONS_CACHE_TTL = 30000; // 30 seconds
+
+// Helper to clear cache on updates
+const invalidateLessonsCache = () => lessonsCache.clear();
+
 // Get all lessons
 router.get('/', async (req, res) => {
   try {
-    const Lesson = require('../models/Lesson.cjs');
     const { teacherId } = req.query;
+    const cacheKey = `list_${teacherId || 'default'}`;
+    const now = Date.now();
+    const cached = lessonsCache.get(cacheKey);
+    if (cached && cached.expiresAt > now) {
+      return res.json(cached.data);
+    }
     
     let lessons;
     if (teacherId === 'all') {
@@ -48,6 +60,7 @@ router.get('/', async (req, res) => {
       if (error) throw error;
       lessons = data || [];
     }
+    lessonsCache.set(cacheKey, { data: lessons, expiresAt: now + LESSONS_CACHE_TTL });
     res.json(lessons);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -179,6 +192,7 @@ router.post('/', async (req, res) => {
   try {
     const Lesson = require('../models/Lesson.cjs');
     const lesson = await Lesson.create(req.body);
+    invalidateLessonsCache();
     res.status(201).json(lesson);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -193,6 +207,7 @@ router.patch('/:id', async (req, res) => {
     if (!lesson) {
       return res.status(404).json({ message: 'Lesson not found' });
     }
+    invalidateLessonsCache();
     res.json(lesson);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -245,6 +260,7 @@ router.delete('/:id', async (req, res) => {
       supabase.from('assigned_content').delete().eq('content_id', lessonId)
     ]);
 
+    invalidateLessonsCache();
     console.log(`✅ Lesson ${lessonId} deleted successfully`);
     res.json({ success: true, message: 'Lesson deleted successfully' });
   } catch (error) {

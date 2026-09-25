@@ -1,62 +1,78 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeftRight, RefreshCw, Repeat, ArrowLeft, Ruler, Activity, BookOpen, ChevronDown } from 'lucide-react';
+import { ArrowLeftRight, RefreshCw, Repeat, ArrowLeft, Ruler, Activity, BookOpen, ChevronDown, Check } from 'lucide-react';
 import unitConversions from '../../data/unitConversions.json';
 
-// --- Custom Mechanical Selector Component ---
-const MechanicalSelector = ({ options, value, onChange, label }) => {
+// --- Smooth Custom Unit Dropdown Component (matching sample design) ---
+const SmoothUnitSelect = ({ units, value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const wrapperRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const selectedOption = options.find(opt => opt.id === value);
+  const currentInfo = units?.[value] || { name: value };
+  const unitList = Object.entries(units || {});
 
   return (
-    <div className="relative font-body" ref={wrapperRef}>
+    <div className="relative font-body w-full" ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between bg-white border-2 border-[#E5E7EB] hover:border-[#274dad]/50 px-4 py-4 rounded-xl text-[#1E293B] font-bold transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] relative overflow-hidden group focus:outline-none"
+        className="w-full flex items-center justify-between px-4 sm:px-5 py-3.5 sm:py-4 rounded-2xl border-2 border-[#0ea5e9] bg-white hover:bg-sky-50/40 text-[#0284c7] transition-all duration-200 cursor-pointer shadow-xs select-none focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]/20 active:scale-[0.99]"
       >
-        {/* Subtle metallic reflection */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-[#e4f2f0] opacity-50 pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col items-start">
-          <span className="text-[10px] text-slate-400 uppercase tracking-widest">{label}</span>
-          <span className="text-lg">{selectedOption?.id} - {selectedOption?.name}</span>
+        <div className="flex items-center gap-2 overflow-hidden text-left min-w-0">
+          <span className="font-heading text-sm sm:text-base font-extrabold text-[#0284c7] truncate tracking-tight">
+            {value} — {currentInfo.name}
+          </span>
         </div>
-        <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-500 relative z-10 ${isOpen ? 'rotate-180 text-[#274dad]' : 'group-hover:text-[#274dad]'}`} />
+        <ChevronDown
+          className={`w-5 h-5 ml-2 flex-shrink-0 text-[#0ea5e9] transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#274dad]/30 rounded-xl shadow-[0_20px_50px_-10px_rgba(0,0,0,0.15)] z-50 overflow-hidden backdrop-blur-sm animate-fade-in-up">
-          <div className="max-h-[250px] overflow-y-auto custom-scrollbar">
-            {options.map((opt) => (
-              <button
-                key={opt.id}
-                onClick={() => {
-                  onChange(opt.id);
-                  setIsOpen(false);
-                }}
-                className={`w-full text-left px-5 py-3 hover:bg-[#e4f2f0] transition-colors border-b border-slate-100 last:border-0 flex items-center justify-between ${value === opt.id ? 'bg-[#e4f2f0]/50' : ''}`}
-              >
-                <div className="flex flex-col">
-                  <span className={`font-bold ${value === opt.id ? 'text-[#2099e9]' : 'text-[#1E293B]'}`}>{opt.id}</span>
-                  <span className="text-xs text-slate-500">{opt.name}</span>
-                </div>
-                {value === opt.id && (
-                  <div className="w-2 h-2 rounded-full bg-[#274dad] shadow-[0_0_5px_#274dad] animate-pulse" />
-                )}
-              </button>
-            ))}
+        <div
+          className="absolute top-full left-0 right-0 mt-2 z-[100] rounded-2xl bg-white border border-slate-100 shadow-[0_20px_45px_rgba(0,0,0,0.12)] p-2 transition-all animate-in fade-in slide-in-from-top-2 duration-150"
+        >
+          <div className="max-h-60 overflow-y-auto scrollbar-thin py-1 space-y-1">
+            {unitList.map(([uKey, uInfo]) => {
+              const isSelected = uKey === value;
+              return (
+                <button
+                  key={uKey}
+                  type="button"
+                  onClick={() => {
+                    onChange(uKey);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all duration-150 cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#eff8ff] text-[#0284c7] font-extrabold'
+                      : 'text-[#1e293b] hover:bg-slate-50 hover:text-[#0284c7] font-bold'
+                  }`}
+                >
+                  <span className="font-heading text-sm sm:text-base truncate">
+                    {uKey} — {uInfo.name}
+                  </span>
+                  {isSelected && (
+                    <Check
+                      className="w-5 h-5 flex-shrink-0 ml-2 text-[#0ea5e9]"
+                      strokeWidth={2.5}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -249,7 +265,7 @@ const UnitConverter = () => {
               {/* Converter Interface */}
               <div className="space-y-8 relative z-10">
                 {/* From Unit */}
-                <div className="bg-[#FFFFFF] p-6 rounded-2xl border border-[#E5E7EB] group focus-within:border-[#274dad] transition-colors">
+                <div className="bg-[#FFFFFF] p-6 rounded-2xl border border-[#E5E7EB] group focus-within:border-[#274dad] transition-colors relative z-30">
                   <label className="font-heading block text-xs font-extrabold text-slate-400 tracking-[0.1em] uppercase mb-4 group-focus-within:text-[#274dad] transition-colors">
                     Nguồn đầu vào
                   </label>
@@ -264,17 +280,11 @@ const UnitConverter = () => {
                       placeholder="0.00"
                       className="w-full bg-white border border-[#E5E7EB] px-4 py-4 rounded-xl font-mono text-2xl font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#274dad]/20 focus:border-[#274dad] transition-all shadow-sm placeholder:text-slate-300"
                     />
-                    <select
+                    <SmoothUnitSelect
+                      units={currentQuantity.units}
                       value={fromUnit}
-                      onChange={(e) => setFromUnit(e.target.value)}
-                      className="w-full bg-white border border-[#E5E7EB] px-4 py-4 rounded-xl text-[#1E293B] font-semibold focus:outline-none focus:ring-2 focus:ring-[#274dad]/20 focus:border-[#274dad] transition-all shadow-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:calc(100%-1rem)_center]"
-                    >
-                      {Object.entries(currentQuantity.units).map(([unit, info]) => (
-                        <option key={unit} value={unit}>
-                          {unit} - {info.name}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(unitKey) => setFromUnit(unitKey)}
+                    />
                   </div>
                 </div>
 
@@ -290,8 +300,10 @@ const UnitConverter = () => {
                 </div>
 
                 {/* To Unit */}
-                <div className="bg-[#1E293B] p-6 rounded-2xl shadow-inner relative overflow-hidden">
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(212,175,55,0.05)_0%,transparent_60%)] pointer-events-none" />
+                <div className="bg-[#1E293B] p-6 rounded-2xl shadow-inner relative z-10">
+                  <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(212,175,55,0.05)_0%,transparent_60%)]" />
+                  </div>
 
                   <label className="font-heading block text-xs font-extrabold text-slate-400 tracking-[0.1em] uppercase mb-4 relative z-10">
                     Kết xuất đầu ra
@@ -302,17 +314,11 @@ const UnitConverter = () => {
                         {result !== null ? (Math.abs(result) > 10000 || Math.abs(result) < 0.0001 && result !== 0 ? result.toExponential(4) : result.toFixed(6)) : '0.00'}
                       </span>
                     </div>
-                    <select
+                    <SmoothUnitSelect
+                      units={currentQuantity.units}
                       value={toUnit}
-                      onChange={(e) => setToUnit(e.target.value)}
-                      className="w-full bg-white/10 border border-white/20 px-4 py-4 rounded-xl text-white font-semibold focus:outline-none focus:ring-2 focus:ring-[#44b5d7]/50 focus:border-[#44b5d7] transition-all shadow-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:calc(100%-1rem)_center]"
-                    >
-                      {Object.entries(currentQuantity.units).map(([unit, info]) => (
-                        <option key={unit} value={unit} className="text-[#1E293B]">
-                          {unit} - {info.name}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(unitKey) => setToUnit(unitKey)}
+                    />
                   </div>
                 </div>
 

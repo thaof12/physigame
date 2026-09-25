@@ -171,7 +171,7 @@ const PhysicsLesson = () => {
           });
         }
       } finally {
-        setTimeout(() => setLoading(false), 600);
+        setLoading(false);
       }
     };
 
@@ -218,10 +218,34 @@ const PhysicsLesson = () => {
     try {
       const userStr = localStorage.getItem('user');
       const user = userStr ? JSON.parse(userStr) : null;
-      const userId = user?.email || user?.uid;
+      const userId = user?.email || user?.uid || user?.id;
       
+      const totalEx = exercises.length || 1;
+      const lessonTitle = lessonData?.title || `Bài học ${lessonId}`;
+      const earnedXP = Math.max(50, (quizScore || 1) * 50);
+
+      // Log session activity immediately
+      logSessionActivity(
+        'lesson',
+        `Hoàn thành bài tập: ${lessonTitle}`,
+        `Vật lý Lớp ${classId} • Chương ${chapterId} • Đúng ${quizScore}/${totalEx} câu`,
+        earnedXP
+      );
+
+      // Update local progress
+      const lessonKey = `${classId}-${chapterId}-${lessonId}`;
+      let savedProgress = {};
+      try {
+        const progressStr = localStorage.getItem(`physics-progress-${classId}`);
+        savedProgress = progressStr ? JSON.parse(progressStr) : {};
+      } catch (e) {
+        console.error('Failed to parse physics-progress:', e);
+      }
+      savedProgress[lessonKey] = 'completed';
+      localStorage.setItem(`physics-progress-${classId}`, JSON.stringify(savedProgress));
+
+      // Submit to backend
       if (userId) {
-        const totalEx = exercises.length;
         const progressData = {
           userId,
           programId: 'physics',
@@ -234,28 +258,11 @@ const PhysicsLesson = () => {
           completionDate: new Date().toISOString()
         };
 
-        // Submit to backend
-        await axios.post(`${API_BASE_URL}/users/submit-physics-lesson`, progressData);
-
-        // Log session activity
-        logSessionActivity(
-          'lesson',
-          'Hoàn thành bài học',
-          `Bài học ${lessonId} (Chương ${chapterId}) - Lớp ${classId}`,
-          quizScore * 50
-        );
-        
-        // Update local progress
-        const lessonKey = `${classId}-${chapterId}-${lessonId}`;
-        let savedProgress = {};
         try {
-          const progressStr = localStorage.getItem(`physics-progress-${classId}`);
-          savedProgress = progressStr ? JSON.parse(progressStr) : {};
-        } catch (e) {
-          console.error('Failed to parse physics-progress:', e);
+          await axios.post(`${API_BASE_URL}/users/submit-physics-lesson`, progressData);
+        } catch (apiError) {
+          console.warn('Backend submission failed, saved session locally:', apiError);
         }
-        savedProgress[lessonKey] = 'completed';
-        localStorage.setItem(`physics-progress-${classId}`, JSON.stringify(savedProgress));
       }
     } catch (error) {
       console.error('Error saving task progress:', error);

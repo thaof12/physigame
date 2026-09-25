@@ -4,6 +4,7 @@ const { supabase } = require('../src/config/supabase.cjs');
 
 // In-memory status map for tracking join approval state: `${classId}_${studentId}` -> 'pending' | 'approved' | 'rejected'
 const statusMap = new Map();
+const ASSIGNMENT_COMPLETIONS_UUID = '00000000-0000-0000-0000-000000000004';
 
 // Generate a random class code: 6 uppercase characters
 function generateClassCode() {
@@ -188,13 +189,13 @@ router.get('/teacher/:teacherId', async (req, res) => {
         }
       } catch (err) {}
 
-      let lessonsCount = 0;
+      let assignmentsCount = 0;
       try {
-        const { count: lCount } = await supabase
-          .from('lessons')
+        const { count: asgCount } = await supabase
+          .from('class_assignments')
           .select('*', { count: 'exact', head: true })
-          .eq('teacher_id', teacherId);
-        lessonsCount = lCount || 0;
+          .eq('class_id', cls.id);
+        assignmentsCount = asgCount || 0;
       } catch (err) {}
 
       return {
@@ -205,7 +206,8 @@ router.get('/teacher/:teacherId', async (req, res) => {
         description: cleanDescription(cls.description),
         students: count,
         pendingCount,
-        lessons: lessonsCount,
+        lessons: assignmentsCount,
+        assignmentsCount: assignmentsCount,
         created: cls.created_at ? cls.created_at.split('T')[0] : new Date().toISOString().split('T')[0]
       };
     }));
@@ -538,6 +540,18 @@ router.get('/:classId/students', async (req, res) => {
         lessonsCompleted = count || 0;
       } catch (e) {}
 
+      // Also count completed class assignments for this student
+      let manualCompletedCount = 0;
+      try {
+        const { count: mCount } = await supabase
+          .from('teacher_notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('teacher_id', ASSIGNMENT_COMPLETIONS_UUID)
+          .like('title', `asg_comp:${student.id}:%`);
+        manualCompletedCount = mCount || 0;
+      } catch (e) {}
+      lessonsCompleted += manualCompletedCount;
+
       let avgScore = 0;
       try {
         const { data: lcScores } = await supabase
@@ -548,11 +562,14 @@ router.get('/:classId/students', async (req, res) => {
         if (lcScores && lcScores.length > 0) {
           const totalPct = lcScores.reduce((sum, item) => sum + (item.score / (item.total_questions || 1) * 100), 0);
           avgScore = Math.round(totalPct / lcScores.length);
+        } else if (manualCompletedCount > 0) {
+          avgScore = 100;
         }
       } catch (e) {}
 
       let lastActive = 'Không hoạt động';
       try {
+        let latestTime = null;
         const { data: latestCompletion } = await supabase
           .from('lesson_completions')
           .select('completed_at')
@@ -562,12 +579,34 @@ router.get('/:classId/students', async (req, res) => {
           .maybeSingle();
 
         if (latestCompletion && latestCompletion.completed_at) {
-          const diff = Date.now() - new Date(latestCompletion.completed_at).getTime();
+          latestTime = new Date(latestCompletion.completed_at).getTime();
+        }
+
+        const { data: latestManual } = await supabase
+          .from('teacher_notifications')
+          .select('created_at')
+          .eq('teacher_id', ASSIGNMENT_COMPLETIONS_UUID)
+          .like('title', `asg_comp:${student.id}:%`)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (latestManual && latestManual.created_at) {
+          const mTime = new Date(latestManual.created_at).getTime();
+          if (!latestTime || mTime > latestTime) {
+            latestTime = mTime;
+          }
+        }
+
+        if (latestTime) {
+          const diff = Date.now() - latestTime;
           const mins = Math.floor(diff / 60000);
           const hours = Math.floor(mins / 60);
           const days = Math.floor(hours / 24);
 
-          if (mins < 60) {
+          if (mins < 1) {
+            lastActive = 'Vừa xong';
+          } else if (mins < 60) {
             lastActive = `${mins} phút trước`;
           } else if (hours < 24) {
             lastActive = `${hours} giờ trước`;
@@ -809,12 +848,29 @@ router.get('/:classId/assignments', async (req, res) => {
       return res.json({ success: true, assignments: assignments || [] });
     }
     
+    // Fetch manual assignment completions for this student
+    const manualCompletions = new Set();
+    try {
+      const { data: compRecords } = await supabase
+        .from('teacher_notifications')
+        .select('title')
+        .eq('teacher_id', ASSIGNMENT_COMPLETIONS_UUID)
+        .like('title', `asg_comp:${studentId}:%`);
+        
+      if (compRecords) {
+        compRecords.forEach(r => {
+          const parts = r.title.split(':');
+          if (parts[2]) manualCompletions.add(parts[2]);
+        });
+      }
+    } catch (e) {}
+
     // Check completions if studentId provided
     const enriched = await Promise.all((assignments || []).map(async (asg) => {
-      let completed = false;
+      let completed = manualCompletions.has(String(asg.id));
       let score = null;
       
-      if (asg.type === 'lesson') {
+      if (!completed && asg.type === 'lesson') {
         const { data: comp } = await supabase
           .from('lesson_completions')
           .select('completed, score')
@@ -826,7 +882,7 @@ router.get('/:classId/assignments', async (req, res) => {
           completed = comp.completed;
           score = comp.score;
         }
-      } else if (asg.type === 'challenge') {
+      } else if (!completed && asg.type === 'challenge') {
         const { data: resObj } = await supabase
           .from('game_results')
           .select('completed, score')
@@ -846,6 +902,116 @@ router.get('/:classId/assignments', async (req, res) => {
     res.json({ success: true, assignments: enriched });
   } catch (error) {
     console.error('Error fetching assignments:', error);
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+});
+
+// POST /api/classes/:classId/assignments/:assignmentId/toggle-complete - Student marks assignment completed/incomplete
+router.post('/:classId/assignments/:assignmentId/toggle-complete', async (req, res) => {
+  try {
+    const { classId, assignmentId } = req.params;
+    const { studentId, completed } = req.body;
+
+    if (!studentId) {
+      return res.status(400).json({ success: false, message: 'studentId is required' });
+    }
+
+    const titleKey = `asg_comp:${studentId}:${assignmentId}`;
+
+    let willComplete = completed !== undefined ? !!completed : true;
+
+    if (completed === undefined) {
+      const { data: existing } = await supabase
+        .from('teacher_notifications')
+        .select('id')
+        .eq('teacher_id', ASSIGNMENT_COMPLETIONS_UUID)
+        .eq('title', titleKey)
+        .maybeSingle();
+      willComplete = !existing;
+    }
+
+    if (willComplete) {
+      // Upsert/Insert completion record
+      await supabase
+        .from('teacher_notifications')
+        .delete()
+        .eq('teacher_id', ASSIGNMENT_COMPLETIONS_UUID)
+        .eq('title', titleKey);
+
+      await supabase
+        .from('teacher_notifications')
+        .insert({
+          teacher_id: ASSIGNMENT_COMPLETIONS_UUID,
+          title: titleKey,
+          content: JSON.stringify({
+            studentId,
+            assignmentId,
+            classId,
+            completedAt: new Date().toISOString(),
+            score: null
+          }),
+          is_read: true
+        });
+
+      // Send teacher notification about student completion
+      try {
+        const { data: cls } = await supabase
+          .from('classes')
+          .select('id, name, teacher_id')
+          .eq('id', classId)
+          .maybeSingle();
+
+        const { data: asg } = await supabase
+          .from('class_assignments')
+          .select('id, title')
+          .eq('id', assignmentId)
+          .maybeSingle();
+
+        const { data: studentUser } = await supabase
+          .from('users')
+          .select('display_name, username')
+          .eq('id', studentId)
+          .maybeSingle();
+
+        const studentName = studentUser?.display_name || studentUser?.username || 'Học sinh';
+        const asgTitle = asg?.title || 'Bài tập';
+        const className = cls?.name || 'Lớp học';
+
+        if (cls?.teacher_id) {
+          await supabase
+            .from('teacher_notifications')
+            .insert({
+              teacher_id: cls.teacher_id,
+              title: 'Học sinh đã hoàn thành bài tập',
+              content: `Học sinh ${studentName} đã hoàn thành bài tập "${asgTitle}" trong lớp "${className}".`,
+              is_read: false
+            });
+        }
+      } catch (notifErr) {
+        console.error('Error sending teacher notification on assignment complete:', notifErr);
+      }
+
+      return res.json({
+        success: true,
+        completed: true,
+        message: 'Đã báo cáo hoàn thành bài tập tới giáo viên!'
+      });
+    } else {
+      // Remove completion record
+      await supabase
+        .from('teacher_notifications')
+        .delete()
+        .eq('teacher_id', ASSIGNMENT_COMPLETIONS_UUID)
+        .eq('title', titleKey);
+
+      return res.json({
+        success: true,
+        completed: false,
+        message: 'Đã hủy đánh dấu hoàn thành bài tập'
+      });
+    }
+  } catch (error) {
+    console.error('Error toggling assignment completion:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });

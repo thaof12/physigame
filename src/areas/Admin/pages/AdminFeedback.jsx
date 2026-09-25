@@ -87,12 +87,22 @@ const AdminFeedback = () => {
       window.addEventListener('eureka_support_updated', handleStorage);
 
       const intervalId = setInterval(() => {
-         loadAllMessages();
-      }, 2000);
+         if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+            loadAllMessages();
+         }
+      }, 10000);
+
+      const handleFocus = () => {
+         if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+            loadAllMessages();
+         }
+      };
+      window.addEventListener('focus', handleFocus);
 
       return () => {
          window.removeEventListener('storage', handleStorage);
          window.removeEventListener('eureka_support_updated', handleStorage);
+         window.removeEventListener('focus', handleFocus);
          clearInterval(intervalId);
       };
    }, []);

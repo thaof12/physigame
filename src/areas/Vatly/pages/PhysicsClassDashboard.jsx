@@ -46,7 +46,7 @@ const PhysicsClassDashboard = () => {
         console.log('Could not load progress from backend:', error);
       }
       
-      setTimeout(() => setLoading(false), 500);
+      setLoading(false);
     };
     
     loadProgress();

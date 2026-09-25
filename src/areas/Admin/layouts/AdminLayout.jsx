@@ -105,7 +105,11 @@ const AdminLayout = () => {
     };
 
     fetchReportCount();
-    const interval = setInterval(fetchReportCount, 12000); // 12s to reduce flicker
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchReportCount();
+      }
+    }, 15000);
     return () => {
       isMounted = false;
       clearInterval(interval);

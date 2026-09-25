@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import GlobalHeader from './GlobalHeader';
 import GlobalFooter from './GlobalFooter';
 import { useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import DifyChatbot from '../AIChatbot/DifyChatbot';
+
+const DifyChatbot = lazy(() => import('../AIChatbot/DifyChatbot'));
 
 export default function MainLayout() {
   const location = useLocation();
@@ -66,7 +67,9 @@ export default function MainLayout() {
       </main>
       <GlobalFooter />
       {/* AI Chatbot - floating widget, hiển thị trên toàn bộ student layout */}
-      <DifyChatbot />
+      <Suspense fallback={null}>
+        <DifyChatbot />
+      </Suspense>
     </div>
   );
 }

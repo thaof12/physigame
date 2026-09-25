@@ -3,10 +3,21 @@ const router = express.Router();
 const Challenge = require('../models/Challenge.cjs');
 const User = require('../models/User.cjs');
 
+// In-memory cache for challenges
+const challengesCache = new Map();
+const CHALLENGES_CACHE_TTL = 30000; // 30 seconds
+
 // Get all challenges
 router.get('/', async (req, res) => {
   try {
     const { teacherId, category } = req.query;
+    const cacheKey = `c_${teacherId || 'none'}_${category || 'all'}`;
+    const now = Date.now();
+    const cached = challengesCache.get(cacheKey);
+    if (cached && cached.expiresAt > now) {
+      return res.json(cached.data);
+    }
+
     let query = require('../src/config/supabase.cjs').supabase
       .from('challenges')
       .select('*');
@@ -28,7 +39,9 @@ router.get('/', async (req, res) => {
     const { data: challenges, error } = await query.order('created_at', { ascending: false });
     if (error) throw error;
 
-    res.json(challenges || []);
+    const result = challenges || [];
+    challengesCache.set(cacheKey, { data: result, expiresAt: now + CHALLENGES_CACHE_TTL });
+    res.json(result);
   } catch (error) {
     console.error('Error fetching challenges:', error);
     res.status(500).json({ message: 'Error fetching challenges', error: error.message });

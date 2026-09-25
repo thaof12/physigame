@@ -85,12 +85,22 @@ const TeacherSupportPage = () => {
       window.addEventListener('eureka_support_updated', handleStorage);
 
       const intervalId = setInterval(() => {
-         loadMessages();
-      }, 2000);
+         if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+            loadMessages();
+         }
+      }, 10000);
+
+      const handleFocus = () => {
+         if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+            loadMessages();
+         }
+      };
+      window.addEventListener('focus', handleFocus);
 
       return () => {
          window.removeEventListener('storage', handleStorage);
          window.removeEventListener('eureka_support_updated', handleStorage);
+         window.removeEventListener('focus', handleFocus);
          clearInterval(intervalId);
       };
    }, [teacher]);

@@ -1,9 +1,16 @@
-export const logSessionActivity = (type, title, detail, xp = 0) => {
+const getUserId = () => {
   try {
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
-    const userId = user?.uid || user?.id || 'anonymous';
+    return user?.id || user?.uid || user?.email || 'anonymous';
+  } catch {
+    return 'anonymous';
+  }
+};
 
+export const logSessionActivity = (type, title, detail, xp = 0) => {
+  try {
+    const userId = getUserId();
     const key = `session_activities_${userId}`;
     const existing = JSON.parse(sessionStorage.getItem(key) || '[]');
 
@@ -25,17 +32,54 @@ export const logSessionActivity = (type, title, detail, xp = 0) => {
 
 export const getSessionActivities = () => {
   try {
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    const userId = user?.uid || user?.id || 'anonymous';
-
+    const userId = getUserId();
     const key = `session_activities_${userId}`;
-    const activities = JSON.parse(sessionStorage.getItem(key) || '[]');
+    let activities = JSON.parse(sessionStorage.getItem(key) || '[]');
 
-    // ONLY display activities that grant XP!
-    return activities.filter(act => (act.xp || 0) > 0);
+    // If specific key is empty, check any session_activities_ key as fallback
+    if (!activities.length) {
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const k = sessionStorage.key(i);
+        if (k && k.startsWith('session_activities_')) {
+          try {
+            const parsed = JSON.parse(sessionStorage.getItem(k) || '[]');
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              activities = parsed;
+              break;
+            }
+          } catch {}
+        }
+      }
+    }
+
+    // Display activities that grant XP or are completed lessons/exercises
+    return activities.filter(act => (act.xp || 0) > 0 || act.type === 'lesson');
   } catch (e) {
     console.error('Error getting session activities:', e);
     return [];
   }
 };
+
+export const clearSessionActivities = (userId) => {
+  try {
+    if (userId) {
+      sessionStorage.removeItem(`session_activities_${userId}`);
+    }
+    const currentId = getUserId();
+    if (currentId) {
+      sessionStorage.removeItem(`session_activities_${currentId}`);
+    }
+    // Remove all session activity keys
+    const keysToRemove = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      if (k && k.startsWith('session_activities_')) {
+        keysToRemove.push(k);
+      }
+    }
+    keysToRemove.forEach(k => sessionStorage.removeItem(k));
+  } catch (e) {
+    console.error('Error clearing session activities:', e);
+  }
+};
+

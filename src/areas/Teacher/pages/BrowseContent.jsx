@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import api from '../../../config/api';
 import { useTeacherAuth } from '../contexts/TeacherAuthContext';
+import { openDocumentInNewTab } from '../../../utils/documentViewer';
 
 const getEmbedUrl = (url) => {
   if (!url) return '';
@@ -84,9 +85,13 @@ const BrowseContent = () => {
         setLockedIds(locksRes.data.locked_ids);
       }
 
-      // If currently previewed item was deleted, close modal
+      // If currently previewed item was deleted or locked, close modal
       setSelectedItem(prev => {
         if (!prev) return null;
+        const currentLocks = locksRes?.data?.locked_ids || [];
+        if (currentLocks.includes(String(prev.id)) || prev.is_locked || prev.status === 'locked') {
+          return null;
+        }
         const existsInLessons = newLessons.some(l => String(l.id) === String(prev.id));
         const existsInExercises = newExercises.some(e => String(e.id) === String(prev.id));
         return (existsInLessons || existsInExercises) ? prev : null;
@@ -102,9 +107,20 @@ const BrowseContent = () => {
   useEffect(() => {
     fetchSystemContent(false);
     const interval = setInterval(() => {
-      fetchSystemContent(true);
-    }, 5000);
-    return () => clearInterval(interval);
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchSystemContent(true);
+      }
+    }, 60000);
+    const handleFocus = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchSystemContent(true);
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const tabs = [
@@ -302,7 +318,19 @@ const BrowseContent = () => {
   const openAssignModal = async (item, e) => {
     if (e) e.stopPropagation();
     setAssignItem(item);
-    setAssignLink(item.theory || item.link || item.content || '');
+    
+    // Determine the most accurate, working link for this lesson or exercise
+    let rawLink = (item.theory || item.link || item.content || '').trim();
+    if (!rawLink) {
+      if (activeTab === 'lessons') {
+        rawLink = `${window.location.origin}/physics-lesson/${item.class_id || item.grade || 6}/${item.chapter_id || 1}/${item.lesson_id || 1}`;
+      } else {
+        rawLink = `${window.location.origin}/advanced-physics-challenge`;
+      }
+    } else if (rawLink.startsWith('/')) {
+      rawLink = `${window.location.origin}${rawLink}`;
+    }
+    setAssignLink(rawLink);
     setAssignClassId('');
     setAssignDueDate('');
     setAssignNote('');
@@ -528,15 +556,15 @@ const BrowseContent = () => {
               <div
                 key={item.id}
                 className={`rounded-2xl p-5 shadow-sm transition-all group flex flex-col gap-4 relative overflow-hidden ${isLocked
-                    ? 'bg-slate-100/90 border-2 border-slate-300 opacity-75 grayscale-[35%]'
+                    ? 'bg-slate-100/95 border-2 border-dashed border-amber-300 opacity-55 grayscale-[50%] cursor-not-allowed select-none'
                     : 'bg-white border border-slate-100 hover:shadow-md'
                   }`}
               >
                 {/* Notice banner if locked */}
                 {isLocked && (
-                  <div className="w-full bg-amber-500/10 border border-amber-300 text-amber-950 px-3 py-2 rounded-xl font-heading font-extrabold text-[11px] flex items-center gap-2">
+                  <div className="w-full bg-amber-50 border border-amber-300 text-amber-950 px-3.5 py-2.5 rounded-xl font-heading font-extrabold text-[11px] flex items-center gap-2 shadow-sm">
                     <Lock className="w-4 h-4 text-amber-700 shrink-0" />
-                    <span>TẠM KHÓA: Chúng tôi đang tạm khóa bài để xem xét vi phạm. Bạn không thể thực hiện bất kỳ thao tác nào liên quan đến bài viết này.</span>
+                    <span>TẠM KHÓA: Admin đã tạm khóa bài này để xem xét vi phạm. Tất cả các thao tác (xem, xóa, giao bài) đều bị vô hiệu hóa.</span>
                   </div>
                 )}
 
@@ -574,44 +602,44 @@ const BrowseContent = () => {
                 {/* Actions */}
                 <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                   <button
-                    onClick={() => setSelectedItem(item)}
-                    className="font-heading flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 font-extrabold rounded-xl text-xs transition-all"
+                    onClick={() => !isLocked && setSelectedItem(item)}
+                    disabled={isLocked}
+                    className={`font-heading flex-1 flex items-center justify-center gap-1.5 px-3 py-2 font-extrabold rounded-xl text-xs transition-all ${
+                      isLocked
+                        ? 'bg-slate-200/80 border border-slate-300 text-slate-400 cursor-not-allowed pointer-events-none'
+                        : 'bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 cursor-pointer'
+                    }`}
+                    title={isLocked ? 'Bài đã bị tạm khóa, không thể xem chi tiết' : 'Xem chi tiết'}
                   >
-                    <ScanSearch className="w-3.5 h-3.5" />
-                    Chi tiết
+                    {isLocked ? <Lock className="w-3.5 h-3.5 text-slate-400" /> : <ScanSearch className="w-3.5 h-3.5" />}
+                    {isLocked ? 'Đã tạm khóa' : 'Chi tiết'}
                   </button>
                   <button
                     onClick={(e) => !isLocked && openAssignModal(item, e)}
                     disabled={isLocked}
                     className={`font-heading flex-1 flex items-center justify-center gap-1.5 px-3 py-2 font-extrabold rounded-xl text-xs transition-all ${isLocked
-                        ? 'bg-slate-200 border border-slate-300 text-slate-400 cursor-not-allowed'
-                        : 'bg-cyan-700 hover:bg-cyan-800 text-white'
+                        ? 'bg-slate-200/80 border border-slate-300 text-slate-400 cursor-not-allowed pointer-events-none'
+                        : 'bg-cyan-700 hover:bg-cyan-800 text-white cursor-pointer'
                       }`}
+                    title={isLocked ? 'Bài đã bị tạm khóa, không thể giao bài' : 'Giao bài'}
                   >
-                    <Send className="w-3.5 h-3.5" />
-                    Giao bài
+                    {isLocked ? <Lock className="w-3.5 h-3.5 text-slate-400" /> : <Send className="w-3.5 h-3.5" />}
+                    {isLocked ? 'Không thể giao' : 'Giao bài'}
                   </button>
                   {isOwner && (
-                    isLocked ? (
-                      <button
-                        type="button"
-                        disabled
-                        className="font-heading px-3 py-2 bg-slate-200 border border-slate-300 text-slate-500 font-extrabold rounded-xl text-xs cursor-not-allowed shrink-0 flex items-center gap-1"
-                        title="Bài viết bị Quản trị viên khóa cứng do có báo cáo vi phạm. Bạn không thể thực hiện thao tác xóa bài."
-                      >
-                        <Lock className="w-4 h-4 text-amber-700" />
-                        <span>Đã bị khóa</span>
-                      </button>
-                    ) : (
-                      <button
-                        onClick={(e) => handleDeleteContent(item, e)}
-                        disabled={deleteSubmitting}
-                        className="font-heading p-2 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 text-rose-600 hover:text-rose-700 font-extrabold rounded-xl text-xs transition-all shrink-0 flex items-center justify-center"
-                        title="Xóa bài đã đăng"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )
+                    <button
+                      type="button"
+                      disabled={isLocked || deleteSubmitting}
+                      onClick={(e) => !isLocked && handleDeleteContent(item, e)}
+                      className={`font-heading p-2 rounded-xl text-xs transition-all shrink-0 flex items-center justify-center ${
+                        isLocked
+                          ? 'bg-slate-200/80 border border-slate-300 text-slate-400 cursor-not-allowed pointer-events-none'
+                          : 'bg-rose-50 hover:bg-rose-100 border border-rose-200/80 text-rose-600 hover:text-rose-700 cursor-pointer'
+                      }`}
+                      title={isLocked ? 'Bài viết bị Quản trị viên khóa do có báo cáo vi phạm. Bạn không thể thực hiện thao tác xóa bài.' : 'Xóa bài đã đăng'}
+                    >
+                      {isLocked ? <Lock className="w-4 h-4 text-slate-400" /> : <Trash2 className="w-4 h-4" />}
+                    </button>
                   )}
                 </div>
               </div>
@@ -1001,8 +1029,8 @@ const BrowseContent = () => {
                         />
                       </div>
                       <button
-                        onClick={() => window.open(selectedItem.theory, '_blank')}
-                        className="font-heading w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold rounded-xl text-sm flex items-center justify-center gap-2 transition-all border border-indigo-100/50"
+                        onClick={() => openDocumentInNewTab(selectedItem.theory)}
+                        className="font-heading w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold rounded-xl text-sm flex items-center justify-center gap-2 transition-all border border-indigo-100/50 cursor-pointer"
                       >
                         <ExternalLink className="w-4 h-4" />
                         Mở tài liệu trong tab mới
@@ -1042,8 +1070,8 @@ const BrowseContent = () => {
                         />
                       </div>
                       <button
-                        onClick={() => window.open(selectedItem.link, '_blank')}
-                        className="font-heading w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold rounded-xl text-sm flex items-center justify-center gap-2 transition-all border border-indigo-100/50"
+                        onClick={() => openDocumentInNewTab(selectedItem.link)}
+                        className="font-heading w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-extrabold rounded-xl text-sm flex items-center justify-center gap-2 transition-all border border-indigo-100/50 cursor-pointer"
                       >
                         <ExternalLink className="w-4 h-4" />
                         Mở bài tập trong tab mới

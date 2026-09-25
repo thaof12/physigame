@@ -87,11 +87,19 @@ const TeacherLayout = () => {
 
     fetchNotifications();
 
-    // 1. Fast polling fallback every 3 seconds for near-instant updates
-    const interval = setInterval(fetchNotifications, 3000);
+    // 1. Polling fallback every 30 seconds when visible (Supabase Realtime provides instant push)
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchNotifications();
+      }
+    }, 30000);
 
     // 2. Fetch immediately when window focuses or tab visibility changes
-    const handleFocus = () => fetchNotifications();
+    const handleFocus = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchNotifications();
+      }
+    };
     window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleFocus);
 
@@ -170,9 +178,14 @@ const TeacherLayout = () => {
     );
   }
 
-  // Redirect to login if not authenticated or deactivated
-  if (!isAuthenticated || teacher?.status === 'inactive') {
+  // Redirect to login if account is truly deactivated
+  if (teacher?.status === 'inactive' || teacher?.teacher_status === 'inactive') {
     return <Navigate to="/login?error=deactivated" replace />;
+  }
+
+  // Redirect to normal login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
 
   // Redirect to pending page if not verified

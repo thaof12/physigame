@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useTeacherAuth } from '../contexts/TeacherAuthContext';
 import api from '../../../config/api';
+import { openDocumentInNewTab } from '../../../utils/documentViewer';
 
 const ClassManagement = () => {
   const { teacher } = useTeacherAuth();
@@ -300,6 +301,35 @@ const ClassManagement = () => {
     }
   };
 
+  const handleOpenAssignmentLink = (asg) => {
+    const targetUrl = asg?.link || asg?.resource_id;
+    if (!targetUrl || typeof targetUrl !== 'string') return;
+
+    const trimmed = targetUrl.trim();
+
+    // 1. Base64 Data URL (PDF or uploaded file)
+    if (trimmed.startsWith('data:')) {
+      openDocumentInNewTab(trimmed);
+      return;
+    }
+
+    // 2. Relative internal path (e.g. /game/balance or /physics-lesson/...)
+    if (trimmed.startsWith('/')) {
+      window.open(`${window.location.origin}${trimmed}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // 3. Lesson composite code like "10-1-1"
+    const parts = trimmed.split('-');
+    if (parts.length >= 3 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+      window.open(`${window.location.origin}/physics-lesson/${parts[0]}/${parts[1]}/${parts[2]}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // 4. Standard web link / Google Drive link
+    openDocumentInNewTab(trimmed);
+  };
+
   const handleCreateAssignment = async (e) => {
     e.preventDefault();
     if (!asgTitle.trim() || !asgLink.trim() || !activeClass?.id) return;
@@ -316,6 +346,7 @@ const ClassManagement = () => {
 
       if (response.data?.success) {
         setAssignments([response.data.assignment, ...assignments]);
+        setClasses(prev => prev.map(c => c.id === activeClass.id ? { ...c, lessons: (c.lessons || 0) + 1 } : c));
         setAsgTitle('');
         setAsgLink('');
         setAsgDesc('');
@@ -485,6 +516,7 @@ const ClassManagement = () => {
               onClick={() => {
                 setActiveClass(null);
                 setSelectedAsgProgress(null);
+                fetchClasses();
               }}
               className="p-3 bg-slate-50 hover:bg-slate-100 rounded-2xl text-slate-600 transition-colors"
             >
@@ -664,15 +696,14 @@ const ClassManagement = () => {
                                   )}
                                   {link && (
                                     <div className="flex items-center gap-2 pt-1">
-                                      <a
-                                        href={link.startsWith('http') ? link : 'https://' + link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-indigo-600 rounded-xl text-xs font-bold transition-all"
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenAssignmentLink(asg)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-indigo-600 rounded-xl text-xs font-bold transition-all cursor-pointer"
                                       >
                                         <ExternalLink className="w-3.5 h-3.5" />
                                         Mở link bài tập
-                                      </a>
+                                      </button>
                                     </div>
                                   )}
                                 </div>
@@ -723,7 +754,7 @@ const ClassManagement = () => {
                             <div>
                               {stud.completed ? (
                                 <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-xs font-black flex items-center gap-1">
-                                  <CheckCircle2 className="w-3.5 h-3.5" /> Hoàn thành {stud.score !== null && `(${stud.score}đ)`}
+                                  <CheckCircle2 className="w-3.5 h-3.5" /> Hoàn thành
                                 </span>
                               ) : (
                                 <span className="px-2.5 py-1 bg-slate-50 text-slate-500 border border-slate-100 rounded-lg text-xs font-bold">
@@ -1018,58 +1049,53 @@ const ClassManagement = () => {
                         </div>
                       ) : (
                         <div className="bg-white border border-slate-100 rounded-3xl shadow-sm overflow-x-auto">
-                          <table className="w-full text-left border-collapse">
+                          <table className="w-full min-w-[850px] text-left border-collapse">
                             <thead>
-                              <tr className="border-b border-slate-100 bg-slate-50/50">
-                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Học sinh</th>
-                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Cấp độ (XP)</th>
-                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Bài học đã làm</th>
-                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Điểm TB</th>
-                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider">Hoạt động cuối</th>
-                                <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-wider text-right">Hành động</th>
+                              <tr className="border-b border-slate-100 bg-slate-50/60">
+                                <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider min-w-[240px]">Học sinh</th>
+                                <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider whitespace-nowrap min-w-[150px]">Cấp độ (XP)</th>
+                                <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider whitespace-nowrap min-w-[140px]">Bài học đã làm</th>
+                                <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider whitespace-nowrap min-w-[150px]">Hoạt động cuối</th>
+                                <th className="py-4 px-5 text-xs font-black text-slate-400 uppercase tracking-wider whitespace-nowrap min-w-[140px] text-right">Hành động</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 font-medium text-slate-700 text-sm">
                               {approvedStudents.map(stud => (
-                                <tr key={stud.id} className="hover:bg-slate-50/30 transition-colors">
-                                  <td className="p-4">
+                                <tr key={stud.id} className="hover:bg-slate-50/40 transition-colors">
+                                  <td className="py-4 px-5 min-w-[240px]">
                                     <div className="flex items-center gap-3">
                                       {stud.avatar ? (
-                                        <img src={stud.avatar} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
+                                        <img src={stud.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border border-slate-100 shadow-sm shrink-0" />
                                       ) : (
-                                        <div className="w-8 h-8 bg-indigo-50 text-indigo-600 font-black rounded-full flex items-center justify-center text-xs">
+                                        <div className="w-9 h-9 bg-indigo-50 border border-indigo-100 text-indigo-600 font-black rounded-full flex items-center justify-center text-xs shrink-0">
                                           {stud.name.charAt(0)}
                                         </div>
                                       )}
-                                      <div>
-                                        <p className="font-black text-slate-900">{stud.name}</p>
-                                        <p className="text-[10px] text-slate-400 font-bold">{stud.email}</p>
+                                      <div className="min-w-0">
+                                        <p className="font-black text-slate-900 truncate">{stud.name}</p>
+                                        <p className="text-[11px] text-slate-400 font-bold truncate">{stud.email}</p>
                                       </div>
                                     </div>
                                   </td>
-                                  <td className="p-4">
-                                    <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded text-xs font-bold text-indigo-600">
+                                  <td className="py-4 px-5 whitespace-nowrap">
+                                    <span className="inline-flex items-center px-2.5 py-1 bg-indigo-50/80 border border-indigo-100/80 rounded-lg text-xs font-black text-indigo-600 whitespace-nowrap shadow-xs">
                                       Lvl {stud.level} ({stud.xp} XP)
                                     </span>
                                   </td>
-                                  <td className="p-4 font-bold text-slate-800">{stud.lessonsCompleted} bài</td>
-                                  <td className="p-4">
-                                    <span className={`px-2 py-0.5 rounded text-xs font-black ${
-                                      stud.avgScore >= 80 
-                                      ? 'bg-emerald-50 text-emerald-700' 
-                                      : stud.avgScore >= 50 
-                                      ? 'bg-amber-50 text-amber-700' 
-                                      : 'bg-rose-50 text-rose-700'
-                                    }`}>
-                                      {stud.avgScore}%
+                                  <td className="py-4 px-5 font-black text-slate-800 whitespace-nowrap">
+                                    <span className="inline-flex items-center gap-1.5 text-xs bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg">
+                                      <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
+                                      {stud.lessonsCompleted} bài
                                     </span>
                                   </td>
-                                  <td className="p-4 text-xs text-slate-400 font-bold">{stud.lastActive}</td>
-                                  <td className="p-4 text-right">
+                                  <td className="py-4 px-5 text-xs text-slate-500 font-bold whitespace-nowrap">
+                                    {stud.lastActive}
+                                  </td>
+                                  <td className="py-4 px-5 text-right whitespace-nowrap">
                                     <button
                                       onClick={() => handleKickStudent(stud.id, stud.name)}
-                                      className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs rounded-xl transition-colors inline-flex items-center gap-1"
-                                      title="Kick / Xóa học sinh khỏi lớp"
+                                      className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs rounded-xl transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 whitespace-nowrap"
+                                      title="Xóa học sinh khỏi lớp"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
                                       <span>Xóa khỏi lớp</span>
@@ -1283,7 +1309,7 @@ const ClassManagement = () => {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <BookOpen className="w-4 h-4 text-slate-400" />
-                  {cls.lessons} bài học
+                  {cls.lessons || 0} bài tập
                 </span>
               </div>
             </div>

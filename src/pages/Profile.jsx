@@ -702,29 +702,58 @@ const Profile = () => {
               {/* SECTION: ACTIVITY */}
               {activeTab === 'activity' && (
                 <div className="bg-white rounded-[2.5rem] border border-[#E5E7EB] p-8 sm:p-10 shadow-sm relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#274dad]/5 blur-[60px] rounded-full" />
-                  <div className="space-y-6">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#274dad]/5 blur-[60px] rounded-full pointer-events-none" />
+                  
+                  {/* Header / Session badge */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-4">
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e4f2f0] text-[#2099e9] text-[11px] font-extrabold uppercase tracking-wider mb-2 border border-[#274dad]/10">
+                        <Clock className="w-3.5 h-3.5" /> Phiên làm việc hiện tại
+                      </div>
+                      <h3 className="font-heading text-2xl font-extrabold text-[#1E293B]">Nhật Ký Hoạt Động</h3>
+                      <p className="font-body text-xs sm:text-sm text-slate-500 mt-1">
+                        Ghi nhận các bài tập & bài học bạn đã hoàn thành trong phiên đăng nhập này.
+                      </p>
+                    </div>
+                    {recentActivity.length > 0 && (
+                      <span className="font-heading text-xs font-bold px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
+                        Đã làm xong {recentActivity.length} bài
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
                     {recentActivity.length > 0 ? recentActivity.map((act, i) => (
-                      <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-6 py-5 border-b border-slate-100 last:border-b-0 transition-all group">
-                        <div className="p-4 bg-[#e4f2f0] rounded-2xl text-[#274dad] transition-colors group-hover:bg-[#274dad] group-hover:text-white border border-[#274dad]/10">
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-5 p-5 rounded-2xl bg-white border border-slate-100 hover:border-[#274dad]/30 hover:shadow-md transition-all group">
+                        <div className="w-12 h-12 rounded-2xl bg-[#e4f2f0] text-[#274dad] flex items-center justify-center transition-colors group-hover:bg-[#274dad] group-hover:text-white border border-[#274dad]/10 flex-shrink-0">
                           {act.type === 'lesson' ? <BookOpen className="w-6 h-6" /> : 
                            act.type === 'quest' || act.type === 'achievement' ? <Trophy className="w-6 h-6" /> : 
                            act.type === 'game' ? <Star className="w-6 h-6" /> : 
                            <Swords className="w-6 h-6" />}
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-heading font-extrabold text-[#1E293B] text-lg leading-tight mb-1">{act.title}</h4>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h4 className="font-heading font-extrabold text-[#1E293B] text-base leading-tight">{act.title}</h4>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              Đã hoàn thành
+                            </span>
+                          </div>
                           <p className="font-body text-sm font-medium text-slate-500">{act.detail}</p>
                         </div>
-                        <div className="sm:text-right flex sm:flex-col justify-between items-center sm:items-end gap-1">
-                          <span className="font-heading font-extrabold text-xl text-emerald-600">+{act.xp} XP</span>
-                          <span className="font-heading text-[10px] font-extrabold text-slate-300 uppercase tracking-widest">{getRelativeTime(act.time)}</span>
+                        <div className="sm:text-right flex sm:flex-col justify-between items-center sm:items-end gap-1 flex-shrink-0">
+                          <span className="font-heading font-extrabold text-lg text-emerald-600">+{act.xp || 50} XP</span>
+                          <span className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">{getRelativeTime(act.time)}</span>
                         </div>
                       </div>
                     )) : (
-                      <div className="text-center py-20 text-slate-400">
-                        <Clock className="w-16 h-16 mx-auto mb-4 opacity-10" />
-                        <p className="font-body font-bold">Chưa có dấu vết hành trình tại đây.</p>
+                      <div className="text-center py-16 text-slate-400">
+                        <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                          <Clock className="w-10 h-10 text-slate-300" />
+                        </div>
+                        <p className="font-heading font-bold text-slate-700 text-base mb-1">Chưa có dấu vết hành trình trong phiên này</p>
+                        <p className="font-body text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
+                          Khi bạn làm xong các bài tập trong giao diện lớp học vật lý, nhật ký sẽ tự động ghi lại tại đây!
+                        </p>
                       </div>
                     )}
                   </div>

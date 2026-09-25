@@ -55,9 +55,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Request logging middleware
+// Request logging middleware (filter out high frequency pings to prevent I/O lag)
 app.use((req, res, next) => {
-  console.log(`📝 ${req.method} ${req.url}`);
+  if (!req.url.startsWith('/api/users/check-status') && !req.url.startsWith('/api/health')) {
+    console.log(`📝 ${req.method} ${req.url}`);
+  }
   next();
 });
 
@@ -101,13 +103,23 @@ app.use('/api/support', require('./routes/support.cjs'));
 // API Endpoints
 const SETTINGS_FILE = path.join(__dirname, 'settings.json');
 
+let cachedSettings = null;
+let cachedSettingsTime = 0;
+const SETTINGS_CACHE_TTL = 60000; // 60 seconds
+
 app.get('/api/settings', (req, res) => {
   try {
+    const now = Date.now();
+    if (cachedSettings && (now - cachedSettingsTime < SETTINGS_CACHE_TTL)) {
+      return res.json(cachedSettings);
+    }
     if (fs.existsSync(SETTINGS_FILE)) {
       const data = fs.readFileSync(SETTINGS_FILE, 'utf8');
-      res.json(JSON.parse(data));
+      cachedSettings = JSON.parse(data);
+      cachedSettingsTime = now;
+      return res.json(cachedSettings);
     } else {
-      res.json({
+      const defaultSettings = {
         siteName: 'Eureka',
         siteDescription: 'Nền tảng học Vật lý tương tác',
         maintenanceMode: false,
@@ -117,9 +129,13 @@ app.get('/api/settings', (req, res) => {
         backupFrequency: 'daily',
         maxUploadSize: 10,
         sessionTimeout: 30
-      });
+      };
+      cachedSettings = defaultSettings;
+      cachedSettingsTime = now;
+      return res.json(defaultSettings);
     }
   } catch (error) {
+    if (cachedSettings) return res.json(cachedSettings);
     res.status(500).json({ error: 'Failed to read settings' });
   }
 });
@@ -127,6 +143,8 @@ app.get('/api/settings', (req, res) => {
 app.post('/api/settings', (req, res) => {
   try {
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(req.body, null, 2));
+    cachedSettings = req.body;
+    cachedSettingsTime = Date.now();
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Failed to save settings' });

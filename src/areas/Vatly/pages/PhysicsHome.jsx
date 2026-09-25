@@ -150,13 +150,16 @@ const PhysicsHome = () => {
       fetchLeaderboardData();
 
       let channel;
+      let debounceTimer = null;
       try {
          if (supabase && typeof supabase.channel === 'function') {
             channel = supabase
                .channel('public_users_xp_realtime_home')
                .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
-                  console.log('⚡ [Realtime XP] Supabase update detected! Updating Hero Leaderboard...');
-                  fetchLeaderboardData();
+                  if (debounceTimer) clearTimeout(debounceTimer);
+                  debounceTimer = setTimeout(() => {
+                     fetchLeaderboardData();
+                  }, 4000);
                })
                .subscribe();
          }
@@ -165,6 +168,7 @@ const PhysicsHome = () => {
       }
 
       return () => {
+         if (debounceTimer) clearTimeout(debounceTimer);
          if (channel && supabase && typeof supabase.removeChannel === 'function') {
             try {
                supabase.removeChannel(channel);
@@ -175,7 +179,7 @@ const PhysicsHome = () => {
 
    useEffect(() => {
       setActive(user?.profile?.grade ?? 10);
-      setTimeout(() => setLoading(false), 600);
+      setLoading(false);
    }, [user]);
 
    // Auto-advance Carousel
@@ -304,6 +308,8 @@ const PhysicsHome = () => {
                               <img
                                  src={slide.src}
                                  alt={slide.title}
+                                 loading={index === 0 ? "eager" : "lazy"}
+                                 decoding="async"
                                  className="w-full h-full object-cover object-center"
                               />
 

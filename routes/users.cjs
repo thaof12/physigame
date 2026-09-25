@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User.cjs');
 const { supabase } = require('../src/config/supabase.cjs');
+const { sendViaGmail, buildStatusHtml } = require('./email.cjs');
 
 // Register route - creates Supabase auth user + profile
 router.post('/register', async (req, res) => {
@@ -680,23 +681,23 @@ router.post('/teacher-application', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
     }
 
-    // Ensure storage bucket exists and is set to public
-    try {
-      const { data: buckets } = await supabase.storage.listBuckets();
-      if (!buckets?.find(b => b.name === 'teacher-certificates')) {
-        await supabase.storage.createBucket('teacher-certificates', { public: true });
-        console.log('✅ [Backend] Created storage bucket: teacher-certificates');
-      } else {
-        await supabase.storage.updateBucket('teacher-certificates', { public: true });
+    // Ensure storage bucket exists (cached check so it runs at most once)
+    if (!global._isCertBucketReady) {
+      try {
+        const { data: buckets } = await supabase.storage.listBuckets();
+        if (!buckets?.find(b => b.name === 'teacher-certificates')) {
+          await supabase.storage.createBucket('teacher-certificates', { public: true });
+        }
+        global._isCertBucketReady = true;
+      } catch (bErr) {
+        global._isCertBucketReady = true;
       }
-    } catch (bErr) {
-      console.warn('⚠️ [Backend] Bucket check warning:', bErr.message);
     }
 
-    // Process certificate files using backend Service Role Key (bypasses Storage RLS)
-    const uploadedCerts = [];
-    if (certificates && Array.isArray(certificates)) {
-      for (const cert of certificates) {
+    // Process certificate files in parallel with timeout to prevent blocking
+    let uploadedCerts = [];
+    if (certificates && Array.isArray(certificates) && certificates.length > 0) {
+      uploadedCerts = await Promise.all(certificates.map(async (cert) => {
         if (cert.base64) {
           try {
             const ext = (cert.name || 'file.png').split('.').pop();
@@ -705,26 +706,27 @@ router.post('/teacher-application', async (req, res) => {
             const contentType = matches ? matches[1] : cert.type || 'application/octet-stream';
             const buffer = Buffer.from(matches ? matches[2] : cert.base64, 'base64');
 
-            const { error: uploadErr } = await supabase.storage
+            const uploadPromise = supabase.storage
               .from('teacher-certificates')
               .upload(filePath, buffer, { contentType, upsert: true });
 
-            if (uploadErr) {
-              console.warn(`⚠️ [Backend] Upload certificate warning for ${cert.name}:`, uploadErr.message);
-              uploadedCerts.push({ name: cert.name, type: contentType, url: cert.base64, base64: cert.base64 });
-            } else {
-              uploadedCerts.push({ name: cert.name, path: filePath, type: contentType, url: cert.base64, base64: cert.base64 });
+            const timeoutPromise = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('timeout')), 6000)
+            );
+
+            const res = await Promise.race([uploadPromise, timeoutPromise]);
+            if (res?.error) {
+              return { name: cert.name, type: contentType, url: cert.base64, base64: cert.base64 };
             }
+            return { name: cert.name, path: filePath, type: contentType, url: cert.base64, base64: cert.base64 };
           } catch (fileErr) {
-            console.error(`❌ [Backend] File processing exception:`, fileErr.message);
-            if (cert.base64) {
-              uploadedCerts.push({ name: cert.name, type: cert.type || 'image/jpeg', url: cert.base64, base64: cert.base64 });
-            }
+            return { name: cert.name, type: cert.type || 'image/jpeg', url: cert.base64, base64: cert.base64 };
           }
-        } else if (cert.path || cert.url || cert.base64) {
-          uploadedCerts.push(cert);
+        } else if (cert.path || cert.url) {
+          return cert;
         }
-      }
+        return cert;
+      }));
     }
 
     let resolvedEmail = validEmail;
@@ -779,6 +781,29 @@ router.post('/teacher-application', async (req, res) => {
 
     console.log(`📋 [Backend] Submitting teacher application for user ${resolvedEmail} (${user.id})`);
     const updated = await User.update(user.id, updates);
+
+    // Send immediate confirmation notification to applicant
+    try {
+      await supabase.from('teacher_notifications').insert({
+        teacher_id: user.id,
+        title: '📋 Hồ sơ đăng ký giảng viên đã được tiếp nhận',
+        content: `Chào bạn, hồ sơ đăng ký giảng viên của bạn đã được gửi thành công và đang được Ban quản trị xem xét. Chúng tôi sẽ cập nhật kết quả ngay khi hoàn tất.`,
+        is_read: false
+      });
+    } catch (notifErr) {}
+
+    // Send confirmation email to applicant with official Eureka logo
+    if (resolvedEmail && !resolvedEmail.includes('@example.com')) {
+      sendViaGmail({
+        to: resolvedEmail,
+        teacherName: fullName?.trim() || user.display_name,
+        subject: `[Eureka Physics] Xác nhận tiếp nhận hồ sơ đăng ký giảng viên - ${fullName?.trim() || 'Ứng viên'}`,
+        htmlContent: buildStatusHtml({
+          teacherName: fullName?.trim() || user.display_name,
+          status: 'pending'
+        })
+      }).catch(mailErr => console.warn('Email send warning on teacher-application:', mailErr.message));
+    }
 
     res.json({
       success: true,
@@ -869,6 +894,30 @@ router.post('/verify-teacher/:id', async (req, res) => {
 
     if (updated) {
       console.log(`✅ [Backend] Teacher ${id} verified successfully`);
+
+      // Notify teacher of approval
+      try {
+        await supabase.from('teacher_notifications').insert({
+          teacher_id: user.id,
+          title: '🎉 Chúc mừng! Hồ sơ giảng viên đã được duyệt',
+          content: `Hồ sơ giảng viên của bạn đã được phê duyệt thành công. Bạn hiện đã có toàn quyền truy cập và sử dụng tất cả tính năng dành cho Giáo viên.`,
+          is_read: false
+        });
+      } catch (nErr) {}
+
+      // Send official approval email with official Eureka logo
+      if (user.email && !user.email.includes('@example.com')) {
+        sendViaGmail({
+          to: user.email,
+          teacherName: user.display_name || user.username || 'Quý Thầy/Cô',
+          subject: `[Eureka Physics] Chúc mừng! Hồ sơ Giảng viên của bạn đã được phê duyệt`,
+          htmlContent: buildStatusHtml({
+            teacherName: user.display_name || user.username,
+            status: 'verified'
+          })
+        }).catch(mailErr => console.warn('Email send warning on verify-teacher:', mailErr.message));
+      }
+
       return res.json({ success: true, message: 'Giáo viên đã được duyệt thành công' });
     } else {
       throw new Error('Update returned no data');
@@ -888,9 +937,10 @@ router.post('/reject-teacher/:id', async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     
+    const rejectionReason = req.body?.reason || 'Thông tin cung cấp không đủ điều kiện xác minh danh tính giảng viên';
     const teacherProfile = user.teacher_profile || {};
     teacherProfile.rejectedAt = new Date().toISOString();
-    teacherProfile.rejectionReason = req.body?.reason || 'Không đáp ứng yêu cầu';
+    teacherProfile.rejectionReason = rejectionReason;
 
     await User.update(user.id, { 
       role: 'teacher',
@@ -898,7 +948,31 @@ router.post('/reject-teacher/:id', async (req, res) => {
       teacher_profile: teacherProfile 
     });
 
-    console.log(`✅ [Backend] Teacher ${user.email} (${user.id}) set to REJECTED`);
+    // Notify teacher of rejection popup response
+    try {
+      await supabase.from('teacher_notifications').insert({
+        teacher_id: user.id,
+        title: '❌ Lý do từ chối từ Ban Quản Trị',
+        content: `Hồ sơ đăng ký giảng viên của bạn chưa được phê duyệt. Lý do từ chối từ Ban Quản Trị: "${rejectionReason}". Bạn có thể chỉnh sửa và nộp lại hồ sơ minh chứng.`,
+        is_read: false
+      });
+    } catch (nErr) {}
+
+    // Send official rejection email with official Eureka logo
+    if (user.email && !user.email.includes('@example.com')) {
+      sendViaGmail({
+        to: user.email,
+        teacherName: user.display_name || user.username || 'Ứng viên',
+        subject: `[Eureka Physics] Thông báo kết quả xét duyệt hồ sơ giảng viên - ${user.display_name || 'Ứng viên'}`,
+        htmlContent: buildStatusHtml({
+          teacherName: user.display_name || user.username,
+          status: 'rejected',
+          rejectionReason
+        })
+      }).catch(mailErr => console.warn('Email send warning on reject-teacher:', mailErr.message));
+    }
+
+    console.log(`✅ [Backend] Teacher ${user.email} (${user.id}) set to REJECTED with reason: ${rejectionReason}`);
     res.json({ success: true, message: 'Đã từ chối đăng ký giáo viên' });
   } catch (error) {
     console.error('❌ [Backend] reject-teacher error:', error);
@@ -1205,6 +1279,20 @@ router.post('/update-status', async (req, res) => {
 
     console.log(`📡 [Backend] Admin updating user ${user.email}: status=${status}, teacher_status=${teacher_status}`);
 
+    // If account is being set to inactive (banned), send official notification email
+    if (status === 'inactive' && user.status !== 'inactive' && user.email && !user.email.includes('@example.com')) {
+      sendViaGmail({
+        to: user.email,
+        teacherName: user.display_name || user.username || 'Quý Thầy/Cô',
+        subject: `[Eureka Physics] Thông báo tạm khóa tài khoản giảng viên - ${user.display_name || 'Quý Thầy/Cô'}`,
+        htmlContent: buildStatusHtml({
+          teacherName: user.display_name || user.username,
+          status: 'inactive',
+          rejectionReason: 'Tài khoản của bạn đã bị tạm dừng hoạt động do vi phạm quy định hoặc theo quyết định quản trị.'
+        })
+      }).catch(e => console.warn('Email send warning on ban user:', e.message));
+    }
+
     // Use User.update which uses service role key — bypasses RLS
     const updated = await User.update(user.id, updates);
 
@@ -1249,6 +1337,20 @@ router.post('/batch-update-status', async (req, res) => {
         if (user.role === 'teacher') {
           updates.teacher_status = status === 'active' ? 'verified' : status;
         }
+
+        if (status === 'inactive' && user.status !== 'inactive' && user.email && !user.email.includes('@example.com')) {
+          sendViaGmail({
+            to: user.email,
+            teacherName: user.display_name || user.username || 'Quý Thầy/Cô',
+            subject: `[Eureka Physics] Thông báo tạm khóa tài khoản giảng viên - ${user.display_name || 'Quý Thầy/Cô'}`,
+            htmlContent: buildStatusHtml({
+              teacherName: user.display_name || user.username,
+              status: 'inactive',
+              rejectionReason: 'Tài khoản của bạn đã bị tạm dừng hoạt động theo quyết định quản trị.'
+            })
+          }).catch(e => console.warn('Email send warning on batch ban user:', e.message));
+        }
+
         return User.update(id, updates);
       })
     );
@@ -1272,6 +1374,19 @@ router.delete('/delete/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng' });
     }
 
+    // Send official account deletion email
+    if (user.email && !user.email.includes('@example.com')) {
+      sendViaGmail({
+        to: user.email,
+        teacherName: user.display_name || user.username || 'Người dùng',
+        subject: `[Eureka Physics] Thông báo về việc xóa tài khoản - ${user.display_name || 'Người dùng'}`,
+        htmlContent: buildStatusHtml({
+          teacherName: user.display_name || user.username,
+          status: 'deleted'
+        })
+      }).catch(e => console.warn('Email send warning on delete user:', e.message));
+    }
+
     await User.delete(id);
     console.log(`✅ [Backend] User ${id} deleted`);
     res.json({ success: true, message: 'Đã xóa người dùng thành công' });
@@ -1281,8 +1396,12 @@ router.delete('/delete/:id', async (req, res) => {
   }
 });
 
+// In-memory cache for status checks: Map of key -> { data, expiresAt }
+const statusCheckCache = new Map();
+const STATUS_CACHE_TTL = 10000; // 10s TTL
+
 // GET /api/users/check-status — Polling endpoint for client-side inactive detection
-// Uses service role key (bypasses RLS) — safe to call every few seconds
+// Uses service role key (bypasses RLS) + in-memory cache for ultra-fast response
 router.get('/check-status', async (req, res) => {
   try {
     const { email, id } = req.query;
@@ -1290,19 +1409,28 @@ router.get('/check-status', async (req, res) => {
       return res.status(400).json({ success: false, message: 'email hoặc id là bắt buộc' });
     }
 
+    const cacheKey = (id || email).toLowerCase();
+    const cached = statusCheckCache.get(cacheKey);
+    const now = Date.now();
+    if (cached && cached.expiresAt > now) {
+      return res.json(cached.data);
+    }
+
     let user = null;
     if (id) user = await User.findById(id);
     if (!user && email) user = await User.findByEmail(email);
 
     if (!user) {
-      return res.json({ success: true, exists: false, status: 'active', teacher_status: null });
+      const responseData = { success: true, exists: false, status: 'active', teacher_status: null };
+      statusCheckCache.set(cacheKey, { data: responseData, expiresAt: now + STATUS_CACHE_TTL });
+      return res.json(responseData);
     }
 
     const isDeactivated =
       user.status === 'inactive' ||
       user.teacher_status === 'inactive';
 
-    return res.json({
+    const responseData = {
       success: true,
       exists: true,
       status: user.status || 'active',
@@ -1312,7 +1440,10 @@ router.get('/check-status', async (req, res) => {
       teacher_profile: user.teacher_profile || null,
       rejectionReason: user.teacher_profile?.rejectionReason || null,
       isDeactivated
-    });
+    };
+
+    statusCheckCache.set(cacheKey, { data: responseData, expiresAt: now + STATUS_CACHE_TTL });
+    return res.json(responseData);
   } catch (error) {
     console.error('❌ [Backend] check-status error:', error);
     res.status(500).json({ success: false, message: 'Lỗi máy chủ', error: error.message });

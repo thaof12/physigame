@@ -4,13 +4,15 @@ import { Wrench } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { GameProgressProvider } from './contexts/GameProgressContext';
 import { ThemeProvider } from './contexts/ThemeContext';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
 import MainLayout from './components/layout/MainLayout';
-import PhysicsHome from './areas/Vatly/pages/PhysicsHome';
 
 import "./index.css";
+
+// Lazy-loaded pages for faster initial startup (code splitting)
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const PhysicsHome = lazy(() => import('./areas/Vatly/pages/PhysicsHome'));
 
 // Lazy-loaded components for better load performance (code splitting)
 

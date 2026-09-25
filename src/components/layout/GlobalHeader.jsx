@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 
 import EurekaPremiumLogo from '../ui/EurekaPremiumLogo';
+import { preloadRoute } from '../../utils/routePreload';
 
 const GlobalHeader = () => {
   const { t } = useTranslation();
@@ -117,6 +118,7 @@ const GlobalHeader = () => {
                 onMouseLeave={() => hasChildren && setActiveDropdown(null)}
               >
                 <button
+                  onMouseEnter={() => !hasChildren && link.path && preloadRoute(link.path)}
                   onClick={() => {
                     if (!hasChildren && link.path) {
                       if (!user) navigate('/login');
@@ -144,6 +146,7 @@ const GlobalHeader = () => {
                         return (
                           <button
                             key={child.name}
+                            onMouseEnter={() => child.path && preloadRoute(child.path)}
                             onClick={() => {
                               if (!user) navigate('/login');
                               else navigate(child.path);

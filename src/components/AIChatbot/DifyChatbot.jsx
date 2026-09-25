@@ -35,6 +35,24 @@ function DifyChatbot() {
     const loadHistory = async () => {
       if (!user?.id) return;
 
+      if (sessionStorage.getItem('chat_histories_table_missing') === 'true') {
+        const savedSessions = localStorage.getItem(sessionsKey);
+        if (savedSessions) {
+          try {
+            const parsedSessions = JSON.parse(savedSessions);
+            if (Array.isArray(parsedSessions)) {
+              setHistoryItems(parsedSessions);
+              const lastConversation = parsedSessions[0];
+              if (lastConversation?.messages?.length) {
+                setConversationId(lastConversation.conversation_id || '');
+                setMessages(lastConversation.messages);
+              }
+            }
+          } catch {}
+        }
+        return;
+      }
+
       const { data, error } = await supabase
         .from(messagesTable)
         .select('conversation_id, messages, updated_at, created_at')
@@ -43,7 +61,24 @@ function DifyChatbot() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.warn('Failed to load chat history:', error.message);
+        // Table not present in DB schema yet - fallback silently to localStorage sessions
+        try {
+          sessionStorage.setItem('chat_histories_table_missing', 'true');
+        } catch {}
+        const savedSessions = localStorage.getItem(sessionsKey);
+        if (savedSessions) {
+          try {
+            const parsedSessions = JSON.parse(savedSessions);
+            if (Array.isArray(parsedSessions)) {
+              setHistoryItems(parsedSessions);
+              const lastConversation = parsedSessions[0];
+              if (lastConversation?.messages?.length) {
+                setConversationId(lastConversation.conversation_id || '');
+                setMessages(lastConversation.messages);
+              }
+            }
+          } catch {}
+        }
         return;
       }
 
@@ -97,13 +132,18 @@ function DifyChatbot() {
         updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase.from(messagesTable).upsert(payload, {
-        onConflict: 'user_id,conversation_id'
-      });
-
-      if (error) {
-        console.warn('Failed to persist chat history:', error.message);
-        return;
+      // Try saving to Supabase if table is available, but always save locally
+      if (sessionStorage.getItem('chat_histories_table_missing') !== 'true') {
+        try {
+          const { error } = await supabase.from(messagesTable).upsert(payload, {
+            onConflict: 'user_id,conversation_id'
+          });
+          if (error && (error.code === '42P01' || error.code === 'PGRST205')) {
+            sessionStorage.setItem('chat_histories_table_missing', 'true');
+          }
+        } catch (err) {
+          // Table may not exist yet, local storage will handle it
+        }
       }
 
       setHistoryItems((current) => {

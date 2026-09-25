@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../config/supabase';
 import api from '../config/api';
+import { clearSessionActivities } from '../services/activityLogger';
 
 const AuthContext = createContext();
 
@@ -487,6 +488,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       localStorage.removeItem('physigame_admin');
+      clearSessionActivities();
+      sessionStorage.clear();
     } catch (e) {}
     setUser(null);
     supabase.auth.signOut().catch(() => {});
@@ -530,23 +533,8 @@ export const AuthProvider = ({ children }) => {
       return false;
     };
 
-    // Check immediately if current user is marked inactive in admin cache
-    const isInactiveInCache = () => {
-      try {
-        const cachedAdminUsersStr = localStorage.getItem('physigame_admin_users_cache');
-        if (cachedAdminUsersStr) {
-          const cachedUsers = JSON.parse(cachedAdminUsersStr);
-          const match = cachedUsers.find(u =>
-            (u.id && String(u.id) === String(currentUserId)) ||
-            (u.email && currentUserEmail && u.email.toLowerCase() === currentUserEmail.toLowerCase())
-          );
-          if (match && isDeactivatedRecord(match)) return true;
-        }
-      } catch (e) {}
-      return false;
-    };
-
-    if (isDeactivatedRecord(user) || isInactiveInCache()) {
+    // Check immediately if current user record itself is marked inactive
+    if (isDeactivatedRecord(user)) {
       console.warn('⚠️ User account is inactive on effect mount. Showing deactivation warning.');
       logoutSilentKickoutRef.current?.(currentUserName);
       return;
@@ -606,23 +594,18 @@ export const AuthProvider = ({ children }) => {
       )
       .subscribe();
 
-    // 3. Polling backup — every 4s, uses backend API (service role, bypasses RLS)
-    //    More reliable than Supabase anon key which can be blocked by RLS
+    // 3. Polling backup — every 30s when tab is visible (service role, bypasses RLS)
+    //    Supabase Realtime and BroadcastChannel handle immediate lockouts
     let pollActive = true; // prevent multiple triggers after warning shown
-    const interval = setInterval(async () => {
+    const runPollCheck = async () => {
       if (!pollActive) return;
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
       try {
-        if (isInactiveInCache()) {
-          pollActive = false;
-          logoutSilentKickoutRef.current?.(currentUserName);
-          return;
-        }
         if (currentUserEmail) {
           const response = await api.get('/users/check-status', {
             params: { email: currentUserEmail }
           });
           const statusData = response?.data;
-          console.log(`[AuthContext] Poll check: status=${statusData?.status}, teacher_status=${statusData?.teacher_status}`);
           if (statusData?.isDeactivated) {
             pollActive = false;
             console.warn('⚠️ [AuthContext] Polling (API): account deactivated! Showing warning.');
@@ -654,20 +637,22 @@ export const AuthProvider = ({ children }) => {
           }
         }
       } catch (e) {
-        // If 403 from api interceptor, let it handle it. Log other errors.
         if (e?.response?.status !== 403) {
-          console.warn('[AuthContext] Poll error (non-fatal):', e?.message);
+          // non-fatal error
         }
       }
-    }, 4000);
+    };
 
-    // 4. localStorage/storage event — same-browser cross-tab via storage events
+    const interval = setInterval(runPollCheck, 30000);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        runPollCheck();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const handleStorageChange = (e) => {
-      if (e.key === 'user' || e.key === 'physigame_admin_users_cache' || !e.key) {
-        if (isInactiveInCache()) {
-          logoutSilentKickoutRef.current?.(currentUserName);
-          return;
-        }
+      if (e.key === 'user' || !e.key) {
         const cached = safeGetItem('user');
         if (cached) {
           if (isDeactivatedRecord(cached)) {
@@ -685,6 +670,7 @@ export const AuthProvider = ({ children }) => {
       if (adminBc) adminBc.close();
       supabase.removeChannel(channel);
       clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('storage', handleStorageChange);
     };
   }, [user?.id, user?.uid, user?.status, user?.teacher_status, user?.email, user?.role]);
@@ -763,6 +749,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       localStorage.setItem('user', JSON.stringify(userData));
+      clearSessionActivities();
       setUser(userData);
 
       return userData;
@@ -888,6 +875,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('physigame_admin');
+    clearSessionActivities();
     sessionStorage.clear();
     setUser(null);
 

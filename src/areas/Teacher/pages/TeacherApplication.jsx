@@ -297,7 +297,7 @@ const TeacherApplication = () => {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-        const maxDim = 1200; // max dimension 1200px
+        const maxDim = 900; // max dimension 900px for lightning-fast payload
         if (width > maxDim || height > maxDim) {
           if (width > height) {
             height = Math.round((height * maxDim) / width);
@@ -311,7 +311,7 @@ const TeacherApplication = () => {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.8));
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
       };
       img.onerror = () => resolve(event.target.result);
     };

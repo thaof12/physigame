@@ -154,6 +154,18 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
       );
 
       if (result.success) {
+        // Also persist notification into teacher_notifications so applicant sees it on /teacher/pending!
+        try {
+          await supabase.from('teacher_notifications').insert({
+            teacher_id: selectedTeacherDetail.id,
+            title: '📩 Phản hồi từ Ban Quản Trị về hồ sơ giảng viên',
+            content: feedbackText.trim(),
+            is_read: false
+          });
+        } catch (notifErr) {
+          console.warn('Could not insert teacher notification:', notifErr);
+        }
+
         setFeedbackStatus({ type: 'success', message: `Đã gửi email phản hồi thành công đến ${targetEmail}!` });
         setFeedbackText('');
       } else {

@@ -1,9 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
+const path = require('path');
+const fs = require('fs');
 
 const GMAIL_USER = process.env.GMAIL_USER || 'phandangnhatminh0908@gmail.com';
 const GMAIL_PASS = process.env.GMAIL_PASS || 'qhybiykbgnrwcocd';
+
+// Path to official Eureka logo
+const OFFICIAL_LOGO_PATH = path.resolve(__dirname, '../public/images/eureka_official_logo.png');
 
 // Create Nodemailer Transporter using Gmail SMTP
 const transporter = nodemailer.createTransport({
@@ -16,29 +21,156 @@ const transporter = nodemailer.createTransport({
 
 /**
  * Universal Email Sender Helper via Gmail SMTP
- * Includes both HTML and plain-text (text) fallback to guarantee inbox deliverability and prevent Spam classification.
+ * Always includes the official Eureka logo as an inline CID attachment
+ * and embeds <img src="cid:eureka_official_logo" />.
  */
 async function sendViaGmail({ to, subject, htmlContent, textContent, teacherName }) {
   const targetEmail = Array.isArray(to) ? to[0] : to;
 
-  // Fallback plain text version if none provided (Crucial to bypass Gmail Spam Filters)
-  const plainText = textContent || `Kính gửi thầy/cô ${teacherName || 'Ứng viên'},\n\nBan quản trị hệ thống Eureka Physics xin gửi lời phản hồi trực tiếp tới thầy/cô về đơn đăng ký làm Giảng viên.\n\nTrân trọng,\nBan Quản Trị Eureka Physics`;
+  // Fallback plain text version if none provided
+  const plainText = textContent || `Kính gửi thầy/cô ${teacherName || 'Ứng viên'},\n\nBan quản trị hệ thống Eureka Physics xin gửi thông báo chính thức tới thầy/cô.\n\nTrân trọng,\nBan Quản Trị Eureka Physics`;
+
+  // Ensure any legacy cursive text logo is substituted with the official logo image
+  let finalHtml = htmlContent;
+  if (finalHtml) {
+    finalHtml = finalHtml.replace(
+      /<span style="font-family: 'Dancing Script'[^>]*>Eureka<\/span>/gi,
+      `<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 auto; text-align: center; border-collapse: collapse;">
+        <tr>
+          <td align="center" style="text-align: center; padding: 0;">
+            <img src="cid:eureka_official_logo" alt="Eureka" width="230" style="display: block; margin: 0 auto; width: 230px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
+          </td>
+        </tr>
+      </table>`
+    );
+  }
+
+  // Build attachments list with official Eureka logo
+  const attachments = [];
+  if (fs.existsSync(OFFICIAL_LOGO_PATH)) {
+    attachments.push({
+      filename: 'eureka_official_logo.png',
+      path: OFFICIAL_LOGO_PATH,
+      cid: 'eureka_official_logo'
+    });
+  }
 
   const mailOptions = {
     from: `"Eureka Physics" <${GMAIL_USER}>`,
     to: targetEmail,
     subject: subject,
     text: plainText,
-    html: htmlContent
+    html: finalHtml,
+    attachments
   };
 
   const info = await transporter.sendMail(mailOptions);
-  console.log(`✅ [Gmail SMTP] Real email delivered to ${targetEmail}. MessageId: ${info.messageId}`);
+  console.log(`✅ [Gmail SMTP] Official email delivered to ${targetEmail}. MessageId: ${info.messageId}`);
   return {
     success: true,
     message: `Đã gửi email thành công tới ${targetEmail}!`,
     messageId: info.messageId
   };
+}
+
+/**
+ * Template builder for system status emails (approved, rejected, pending, banned, deleted)
+ */
+function buildStatusHtml({ teacherName, status, rejectionReason, customTitle, customMessage }) {
+  const isApproved = status === 'verified';
+  const isRejected = status === 'rejected';
+  const isPending = status === 'pending';
+  const isInactive = status === 'inactive' || status === 'banned';
+  const isDeleted = status === 'deleted';
+
+  let statusBadgeText = 'ĐÃ ĐƯỢC CHẤP THUẬN';
+  let badgeBg = '#ecfdf5';
+  let badgeColor = '#047857';
+  let badgeBorder = '#10b981';
+  let title = 'Tài khoản Giảng viên đã được kích hoạt';
+  let mainMessage = 'Chúc mừng thầy/cô đã hoàn tất quá trình xác thực hồ sơ giảng viên trên Eureka Physics. Tài khoản của thầy/cô đã sẵn sàng để bắt đầu sử dụng toàn bộ tính năng giảng dạy, quản lý lớp học và ngân hàng nội dung.';
+  let callToAction = 'Thầy/cô đã có thể đăng nhập ngay vào hệ thống để bắt đầu giảng dạy.';
+
+  if (isRejected) {
+    statusBadgeText = 'HỒ SƠ CHƯA ĐƯỢC PHÊ DUYỆT';
+    badgeBg = '#fff1f2';
+    badgeColor = '#e11d48';
+    badgeBorder = '#f43f5e';
+    title = 'Thông báo kết quả xét duyệt hồ sơ giảng viên';
+    mainMessage = 'Rất tiếc, hồ sơ đăng ký giảng viên của thầy/cô chưa đáp ứng đủ điều kiện theo tiêu chuẩn hiện tại của Eureka Physics.';
+    callToAction = 'Thầy/cô có thể đăng nhập để chỉnh sửa thông tin và nộp lại hồ sơ minh chứng bất kỳ lúc nào.';
+  } else if (isPending) {
+    statusBadgeText = 'ĐÃ TIẾP NHẬN HỒ SƠ ĐĂNG KÝ';
+    badgeBg = '#eff6ff';
+    badgeColor = '#1d4ed8';
+    badgeBorder = '#3b82f6';
+    title = 'Hồ sơ đăng ký giảng viên đã được tiếp nhận';
+    mainMessage = 'Ban Quản Trị Eureka Physics đã tiếp nhận hồ sơ đăng ký giảng viên của thầy/cô. Chúng tôi đang tiến hành đối soát và thẩm định thông tin minh chứng.';
+    callToAction = 'Quy trình xét duyệt thường diễn ra trong vòng 24–48h làm việc. Chúng tôi sẽ thông báo kết quả qua email ngay khi hoàn tất.';
+  } else if (isInactive) {
+    statusBadgeText = 'TÀI KHOẢN ĐÃ BỊ TẠM KHÓA';
+    badgeBg = '#fef2f2';
+    badgeColor = '#b91c1c';
+    badgeBorder = '#ef4444';
+    title = 'Thông báo tạm khóa tài khoản giảng viên';
+    mainMessage = 'Tài khoản giảng viên của thầy/cô trên hệ thống Eureka Physics hiện đã bị tạm dừng hoạt động do vi phạm quy định hoặc theo quyết định quản trị.';
+    callToAction = 'Nếu thầy/cô cần giải trình hoặc hỗ trợ mở khóa tài khoản, vui lòng phản hồi lại email này hoặc liên hệ support@physigame.edu.vn.';
+  } else if (isDeleted) {
+    statusBadgeText = 'TÀI KHOẢN ĐÃ ĐƯỢC XÓA';
+    badgeBg = '#f8fafc';
+    badgeColor = '#334155';
+    badgeBorder = '#94a3b8';
+    title = 'Thông báo xóa tài khoản người dùng';
+    mainMessage = 'Tài khoản của thầy/cô đã được xóa khỏi hệ thống Eureka Physics theo quy trình quản trị dữ liệu.';
+    callToAction = 'Mọi dữ liệu liên quan đã được xử lý theo chính sách bảo mật của hệ thống.';
+  }
+
+  if (customTitle) title = customTitle;
+  if (customMessage) mainMessage = customMessage;
+
+  return `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 28px 24px; border: 1px solid #e2e8f0; border-radius: 20px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+      <!-- Official Eureka Logo Header -->
+      <div style="text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid #3b82f6;">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 auto; text-align: center; border-collapse: collapse;">
+          <tr>
+            <td align="center" style="text-align: center; padding: 0;">
+              <img src="cid:eureka_official_logo" alt="Eureka" width="230" style="display: block; margin: 0 auto; width: 230px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
+            </td>
+          </tr>
+        </table>
+        <p style="color: #64748b; margin-top: 12px; margin-bottom: 0; font-size: 13px; font-weight: 700; font-family: 'Segoe UI', Arial, sans-serif; letter-spacing: 0.3px; text-transform: uppercase;">${title}</p>
+      </div>
+
+      <!-- Main Body -->
+      <div style="padding: 4px 0 20px 0;">
+        <p style="font-size: 16px; color: #1e293b; margin-top: 0;">Kính gửi thầy/cô <strong>${teacherName || 'Quý Thầy/Cô'}</strong>,</p>
+        <p style="font-size: 15px; color: #334155; line-height: 1.6;">${mainMessage}</p>
+
+        <!-- Status Badge Box -->
+        <div style="padding: 16px 20px; background-color: ${badgeBg}; border: 1.5px solid ${badgeBorder}; border-radius: 14px; margin: 24px 0; text-align: center;">
+          <p style="font-weight: 800; color: ${badgeColor}; font-size: 16px; margin: 0; letter-spacing: 0.5px;">
+            ${statusBadgeText}
+          </p>
+        </div>
+
+        ${(isRejected || isInactive) && rejectionReason ? `
+          <div style="background-color: #fff1f2; border-left: 4px solid #f43f5e; padding: 14px 18px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: #9f1239; text-transform: uppercase; letter-spacing: 0.5px;">Lý do từ Ban Quản Trị:</p>
+            <p style="margin: 0; font-size: 14px; color: #be123c; font-style: italic; font-weight: 600; line-height: 1.5;">"${rejectionReason}"</p>
+          </div>
+        ` : ''}
+
+        <p style="font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 0;">${callToAction}</p>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align: center; padding-top: 20px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; line-height: 1.6;">
+        <p style="margin: 0;">Trân trọng,<br><strong style="color: #1e293b; font-size: 13px;">Ban Quản Trị Eureka Physics Lab</strong></p>
+        <p style="margin: 4px 0 0 0; color: #64748b;">Hỗ trợ kỹ thuật: <a href="mailto:support@physigame.edu.vn" style="color: #3b82f6; text-decoration: none; font-weight: 600;">support@physigame.edu.vn</a></p>
+      </div>
+    </div>
+  `;
 }
 
 /**
@@ -55,11 +187,26 @@ router.post('/send-status', async (req, res) => {
 
     console.log(`📧 [Backend Email] Sending status mail via Gmail SMTP to: ${to} (Status: ${status})`);
 
-    const defaultSubject = subject || (status === 'verified'
-      ? 'Chúc mừng! Tài khoản Giảng viên của bạn đã được xác duyệt'
-      : 'Thông báo về yêu cầu đăng ký Giảng viên của bạn');
+    let defaultSubject = subject;
+    if (!defaultSubject) {
+      if (status === 'verified') {
+        defaultSubject = `[Eureka Physics] Chúc mừng! Hồ sơ Giảng viên của ${teacherName || 'bạn'} đã được phê duyệt`;
+      } else if (status === 'rejected') {
+        defaultSubject = `[Eureka Physics] Thông báo kết quả xét duyệt hồ sơ giảng viên của ${teacherName || 'bạn'}`;
+      } else if (status === 'pending') {
+        defaultSubject = `[Eureka Physics] Xác nhận tiếp nhận hồ sơ đăng ký giảng viên - ${teacherName || 'Ứng viên'}`;
+      } else if (status === 'inactive' || status === 'banned') {
+        defaultSubject = `[Eureka Physics] Thông báo tạm khóa tài khoản giảng viên - ${teacherName || 'Quý Thầy/Cô'}`;
+      } else if (status === 'deleted') {
+        defaultSubject = `[Eureka Physics] Thông báo về việc xóa tài khoản - ${teacherName || 'Người dùng'}`;
+      } else {
+        defaultSubject = `[Eureka Physics] Thông báo từ Ban Quản Trị về tài khoản của bạn`;
+      }
+    }
 
-    const result = await sendViaGmail({ to, subject: defaultSubject, htmlContent, textContent, teacherName });
+    const finalHtml = htmlContent || buildStatusHtml({ teacherName, status, rejectionReason });
+
+    const result = await sendViaGmail({ to, subject: defaultSubject, htmlContent: finalHtml, textContent, teacherName });
     res.json(result);
   } catch (error) {
     console.error('❌ [Backend Email] Gmail SMTP Status Error:', error.message || error);
@@ -89,25 +236,33 @@ router.post('/send-feedback', async (req, res) => {
     const defaultSubject = subject || `[Eureka Physics] Phản hồi về hồ sơ đăng ký giảng viên của ${teacherName || 'bạn'}`;
 
     const defaultHtml = htmlContent || `
-      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
-        <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #3b82f6;">
-          <div style="display: inline-block; text-align: center; vertical-align: middle;">
-            <span style="font-family: 'Dancing Script', 'Great Vibes', 'Brush Script MT', 'Lucida Calligraphy', cursive; font-size: 44px; font-weight: 700; font-style: italic; color: #101828; line-height: 1; vertical-align: middle;">Eureka</span>
-          </div>
-          <p style="color: #64748b; margin-top: 8px; margin-bottom: 0; font-size: 14px; font-weight: 500; font-family: 'Segoe UI', Arial, sans-serif;">Thông báo phản hồi từ Ban Quản Trị</p>
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 28px 24px; border: 1px solid #e2e8f0; border-radius: 20px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+        <!-- Official Eureka Logo Header -->
+        <div style="text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid #3b82f6;">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 auto; text-align: center; border-collapse: collapse;">
+            <tr>
+              <td align="center" style="text-align: center; padding: 0;">
+                <img src="cid:eureka_official_logo" alt="Eureka" width="230" style="display: block; margin: 0 auto; width: 230px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
+              </td>
+            </tr>
+          </table>
+          <p style="color: #64748b; margin-top: 12px; margin-bottom: 0; font-size: 13px; font-weight: 700; font-family: 'Segoe UI', Arial, sans-serif; letter-spacing: 0.3px;">THÔNG BÁO PHẢN HỒI TỪ BAN QUẢN TRỊ</p>
         </div>
-        <div style="padding: 24px 0;">
-          <p style="font-size: 16px; color: #1e293b;">Kính gửi thầy/cô <strong>${teacherName || 'Ứng viên'}</strong>,</p>
+
+        <div style="padding: 4px 0 20px 0;">
+          <p style="font-size: 16px; color: #1e293b; margin-top: 0;">Kính gửi thầy/cô <strong>${teacherName || 'Ứng viên'}</strong>,</p>
           <p style="font-size: 15px; color: #334155; line-height: 1.6;">Ban quản trị hệ thống Eureka Physics xin gửi lời phản hồi trực tiếp tới thầy/cô về đơn đăng ký làm Giảng viên:</p>
           
           <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0; font-size: 15px; color: #0f172a; white-space: pre-wrap; font-style: italic; line-height: 1.6;">"${message || ''}"</p>
           </div>
 
-          <p style="font-size: 14px; color: #475569;">Nếu thầy/cô có thắc mắc hoặc cần hỗ trợ bổ sung thông tin, vui lòng phản hồi lại email này.</p>
+          <p style="font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 0;">Nếu thầy/cô có thắc mắc hoặc cần hỗ trợ bổ sung thông tin, vui lòng phản hồi lại email này.</p>
         </div>
-        <div style="text-align: center; padding-top: 20px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8;">
-          <p style="margin: 0;">Trân trọng,<br><strong style="color: #1e293b;">Ban Quản Trị Eureka Physics</strong></p>
+
+        <div style="text-align: center; padding-top: 20px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; line-height: 1.6;">
+          <p style="margin: 0;">Trân trọng,<br><strong style="color: #1e293b; font-size: 13px;">Ban Quản Trị Eureka Physics Lab</strong></p>
+          <p style="margin: 4px 0 0 0; color: #64748b;">Hỗ trợ kỹ thuật: <a href="mailto:support@physigame.edu.vn" style="color: #3b82f6; text-decoration: none; font-weight: 600;">support@physigame.edu.vn</a></p>
         </div>
       </div>
     `;
@@ -128,3 +283,5 @@ router.post('/send-feedback', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.sendViaGmail = sendViaGmail;
+module.exports.buildStatusHtml = buildStatusHtml;

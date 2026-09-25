@@ -190,6 +190,27 @@ const AdminMaterials = () => {
     new Set(rawList.map(item => Number(item.grade || item.class_id || 8)))
   ).filter(Boolean).sort((a, b) => a - b);
 
+  // Helper to reliably match reports with an item by ID or title
+  const getItemReports = (item, allReports) => {
+    if (!item || !allReports || !Array.isArray(allReports)) return [];
+    const itemId = String(item.id || '');
+    const itemLessonId = String(item.lesson_id || '');
+    const itemChallengeId = String(item.challenge_id || '');
+    const itemTitle = String(item.title || item.name || '').trim().toLowerCase();
+
+    return allReports.filter(r => {
+      const reportContentId = String(r.content_id || '');
+      if (reportContentId && (reportContentId === itemId || reportContentId === itemLessonId || reportContentId === itemChallengeId)) {
+        return true;
+      }
+      const reportTitle = String(r.content_title || '').trim().toLowerCase();
+      if (itemTitle && reportTitle && itemTitle === reportTitle) {
+        return true;
+      }
+      return false;
+    });
+  };
+
   // Filtered content list
   const filteredContent = rawList.filter(item => {
     const title = (item.title || item.name || '').toLowerCase();
@@ -198,7 +219,7 @@ const AdminMaterials = () => {
     const itemGrade = Number(item.grade || item.class_id || 8);
     const matchesGrade = filterGrade === 'all' || itemGrade === Number(filterGrade);
 
-    const itemReports = reports.filter(r => String(r.content_id) === String(item.id));
+    const itemReports = getItemReports(item, reports);
     const hasReport = itemReports.length > 0;
     const matchesReportedFilter = !filterOnlyReported || hasReport;
 
@@ -206,8 +227,8 @@ const AdminMaterials = () => {
   });
 
   // Report counts per category
-  const lessonReportsCount = reports.filter(r => lessons.some(l => String(l.id) === String(r.content_id))).length;
-  const exerciseReportsCount = reports.filter(r => exercises.some(e => String(e.id) === String(r.content_id))).length;
+  const lessonReportsCount = reports.filter(r => lessons.some(l => getItemReports(l, [r]).length > 0)).length;
+  const exerciseReportsCount = reports.filter(r => exercises.some(e => getItemReports(e, [r]).length > 0)).length;
   const currentTabReportCount = activeTab === 'lessons' ? lessonReportsCount : exerciseReportsCount;
 
   // Handle reply directly to reporting teacher
@@ -364,7 +385,11 @@ const AdminMaterials = () => {
       await api.delete(`/reports/content/${contentId}`);
 
       // Instant local state update — remove reports for this content immediately
-      setReports(prev => prev.filter(r => String(r.content_id) !== String(contentId)));
+      setReports(prev => prev.filter(r => {
+        const item = rawList.find(x => String(x.id) === String(contentId));
+        if (item && getItemReports(item, [r]).length > 0) return false;
+        return String(r.content_id) !== String(contentId);
+      }));
 
       // If the edit modal is open for this item, close it
       if (editItem && String(editItem.id) === String(contentId)) {
@@ -575,7 +600,7 @@ const AdminMaterials = () => {
           {filteredContent.map((item) => {
             const author = getAuthorInfo(item);
             const isLocked = lockedIds.includes(String(item.id)) || item.is_locked || item.status === 'locked';
-            const itemReports = reports.filter(r => String(r.content_id) === String(item.id));
+            const itemReports = getItemReports(item, reports);
             const hasReport = itemReports.length > 0;
 
             return (
@@ -601,17 +626,23 @@ const AdminMaterials = () => {
                         <span>BÁO CÁO VI PHẠM ({itemReports.length})</span>
                       </div>
 
-                      {/* Standalone Separate "Đã xử lý" Button */}
-                      <button
-                        type="button"
-                        onClick={() => handleResolveReports(item.id)}
-                        disabled={resolveSubmitting}
-                        className="font-heading px-3 py-1.5 bg-white hover:bg-rose-100 border border-rose-300 text-rose-700 hover:text-rose-900 text-xs font-extrabold rounded-xl shadow-sm transition-all flex items-center gap-1 shrink-0"
-                        title="Đánh dấu đã xử lý xong và dọn dẹp báo cáo"
-                      >
-                        <Check className="w-3.5 h-3.5 text-rose-600" />
-                        <span>Đã xử lý</span>
-                      </button>
+                      {/* Explicit Status & Action Button */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-heading px-2 py-1 bg-amber-50 border border-amber-300 text-amber-900 text-[11px] font-black rounded-lg flex items-center gap-1 shadow-sm">
+                          <AlertTriangle className="w-3 h-3 text-amber-600 animate-pulse" />
+                          Chưa xử lý
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleResolveReports(item.id)}
+                          disabled={resolveSubmitting}
+                          className="font-heading px-2.5 py-1 bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-700 hover:text-emerald-900 text-[11px] font-black rounded-lg shadow-sm transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+                          title="Bấm để xác nhận và đánh dấu đã xử lý xong báo cáo"
+                        >
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Đánh dấu xong</span>
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -740,7 +771,7 @@ const AdminMaterials = () => {
       {/* EDIT / MANAGE REPORT MODAL */}
       {editItem && (() => {
         const author = getAuthorInfo(editItem);
-        const itemReports = reports.filter(r => String(r.content_id) === String(editItem.id));
+        const itemReports = getItemReports(editItem, reports);
         const isLocked = lockedIds.includes(String(editItem.id)) || editItem.is_locked || editItem.status === 'locked';
 
         return (
@@ -801,8 +832,7 @@ const AdminMaterials = () => {
                         <button
                           onClick={() => handleResolveReports(editItem.id)}
                           disabled={resolveSubmitting}
-                          style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
-                          className="font-heading px-3 py-1.5 text-white text-xs font-extrabold rounded-xl transition-all shadow-sm flex items-center gap-1.5 shrink-0"
+                          className="font-heading px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5 shrink-0 cursor-pointer"
                         >
                           <Check className="w-3.5 h-3.5 text-white" />
                           Đánh dấu đã xử lý
