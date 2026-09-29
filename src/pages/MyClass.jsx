@@ -17,6 +17,8 @@ import {
   AlertCircle,
   Copy,
   ChevronRight,
+  ChevronDown,
+  Check,
   User,
   ArrowRight,
   Search,
@@ -29,6 +31,71 @@ import {
 import api from '../config/api';
 import { openDocumentInNewTab } from '../utils/documentViewer';
 import { logSessionActivity } from '../services/activityLogger';
+
+// Custom smooth dropdown for switching enrolled classes with rounded container & synced font
+const ClassSelectDropdown = ({ classes, activeClass, onSelect }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative font-sans" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl px-4 py-2.5 text-xs font-black focus:outline-none cursor-pointer transition-all flex items-center justify-between gap-2 shadow-sm hover:bg-slate-50/80 active:scale-[0.99] select-none"
+      >
+        <span className="truncate max-w-[200px] sm:max-w-[280px]">
+          Chuyển lớp: {activeClass?.name}
+        </span>
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 flex-shrink-0 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 z-50 min-w-[240px] max-w-[340px] w-max rounded-2xl bg-white border border-slate-100 shadow-[0_16px_40px_rgba(0,0,0,0.12)] p-1.5 transition-all animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="max-h-60 overflow-y-auto scrollbar-thin py-0.5 space-y-0.5">
+            {classes.map((c) => {
+              const isSelected = c.id === activeClass?.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => {
+                    onSelect(c);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-xs font-bold transition-all duration-150 cursor-pointer ${
+                    isSelected
+                      ? 'bg-slate-100 text-slate-900 font-extrabold'
+                      : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                >
+                  <span className="truncate mr-2">Chuyển lớp: {c.name}</span>
+                  {isSelected && (
+                    <Check className="w-3.5 h-3.5 flex-shrink-0 text-slate-600" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const MyClass = () => {
   const { user } = useAuth();
@@ -388,21 +455,11 @@ const MyClass = () => {
             {/* Quick Switch Class Dropdown if Student enrolled in multiple approved classes */}
             <div className="flex items-center gap-3 self-end md:self-center">
               {approvedMyClasses.length > 1 && (
-                <div className="relative">
-                  <select
-                    value={activeClass.id}
-                    onChange={(e) => {
-                      const selected = approvedMyClasses.find(c => c.id === e.target.value);
-                      if (selected) setActiveClass(selected);
-                    }}
-                    className="bg-white border border-slate-200 text-slate-700 rounded-xl px-4 py-2.5 text-xs font-black focus:outline-none cursor-pointer transition-all pr-8 appearance-none shadow-sm hover:border-indigo-200"
-                    style={{ backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`, backgroundPosition: 'right 10px center', backgroundSize: '14px', backgroundRepeat: 'no-repeat' }}
-                  >
-                    {approvedMyClasses.map(c => (
-                      <option key={c.id} value={c.id} className="text-slate-900 font-bold">Chuyển lớp: {c.name}</option>
-                    ))}
-                  </select>
-                </div>
+                <ClassSelectDropdown
+                  classes={approvedMyClasses}
+                  activeClass={activeClass}
+                  onSelect={(selected) => setActiveClass(selected)}
+                />
               )}
 
               <button
