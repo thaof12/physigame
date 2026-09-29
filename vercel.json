@@ -26,10 +26,10 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*(facebookexternalhit|Facebot|Zalo|Twitterbot|Pinterest|Googlebot|LinkedInBot|Discordbot|TelegramBot|WhatsApp|curl|bingbot).*"
+          "value": "(?i).*(facebookexternalhit|facebot|zalo|twitterbot|pinterest|googlebot|linkedinbot|discordbot|telegrambot|whatsapp|curl|bingbot).*"
         }
       ],
-      "destination": "/api/og"
+      "destination": "/api/og.js"
     },
     {
       "source": "/api/(.*)",
