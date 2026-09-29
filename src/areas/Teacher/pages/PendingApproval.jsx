@@ -91,6 +91,24 @@ const PendingApproval = () => {
     return filtered;
   }, [teacher]);
 
+  const getRejectionReason = () => {
+    const fromProfile = teacher?.teacherProfile?.rejectionReason || teacher?.teacher_profile?.rejectionReason;
+    if (fromProfile && typeof fromProfile === 'string' && fromProfile.trim()) {
+      return fromProfile.trim();
+    }
+    const rejNotif = notifications.find(n => 
+      (n.title && n.title.toLowerCase().includes('từ chối')) ||
+      (n.content && n.content.toLowerCase().includes('từ chối'))
+    );
+    if (rejNotif?.content) {
+      const match = rejNotif.content.match(/Lý do từ chối(?: từ Ban Quản Trị)?:\s*["“']?([^"”']+)["”']?/i);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+    return 'Thông tin cung cấp không đủ điều kiện xác minh danh tính giảng viên';
+  };
+
   // Fetch notifications sent to this teacher
   const fetchNotifications = useCallback(async () => {
     if (!teacher?.id) return;
@@ -332,46 +350,41 @@ const PendingApproval = () => {
             )}
           </div>
 
-          {/* Notifications from Admin / System */}
-          {notifications.length > 0 && (
-            <div className="space-y-3 mb-6 bg-slate-50/60 border border-slate-100 p-4 rounded-2xl">
-              <div className="flex items-center justify-between">
-                <h4 className="font-heading text-xs font-black uppercase tracking-wider text-slate-600 flex items-center gap-2">
-                  <Bell className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Thông báo & Phản hồi ({notifications.length})</span>
-                </h4>
-                {lastCheckedTime && (
-                  <span className="text-[10px] text-slate-400 font-bold">Cập nhật: {lastCheckedTime}</span>
-                )}
-              </div>
-              <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
-                {notifications.map(notif => {
-                  const isRejectionItem = notif.isPopupReason || (notif.title && notif.title.toLowerCase().includes('từ chối'));
-                  return (
-                    <div
-                      key={notif.id}
-                      className={`p-3.5 bg-white border rounded-xl text-left space-y-1.5 shadow-xs transition-colors ${
-                        isRejectionItem ? 'border-rose-200 bg-rose-50/20' : 'border-slate-100 hover:border-indigo-100'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <p className={`font-black text-xs flex items-center gap-1.5 ${isRejectionItem ? 'text-rose-700' : 'text-slate-900'}`}>
-                          {isRejectionItem ? <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" /> : <Sparkles className="w-3.5 h-3.5 text-indigo-500 shrink-0" />}
-                          <span>{notif.title}</span>
-                        </p>
-                        <span className="text-[10px] text-slate-400 font-bold shrink-0">
-                          {notif.created_at ? new Date(notif.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''}
-                        </span>
-                      </div>
-                      <p className={`text-xs leading-relaxed ${isRejectionItem ? 'text-rose-700 font-medium' : 'text-slate-600 font-medium'}`}>
-                        {notif.content}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+          {/* Notifications from Admin / System - Only 2 cases: Pending or Rejected */}
+          <div className="space-y-3 mb-6 bg-slate-50/60 border border-slate-100 p-4 rounded-2xl">
+            <div className="flex items-center justify-between">
+              <h4 className="font-heading text-xs font-black uppercase tracking-wider text-slate-600 flex items-center gap-2">
+                <Bell className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Thông báo & Phản hồi</span>
+              </h4>
             </div>
-          )}
+
+            {isRejected ? (
+              <div className="p-3.5 bg-rose-50/25 border border-rose-200 rounded-xl text-left space-y-1.5 shadow-xs transition-colors">
+                <div className="flex items-center gap-2">
+                  <p className="font-black text-xs flex items-center gap-1.5 text-rose-700">
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                    <span>❌ Lý do từ chối từ Ban Quản Trị</span>
+                  </p>
+                </div>
+                <p className="text-xs leading-relaxed text-rose-700 font-medium">
+                  Hồ sơ đăng ký giảng viên của bạn chưa được phê duyệt. Lý do từ chối từ Ban Quản Trị: "{getRejectionReason()}". Bạn có thể chỉnh sửa và nộp lại hồ sơ minh chứng.
+                </p>
+              </div>
+            ) : (
+              <div className="p-3.5 bg-white border border-slate-100 hover:border-indigo-100 rounded-xl text-left space-y-1.5 shadow-xs transition-colors">
+                <div className="flex items-center gap-2">
+                  <p className="font-black text-xs flex items-center gap-1.5 text-slate-900">
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                    <span>📋 Hồ sơ đăng ký giảng viên đã được tiếp nhận</span>
+                  </p>
+                </div>
+                <p className="text-xs leading-relaxed text-slate-600 font-medium">
+                  Chào bạn, hồ sơ đăng ký giảng viên của bạn đã được gửi thành công và đang được Ban quản trị xem xét. Chúng tôi sẽ cập nhật kết quả ngay khi hoàn tất.
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* Status Specific Message */}
           {isPending && (
@@ -385,16 +398,6 @@ const PendingApproval = () => {
 
           {isRejected && (
             <div className="space-y-4 mb-8">
-              <div className="p-5 bg-rose-50 border border-rose-100 rounded-2xl">
-                <div className="flex items-center gap-2 mb-2 text-rose-700">
-                  <AlertCircle className="w-4 h-4" />
-                  <h4 className="font-heading font-extrabold text-xs uppercase tracking-wider">Lý do từ chối:</h4>
-                </div>
-                <p className="font-body text-xs font-medium text-rose-600 leading-relaxed">
-                  {teacher.teacherProfile?.rejectionReason || 'Thông tin cung cấp không đủ điều kiện xác minh danh tính giảng viên.'}
-                </p>
-              </div>
-
               <button
                 onClick={() => navigate('/teacher/apply')}
                 className="w-full py-3.5 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-heading font-extrabold text-sm transition-all shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2.5 active:scale-[0.98] cursor-pointer"

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../config/supabase';
 import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, User, Sparkles, ArrowRight, ShieldAlert } from 'lucide-react';
 import EurekaPremiumLogo from '../components/ui/EurekaPremiumLogo';
 
@@ -18,6 +19,24 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [allowRegistration, setAllowRegistration] = useState(true);
+
+  // OTP Verification States
+  const [step, setStep] = useState('form'); // 'form' | 'otp'
+  const [otp, setOtp] = useState('');
+  const [otpToken, setOtpToken] = useState('');
+  const [countdown, setCountdown] = useState(60);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+
+  React.useEffect(() => {
+    let timer;
+    if (step === 'otp' && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [step, countdown]);
 
   React.useEffect(() => {
     const fetchSettings = async () => {
@@ -71,6 +90,10 @@ const Register = () => {
   };
 
   const validateForm = () => {
+    if (!formData.username.trim()) {
+      setError('Vui lòng nhập họ và tên');
+      return false;
+    }
     if (!formData.email || !validateGmail(formData.email)) {
       setError('không tìm thấy gmail của bạn.');
       return false;
@@ -101,6 +124,7 @@ const Register = () => {
     }
   };
 
+  // Step 1: Initiate registration by sending OTP to the user's Gmail
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -109,25 +133,107 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // Backend email verification check
+      // Clear any conflicting active session before signup
       try {
-        const verifyRes = await fetch('/api/email/verify-gmail', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: formData.email })
-        });
-        if (verifyRes.ok) {
-          const verifyData = await verifyRes.json();
-          if (verifyData.valid === false) {
-            setError(verifyData.message || 'không tìm thấy gmail của bạn.');
-            setLoading(false);
-            return;
-          }
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          await supabase.auth.signOut();
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
         }
-      } catch (checkErr) {
-        console.warn('Backend verification skipped:', checkErr);
+      } catch (cleanErr) {
+        console.warn('Session cleanup skipped:', cleanErr);
       }
 
+      // Send registration OTP to the provided Gmail
+      const res = await fetch('/api/email/send-registration-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          username: formData.username
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.message || 'không tìm thấy gmail của bạn.');
+        setLoading(false);
+        return;
+      }
+
+      setOtpToken(data.otpToken);
+      setStep('otp');
+      setCountdown(60);
+      setOtp('');
+    } catch (err) {
+      console.error('Send OTP error:', err);
+      setError('không tìm thấy gmail của bạn.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Resend OTP
+  const handleResendOtp = async () => {
+    if (countdown > 0 || sendingOtp) return;
+    setSendingOtp(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/email/send-registration-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          username: formData.username
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.message || 'không tìm thấy gmail của bạn.');
+      } else {
+        setOtpToken(data.otpToken);
+        setCountdown(60);
+      }
+    } catch {
+      setError('Không thể gửi lại mã xác thực. Vui lòng thử lại.');
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  // Step 2: Verify OTP and finalize Supabase account creation
+  const handleVerifyOtpAndRegister = async (e) => {
+    e.preventDefault();
+    if (!otp || otp.trim().length !== 6) {
+      setError('Vui lòng nhập đủ 6 chữ số mã xác thực OTP.');
+      return;
+    }
+
+    setVerifyingOtp(true);
+    setError('');
+
+    try {
+      // 1. Verify OTP with backend
+      const verifyRes = await fetch('/api/email/verify-registration-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          otp: otp.trim(),
+          otpToken
+        })
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok || !verifyData.success) {
+        setError(verifyData.message || 'Mã xác thực không chính xác hoặc đã hết hạn.');
+        setVerifyingOtp(false);
+        return;
+      }
+
+      // 2. Perform account creation in Supabase
       await register(
         formData.username,
         formData.email, 
@@ -146,6 +252,8 @@ const Register = () => {
         msg.toLowerCase().includes('email') ||
         msg.toLowerCase().includes('not found') ||
         msg.toLowerCase().includes('invalid') ||
+        msg.includes('Database error') ||
+        msg.includes('database error') ||
         msg.includes('không tìm thấy gmail')
       ) {
         setError('không tìm thấy gmail của bạn.');
@@ -153,7 +261,7 @@ const Register = () => {
         setError(msg || 'Đăng ký thất bại. Vui lòng thử lại.');
       }
     } finally {
-      setLoading(false);
+      setVerifyingOtp(false);
     }
   };
 
@@ -245,6 +353,78 @@ const Register = () => {
               </div>
             )}
 
+            {step === 'otp' ? (
+              <div className="space-y-6 animate-fadeIn">
+                <div className="text-center space-y-2">
+                  <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl mx-auto flex items-center justify-center border border-blue-100 shadow-sm mb-4">
+                    <Mail className="w-8 h-8" />
+                  </div>
+                  <h3 className="font-heading text-2xl font-extrabold text-slate-900">Xác thực hộp thư Gmail</h3>
+                  <p className="font-body text-slate-500 text-sm leading-relaxed max-w-sm mx-auto">
+                    Mã xác thực 6 chữ số đã được gửi tới:<br/>
+                    <strong className="text-slate-900 font-bold text-base">{formData.email}</strong>
+                  </p>
+                  <p className="text-xs text-slate-400 italic">
+                    (Vui lòng kiểm tra hộp thư đến hoặc mục Thư rác/Spam)
+                  </p>
+                </div>
+
+                <form onSubmit={handleVerifyOtpAndRegister} className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="font-heading text-xs font-extrabold text-slate-700 block text-center uppercase tracking-wider">
+                      Nhập mã OTP gồm 6 chữ số
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      autoFocus
+                      className="font-mono text-center tracking-[12px] text-3xl font-black w-full bg-gray-50 border-2 border-slate-200 text-slate-900 rounded-2xl py-4 px-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all shadow-inner"
+                      placeholder="••••••"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={verifyingOtp || otp.length !== 6}
+                    className="font-heading w-full py-4 rounded-2xl bg-black hover:bg-slate-800 disabled:opacity-50 text-white font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-xl hover:shadow-2xl active:scale-95"
+                  >
+                    {verifyingOtp ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        <span>Đang xác thực & tạo tài khoản...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Xác nhận & Hoàn tất</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+
+                  <div className="flex items-center justify-between text-xs font-bold pt-3 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => { setStep('form'); setError(''); }}
+                      className="text-slate-500 hover:text-black transition-colors flex items-center gap-1"
+                    >
+                      ← Đổi email khác
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={countdown > 0 || sendingOtp}
+                      className={`${countdown > 0 ? 'text-slate-400 cursor-not-allowed font-medium' : 'text-blue-600 hover:underline'}`}
+                    >
+                      {sendingOtp ? 'Đang gửi lại...' : countdown > 0 ? `Gửi lại mã sau (${countdown}s)` : 'Gửi lại mã OTP'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            ) : (
+              <>
             {/* Role Selection - MANDATORY */}
             <div className="mb-8 space-y-4">
               <label className="font-heading text-xs font-extrabold uppercase tracking-widest text-slate-400 ml-1">Bạn là ai?</label>
@@ -357,7 +537,7 @@ const Register = () => {
               >
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 <span className="relative flex justify-center items-center gap-3">
-                  {loading ? 'Đang khởi tạo...' : 'Tạo tài khoản'}
+                  {loading ? 'Đang gửi mã xác thực...' : 'Tạo tài khoản'}
                   {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /> }
                 </span>
               </button>
@@ -388,6 +568,8 @@ const Register = () => {
                 Đăng nhập ngay
               </Link>
             </p>
+            </>
+            )}
             </>
             )}
             

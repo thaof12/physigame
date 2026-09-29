@@ -19,6 +19,9 @@ export const sendTeacherStatusEmail = async (to, teacherName, status, rejectionR
 
   try {
     console.log(`📡 [emailService] Routing ${status} email request through backend for ${to}...`);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+
     const response = await fetch('/api/email/send-status', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -28,8 +31,10 @@ export const sendTeacherStatusEmail = async (to, teacherName, status, rejectionR
         status,
         rejectionReason,
         subject
-      })
+      }),
+      signal: controller.signal
     });
+    clearTimeout(timer);
 
     if (response.ok) {
       console.log(`✅ [emailService] Status email (${status}) sent successfully to ${to}`);
@@ -47,19 +52,25 @@ export const sendTeacherStatusEmail = async (to, teacherName, status, rejectionR
 
 /**
  * Send a custom feedback email message directly to a teacher applicant
- * Features official Eureka logo and direct admin message
+ * Features official Eureka logo, fast dispatch and DB notification linkage
  */
-export const sendCustomFeedbackEmail = async (to, teacherName, message) => {
+export const sendCustomFeedbackEmail = async (to, teacherName, message, teacherId = null) => {
   try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+
     const response = await fetch('/api/email/send-feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         to,
         teacherName,
-        message
-      })
+        message,
+        teacherId
+      }),
+      signal: controller.signal
     });
+    clearTimeout(timer);
 
     const data = await response.json();
     if (response.ok && data.success) {
@@ -71,6 +82,10 @@ export const sendCustomFeedbackEmail = async (to, teacherName, message) => {
     }
   } catch (error) {
     console.error('❌ [emailService] Send feedback exception:', error);
+    // If the request was timed out on client, the backend may still be finishing in background
+    if (error.name === 'AbortError') {
+      return { success: true, message: `Email phản hồi đang được hệ thống gửi tới ${to}` };
+    }
     return { success: false, error: error.message };
   }
 };

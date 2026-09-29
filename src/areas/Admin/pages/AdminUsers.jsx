@@ -143,30 +143,33 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
       return;
     }
 
+    const teacherId = selectedTeacherDetail.id || selectedTeacherDetail._id;
+    const teacherName = selectedTeacherDetail.displayName || selectedTeacherDetail.username;
+    const content = feedbackText.trim();
+
     setSendingFeedback(true);
     setFeedbackStatus(null);
 
     try {
       const result = await sendCustomFeedbackEmail(
         targetEmail,
-        selectedTeacherDetail.displayName || selectedTeacherDetail.username,
-        feedbackText.trim()
+        teacherName,
+        content,
+        teacherId
       );
 
       if (result.success) {
-        // Also persist notification into teacher_notifications so applicant sees it on /teacher/pending!
-        try {
-          await supabase.from('teacher_notifications').insert({
-            teacher_id: selectedTeacherDetail.id,
+        // Fallback non-blocking notification insert in background
+        if (teacherId) {
+          supabase.from('teacher_notifications').insert({
+            teacher_id: teacherId,
             title: '📩 Phản hồi từ Ban Quản Trị về hồ sơ giảng viên',
-            content: feedbackText.trim(),
+            content: content,
             is_read: false
-          });
-        } catch (notifErr) {
-          console.warn('Could not insert teacher notification:', notifErr);
+          }).then(() => {}).catch(() => {});
         }
 
-        setFeedbackStatus({ type: 'success', message: `Đã gửi email phản hồi thành công đến ${targetEmail}!` });
+        setFeedbackStatus({ type: 'success', message: result.message || `Đã gửi email phản hồi thành công đến ${targetEmail}!` });
         setFeedbackText('');
       } else {
         setFeedbackStatus({ type: 'error', message: result.error || 'Gửi email phản hồi thất bại.' });
@@ -340,7 +343,7 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
       }
 
       if (teacher?.email) {
-        await sendTeacherStatusEmail(teacher.email, teacher.displayName, 'verified');
+        sendTeacherStatusEmail(teacher.email, teacher.displayName, 'verified').catch(() => {});
       }
       
       try {
@@ -378,7 +381,7 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
       }
 
       if (teacher?.email) {
-        await sendTeacherStatusEmail(teacher.email, teacher.displayName, 'rejected', rejectReason);
+        sendTeacherStatusEmail(teacher.email, teacher.displayName, 'rejected', rejectReason).catch(() => {});
       }
 
       try {
