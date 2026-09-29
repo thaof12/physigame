@@ -78,10 +78,18 @@ export const TeacherAuthProvider = ({ children }) => {
     }
   };
 
-  const effectiveStatus = teacher?.teacher_status || teacher?.teacherStatus || user?.teacher_status || user?.teacherStatus || 'pending';
+  const effectiveStatus = teacher?.teacher_status || teacher?.teacherStatus || user?.teacher_status || user?.teacherStatus || 'unsubmitted';
+  const hasSubmittedApp = Boolean(
+    teacher?.teacher_profile?.phone || 
+    (teacher?.teacher_profile?.school && teacher?.teacher_profile?.school !== 'Chưa cập nhật') || 
+    teacher?.teacher_profile?.applied_at ||
+    teacher?.teacherProfile?.phone ||
+    teacher?.teacherProfile?.appliedAt
+  );
   const isTeacherVerified = effectiveStatus === 'verified';
   const isTeacherRejected = effectiveStatus === 'rejected';
-  const isTeacherPending = !isTeacherVerified && !isTeacherRejected;
+  const isTeacherPending = effectiveStatus === 'pending' && hasSubmittedApp;
+  const isTeacherUnsubmitted = !isTeacherVerified && !isTeacherRejected && !isTeacherPending;
 
   const value = {
     teacher,
@@ -90,6 +98,7 @@ export const TeacherAuthProvider = ({ children }) => {
     isVerified: isTeacherVerified,
     isPending: isTeacherPending,
     isRejected: isTeacherRejected,
+    isUnsubmitted: isTeacherUnsubmitted,
     logout,
     refreshTeacher,
     checkTeacherAuth

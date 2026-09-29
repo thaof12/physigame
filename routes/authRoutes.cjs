@@ -85,7 +85,7 @@ router.post('/register', async (req, res) => {
           display_name: username || user.display_name,
           role: req.body.role || user.role || 'student',
           status: user.status || 'active',
-          teacher_status: isTeacherRole ? (user.teacher_status || 'pending') : user.teacher_status,
+          teacher_status: isTeacherRole ? (user.teacher_status || 'unsubmitted') : user.teacher_status,
           updated_at: new Date().toISOString()
         });
       } else {
@@ -96,7 +96,7 @@ router.post('/register', async (req, res) => {
           display_name: username || email.split('@')[0],
           role: req.body.role || 'student',
           status: 'active',
-          teacher_status: isTeacherRole ? 'pending' : null,
+          teacher_status: isTeacherRole ? 'unsubmitted' : null,
           xp: 0,
           level: 1,
           programs: [],

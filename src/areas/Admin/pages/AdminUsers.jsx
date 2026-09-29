@@ -327,7 +327,12 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
       }));
 
       setAllTeachers(formatted);
-      const pendingList = formatted.filter(t => (t.teacherStatus || '').toLowerCase() === 'pending');
+      const pendingList = formatted.filter(t => {
+        const status = (t.teacherStatus || '').toLowerCase();
+        if (status !== 'pending') return false;
+        const tp = t.teacherProfile || {};
+        return Boolean(tp.phone || (tp.school && tp.school !== 'Chưa cập nhật') || (tp.certificates && tp.certificates.length > 0) || tp.appliedAt);
+      });
       setPendingTeachers(pendingList);
       try {
         localStorage.setItem('eureka_admin_all_teachers', JSON.stringify(formatted));
@@ -1217,11 +1222,17 @@ const AdminUsers = () => {
           // Resolve display status — status field takes priority if explicitly 'inactive'
           let resolvedStatus = u.status || 'active';
           if (u.role === 'teacher') {
+            const hasApp = Boolean(
+              u.teacher_profile?.phone || 
+              (u.teacher_profile?.school && u.teacher_profile?.school !== 'Chưa cập nhật') || 
+              u.teacher_profile?.applied_at
+            );
             // Explicit inactive check first (both fields)
             if (u.status === 'inactive' || u.teacher_status === 'inactive') resolvedStatus = 'inactive';
-            else if (u.teacher_status === 'pending') resolvedStatus = 'pending';
-            else if (u.teacher_status === 'rejected') resolvedStatus = 'rejected';
             else if (u.teacher_status === 'verified') resolvedStatus = 'active';
+            else if (u.teacher_status === 'rejected') resolvedStatus = 'rejected';
+            else if (u.teacher_status === 'pending' && hasApp) resolvedStatus = 'pending';
+            else resolvedStatus = 'unsubmitted';
           }
           const userAvatar = u.avatar || u.avatar_url || u.profile?.avatar || u.teacher_profile?.avatar || null;
           return {
@@ -1759,6 +1770,8 @@ const AdminUsers = () => {
                                     ? 'Giáo viên (Từ chối)'
                                     : user.status === 'pending'
                                     ? 'Giáo viên (Chờ duyệt)'
+                                    : user.status === 'unsubmitted' || user.teacher_status === 'unsubmitted'
+                                    ? 'Giáo viên (Chưa nộp đơn)'
                                     : 'Giáo viên'}
                                 </>
                               ) : user.role === 'admin' ? (
@@ -1798,6 +1811,11 @@ const AdminUsers = () => {
                                 <>
                                   <span className="w-2 h-2 bg-rose-500 rounded-full"></span>
                                   Từ chối
+                                </>
+                              ) : user.status === 'unsubmitted' ? (
+                                <>
+                                  <span className="w-2 h-2 bg-slate-400 rounded-full"></span>
+                                  Chưa nộp đơn
                                 </>
                               ) : (
                                 <>
@@ -2022,6 +2040,8 @@ const AdminUsers = () => {
                           ? 'Giáo viên (Từ chối)'
                           : showUserDetail.status === 'pending'
                           ? 'Giáo viên (Chờ duyệt)'
+                          : showUserDetail.status === 'unsubmitted'
+                          ? 'Giáo viên (Chưa nộp đơn)'
                           : 'Giáo viên'
                       ) : showUserDetail.role === 'admin' ? 'Quản trị viên' : `Học sinh (Lớp ${showUserDetail.grade || '?'})`}
                     </p>
@@ -2038,6 +2058,7 @@ const AdminUsers = () => {
                       {showUserDetail.status === 'active' ? 'Hoạt động' :
                        showUserDetail.status === 'pending' ? 'Chờ duyệt' :
                        showUserDetail.status === 'rejected' ? 'Từ chối' :
+                       showUserDetail.status === 'unsubmitted' ? 'Chưa nộp đơn' :
                        'Không hoạt động'}
                     </p>
                   </div>

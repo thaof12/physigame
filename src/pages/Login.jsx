@@ -34,13 +34,35 @@ const Login = () => {
       if (user.teacherStatus === 'verified' || user.teacher_status === 'verified') {
         navigate('/teacher/dashboard', { replace: true });
       } else {
-        const hasProfile = user.teacher_profile?.phone || user.teacher_profile?.school || user.teacherProfile?.phone || user.teacherProfile?.school;
-        navigate(hasProfile ? '/teacher/pending' : '/teacher/apply', { replace: true });
+        const hasProfile = Boolean(
+          user.teacher_profile?.phone || 
+          (user.teacher_profile?.school && user.teacher_profile?.school !== 'Chưa cập nhật') || 
+          user.teacher_profile?.applied_at ||
+          user.teacherProfile?.phone ||
+          user.teacherProfile?.appliedAt
+        );
+        const isPending = (user.teacherStatus === 'pending' || user.teacher_status === 'pending') && hasProfile;
+        navigate(isPending ? '/teacher/pending' : '/teacher/apply', { replace: true });
       }
     } else {
       navigate('/', { replace: true });
     }
   };
+
+  // Idle prefetching for lightning-fast navigation to Register & Teacher Application
+  React.useEffect(() => {
+    const prefetchModules = () => {
+      import('./Register');
+      import('../areas/Teacher/pages/TeacherApplication');
+    };
+    if (typeof window !== 'undefined') {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(prefetchModules);
+      } else {
+        setTimeout(prefetchModules, 400);
+      }
+    }
+  }, []);
 
   // Auto redirect if user is already authenticated (e.g. from Google OAuth callback)
   React.useEffect(() => {
@@ -263,7 +285,11 @@ const Login = () => {
 
             <p className="font-body mt-10 text-center text-slate-500 font-bold">
               Bạn là lính mới?{' '}
-              <Link to="/register" className="text-black hover:text-gray-600 underline underline-offset-4 decoration-2">
+              <Link
+                to="/register"
+                onMouseEnter={() => import('./Register')}
+                className="text-black hover:text-gray-600 underline underline-offset-4 decoration-2"
+              >
                 Gia nhập ngay
               </Link>
             </p>

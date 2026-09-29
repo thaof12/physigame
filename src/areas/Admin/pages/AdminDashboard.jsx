@@ -90,7 +90,11 @@ const AdminDashboard = () => {
 
         const allUsers = allUsersRes.data || [];
         const allTeachers = fallbackTeachersRes.data || [];
-        const realPendingFromDb = allTeachers.filter(t => t.teacher_status === 'pending' || !t.teacher_status);
+        const realPendingFromDb = allTeachers.filter(t => {
+          if (t.teacher_status !== 'pending') return false;
+          const tp = t.teacher_profile || {};
+          return Boolean(tp.phone || (tp.school && tp.school !== 'Chưa cập nhật') || tp.applied_at);
+        });
 
         if (pendingList.length === 0) {
           pendingList = realPendingFromDb;

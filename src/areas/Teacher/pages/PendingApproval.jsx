@@ -149,7 +149,21 @@ const PendingApproval = () => {
 
   useEffect(() => {
     if (isVerified) {
-      navigate('/teacher/dashboard');
+      navigate('/teacher/dashboard', { replace: true });
+      return;
+    }
+
+    const hasApp = Boolean(
+      teacher?.teacher_profile?.phone || 
+      (teacher?.teacher_profile?.school && teacher?.teacher_profile?.school !== 'Chưa cập nhật') || 
+      teacher?.teacher_profile?.applied_at ||
+      teacher?.teacherProfile?.phone ||
+      teacher?.teacherProfile?.appliedAt
+    );
+
+    // If teacher hasn't submitted application form yet and not rejected, redirect to /teacher/apply
+    if (teacher && !hasApp && teacher?.teacher_status !== 'rejected') {
+      navigate('/teacher/apply', { replace: true });
       return;
     }
 
@@ -161,7 +175,7 @@ const PendingApproval = () => {
           if (u?.role === 'teacher') return; // Wait for teacher session to hydrate
         }
       } catch (e) {}
-      navigate('/login');
+      navigate('/login', { replace: true });
       return;
     }
 

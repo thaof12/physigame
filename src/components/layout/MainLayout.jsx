@@ -19,10 +19,19 @@ export default function MainLayout() {
     }
     
     const isTeacher = user.role === 'teacher';
-    const isPending = user.teacherStatus === 'pending' || user.teacher_status === 'pending';
+    const isVerified = user.teacherStatus === 'verified' || user.teacher_status === 'verified';
+    const hasSubmittedProfile = Boolean(
+      user.teacher_profile?.phone || 
+      (user.teacher_profile?.school && user.teacher_profile?.school !== 'Chưa cập nhật') || 
+      user.teacher_profile?.applied_at ||
+      user.teacherProfile?.phone ||
+      user.teacherProfile?.appliedAt
+    );
+    const isPending = (user.teacherStatus === 'pending' || user.teacher_status === 'pending') && hasSubmittedProfile;
+    const isUnsubmitted = isTeacher && !isVerified && !hasSubmittedProfile && user.teacher_status !== 'rejected';
     const isAdmin = user.role === 'admin' || user.email === 'quantrivien@gmail.com';
     
-    console.log(`%c🛡️ [MainLayout] Guard check - Role: ${user.role}, Status: ${user.teacherStatus || user.teacher_status}`, 'color: #274dad; font-weight: bold');
+    console.log(`%c🛡️ [MainLayout] Guard check - Role: ${user.role}, Status: ${user.teacherStatus || user.teacher_status}, Submitted: ${hasSubmittedProfile}`, 'color: #274dad; font-weight: bold');
     
     if (isAdmin) {
       console.log('%c🚀 [MainLayout] Admin detected on student route. FORCING REDIRECT...', 'color: #f59e0b; font-weight: black');
@@ -31,15 +40,20 @@ export default function MainLayout() {
     }
 
     if (isTeacher) {
+      if (isUnsubmitted) {
+        console.log('%c🚀 [MainLayout] Unsubmitted teacher detected on student layout. Immediate redirect to /teacher/apply...', 'color: #2099e9; font-weight: bold');
+        navigate('/teacher/apply', { replace: true });
+        return;
+      }
+
+      const publicLandingPaths = ['/', '/home', '/support/guide', '/support/faq', '/support/privacy', '/support/terms'];
+
       if (isPending) {
-        const publicLandingPaths = ['/', '/home', '/support/guide', '/support/faq', '/support/privacy', '/support/terms'];
         if (!publicLandingPaths.includes(location.pathname) && location.pathname !== '/teacher/pending') {
-          console.log('%c🚀 [MainLayout] Pending teacher detected on protected student route. FORCING REDIRECT...', 'color: #f59e0b; font-weight: black; font-size: 14px');
+          console.log('%c🚀 [MainLayout] Pending teacher detected on protected student route. Redirecting to /teacher/pending...', 'color: #f59e0b; font-weight: black');
           navigate('/teacher/pending', { replace: true });
-        } else {
-          console.log('%c✅ [MainLayout] Teacher on permitted public/pending page. Guard passed.', 'color: #10b981');
         }
-      } else {
+      } else if (isVerified) {
         // Verified teacher - redirect to dashboard if on general student homepage / landing paths
         const studentHomePaths = ['/', '/home'];
         if (studentHomePaths.includes(location.pathname)) {

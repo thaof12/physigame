@@ -177,8 +177,8 @@ export const AuthProvider = ({ children }) => {
               firebaseUid: session.user.id,
               uid: session.user.id,
               role: intentRole,
-              teacherStatus: intentRole === 'teacher' ? 'pending' : 'verified',
-              teacher_status: intentRole === 'teacher' ? 'pending' : 'verified',
+              teacherStatus: intentRole === 'teacher' ? 'unsubmitted' : 'verified',
+              teacher_status: intentRole === 'teacher' ? 'unsubmitted' : 'verified',
               xp: 0,
               level: 1,
               programs: []
@@ -297,7 +297,33 @@ export const AuthProvider = ({ children }) => {
               } catch (e) {}
             }
 
-            const resolvedStatus = statusCheckData?.teacher_status || dbUser?.teacher_status || apiUser?.teacher_status || apiUser?.teacherStatus || 'pending';
+            const hasSubmittedApplication = Boolean(
+              dbUser?.teacher_profile?.phone || 
+              (dbUser?.teacher_profile?.school && dbUser?.teacher_profile?.school !== 'Chưa cập nhật') ||
+              dbUser?.teacher_profile?.applied_at ||
+              apiUser?.teacherProfile?.phone ||
+              apiUser?.teacherProfile?.appliedAt ||
+              statusCheckData?.teacher_profile?.phone
+            );
+
+            let resolvedStatus = statusCheckData?.teacher_status || dbUser?.teacher_status || apiUser?.teacher_status || apiUser?.teacherStatus;
+            
+            const isUserTeacher = statusCheckData?.role === 'teacher' || dbUser?.role === 'teacher' || apiUser?.role === 'teacher' || isTeacherIntent;
+
+            if (isUserTeacher) {
+              if (resolvedStatus === 'verified' || resolvedStatus === 'rejected') {
+                // Keep authoritative decision
+              } else if (resolvedStatus === 'pending' && hasSubmittedApplication) {
+                // Genuine pending with submitted application
+              } else {
+                resolvedStatus = 'unsubmitted';
+                if (dbUser?.teacher_status === 'pending' && !hasSubmittedApplication) {
+                  supabase.from('users').update({ teacher_status: 'unsubmitted' }).eq('id', session.user.id).then(() => {});
+                }
+              }
+            } else if (!resolvedStatus) {
+              resolvedStatus = 'verified';
+            }
 
             let userData = null;
             if (dbUser || apiUser || statusCheckData) {
@@ -308,7 +334,7 @@ export const AuthProvider = ({ children }) => {
                 id: session.user.id,
                 uid: session.user.id,
                 firebaseUid: session.user.id,
-                role: statusCheckData?.role || dbUser?.role || apiUser?.role || 'student',
+                role: statusCheckData?.role || dbUser?.role || apiUser?.role || (isTeacherIntent ? 'teacher' : 'student'),
                 teacherStatus: resolvedStatus,
                 teacher_status: resolvedStatus,
                 teacherProfile: {
@@ -325,7 +351,7 @@ export const AuthProvider = ({ children }) => {
 
             // 3. ATOMIC SYNC: If intent is teacher and they aren't already a teacher with status, register them
             if (isTeacherIntent) {
-              const hasExistingStatus = isAlreadyTeacher && (existingStatus === 'verified' || existingStatus === 'pending' || existingStatus === 'rejected');
+              const hasExistingStatus = isAlreadyTeacher && (existingStatus === 'verified' || (existingStatus === 'pending' && hasSubmittedApplication) || existingStatus === 'rejected');
               
               if (hasExistingStatus) {
                 console.log(`%cℹ️ [AuthContext] User is already a teacher with status: ${existingStatus}. Preserving status.`, 'color: #10b981; font-weight: bold');
@@ -351,7 +377,7 @@ export const AuthProvider = ({ children }) => {
                    email: session.user.email,
                    avatar: googleAvatarUrl,
                    role: 'teacher',
-                   teacher_status: 'pending',
+                   teacher_status: 'unsubmitted',
                    updated_at: new Date().toISOString()
                 };
 
@@ -363,7 +389,7 @@ export const AuthProvider = ({ children }) => {
                 if (syncError) {
                   console.error('❌ [AuthContext] Schema Sync failed:', syncError.message);
                 } else {
-                  console.log('✅ [AuthContext] Database synchronized (teacher_status: pending)');
+                  console.log('✅ [AuthContext] Database synchronized (teacher_status: unsubmitted)');
                 }
 
                 // 4. Update Backend API if possible
@@ -373,7 +399,7 @@ export const AuthProvider = ({ children }) => {
                     email: session.user.email,
                     firebaseUid: session.user.id,
                     role: 'teacher',
-                    teacherStatus: 'pending'
+                    teacherStatus: 'unsubmitted'
                   });
                 } catch (apiErr) {
                   console.warn('⚠️ [AuthContext] Backend API sync skipped or failed');
@@ -386,8 +412,8 @@ export const AuthProvider = ({ children }) => {
                   displayName: session.user.user_metadata?.display_name || session.user.email?.split('@')[0],
                   id: session.user.id,
                   uid: session.user.id,
-                  teacherStatus: 'pending',
-                  teacher_status: 'pending'
+                  teacherStatus: 'unsubmitted',
+                  teacher_status: 'unsubmitted'
                 };
                 
                 localStorage.removeItem('pending_role');
@@ -412,9 +438,11 @@ export const AuthProvider = ({ children }) => {
 
               if (isTeacher) {
                 if (isTeacherIntent && !isAlreadyTeacher) {
-                  finalStatus = 'pending';
+                  finalStatus = 'unsubmitted';
+                } else if (existingStatus === 'pending' && !hasSubmittedApplication) {
+                  finalStatus = 'unsubmitted';
                 } else {
-                  finalStatus = existingStatus || 'pending';
+                  finalStatus = existingStatus || 'unsubmitted';
                 }
               }
 
@@ -449,33 +477,44 @@ export const AuthProvider = ({ children }) => {
               if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
               setLoading(false);
 
-              // Auto redirect if user landed on /login or /register after OAuth callback
+              const isUserTeacherFinal = finalUser.role === 'teacher';
+              const hasProfile = Boolean(
+                finalUser.teacher_profile?.phone || 
+                (finalUser.teacher_profile?.school && finalUser.teacher_profile?.school !== 'Chưa cập nhật') || 
+                finalUser.teacher_profile?.applied_at ||
+                finalUser.teacherProfile?.phone ||
+                finalUser.teacherProfile?.appliedAt
+              );
+              const isVerified = finalUser.teacherStatus === 'verified' || finalUser.teacher_status === 'verified';
+              const isPending = (finalUser.teacherStatus === 'pending' || finalUser.teacher_status === 'pending') && hasProfile;
+              const isUnsubmitted = isUserTeacherFinal && !isVerified && !hasProfile && finalUser.teacher_status !== 'rejected';
+
               const currentPath = window.location.pathname;
-              if (currentPath === '/login' || currentPath === '/register') {
-                if (finalUser.role === 'admin' || finalUser.email === 'quantrivien@gmail.com') {
-                  window.location.href = '/admin/dashboard';
-                } else if (finalUser.role === 'teacher') {
-                  if (finalUser.teacherStatus === 'verified' || finalUser.teacher_status === 'verified') {
-                    window.location.href = '/teacher/dashboard';
-                  } else {
-                    const hasProfile = finalUser.teacher_profile?.phone || finalUser.teacher_profile?.school;
-                    window.location.href = hasProfile ? '/teacher/pending' : '/teacher/apply';
-                  }
-                } else {
-                  window.location.href = '/';
+
+              // If unsubmitted teacher: ALWAYS redirect to /teacher/apply immediately!
+              if (isUnsubmitted) {
+                if (currentPath !== '/teacher/apply') {
+                  console.log('%c📋 [AuthContext] Unsubmitted teacher detected → INSTANT redirect to /teacher/apply', 'color: #7c3aed; font-weight: bold');
+                  window.location.replace('/teacher/apply');
+                  return;
                 }
-                return;
               }
 
-              // NEW TEACHER via Google OAuth → redirect to application form
-              // Only if: intent was teacher AND they were NOT already a teacher with existing profile
-              const isNewTeacher = isTeacherIntent && !isAlreadyTeacher;
-              const hasExistingProfile = userData?.teacher_profile?.phone || userData?.teacher_profile?.school;
-              if (isNewTeacher && !hasExistingProfile) {
-                console.log('%c📋 [AuthContext] New Google teacher → redirecting to /teacher/apply', 'color: #7c3aed; font-weight: bold');
-                setTimeout(() => {
-                  window.location.href = '/teacher/apply';
-                }, 300);
+              // Auto redirect if user landed on /login, /register, /, or /# after OAuth callback
+              if (currentPath === '/login' || currentPath === '/register' || currentPath === '/' || currentPath === '') {
+                if (finalUser.role === 'admin' || finalUser.email === 'quantrivien@gmail.com') {
+                  window.location.replace('/admin/dashboard');
+                  return;
+                } else if (isTeacher) {
+                  if (isVerified) {
+                    window.location.replace('/teacher/dashboard');
+                  } else if (isPending) {
+                    window.location.replace('/teacher/pending');
+                  } else {
+                    window.location.replace('/teacher/apply');
+                  }
+                  return;
+                }
               }
             } else {
               throw new Error('Profile determination failed');
@@ -499,8 +538,8 @@ export const AuthProvider = ({ children }) => {
               firebaseUid: session.user.id,
               uid: session.user.id,
               role: role,
-              teacherStatus: role === 'teacher' ? (cachedUser?.teacherStatus || 'pending') : 'verified',
-              teacher_status: role === 'teacher' ? (cachedUser?.teacher_status || 'pending') : 'verified'
+              teacherStatus: role === 'teacher' ? (cachedUser?.teacherStatus || 'unsubmitted') : 'verified',
+              teacher_status: role === 'teacher' ? (cachedUser?.teacher_status || 'unsubmitted') : 'verified'
             };
             
             setUser(basicUser);
@@ -859,7 +898,7 @@ export const AuthProvider = ({ children }) => {
           email,
           password,
           role,
-          teacherStatus: role === 'teacher' ? 'pending' : 'verified'
+          teacherStatus: role === 'teacher' ? 'unsubmitted' : 'verified'
         });
 
         if (regRes.data?.user?.id) {
@@ -886,27 +925,8 @@ export const AuthProvider = ({ children }) => {
             email,
             firebaseUid: newUserId,
             role,
-            teacherStatus: role === 'teacher' ? 'pending' : 'verified'
+            teacherStatus: role === 'teacher' ? 'unsubmitted' : 'verified'
           }).catch(() => {});
-        }
-      }
-
-      // Explicitly sync to "teacher profile" table for Admin Dashboard visibility
-      if (role === 'teacher' && newUserId) {
-        try {
-          await supabase
-            .from('teacher profile')
-            .upsert({
-              id: newUserId,
-              name: username,
-              email: email,
-              teacherStatus: 'pending',
-              subject: 'Chưa cập nhật',
-              school: 'Chưa cập nhật',
-              createdAt: new Date().toISOString()
-            });
-        } catch (tpErr) {
-          console.warn('⚠️ Teacher profile upsert skipped:', tpErr.message);
         }
       }
 
@@ -939,7 +959,8 @@ export const AuthProvider = ({ children }) => {
             firebaseUid: newUserId, 
             uid: newUserId,
             role: role,
-            teacherStatus: role === 'teacher' ? 'pending' : 'verified'
+            teacherStatus: role === 'teacher' ? 'unsubmitted' : 'verified',
+            teacher_status: role === 'teacher' ? 'unsubmitted' : 'verified'
           };
           localStorage.setItem('user', JSON.stringify(userData));
           setUser(userData);
@@ -955,7 +976,8 @@ export const AuthProvider = ({ children }) => {
           firebaseUid: newUserId,
           uid: newUserId,
           role: role,
-          teacherStatus: role === 'teacher' ? 'pending' : 'verified',
+          teacherStatus: role === 'teacher' ? 'unsubmitted' : 'verified',
+          teacher_status: role === 'teacher' ? 'unsubmitted' : 'verified',
           xp: 0,
           level: 1,
           programs: []
@@ -974,10 +996,12 @@ export const AuthProvider = ({ children }) => {
       // Store intended role for new accounts
       localStorage.setItem('pending_role', role);
 
+      const targetRedirect = role === 'teacher' ? `${window.location.origin}/teacher/apply` : `${window.location.origin}/`;
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: targetRedirect,
           queryParams: {
             prompt: 'select_account'
           }

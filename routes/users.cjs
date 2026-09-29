@@ -421,14 +421,19 @@ router.get('/dashboard-stats', async (req, res) => {
   try {
     const { data: users, error } = await supabase
       .from('users')
-      .select('id, role, status, teacher_status, created_at');
+      .select('id, role, status, teacher_status, teacher_profile, created_at');
 
     if (error) throw error;
 
     const allUsers = users || [];
     const students = allUsers.filter(u => u.role === 'student').length;
     const teachers = allUsers.filter(u => u.role === 'teacher').length;
-    const pendingTeachers = allUsers.filter(u => u.role === 'teacher' && (u.teacher_status === 'pending' || !u.teacher_status)).length;
+    const pendingTeachers = allUsers.filter(u => {
+      if (u.role !== 'teacher') return false;
+      if (u.teacher_status !== 'pending') return false;
+      const tp = u.teacher_profile;
+      return Boolean(tp?.phone || (tp?.school && tp.school !== 'Chưa cập nhật') || tp?.applied_at);
+    }).length;
     const rejectedTeachers = allUsers.filter(u => u.role === 'teacher' && u.teacher_status === 'rejected').length;
     const verifiedTeachers = allUsers.filter(u => u.role === 'teacher' && u.teacher_status === 'verified').length;
 
@@ -463,7 +468,11 @@ router.get('/pending-teachers', async (req, res) => {
 
     if (error) throw error;
 
-    const pending = (data || []).filter(u => u.teacher_status === 'pending' || !u.teacher_status);
+    const pending = (data || []).filter(u => {
+      if (u.teacher_status !== 'pending') return false;
+      const tp = u.teacher_profile;
+      return Boolean(tp?.phone || (tp?.school && tp.school !== 'Chưa cập nhật') || tp?.applied_at);
+    });
 
     return res.json({
       success: true,
@@ -858,7 +867,11 @@ router.get('/pending-teachers', async (req, res) => {
       { role: 'teacher', teacher_status: 'pending' },
       { select: 'id,username,email,display_name,avatar,teacher_profile,created_at' }
     );
-    const enriched = await Promise.all(teachers.map(ensureTeacherEmail));
+    const validTeachers = (teachers || []).filter(u => {
+      const tp = u.teacher_profile;
+      return Boolean(tp?.phone || (tp?.school && tp.school !== 'Chưa cập nhật') || tp?.applied_at);
+    });
+    const enriched = await Promise.all(validTeachers.map(ensureTeacherEmail));
     res.json({ success: true, count: enriched.length, teachers: enriched });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error', error: error.message });

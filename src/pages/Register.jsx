@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../config/supabase';
 import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, User, Sparkles, ArrowRight, ShieldAlert } from 'lucide-react';
@@ -7,21 +7,32 @@ import EurekaPremiumLogo from '../components/ui/EurekaPremiumLogo';
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading, register, loginWithGoogle } = useAuth();
   
+  const searchParams = new URLSearchParams(location.search);
+  const initialRole = searchParams.get('role') === 'teacher' ? 'teacher' : 'student';
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
-  const [selectedRole, setSelectedRole] = useState('student');
+  const [selectedRole, setSelectedRole] = useState(initialRole);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [allowRegistration, setAllowRegistration] = useState(true);
 
+  // Instant prefetching of TeacherApplication chunk when teacher role is selected
+  useEffect(() => {
+    if (selectedRole === 'teacher') {
+      import('../areas/Teacher/pages/TeacherApplication');
+    }
+  }, [selectedRole]);
+
   // Auto redirect if user is already authenticated (e.g. from Google OAuth callback)
-  React.useEffect(() => {
+  useEffect(() => {
     if (user && !authLoading && user.status !== 'inactive' && user.teacher_status !== 'inactive') {
       if (user.role === 'admin' || user.email === 'quantrivien@gmail.com') {
         localStorage.setItem('physigame_admin', JSON.stringify({
@@ -29,15 +40,22 @@ const Register = () => {
           name: user.displayName || 'Quản trị viên',
           role: 'super_admin'
         }));
-        window.location.replace('/admin/dashboard');
+        navigate('/admin/dashboard', { replace: true });
       } else if (user.role === 'teacher') {
-        const hasProfile = user.teacher_profile?.phone || user.teacher_profile?.school;
-        window.location.replace(hasProfile ? '/teacher/pending' : '/teacher/apply');
+        const hasProfile = Boolean(
+          user.teacher_profile?.phone || 
+          (user.teacher_profile?.school && user.teacher_profile?.school !== 'Chưa cập nhật') || 
+          user.teacher_profile?.applied_at ||
+          user.teacherProfile?.phone ||
+          user.teacherProfile?.appliedAt
+        );
+        const isPending = (user.teacherStatus === 'pending' || user.teacher_status === 'pending') && hasProfile;
+        navigate(isPending ? '/teacher/pending' : '/teacher/apply', { replace: true });
       } else {
-        window.location.replace('/');
+        navigate('/', { replace: true });
       }
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, navigate]);
 
   // OTP Verification States
   const [step, setStep] = useState('form'); // 'form' | 'otp'
@@ -261,9 +279,9 @@ const Register = () => {
       );
       
       if (selectedRole === 'teacher') {
-        navigate('/teacher/apply');
+        navigate('/teacher/apply', { replace: true });
       } else {
-        navigate('/');
+        navigate('/', { replace: true });
       }
     } catch (err) {
       const msg = err.message || '';
