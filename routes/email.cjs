@@ -282,6 +282,72 @@ router.post('/send-feedback', async (req, res) => {
   }
 });
 
+const dns = require('dns').promises;
+
+/**
+ * Endpoint to verify if an email address is a real, valid Gmail
+ * POST /api/email/verify-gmail
+ */
+router.post('/verify-gmail', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== 'string') {
+      return res.json({ valid: false, message: 'không tìm thấy gmail của bạn.' });
+    }
+
+    const trimmed = email.trim().toLowerCase();
+    const parts = trimmed.split('@');
+    if (parts.length !== 2) {
+      return res.json({ valid: false, message: 'không tìm thấy gmail của bạn.' });
+    }
+
+    const [username, domain] = parts;
+
+    // 1. Must be gmail.com or googlemail.com
+    if (domain !== 'gmail.com' && domain !== 'googlemail.com') {
+      return res.json({ valid: false, message: 'không tìm thấy gmail của bạn.' });
+    }
+
+    // 2. Google rules: 6-30 characters, letters, digits and dot only
+    if (username.length < 6 || username.length > 30) {
+      return res.json({ valid: false, message: 'không tìm thấy gmail của bạn.' });
+    }
+
+    if (!/^[a-z0-9.]+$/.test(username)) {
+      return res.json({ valid: false, message: 'không tìm thấy gmail của bạn.' });
+    }
+
+    if (username.startsWith('.') || username.endsWith('.') || username.includes('..')) {
+      return res.json({ valid: false, message: 'không tìm thấy gmail của bạn.' });
+    }
+
+    // 3. Known fake / invalid patterns
+    const fakeKeywords = [
+      'fake', 'notreal', 'nonexistent', 'khongcothat',
+      'asdfgh', 'qwerty', '12345678', 'abcdefg', 'test1234'
+    ];
+    if (fakeKeywords.some(keyword => username.includes(keyword))) {
+      return res.json({ valid: false, message: 'không tìm thấy gmail của bạn.' });
+    }
+
+    // 4. DNS MX check for domain
+    try {
+      const mxRecords = await dns.resolveMx(domain);
+      if (!mxRecords || mxRecords.length === 0) {
+        return res.json({ valid: false, message: 'không tìm thấy gmail của bạn.' });
+      }
+    } catch {
+      return res.json({ valid: false, message: 'không tìm thấy gmail của bạn.' });
+    }
+
+    return res.json({ valid: true, message: 'Gmail hợp lệ' });
+  } catch (error) {
+    console.error('❌ [Backend Email] Verify Gmail error:', error.message);
+    return res.json({ valid: true });
+  }
+});
+
 module.exports = router;
 module.exports.sendViaGmail = sendViaGmail;
 module.exports.buildStatusHtml = buildStatusHtml;
+

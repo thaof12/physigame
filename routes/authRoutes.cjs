@@ -9,6 +9,24 @@ router.post('/register', async (req, res) => {
     const { username, email, firebaseUid, selectedProgram } = req.body;
     console.log('📝 Register request:', { username, email });
 
+    // Validate email format and domain
+    const trimmedEmail = (email || '').trim().toLowerCase();
+    const parts = trimmedEmail.split('@');
+    if (parts.length !== 2 || (parts[1] !== 'gmail.com' && parts[1] !== 'googlemail.com')) {
+      return res.status(400).json({ success: false, message: 'không tìm thấy gmail của bạn.' });
+    }
+    const [uName] = parts;
+    if (
+      uName.length < 6 ||
+      uName.length > 30 ||
+      !/^[a-z0-9.]+$/.test(uName) ||
+      uName.startsWith('.') ||
+      uName.endsWith('.') ||
+      uName.includes('..')
+    ) {
+      return res.status(400).json({ success: false, message: 'không tìm thấy gmail của bạn.' });
+    }
+
     // Check duplicates
     const existingEmail = await User.findByEmail(email);
     if (existingEmail) {

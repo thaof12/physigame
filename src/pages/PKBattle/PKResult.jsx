@@ -21,7 +21,7 @@ const PKResult = () => {
     opponent = { displayName: 'Đối thủ', avatar: '' },
     winner = 'me', // 'me', 'opponent', 'draw'
     myAnswers = [],
-    rewards: stateRewards,
+    rewards: _stateRewards,
     roomId = ''
   } = location.state || {};
 
@@ -232,7 +232,7 @@ const PKResult = () => {
 
               <button
                 className="flex-1 py-3 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-black text-[11px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/pk-battle')}
               >
                 <Home size={14} />
                 <span>Trang chủ</span>

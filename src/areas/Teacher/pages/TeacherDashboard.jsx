@@ -223,7 +223,7 @@ const TeacherDashboard = () => {
                           </div>
 
                           {cls.pendingCount > 0 ? (
-                            <span className="flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full animate-pulse border border-amber-300">
+                            <span className="flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
                               <AlertCircle className="w-3 h-3 text-amber-600" />
                               {cls.pendingCount} học sinh chờ duyệt
                             </span>

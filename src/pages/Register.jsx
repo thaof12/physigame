@@ -42,7 +42,39 @@ const Register = () => {
     setError('');
   };
 
+  const validateGmail = (email) => {
+    if (!email) return false;
+    const trimmed = email.trim().toLowerCase();
+    const parts = trimmed.split('@');
+    if (parts.length !== 2) return false;
+
+    const [username, domain] = parts;
+    if (domain !== 'gmail.com' && domain !== 'googlemail.com') {
+      return false;
+    }
+
+    // Google rules: 6-30 chars, alphanumeric + dot only, no start/end dot, no consecutive dots
+    if (username.length < 6 || username.length > 30) return false;
+    if (!/^[a-z0-9.]+$/.test(username)) return false;
+    if (username.startsWith('.') || username.endsWith('.') || username.includes('..')) return false;
+
+    // Obvious fake patterns
+    const fakeKeywords = [
+      'fake', 'notreal', 'nonexistent', 'khongcothat',
+      'asdfgh', 'qwerty', '12345678', 'abcdefg', 'test1234'
+    ];
+    if (fakeKeywords.some((keyword) => username.includes(keyword))) {
+      return false;
+    }
+
+    return true;
+  };
+
   const validateForm = () => {
+    if (!formData.email || !validateGmail(formData.email)) {
+      setError('không tìm thấy gmail của bạn.');
+      return false;
+    }
     if (formData.password !== formData.confirmPassword) {
       setError('Mật khẩu xác nhận không khớp');
       return false;
@@ -77,6 +109,25 @@ const Register = () => {
     setLoading(true);
 
     try {
+      // Backend email verification check
+      try {
+        const verifyRes = await fetch('/api/email/verify-gmail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email })
+        });
+        if (verifyRes.ok) {
+          const verifyData = await verifyRes.json();
+          if (verifyData.valid === false) {
+            setError(verifyData.message || 'không tìm thấy gmail của bạn.');
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (checkErr) {
+        console.warn('Backend verification skipped:', checkErr);
+      }
+
       await register(
         formData.username,
         formData.email, 
@@ -87,10 +138,20 @@ const Register = () => {
       if (selectedRole === 'teacher') {
         navigate('/teacher/apply');
       } else {
-        navigate('/placement-test/physics');
+        navigate('/');
       }
     } catch (err) {
-      setError(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+      const msg = err.message || '';
+      if (
+        msg.toLowerCase().includes('email') ||
+        msg.toLowerCase().includes('not found') ||
+        msg.toLowerCase().includes('invalid') ||
+        msg.includes('không tìm thấy gmail')
+      ) {
+        setError('không tìm thấy gmail của bạn.');
+      } else {
+        setError(msg || 'Đăng ký thất bại. Vui lòng thử lại.');
+      }
     } finally {
       setLoading(false);
     }
@@ -246,7 +307,7 @@ const Register = () => {
                     onChange={handleChange}
                     required
                     className="font-body w-full bg-gray-50 border-2 border-transparent text-black placeholder-slate-400 rounded-2xl py-3.5 pl-11 pr-4 focus:outline-none focus:bg-white focus:border-black focus:ring-4 focus:ring-black/5 transition-all font-bold text-sm"
-                    placeholder="name@example.com"
+                    placeholder="vidu@gmail.com"
                   />
                 </div>
               </div>

@@ -5,6 +5,70 @@ const { supabase } = require('../src/config/supabase.cjs');
 // In-memory status map for tracking join approval state: `${classId}_${studentId}` -> 'pending' | 'approved' | 'rejected'
 const statusMap = new Map();
 const ASSIGNMENT_COMPLETIONS_UUID = '00000000-0000-0000-0000-000000000004';
+const MEMBERSHIP_STATUS_UUID = '00000000-0000-0000-0000-000000000005';
+
+// Synchronize statusMap & classGradeMap with persistent storage in teacher_notifications
+async function loadPersistentStatuses(filter = null) {
+  try {
+    let query = supabase
+      .from('teacher_notifications')
+      .select('title, content')
+      .eq('teacher_id', MEMBERSHIP_STATUS_UUID);
+
+    if (filter) {
+      query = query.like('title', filter);
+    }
+    const { data } = await query;
+    if (data) {
+      data.forEach(item => {
+        if (item.title && item.title.startsWith('mem_status:')) {
+          const parts = item.title.split(':');
+          if (parts.length === 3) {
+            statusMap.set(`${parts[1]}_${parts[2]}`, item.content);
+          }
+        } else if (item.title && item.title.startsWith('class_grade:')) {
+          const cid = item.title.replace('class_grade:', '');
+          if (cid) classGradeMap.set(cid, parseInt(item.content));
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('Error loading persistent statuses:', err.message);
+  }
+}
+
+// Initial eager load
+loadPersistentStatuses();
+
+async function setPersistentStatus(classId, studentId, status) {
+  const key = `${String(classId)}_${String(studentId)}`;
+  if (status) {
+    statusMap.set(key, status);
+  } else {
+    statusMap.delete(key);
+  }
+  const title = `mem_status:${classId}:${studentId}`;
+  try {
+    await supabase
+      .from('teacher_notifications')
+      .delete()
+      .eq('teacher_id', MEMBERSHIP_STATUS_UUID)
+      .eq('title', title);
+
+    if (status) {
+      await supabase
+        .from('teacher_notifications')
+        .insert({
+          teacher_id: MEMBERSHIP_STATUS_UUID,
+          title,
+          content: status,
+          is_read: false
+        });
+    }
+  } catch (err) {
+    console.warn('Error persisting membership status:', err.message);
+  }
+}
 
 // Generate a random class code: 6 uppercase characters
 function generateClassCode() {
@@ -70,6 +134,10 @@ function getMembershipStatus(classId, studentId, dbStatus) {
 router.get('/all', async (req, res) => {
   try {
     const { grade, search, studentId } = req.query;
+
+    if (studentId) {
+      await loadPersistentStatuses(`mem_status:%:${studentId}`);
+    }
 
     const { data: classes, error } = await supabase
       .from('classes')
@@ -161,6 +229,9 @@ router.get('/all', async (req, res) => {
 router.get('/teacher/:teacherId', async (req, res) => {
   try {
     const { teacherId } = req.params;
+
+    // Load persistent statuses to ensure pendingCount & students count are accurate
+    await loadPersistentStatuses('mem_status:%');
     
     const { data: classes, error } = await supabase
       .from('classes')
@@ -290,7 +361,16 @@ router.post('/', async (req, res) => {
     }
 
     if (newClass) {
-      if (newClass.id) classGradeMap.set(String(newClass.id), selectedGrade);
+      if (newClass.id) {
+        classGradeMap.set(String(newClass.id), selectedGrade);
+        // Persist grade mapping to avoid losing custom class grade across restarts
+        supabase.from('teacher_notifications').insert({
+          teacher_id: MEMBERSHIP_STATUS_UUID,
+          title: `class_grade:${newClass.id}`,
+          content: String(selectedGrade),
+          is_read: false
+        }).then(() => {}).catch(() => {});
+      }
       if (newClass.code) classGradeMap.set(String(newClass.code), selectedGrade);
     }
 
@@ -334,7 +414,7 @@ router.delete('/:classId', async (req, res) => {
 // POST /api/classes/join - Join a class via class code or class id (sets status='pending')
 router.post('/join', async (req, res) => {
   try {
-    const { studentId, classCode, classId } = req.body;
+    const { studentId, classCode, classId, studentName: clientStudentName } = req.body;
     if (!studentId || (!classCode && !classId)) {
       return res.status(400).json({ success: false, message: 'Thiếu thông tin mã lớp hoặc mã học sinh' });
     }
@@ -360,7 +440,8 @@ router.post('/join', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Lớp học không tồn tại hoặc mã lớp không chính xác' });
     }
 
-    const key = `${String(cls.id)}_${String(studentId)}`;
+    // Ensure persistent statuses for this student are loaded
+    await loadPersistentStatuses(`mem_status:${cls.id}:${studentId}`);
 
     // Check existing membership in database
     let existingMember = null;
@@ -381,7 +462,7 @@ router.post('/join', async (req, res) => {
       } else if (currentStatus === 'pending') {
         return res.status(400).json({ success: false, message: 'Yêu cầu tham gia của bạn đang chờ giáo viên duyệt' });
       } else if (currentStatus === 'rejected') {
-        statusMap.set(key, 'pending');
+        await setPersistentStatus(cls.id, studentId, 'pending');
         try {
           await supabase
             .from('class_members')
@@ -389,21 +470,15 @@ router.post('/join', async (req, res) => {
             .eq('id', existingMember.id);
         } catch (upErr) {}
 
-        // Send teacher notification for re-submitted join request
+        // Send teacher notification for re-submitted join request immediately
+        const sName = clientStudentName || 'Học sinh';
         try {
-          const { data: studentUser } = await supabase
-            .from('users')
-            .select('display_name, username')
-            .eq('id', studentId)
-            .maybeSingle();
-          const studentName = studentUser?.display_name || studentUser?.username || 'Học sinh';
-
           await supabase
             .from('teacher_notifications')
             .insert({
               teacher_id: cls.teacher_id,
               title: 'Yêu cầu gia nhập lớp mới',
-              content: `Học sinh ${studentName} đã gửi lại yêu cầu tham gia vào lớp "${cls.name}" của bạn.`,
+              content: `Học sinh ${sName} đã gửi lại yêu cầu tham gia vào lớp "${cls.name}" của bạn.`,
               is_read: false
             });
         } catch (notifErr) {}
@@ -417,8 +492,8 @@ router.post('/join', async (req, res) => {
       }
     }
 
-    // Mark status as 'pending' in server statusMap FIRST
-    statusMap.set(key, 'pending');
+    // Persist status as 'pending' persistently
+    await setPersistentStatus(cls.id, studentId, 'pending');
 
     // Try inserting into database table
     let joinError = null;
@@ -441,30 +516,34 @@ router.post('/join', async (req, res) => {
       joinError = insFallbackErr;
     }
 
-    if (joinError) {
-      if (joinError.code === '23505') {
-        // Unique constraint - member already present
-        return res.status(400).json({ success: false, message: 'Yêu cầu gia nhập của bạn đang chờ giáo viên duyệt.' });
-      }
+    if (joinError && joinError.code !== '23505') {
       console.error('Error joining class:', joinError);
       return res.status(400).json({ success: false, message: joinError.message || 'Không thể gửi yêu cầu tham gia' });
     }
 
-    // Create teacher notification asynchronously
-    try {
-      const { data: studentUser } = await supabase
-        .from('users')
-        .select('display_name, username')
-        .eq('id', studentId)
-        .maybeSingle();
-      const studentName = studentUser?.display_name || studentUser?.username || 'Học sinh';
+    // Resolve student display name with zero latency if provided, or quick lookup
+    let finalStudentName = clientStudentName;
+    if (!finalStudentName) {
+      try {
+        const { data: studentUser } = await supabase
+          .from('users')
+          .select('display_name, username')
+          .eq('id', studentId)
+          .maybeSingle();
+        finalStudentName = studentUser?.display_name || studentUser?.username || 'Học sinh';
+      } catch (e) {
+        finalStudentName = 'Học sinh';
+      }
+    }
 
+    // Create teacher notification immediately to trigger Realtime WebSocket push
+    try {
       await supabase
         .from('teacher_notifications')
         .insert({
           teacher_id: cls.teacher_id,
           title: 'Yêu cầu gia nhập lớp mới',
-          content: `Học sinh ${studentName} đã gửi yêu cầu tham gia vào lớp "${cls.name}" của bạn.`,
+          content: `Học sinh ${finalStudentName} đã gửi yêu cầu tham gia vào lớp "${cls.name}" của bạn.`,
           is_read: false
         });
     } catch (notifErr) {}
@@ -481,11 +560,14 @@ router.post('/join', async (req, res) => {
   }
 });
 
-// GET /api/classes/:classId/students - Get students enrolled or pending in a class
+// GET /api/classes/:classId/students - Get students enrolled or pending in a class (High-performance optimized)
 router.get('/:classId/students', async (req, res) => {
   try {
     const { classId } = req.params;
     const { status } = req.query; // 'approved', 'pending', 'all'
+
+    // Load persistent statuses for this class
+    await loadPersistentStatuses(`mem_status:${classId}:%`);
 
     const { data: members, error } = await supabase
       .from('class_members')
@@ -527,94 +609,118 @@ router.get('/:classId/students', async (req, res) => {
 
     if (studentsError) throw studentsError;
 
-    const studentsWithStats = await Promise.all((students || []).map(async (student) => {
+    // Separate approved students for batch statistics querying
+    const approvedStudentIds = studentIds.filter(id => memberMap[id]?.status === 'approved');
+
+    // Batch query lesson completions for all approved students in ONE query
+    let completionsByUser = {};
+    if (approvedStudentIds.length > 0) {
+      try {
+        const { data: completions } = await supabase
+          .from('lesson_completions')
+          .select('user_id, score, total_questions, completed, completed_at')
+          .in('user_id', approvedStudentIds);
+
+        (completions || []).forEach(c => {
+          if (!completionsByUser[c.user_id]) {
+            completionsByUser[c.user_id] = [];
+          }
+          completionsByUser[c.user_id].push(c);
+        });
+      } catch (e) {}
+    }
+
+    // Batch query assignment completions for all approved students in ONE query
+    let manualByUser = {};
+    if (approvedStudentIds.length > 0) {
+      try {
+        const { data: manualList } = await supabase
+          .from('teacher_notifications')
+          .select('title, created_at')
+          .eq('teacher_id', ASSIGNMENT_COMPLETIONS_UUID);
+
+        (manualList || []).forEach(m => {
+          if (m.title && m.title.startsWith('asg_comp:')) {
+            const parts = m.title.split(':');
+            const uid = parts[1];
+            if (uid && approvedStudentIds.includes(uid)) {
+              if (!manualByUser[uid]) manualByUser[uid] = [];
+              manualByUser[uid].push(m);
+            }
+          }
+        });
+      } catch (e) {}
+    }
+
+    // Map students with stats in memory with zero extra DB roundtrips
+    const studentsWithStats = (students || []).map((student) => {
       const mInfo = memberMap[student.id] || { status: 'approved', joinedAt: null };
 
-      let lessonsCompleted = 0;
-      try {
-        const { count } = await supabase
-          .from('lesson_completions')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', student.id)
-          .eq('completed', true);
-        lessonsCompleted = count || 0;
-      } catch (e) {}
+      // Pending students: return immediately without expensive calculation
+      if (mInfo.status === 'pending') {
+        return {
+          id: student.id,
+          name: student.display_name || student.username || (student.email ? student.email.split('@')[0] : 'Học sinh'),
+          email: student.email,
+          avatar: student.avatar,
+          xp: student.xp || 0,
+          level: student.level || 1,
+          status: 'pending',
+          joinedAt: mInfo.joinedAt,
+          lessonsCompleted: 0,
+          avgScore: 0,
+          lastActive: 'Chờ duyệt'
+        };
+      }
 
-      // Also count completed class assignments for this student
-      let manualCompletedCount = 0;
-      try {
-        const { count: mCount } = await supabase
-          .from('teacher_notifications')
-          .select('*', { count: 'exact', head: true })
-          .eq('teacher_id', ASSIGNMENT_COMPLETIONS_UUID)
-          .like('title', `asg_comp:${student.id}:%`);
-        manualCompletedCount = mCount || 0;
-      } catch (e) {}
-      lessonsCompleted += manualCompletedCount;
+      // Approved students: compute stats from in-memory batch maps
+      const userComps = completionsByUser[student.id] || [];
+      const userManual = manualByUser[student.id] || [];
+
+      const completedLessons = userComps.filter(c => c.completed).length;
+      const lessonsCompleted = completedLessons + userManual.length;
 
       let avgScore = 0;
-      try {
-        const { data: lcScores } = await supabase
-          .from('lesson_completions')
-          .select('score, total_questions')
-          .eq('user_id', student.id);
-
-        if (lcScores && lcScores.length > 0) {
-          const totalPct = lcScores.reduce((sum, item) => sum + (item.score / (item.total_questions || 1) * 100), 0);
-          avgScore = Math.round(totalPct / lcScores.length);
-        } else if (manualCompletedCount > 0) {
-          avgScore = 100;
-        }
-      } catch (e) {}
+      if (userComps.length > 0) {
+        const totalPct = userComps.reduce((sum, item) => sum + ((item.score || 0) / (item.total_questions || 1) * 100), 0);
+        avgScore = Math.round(totalPct / userComps.length);
+      } else if (userManual.length > 0) {
+        avgScore = 100;
+      }
 
       let lastActive = 'Không hoạt động';
-      try {
-        let latestTime = null;
-        const { data: latestCompletion } = await supabase
-          .from('lesson_completions')
-          .select('completed_at')
-          .eq('user_id', student.id)
-          .order('completed_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+      let latestTime = null;
 
-        if (latestCompletion && latestCompletion.completed_at) {
-          latestTime = new Date(latestCompletion.completed_at).getTime();
+      userComps.forEach(c => {
+        if (c.completed_at) {
+          const t = new Date(c.completed_at).getTime();
+          if (!latestTime || t > latestTime) latestTime = t;
         }
+      });
 
-        const { data: latestManual } = await supabase
-          .from('teacher_notifications')
-          .select('created_at')
-          .eq('teacher_id', ASSIGNMENT_COMPLETIONS_UUID)
-          .like('title', `asg_comp:${student.id}:%`)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (latestManual && latestManual.created_at) {
-          const mTime = new Date(latestManual.created_at).getTime();
-          if (!latestTime || mTime > latestTime) {
-            latestTime = mTime;
-          }
+      userManual.forEach(m => {
+        if (m.created_at) {
+          const t = new Date(m.created_at).getTime();
+          if (!latestTime || t > latestTime) latestTime = t;
         }
+      });
 
-        if (latestTime) {
-          const diff = Date.now() - latestTime;
-          const mins = Math.floor(diff / 60000);
-          const hours = Math.floor(mins / 60);
-          const days = Math.floor(hours / 24);
+      if (latestTime) {
+        const diff = Date.now() - latestTime;
+        const mins = Math.floor(diff / 60000);
+        const hours = Math.floor(mins / 60);
+        const days = Math.floor(hours / 24);
 
-          if (mins < 1) {
-            lastActive = 'Vừa xong';
-          } else if (mins < 60) {
-            lastActive = `${mins} phút trước`;
-          } else if (hours < 24) {
-            lastActive = `${hours} giờ trước`;
-          } else {
-            lastActive = `${days} ngày trước`;
-          }
+        if (mins < 1) {
+          lastActive = 'Vừa xong';
+        } else if (mins < 60) {
+          lastActive = `${mins} phút trước`;
+        } else if (hours < 24) {
+          lastActive = `${hours} giờ trước`;
+        } else {
+          lastActive = `${days} ngày trước`;
         }
-      } catch (e) {}
+      }
 
       return {
         id: student.id,
@@ -629,7 +735,7 @@ router.get('/:classId/students', async (req, res) => {
         avgScore,
         lastActive
       };
-    }));
+    });
 
     res.json({ success: true, students: studentsWithStats });
   } catch (error) {
@@ -643,8 +749,7 @@ router.post('/:classId/students/:studentId/approve', async (req, res) => {
   try {
     const { classId, studentId } = req.params;
 
-    const key = `${String(classId)}_${String(studentId)}`;
-    statusMap.set(key, 'approved');
+    await setPersistentStatus(classId, studentId, 'approved');
 
     try {
       await supabase
@@ -666,8 +771,7 @@ router.post('/:classId/students/:studentId/reject', async (req, res) => {
   try {
     const { classId, studentId } = req.params;
 
-    const key = `${String(classId)}_${String(studentId)}`;
-    statusMap.set(key, 'rejected');
+    await setPersistentStatus(classId, studentId, 'rejected');
 
     try {
       await supabase
@@ -689,8 +793,7 @@ router.delete('/:classId/students/:studentId', async (req, res) => {
   try {
     const { classId, studentId } = req.params;
 
-    const key = `${String(classId)}_${String(studentId)}`;
-    statusMap.delete(key);
+    await setPersistentStatus(classId, studentId, null);
 
     const { error } = await supabase
       .from('class_members')
@@ -711,6 +814,9 @@ router.delete('/:classId/students/:studentId', async (req, res) => {
 router.get('/student/:studentId', async (req, res) => {
   try {
     const { studentId } = req.params;
+
+    // Load persistent statuses for this student
+    await loadPersistentStatuses(`mem_status:%:${studentId}`);
     
     const { data: memberships, error: memberError } = await supabase
       .from('class_members')

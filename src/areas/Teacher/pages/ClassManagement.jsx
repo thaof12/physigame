@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useTeacherAuth } from '../contexts/TeacherAuthContext';
 import api from '../../../config/api';
+import { supabase } from '../../../config/supabase';
 import { openDocumentInNewTab } from '../../../utils/documentViewer';
 
 const ClassManagement = () => {
@@ -117,28 +118,22 @@ const ClassManagement = () => {
     fetchClasses();
   }, [teacher]);
 
-  // Fetch active class details
+  // Fetch active class details in parallel for maximum speed
   const fetchClassDetails = async () => {
     if (!activeClass?.id) return;
     try {
-      // Fetch announcements
-      const annRes = await api.get(`/classes/${activeClass.id}/announcements`);
+      const [annRes, asgRes, meetRes, discRes, studRes] = await Promise.all([
+        api.get(`/classes/${activeClass.id}/announcements`),
+        api.get(`/classes/${activeClass.id}/assignments`),
+        api.get(`/classes/${activeClass.id}/meetings`),
+        api.get(`/classes/${activeClass.id}/discussions`),
+        api.get(`/classes/${activeClass.id}/students?status=all`)
+      ]);
+
       setAnnouncements(annRes.data?.announcements || []);
-
-      // Fetch assignments
-      const asgRes = await api.get(`/classes/${activeClass.id}/assignments`);
       setAssignments(asgRes.data?.assignments || []);
-
-      // Fetch meetings
-      const meetRes = await api.get(`/classes/${activeClass.id}/meetings`);
       setMeetings(meetRes.data?.meetings || []);
-
-      // Fetch discussions
-      const discRes = await api.get(`/classes/${activeClass.id}/discussions`);
       setDiscussions(discRes.data?.discussions || []);
-
-      // Fetch all students (approved and pending)
-      const studRes = await api.get(`/classes/${activeClass.id}/students?status=all`);
       setStudents(studRes.data?.students || []);
     } catch (error) {
       console.error('Error loading class details:', error);
@@ -150,6 +145,50 @@ const ClassManagement = () => {
       fetchClassDetails();
     }
   }, [activeClass]);
+
+  // Realtime subscription and fast sync for instant join request notifications
+  useEffect(() => {
+    if (!teacher?.id) return;
+
+    let notifChannel;
+    try {
+      notifChannel = supabase
+        .channel(`teacher-mgmt-notifs-${teacher.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'teacher_notifications',
+            filter: `teacher_id=eq.${teacher.id}`
+          },
+          () => {
+            fetchClasses();
+            if (activeClass?.id) {
+              fetchClassDetails();
+            }
+          }
+        )
+        .subscribe();
+    } catch (err) {
+      console.warn('Realtime subscription error:', err);
+    }
+
+    // Polling every 4 seconds when page is active & visible
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchClasses();
+        if (activeClass?.id) {
+          fetchClassDetails();
+        }
+      }
+    }, 4000);
+
+    return () => {
+      if (notifChannel) supabase.removeChannel(notifChannel);
+      clearInterval(interval);
+    };
+  }, [teacher?.id, activeClass?.id]);
 
   useEffect(() => {
     if (activeTab === 'discussions') {
@@ -981,7 +1020,7 @@ const ClassManagement = () => {
                       >
                         <span>Chờ duyệt ({pendingStudents.length})</span>
                         {pendingStudents.length > 0 && (
-                          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                          <span className="w-2 h-2 rounded-full bg-rose-500" />
                         )}
                       </button>
                     </div>
@@ -1295,7 +1334,7 @@ const ClassManagement = () => {
                 </button>
 
                 {cls.pendingCount > 0 && (
-                  <span className="px-2 py-0.5 bg-amber-500 text-white rounded-full text-[10px] font-black animate-pulse">
+                  <span className="px-2 py-0.5 bg-amber-500 text-white rounded-full text-[10px] font-black">
                     {cls.pendingCount} chờ duyệt
                   </span>
                 )}

@@ -228,8 +228,10 @@ const MyClass = () => {
     if (targetClassId) setJoiningId(targetClassId);
 
     try {
+      const studentDisplayName = user?.display_name || user?.displayName || user?.username || 'Học sinh';
       const response = await api.post('/classes/join', {
         studentId: user.id,
+        studentName: studentDisplayName,
         classCode: codeToUse ? codeToUse.trim().toUpperCase() : undefined,
         classId: targetClassId || undefined
       });
@@ -238,9 +240,16 @@ const MyClass = () => {
         setSuccessMsg(response.data.message || 'Đã gửi yêu cầu gia nhập thành công!');
         setClassCodeInput('');
         setShowJoinModal(false);
-        // Refresh both lists
-        await fetchStudentClasses();
-        await fetchAllClasses();
+
+        // Optimistically update status of joined class in local list immediately
+        const joinedId = response.data?.class?.id || targetClassId;
+        if (joinedId) {
+          setAllClasses(prev => prev.map(c => c.id === joinedId ? { ...c, myStatus: 'pending' } : c));
+        }
+
+        // Fast background sync
+        fetchStudentClasses();
+        fetchAllClasses();
       }
     } catch (error) {
       console.error('Error joining class:', error);
