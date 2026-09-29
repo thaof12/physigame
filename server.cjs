@@ -212,7 +212,7 @@ app.post('/api/settings', async (req, res) => {
 });
 
 // Endpoint serving uploaded custom OG image as standard binary image for social crawlers
-app.get('/api/og-image', async (req, res) => {
+app.get(['/api/og-image', '/api/og-image.js'], async (req, res) => {
   try {
     let imgData = cachedSettings?.customOgImageData;
 
@@ -251,7 +251,7 @@ app.get('/api/og-image', async (req, res) => {
 });
 
 // Dynamic Open Graph HTML for Social Crawlers (Zalo, Facebook, Discord, Telegram, etc.)
-app.get('/api/og', async (req, res) => {
+app.get(['/api/og', '/api/og.js'], async (req, res) => {
   try {
     let siteName = 'Eureka - Vật lý';
     let siteDescription = 'Nền tảng học Vật lý tương tác';
