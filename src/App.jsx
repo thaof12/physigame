@@ -121,9 +121,13 @@ const AppContent = () => {
         const response = await fetch('/api/settings');
         const settings = await response.json();
         
-        // Cập nhật tiêu đề và mô tả website
+        // Cập nhật tiêu đề và mô tả website (bao gồm cả Open Graph meta tags)
         if (settings.siteName) {
           document.title = settings.siteName;
+          const ogTitle = document.querySelector('meta[property="og:title"]');
+          if (ogTitle) ogTitle.content = settings.siteName;
+          const twTitle = document.querySelector('meta[name="twitter:title"]');
+          if (twTitle) twTitle.content = settings.siteName;
         }
         if (settings.siteDescription) {
           let metaDesc = document.querySelector('meta[name="description"]');
@@ -133,6 +137,28 @@ const AppContent = () => {
             document.head.appendChild(metaDesc);
           }
           metaDesc.content = settings.siteDescription;
+
+          let ogDesc = document.querySelector('meta[property="og:description"]');
+          if (!ogDesc) {
+            ogDesc = document.createElement('meta');
+            ogDesc.setAttribute('property', 'og:description');
+            document.head.appendChild(ogDesc);
+          }
+          ogDesc.content = settings.siteDescription;
+
+          let twDesc = document.querySelector('meta[name="twitter:description"]');
+          if (twDesc) twDesc.content = settings.siteDescription;
+        }
+
+        if (settings.siteOgImage) {
+          let fullImg = settings.siteOgImage;
+          if (!fullImg.startsWith('http://') && !fullImg.startsWith('https://')) {
+            fullImg = window.location.origin + (fullImg.startsWith('/') ? '' : '/') + fullImg;
+          }
+          const ogImg = document.querySelector('meta[property="og:image"]');
+          if (ogImg) ogImg.content = fullImg;
+          const twImg = document.querySelector('meta[name="twitter:image"]');
+          if (twImg) twImg.content = fullImg;
         }
 
         if (settings.maintenanceMode) {

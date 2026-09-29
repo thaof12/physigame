@@ -21,6 +21,17 @@
   ],
   "rewrites": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|Zalo|Twitterbot|Pinterest|Googlebot|LinkedInBot|Discordbot|TelegramBot|WhatsApp|curl|bingbot).*"
+        }
+      ],
+      "destination": "/api/og"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/index.js"
     },

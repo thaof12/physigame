@@ -109,8 +109,10 @@ let cachedSettingsTime = 0;
 const SETTINGS_CACHE_TTL = 10000; // 10 seconds cache
 
 const defaultSettings = {
-  siteName: 'Eureka',
+  siteName: 'Eureka - Vật lý',
   siteDescription: 'Nền tảng học Vật lý tương tác',
+  siteOgImage: '/images/eureka_og_share.png',
+  customOgImageData: '',
   maintenanceMode: false,
   allowRegistration: true,
   emailNotifications: true,
@@ -206,6 +208,117 @@ app.post('/api/settings', async (req, res) => {
   } catch (error) {
     console.error('❌ [Settings] Save error:', error);
     res.status(500).json({ error: 'Failed to save settings: ' + error.message });
+  }
+});
+
+// Endpoint serving uploaded custom OG image as standard binary image for social crawlers
+app.get('/api/og-image', async (req, res) => {
+  try {
+    let imgData = cachedSettings?.customOgImageData;
+
+    if (!imgData) {
+      try {
+        const { data: dbData } = await supabase
+          .from('teacher_notifications')
+          .select('content')
+          .eq('teacher_id', SYSTEM_SETTINGS_UUID)
+          .eq('title', 'system_settings_config')
+          .maybeSingle();
+
+        if (dbData?.content) {
+          const parsed = typeof dbData.content === 'string' ? JSON.parse(dbData.content) : dbData.content;
+          imgData = parsed.customOgImageData;
+        }
+      } catch (e) {}
+    }
+
+    if (imgData && imgData.startsWith('data:image/')) {
+      const match = imgData.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
+      if (match) {
+        const mimeType = match[1];
+        const buffer = Buffer.from(match[2], 'base64');
+        res.setHeader('Content-Type', mimeType);
+        res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+        return res.send(buffer);
+      }
+    }
+
+    // Fallback to default Eureka OG banner
+    res.redirect(302, '/images/eureka_og_share.png');
+  } catch (err) {
+    res.redirect(302, '/images/eureka_og_share.png');
+  }
+});
+
+// Dynamic Open Graph HTML for Social Crawlers (Zalo, Facebook, Discord, Telegram, etc.)
+app.get('/api/og', async (req, res) => {
+  try {
+    let siteName = 'Eureka - Vật lý';
+    let siteDescription = 'Nền tảng học Vật lý tương tác';
+    let siteOgImage = '/images/eureka_og_share.png';
+
+    // Get latest settings from cache or DB
+    if (cachedSettings) {
+      siteName = cachedSettings.siteName || siteName;
+      siteDescription = cachedSettings.siteDescription || siteDescription;
+      siteOgImage = cachedSettings.siteOgImage || siteOgImage;
+    } else {
+      try {
+        const { data: dbData } = await supabase
+          .from('teacher_notifications')
+          .select('content')
+          .eq('teacher_id', SYSTEM_SETTINGS_UUID)
+          .eq('title', 'system_settings_config')
+          .maybeSingle();
+
+        if (dbData?.content) {
+          const parsed = typeof dbData.content === 'string' ? JSON.parse(dbData.content) : dbData.content;
+          siteName = parsed.siteName || siteName;
+          siteDescription = parsed.siteDescription || siteDescription;
+          siteOgImage = parsed.siteOgImage || siteOgImage;
+        }
+      } catch (e) {}
+    }
+
+    const host = req.get('host') || 'eureka-th.vercel.app';
+    const protocol = req.protocol === 'https' || host.includes('vercel.app') ? 'https' : 'http';
+    const baseUrl = `${protocol}://${host}`;
+
+    let imageUrl = siteOgImage;
+    if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+      imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+    }
+
+    const html = `<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>${siteName}</title>
+  <meta name="description" content="${siteDescription}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="${baseUrl}/">
+  <meta property="og:title" content="${siteName}">
+  <meta property="og:description" content="${siteDescription}">
+  <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="${siteName}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${siteName}">
+  <meta name="twitter:description" content="${siteDescription}">
+  <meta name="twitter:image" content="${imageUrl}">
+</head>
+<body>
+  <h1>${siteName}</h1>
+  <p>${siteDescription}</p>
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+    return res.send(html);
+  } catch (err) {
+    res.status(500).send('Error generating OG card');
   }
 });
 
