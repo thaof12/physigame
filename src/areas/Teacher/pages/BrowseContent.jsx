@@ -346,6 +346,14 @@ const BrowseContent = () => {
 
   const openAssignModal = async (item, e) => {
     if (e) e.stopPropagation();
+    if (!item) return;
+
+    const isLocked = lockedIds.includes(String(item.id)) || item.is_locked || item.status === 'locked';
+    if (isLocked) {
+      alert('Bài này đã bị Quản trị viên tạm khóa. Không thể thực hiện giao bài!');
+      return;
+    }
+
     setAssignItem(item);
     
     // Determine the most accurate, working link for this lesson or exercise
@@ -389,6 +397,12 @@ const BrowseContent = () => {
     e.preventDefault();
     if (!assignClassId || !assignLink.trim() || !assignItem) return;
 
+    const isLocked = lockedIds.includes(String(assignItem.id)) || assignItem.is_locked || assignItem.status === 'locked';
+    if (isLocked) {
+      alert('Bài này đã bị Quản trị viên tạm khóa. Không thể thực hiện giao bài!');
+      return;
+    }
+
     setAssignSubmitting(true);
     try {
       await api.post(`/classes/${assignClassId}/assignments`, {
@@ -396,6 +410,8 @@ const BrowseContent = () => {
         description: assignNote.trim() || null,
         link: assignLink.trim(),
         resourceId: assignLink.trim(),
+        contentId: assignItem.id,
+        contentType: activeTab === 'lessons' ? 'lesson' : 'exercise',
         type: 'custom',
         dueDate: assignDueDate || null
       });
@@ -403,7 +419,8 @@ const BrowseContent = () => {
       setTimeout(() => closeAssignModal(), 1600);
     } catch (err) {
       console.error('Error assigning content:', err);
-      alert('Không thể giao bài. Vui lòng thử lại.');
+      const errMsg = err?.response?.data?.message || 'Không thể giao bài. Vui lòng thử lại.';
+      alert(errMsg);
     } finally {
       setAssignSubmitting(false);
     }
@@ -1195,18 +1212,35 @@ const BrowseContent = () => {
 
             {/* Modal Footer */}
             <div className="flex items-center justify-between px-8 py-6 border-t border-slate-100 bg-slate-50/50">
-              <button
-                type="button"
-                onClick={(e) => { setSelectedItem(null); openAssignModal(selectedItem, e); }}
-                className="font-heading flex items-center gap-1.5 px-5 py-2.5 bg-cyan-700 text-white rounded-xl text-xs font-extrabold hover:bg-cyan-800 transition-colors shadow-sm"
-              >
-                <Send className="w-3.5 h-3.5" />
-                Giao bài này
-              </button>
+              {(() => {
+                const isSelectedLocked = selectedItem && (lockedIds.includes(String(selectedItem.id)) || selectedItem.is_locked || selectedItem.status === 'locked');
+                return (
+                  <button
+                    type="button"
+                    disabled={isSelectedLocked}
+                    onClick={(e) => {
+                      if (isSelectedLocked) {
+                        alert('Bài này đã bị Quản trị viên tạm khóa. Không thể thực hiện giao bài!');
+                        return;
+                      }
+                      setSelectedItem(null);
+                      openAssignModal(selectedItem, e);
+                    }}
+                    className={`font-heading flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-extrabold transition-colors shadow-sm ${
+                      isSelectedLocked
+                        ? 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed pointer-events-none'
+                        : 'bg-cyan-700 text-white hover:bg-cyan-800 cursor-pointer'
+                    }`}
+                  >
+                    {isSelectedLocked ? <Lock className="w-3.5 h-3.5 text-slate-400" /> : <Send className="w-3.5 h-3.5" />}
+                    {isSelectedLocked ? 'Đã bị tạm khóa' : 'Giao bài này'}
+                  </button>
+                );
+              })()}
               <button
                 type="button"
                 onClick={() => setSelectedItem(null)}
-                className="font-heading px-6 py-2.5 bg-slate-800 text-white rounded-xl text-xs font-extrabold hover:bg-slate-900 transition-colors shadow-sm"
+                className="font-heading px-6 py-2.5 bg-slate-800 text-white rounded-xl text-xs font-extrabold hover:bg-slate-900 transition-colors shadow-sm cursor-pointer"
               >
                 Đóng lại
               </button>

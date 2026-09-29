@@ -6,6 +6,19 @@ const { supabase } = require('../src/config/supabase.cjs');
 const statusMap = new Map();
 const ASSIGNMENT_COMPLETIONS_UUID = '00000000-0000-0000-0000-000000000004';
 const MEMBERSHIP_STATUS_UUID = '00000000-0000-0000-0000-000000000005';
+const reportsRouter = require('./reports.cjs');
+
+// Helper to get active locked IDs across DB and memory
+const getMergedLockedIds = async () => {
+  if (reportsRouter && typeof reportsRouter.getMergedLockedIds === 'function') {
+    try {
+      return await reportsRouter.getMergedLockedIds();
+    } catch (e) {
+      console.warn('Error calling getMergedLockedIds:', e.message);
+    }
+  }
+  return [];
+};
 
 // Synchronize statusMap & classGradeMap with persistent storage in teacher_notifications
 async function loadPersistentStatuses(filter = null) {
@@ -957,8 +970,62 @@ router.get('/:classId/assignments', async (req, res) => {
       throw error;
     }
     
+    // Fetch locked items from reports / admin lock system
+    const lockedIds = await getMergedLockedIds();
+    let lockedLessons = [];
+    let lockedChallenges = [];
+    if (lockedIds.length > 0) {
+      try {
+        const [lockedLessonsRes, lockedChallengesRes] = await Promise.allSettled([
+          supabase.from('lessons').select('id, title, theory, content, class_id, chapter_id, lesson_id').in('id', lockedIds),
+          supabase.from('challenges').select('id, name, link').in('id', lockedIds)
+        ]);
+        lockedLessons = (lockedLessonsRes.status === 'fulfilled' && lockedLessonsRes.value.data) || [];
+        lockedChallenges = (lockedChallengesRes.status === 'fulfilled' && lockedChallengesRes.value.data) || [];
+      } catch (e) {}
+    }
+
+    const checkIsAssignmentLocked = (asg) => {
+      const desc = asg.description || '';
+      const cidMatch = desc.match(/<!--cid:([^>]+)-->/);
+      const embeddedCid = cidMatch ? cidMatch[1] : null;
+
+      if (embeddedCid && lockedIds.includes(String(embeddedCid))) return true;
+      if (asg.resource_id && lockedIds.includes(String(asg.resource_id))) return true;
+
+      // Check against locked lessons
+      const matchedLockedLesson = lockedLessons.find(l => {
+        const titleMatches = asg.title && l.title && asg.title.trim().toLowerCase() === l.title.trim().toLowerCase();
+        const linkMatches = asg.resource_id && (
+          (l.theory && asg.resource_id === l.theory) ||
+          (l.content && asg.resource_id === l.content)
+        );
+        const compositeMatches = l.class_id && l.chapter_id && l.lesson_id && (
+          String(asg.resource_id).includes(`${l.class_id}-${l.chapter_id}-${l.lesson_id}`) ||
+          String(asg.resource_id).includes(`${l.class_id}/${l.chapter_id}/${l.lesson_id}`)
+        );
+        return titleMatches || linkMatches || compositeMatches;
+      });
+      if (matchedLockedLesson) return true;
+
+      // Check against locked challenges
+      const matchedLockedChallenge = lockedChallenges.find(c => {
+        const titleMatches = asg.title && c.name && asg.title.trim().toLowerCase() === c.name.trim().toLowerCase();
+        const linkMatches = asg.resource_id && c.link && asg.resource_id === c.link;
+        return titleMatches || linkMatches;
+      });
+      if (matchedLockedChallenge) return true;
+
+      return false;
+    };
+
     if (!studentId) {
-      return res.json({ success: true, assignments: assignments || [] });
+      const sanitized = (assignments || []).map(asg => {
+        const cleanDesc = (asg.description || '').replace(/<!--cid:[^>]*-->/g, '').trim();
+        const isLocked = checkIsAssignmentLocked(asg);
+        return { ...asg, description: cleanDesc, is_locked: isLocked };
+      });
+      return res.json({ success: true, assignments: sanitized });
     }
     
     // Fetch manual assignment completions for this student
@@ -1009,7 +1076,9 @@ router.get('/:classId/assignments', async (req, res) => {
         }
       }
       
-      return { ...asg, completed, score };
+      const cleanDesc = (asg.description || '').replace(/<!--cid:[^>]*-->/g, '').trim();
+      const isLocked = checkIsAssignmentLocked(asg);
+      return { ...asg, description: cleanDesc, is_locked: isLocked, completed, score };
     }));
     
     res.json({ success: true, assignments: enriched });
@@ -1133,7 +1202,24 @@ router.post('/:classId/assignments/:assignmentId/toggle-complete', async (req, r
 router.post('/:classId/assignments', async (req, res) => {
   try {
     const { classId } = req.params;
-    const { title, description, type, resourceId, link, dueDate } = req.body;
+    const { title, description, type, resourceId, link, dueDate, contentId } = req.body;
+
+    // Check if content is currently locked by Admin
+    const lockedIds = await getMergedLockedIds();
+    let isItemLocked = false;
+    if (contentId && lockedIds.includes(String(contentId))) {
+      isItemLocked = true;
+    } else if (resourceId && lockedIds.includes(String(resourceId))) {
+      isItemLocked = true;
+    } else if (link && lockedIds.includes(String(link))) {
+      isItemLocked = true;
+    }
+    if (isItemLocked) {
+      return res.status(403).json({
+        success: false,
+        message: 'Nội dung này đã bị Quản trị viên tạm khóa. Không thể thực hiện giao bài vào lớp!'
+      });
+    }
 
     let validParamType = type;
     if (!validParamType || validParamType === 'link') {
@@ -1144,11 +1230,16 @@ router.post('/:classId/assignments', async (req, res) => {
     if (dueDate && typeof dueDate === 'string' && dueDate.trim() !== '') {
       formattedDueDate = dueDate.trim();
     }
+
+    let storedDescription = description ? description.trim() : null;
+    if (contentId) {
+      storedDescription = storedDescription ? `${storedDescription}\n<!--cid:${contentId}-->` : `<!--cid:${contentId}-->`;
+    }
     
     const insertPayload = {
       class_id: classId,
       title: title ? title.trim() : '',
-      description: description ? description.trim() : null,
+      description: storedDescription,
       type: validParamType,
       resource_id: link || resourceId || '',
       due_date: formattedDueDate
@@ -1173,11 +1264,13 @@ router.post('/:classId/assignments', async (req, res) => {
           .select()
           .single();
         if (fallbackErr) throw fallbackErr;
-        return res.json({ success: true, assignment: fallbackData });
+        const cleanDesc = (fallbackData.description || '').replace(/<!--cid:[^>]*-->/g, '').trim();
+        return res.json({ success: true, assignment: { ...fallbackData, description: cleanDesc, is_locked: false } });
       }
       throw error;
     }
-    res.json({ success: true, assignment: data });
+    const cleanDesc = (data.description || '').replace(/<!--cid:[^>]*-->/g, '').trim();
+    res.json({ success: true, assignment: { ...data, description: cleanDesc, is_locked: false } });
   } catch (error) {
     console.error('Error creating assignment:', error);
     res.status(500).json({ success: false, message: 'Server error', error: error.message });

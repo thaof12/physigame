@@ -225,6 +225,13 @@ router.delete('/:id', async (req, res) => {
   console.log(`🗑️ DELETE /api/lessons/${lessonId} (isUuid: ${isUuid})`);
 
   try {
+    // 1. Fetch lesson details before deletion so we can accurately match and remove its class_assignments
+    let lessonToDelete = null;
+    try {
+      const { data: found } = await supabase.from('lessons').select('*').eq('id', lessonId).maybeSingle();
+      lessonToDelete = found;
+    } catch (e) {}
+
     if (isUuid) {
       // UUID-based lesson (teacher-created content stored in Supabase)
       const { data, error } = await supabase
@@ -240,7 +247,6 @@ router.delete('/:id', async (req, res) => {
 
       if (!data || data.length === 0) {
         console.warn(`⚠️ Lesson ${lessonId} not found in Supabase (may already be deleted)`);
-        // Still return success so frontend can clean up its state
       }
     } else {
       // Integer-based legacy lesson
@@ -252,12 +258,43 @@ router.delete('/:id', async (req, res) => {
       await Lesson.delete(parsedId);
     }
 
-    // Always clean up related data — use Promise.allSettled so one failure doesn't abort others
-    // Note: Do NOT call .catch() on Supabase query builders directly; always await them
+    // 2. Comprehensive cleanup of class_assignments for both teacher class view and student class view
+    try {
+      const { data: allAsgs } = await supabase.from('class_assignments').select('id, title, resource_id, description');
+      if (allAsgs && allAsgs.length > 0) {
+        const idsToDelete = allAsgs.filter(asg => {
+          const resId = String(asg.resource_id || '');
+          const desc = String(asg.description || '');
+          const title = String(asg.title || '').trim().toLowerCase();
+
+          const matchesId = resId === String(lessonId) || resId.includes(String(lessonId)) || desc.includes(String(lessonId));
+          const matchesLink = lessonToDelete && (
+            (lessonToDelete.theory && resId === lessonToDelete.theory) ||
+            (lessonToDelete.content && resId === lessonToDelete.content)
+          );
+          const matchesComposite = lessonToDelete && lessonToDelete.class_id && lessonToDelete.chapter_id && lessonToDelete.lesson_id && (
+            resId.includes(`${lessonToDelete.class_id}-${lessonToDelete.chapter_id}-${lessonToDelete.lesson_id}`) ||
+            resId.includes(`${lessonToDelete.class_id}/${lessonToDelete.chapter_id}/${lessonToDelete.lesson_id}`)
+          );
+          const matchesTitle = lessonToDelete && lessonToDelete.title && (title === lessonToDelete.title.trim().toLowerCase());
+
+          return matchesId || matchesLink || matchesComposite || matchesTitle;
+        }).map(a => a.id);
+
+        if (idsToDelete.length > 0) {
+          await supabase.from('class_assignments').delete().in('id', idsToDelete);
+          console.log(`✅ Deleted ${idsToDelete.length} class_assignments associated with deleted lesson ${lessonId}`);
+        }
+      }
+    } catch (cleanErr) {
+      console.warn('Warning cleaning up class_assignments for deleted lesson:', cleanErr.message);
+    }
+
+    // 3. Clean up reports and locks
+    const ADMIN_LOCKS_UUID = '00000000-0000-0000-0000-000000000002';
     await Promise.allSettled([
       supabase.from('reports').delete().eq('content_id', lessonId),
-      supabase.from('class_assignments').delete().eq('content_id', lessonId),
-      supabase.from('assigned_content').delete().eq('content_id', lessonId)
+      supabase.from('teacher_notifications').delete().eq('teacher_id', ADMIN_LOCKS_UUID).eq('title', String(lessonId))
     ]);
 
     invalidateLessonsCache();

@@ -136,6 +136,13 @@ router.delete('/:id', async (req, res) => {
   console.log(`🗑️ DELETE /api/challenges/${id} (isUuid: ${isUuid})`);
 
   try {
+    // 1. Fetch challenge details before deletion so we can accurately match and remove its class_assignments
+    let challengeToDelete = null;
+    try {
+      const { data: found } = await supabase.from('challenges').select('*').eq('id', id).maybeSingle();
+      challengeToDelete = found;
+    } catch (e) {}
+
     if (isUuid) {
       // UUID-based challenge (teacher-created content stored in Supabase)
       const { data, error } = await supabase
@@ -151,7 +158,6 @@ router.delete('/:id', async (req, res) => {
 
       if (!data || data.length === 0) {
         console.warn(`⚠️ Challenge ${id} not found in Supabase (may already be deleted)`);
-        // Not found — still return success so frontend can clean up its state
       }
     } else {
       // Integer-based legacy challenge
@@ -162,11 +168,36 @@ router.delete('/:id', async (req, res) => {
       await Challenge.delete(parsedId);
     }
 
-    // Always clean up related data regardless of whether delete succeeded
+    // 2. Comprehensive cleanup of class_assignments for both teacher class view and student class view
+    try {
+      const { data: allAsgs } = await supabase.from('class_assignments').select('id, title, resource_id, description');
+      if (allAsgs && allAsgs.length > 0) {
+        const idsToDelete = allAsgs.filter(asg => {
+          const resId = String(asg.resource_id || '');
+          const desc = String(asg.description || '');
+          const title = String(asg.title || '').trim().toLowerCase();
+
+          const matchesId = resId === String(id) || resId.includes(String(id)) || desc.includes(String(id));
+          const matchesLink = challengeToDelete && challengeToDelete.link && resId === challengeToDelete.link;
+          const matchesTitle = challengeToDelete && challengeToDelete.name && (title === challengeToDelete.name.trim().toLowerCase());
+
+          return matchesId || matchesLink || matchesTitle;
+        }).map(a => a.id);
+
+        if (idsToDelete.length > 0) {
+          await supabase.from('class_assignments').delete().in('id', idsToDelete);
+          console.log(`✅ Deleted ${idsToDelete.length} class_assignments associated with deleted challenge ${id}`);
+        }
+      }
+    } catch (cleanErr) {
+      console.warn('Warning cleaning up class_assignments for deleted challenge:', cleanErr.message);
+    }
+
+    // 3. Clean up reports and locks
+    const ADMIN_LOCKS_UUID = '00000000-0000-0000-0000-000000000002';
     await Promise.allSettled([
       supabase.from('reports').delete().eq('content_id', id),
-      supabase.from('class_assignments').delete().eq('content_id', id),
-      supabase.from('assigned_content').delete().eq('content_id', id)
+      supabase.from('teacher_notifications').delete().eq('teacher_id', ADMIN_LOCKS_UUID).eq('title', String(id))
     ]);
 
     console.log(`✅ Challenge ${id} deleted successfully`);

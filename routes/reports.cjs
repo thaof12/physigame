@@ -399,4 +399,5 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+router.getMergedLockedIds = getMergedLockedIds;
 module.exports = router;

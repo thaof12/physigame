@@ -26,7 +26,8 @@ import {
   Filter,
   Clock3,
   ShieldAlert,
-  Sparkles
+  Sparkles,
+  Lock
 } from 'lucide-react';
 import api from '../config/api';
 import { openDocumentInNewTab } from '../utils/documentViewer';
@@ -347,6 +348,11 @@ const MyClass = () => {
   };
 
   const navigateToAssignment = (asg) => {
+    if (asg?.is_locked) {
+      alert('Bài tập này đang bị Quản trị viên tạm khóa để xem xét. Không thể mở bài lúc này!');
+      return;
+    }
+
     const targetUrl = asg.link || asg.resource_id;
     if (targetUrl && targetUrl.startsWith('data:')) {
       openDocumentInNewTab(targetUrl);
@@ -373,6 +379,11 @@ const MyClass = () => {
   const handleToggleAssignmentComplete = async (e, asg) => {
     e.stopPropagation();
     if (!user?.id || !activeClass?.id) return;
+
+    if (asg?.is_locked) {
+      alert('Bài tập này đang bị Quản trị viên tạm khóa. Không thể thực hiện thao tác!');
+      return;
+    }
 
     const targetCompleted = !asg.completed;
     setTogglingAsgId(asg.id);
@@ -657,6 +668,11 @@ const MyClass = () => {
                               }`}>
                                 {asg.type === 'link' || (asg.link && asg.link.startsWith('http')) ? 'LINK BÀI TẬP' : asg.type === 'lesson' ? 'BÀI HỌC' : 'THỬ THÁCH'}
                               </span>
+                              {asg.is_locked && (
+                                <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1 shadow-xs">
+                                  <Lock className="w-3 h-3 text-rose-600" /> TẠM KHÓA BỞI ADMIN
+                                </span>
+                              )}
                               {asg.due_date && (
                                 <span className="text-[10px] text-rose-600 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
                                   <Clock className="w-3 h-3 text-rose-500" /> Hạn nộp: {new Date(asg.due_date).toLocaleDateString('vi-VN')}
@@ -669,8 +685,16 @@ const MyClass = () => {
                               )}
                             </div>
                             <h3 
-                              onClick={() => navigateToAssignment(asg)}
-                              className="font-black text-slate-900 hover:text-indigo-600 transition-colors text-base cursor-pointer break-words"
+                              onClick={() => {
+                                if (asg.is_locked) {
+                                  alert('Bài tập này đang bị Quản trị viên tạm khóa. Không thể mở bài lúc này!');
+                                  return;
+                                }
+                                navigateToAssignment(asg);
+                              }}
+                              className={`font-black text-base transition-colors break-words ${
+                                asg.is_locked ? 'text-slate-400 cursor-not-allowed' : 'text-slate-900 hover:text-indigo-600 cursor-pointer'
+                              }`}
                             >
                               {asg.title}
                             </h3>
@@ -683,27 +707,41 @@ const MyClass = () => {
                             {/* Action: Open assignment */}
                             <button
                               type="button"
-                              onClick={() => navigateToAssignment(asg)}
-                              className="px-3.5 py-2 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-600 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-                              title="Mở nội dung bài tập để làm"
+                              disabled={asg.is_locked}
+                              onClick={() => {
+                                if (asg.is_locked) {
+                                  alert('Bài tập này đang bị Quản trị viên tạm khóa. Không thể mở bài lúc này!');
+                                  return;
+                                }
+                                navigateToAssignment(asg);
+                              }}
+                              className={`px-3.5 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 shadow-xs ${
+                                asg.is_locked
+                                  ? 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed pointer-events-none'
+                                  : 'bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-600 cursor-pointer active:scale-95'
+                              }`}
+                              title={asg.is_locked ? 'Bài tập này đã bị Quản trị viên tạm khóa, không thể mở' : 'Mở nội dung bài tập để làm'}
                             >
-                              <span>Làm bài</span>
-                              <ExternalLink className="w-3.5 h-3.5" />
+                              {asg.is_locked ? <Lock className="w-3.5 h-3.5 text-slate-400" /> : null}
+                              <span>{asg.is_locked ? 'Bài đã bị khóa' : 'Làm bài'}</span>
+                              {!asg.is_locked && <ExternalLink className="w-3.5 h-3.5" />}
                             </button>
 
                             {/* Action: Toggle completion status */}
                             <button
                               type="button"
                               onClick={(e) => handleToggleAssignmentComplete(e, asg)}
-                              disabled={togglingAsgId === asg.id}
-                              className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95 group/btn ${
-                                asg.completed
-                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
-                                  : 'bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300'
+                              disabled={togglingAsgId === asg.id || asg.is_locked}
+                              className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 shadow-xs group/btn ${
+                                asg.is_locked
+                                  ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed pointer-events-none'
+                                  : asg.completed
+                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 cursor-pointer active:scale-95'
+                                  : 'bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 cursor-pointer active:scale-95'
                               } ${togglingAsgId === asg.id ? 'opacity-70 cursor-wait' : ''}`}
-                              title={asg.completed ? 'Bấm để hủy trạng thái hoàn thành nếu muốn' : 'Bấm để đánh dấu hoàn thành và gửi báo cáo kết quả tới giáo viên'}
+                              title={asg.is_locked ? 'Bài tập bị tạm khóa, không thể thao tác' : asg.completed ? 'Bấm để hủy trạng thái hoàn thành nếu muốn' : 'Bấm để đánh dấu hoàn thành và gửi báo cáo kết quả tới giáo viên'}
                             >
-                              <CheckCircle2 className={`w-4 h-4 ${asg.completed ? 'text-white' : 'text-slate-400 group-hover/btn:text-emerald-600'}`} />
+                              <CheckCircle2 className={`w-4 h-4 ${asg.is_locked ? 'text-slate-300' : asg.completed ? 'text-white' : 'text-slate-400 group-hover/btn:text-emerald-600'}`} />
                               <span>{asg.completed ? '✓ Đã hoàn thành' : 'Đánh dấu đã hoàn thành'}</span>
                             </button>
                           </div>

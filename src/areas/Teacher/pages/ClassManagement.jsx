@@ -21,9 +21,9 @@ import {
   AlertCircle,
   ShieldAlert,
   UserX,
-  AlertTriangle,
   ChevronDown,
-  Check
+  Check,
+  Lock
 } from 'lucide-react';
 import { useTeacherAuth } from '../contexts/TeacherAuthContext';
 import api from '../../../config/api';
@@ -384,6 +384,11 @@ const ClassManagement = () => {
   };
 
   const handleOpenAssignmentLink = (asg) => {
+    if (asg?.is_locked) {
+      alert('Bài học / bài tập này đã bị Quản trị viên tạm khóa để xem xét vi phạm. Không thể mở bài!');
+      return;
+    }
+
     const targetUrl = asg?.link || asg?.resource_id;
     if (!targetUrl || typeof targetUrl !== 'string') return;
 
@@ -766,6 +771,11 @@ const ClassManagement = () => {
                                     <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100">
                                       LINK BÀI TẬP
                                     </span>
+                                    {asg.is_locked && (
+                                      <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1 shadow-xs">
+                                        <Lock className="w-3 h-3 text-rose-600" /> BỊ TẠM KHÓA BỞI ADMIN
+                                      </span>
+                                    )}
                                     {asg.due_date && (
                                       <span className="text-[10px] text-rose-500 font-bold flex items-center gap-1">
                                         <Clock className="w-3 h-3" /> Hạn nộp: {new Date(asg.due_date).toLocaleDateString('vi-VN')}
@@ -780,11 +790,23 @@ const ClassManagement = () => {
                                     <div className="flex items-center gap-2 pt-1">
                                       <button
                                         type="button"
-                                        onClick={() => handleOpenAssignmentLink(asg)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-indigo-600 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                                        disabled={asg.is_locked}
+                                        onClick={() => {
+                                          if (asg.is_locked) {
+                                            alert('Bài học / bài tập này đã bị Quản trị viên tạm khóa. Không thể mở bài!');
+                                            return;
+                                          }
+                                          handleOpenAssignmentLink(asg);
+                                        }}
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                                          asg.is_locked
+                                            ? 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed pointer-events-none'
+                                            : 'bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-indigo-600 cursor-pointer'
+                                        }`}
+                                        title={asg.is_locked ? 'Bài này đã bị Quản trị viên tạm khóa, không thể mở' : 'Mở link bài tập'}
                                       >
-                                        <ExternalLink className="w-3.5 h-3.5" />
-                                        Mở link bài tập
+                                        {asg.is_locked ? <Lock className="w-3.5 h-3.5 text-slate-400" /> : <ExternalLink className="w-3.5 h-3.5" />}
+                                        {asg.is_locked ? 'Bài đã bị tạm khóa' : 'Mở link bài tập'}
                                       </button>
                                     </div>
                                   )}
