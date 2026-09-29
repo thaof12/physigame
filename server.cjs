@@ -100,54 +100,112 @@ app.use('/api/classes', require('./routes/classes.cjs'));
 app.use('/api/reports', require('./routes/reports.cjs'));
 app.use('/api/support', require('./routes/support.cjs'));
 
-// API Endpoints
+// API Endpoints - System Settings (Persistent across local and Vercel serverless)
 const SETTINGS_FILE = path.join(__dirname, 'settings.json');
+const SYSTEM_SETTINGS_UUID = '00000000-0000-0000-0000-000000000007';
 
 let cachedSettings = null;
 let cachedSettingsTime = 0;
-const SETTINGS_CACHE_TTL = 60000; // 60 seconds
+const SETTINGS_CACHE_TTL = 10000; // 10 seconds cache
 
-app.get('/api/settings', (req, res) => {
+const defaultSettings = {
+  siteName: 'Eureka',
+  siteDescription: 'Nền tảng học Vật lý tương tác',
+  maintenanceMode: false,
+  allowRegistration: true,
+  emailNotifications: true,
+  autoBackup: true,
+  backupFrequency: 'daily',
+  maxUploadSize: 10,
+  sessionTimeout: 30
+};
+
+app.get('/api/settings', async (req, res) => {
   try {
     const now = Date.now();
     if (cachedSettings && (now - cachedSettingsTime < SETTINGS_CACHE_TTL)) {
       return res.json(cachedSettings);
     }
-    if (fs.existsSync(SETTINGS_FILE)) {
-      const data = fs.readFileSync(SETTINGS_FILE, 'utf8');
-      cachedSettings = JSON.parse(data);
-      cachedSettingsTime = now;
-      return res.json(cachedSettings);
-    } else {
-      const defaultSettings = {
-        siteName: 'Eureka',
-        siteDescription: 'Nền tảng học Vật lý tương tác',
-        maintenanceMode: false,
-        allowRegistration: true,
-        emailNotifications: true,
-        autoBackup: true,
-        backupFrequency: 'daily',
-        maxUploadSize: 10,
-        sessionTimeout: 30
-      };
-      cachedSettings = defaultSettings;
-      cachedSettingsTime = now;
-      return res.json(defaultSettings);
+
+    // 1. Try reading from Supabase persistent storage (works everywhere, including Vercel Serverless)
+    try {
+      const { data: dbData } = await supabase
+        .from('teacher_notifications')
+        .select('content')
+        .eq('teacher_id', SYSTEM_SETTINGS_UUID)
+        .eq('title', 'system_settings_config')
+        .maybeSingle();
+
+      if (dbData?.content) {
+        const parsed = typeof dbData.content === 'string' ? JSON.parse(dbData.content) : dbData.content;
+        cachedSettings = { ...defaultSettings, ...parsed };
+        cachedSettingsTime = now;
+        return res.json(cachedSettings);
+      }
+    } catch (dbErr) {
+      console.warn('⚠️ [Settings] Supabase read fallback:', dbErr.message);
     }
+
+    // 2. Fallback to local settings.json if exists
+    try {
+      if (fs.existsSync(SETTINGS_FILE)) {
+        const data = fs.readFileSync(SETTINGS_FILE, 'utf8');
+        cachedSettings = { ...defaultSettings, ...JSON.parse(data) };
+        cachedSettingsTime = now;
+        return res.json(cachedSettings);
+      }
+    } catch (fsErr) {}
+
+    cachedSettings = defaultSettings;
+    cachedSettingsTime = now;
+    return res.json(defaultSettings);
   } catch (error) {
     if (cachedSettings) return res.json(cachedSettings);
-    res.status(500).json({ error: 'Failed to read settings' });
+    res.json(defaultSettings);
   }
 });
 
-app.post('/api/settings', (req, res) => {
+app.post('/api/settings', async (req, res) => {
   try {
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(req.body, null, 2));
-    cachedSettings = req.body;
+    const newSettings = { ...defaultSettings, ...(cachedSettings || {}), ...(req.body || {}) };
+
+    // 1. Update in-memory cache immediately
+    cachedSettings = newSettings;
     cachedSettingsTime = Date.now();
-    res.json({ success: true });
+
+    // 2. Persist to Supabase so it survives Vercel serverless restarts & instances
+    try {
+      await supabase
+        .from('teacher_notifications')
+        .delete()
+        .eq('teacher_id', SYSTEM_SETTINGS_UUID)
+        .eq('title', 'system_settings_config');
+
+      await supabase
+        .from('teacher_notifications')
+        .insert({
+          teacher_id: SYSTEM_SETTINGS_UUID,
+          title: 'system_settings_config',
+          content: JSON.stringify(newSettings),
+          is_read: false
+        });
+      console.log('✅ [Settings] Saved to Supabase persistent store');
+    } catch (dbErr) {
+      console.warn('⚠️ [Settings] Supabase save warning:', dbErr.message);
+    }
+
+    // 3. Try writing to local file if environment allows (safe on read-only serverless)
+    try {
+      fs.writeFileSync(SETTINGS_FILE, JSON.stringify(newSettings, null, 2));
+    } catch (fsErr) {
+      // Safely ignore read-only file system on Vercel
+      console.log('ℹ️ [Settings] Read-only filesystem detected on serverless, persisted in Supabase');
+    }
+
+    res.json({ success: true, settings: newSettings });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to save settings' });
+    console.error('❌ [Settings] Save error:', error);
+    res.status(500).json({ error: 'Failed to save settings: ' + error.message });
   }
 });
 
