@@ -7,7 +7,7 @@ import EurekaPremiumLogo from '../components/ui/EurekaPremiumLogo';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { register, loginWithGoogle } = useAuth();
+  const { user, loading: authLoading, register, loginWithGoogle } = useAuth();
   
   const [formData, setFormData] = useState({
     username: '',
@@ -19,6 +19,25 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [allowRegistration, setAllowRegistration] = useState(true);
+
+  // Auto redirect if user is already authenticated (e.g. from Google OAuth callback)
+  React.useEffect(() => {
+    if (user && !authLoading && user.status !== 'inactive' && user.teacher_status !== 'inactive') {
+      if (user.role === 'admin' || user.email === 'quantrivien@gmail.com') {
+        localStorage.setItem('physigame_admin', JSON.stringify({
+          email: user.email,
+          name: user.displayName || 'Quản trị viên',
+          role: 'super_admin'
+        }));
+        window.location.replace('/admin/dashboard');
+      } else if (user.role === 'teacher') {
+        const hasProfile = user.teacher_profile?.phone || user.teacher_profile?.school;
+        window.location.replace(hasProfile ? '/teacher/pending' : '/teacher/apply');
+      } else {
+        window.location.replace('/');
+      }
+    }
+  }, [user, authLoading]);
 
   // OTP Verification States
   const [step, setStep] = useState('form'); // 'form' | 'otp'

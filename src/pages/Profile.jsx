@@ -13,16 +13,41 @@ import { Link, useNavigate } from 'react-router-dom';
 const Profile = () => {
   const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
-  const [userData, setUserData] = useState(null);
-  const [questData, setQuestData] = useState(null);
-  const [pkStats, setPkStats] = useState(null);
-  const [pkHistory, setPkHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_profile_user_' + (user?.uid || 'default'));
+      return cached ? JSON.parse(cached) : user;
+    } catch (e) { return user; }
+  });
+  const [questData, setQuestData] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_profile_quests_' + (user?.uid || 'default'));
+      return cached ? JSON.parse(cached) : null;
+    } catch (e) { return null; }
+  });
+  const [pkStats, setPkStats] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_profile_pkstats_' + (user?.uid || 'default'));
+      return cached ? JSON.parse(cached) : null;
+    } catch (e) { return null; }
+  });
+  const [pkHistory, setPkHistory] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_profile_pkhistory_' + (user?.uid || 'default'));
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_profile_user_' + (user?.uid || 'default'));
+      return !cached && !user;
+    } catch (e) { return true; }
+  });
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    displayName: '',
+    displayName: user?.displayName || '',
     bio: '',
     school: '',
     grade: ''
@@ -36,8 +61,23 @@ const Profile = () => {
         return;
       }
 
+      // Check cache for this specific user
       try {
-        setLoading(true);
+        const cachedUser = localStorage.getItem('eureka_profile_user_' + user.uid);
+        if (cachedUser) {
+          const parsed = JSON.parse(cachedUser);
+          setUserData(parsed);
+          setEditForm(prev => ({
+            displayName: parsed.displayName || prev.displayName,
+            bio: parsed.profile?.bio || prev.bio,
+            school: parsed.profile?.school || prev.school,
+            grade: parsed.profile?.grade || prev.grade
+          }));
+        }
+      } catch (e) {}
+
+      try {
+        if (!userData) setLoading(true);
         setError(null);
 
         // Fetch user profile, quest data, PK stats and history in parallel
@@ -56,6 +96,13 @@ const Profile = () => {
         if (pkHistoryRes?.data?.success) {
           setPkHistory(pkHistoryRes.data.battles || []);
         }
+
+        try {
+          if (profileRes.data) localStorage.setItem('eureka_profile_user_' + user.uid, JSON.stringify(profileRes.data));
+          if (questRes.data) localStorage.setItem('eureka_profile_quests_' + user.uid, JSON.stringify(questRes.data));
+          if (pkStatsRes?.data?.success) localStorage.setItem('eureka_profile_pkstats_' + user.uid, JSON.stringify(pkStatsRes.data.stats));
+          if (pkHistoryRes?.data?.success) localStorage.setItem('eureka_profile_pkhistory_' + user.uid, JSON.stringify(pkHistoryRes.data.battles || []));
+        } catch (e) {}
 
         setEditForm({
           displayName: profileRes.data?.displayName || '',
@@ -385,14 +432,31 @@ const Profile = () => {
 
               <div className="relative inline-block mb-6 pt-2">
                 <div className={`w-32 h-32 rounded-full p-1.5 bg-white border-2 border-[#E5E7EB] group-hover:border-[#274dad]/50 transition-colors duration-500 shadow-xl overflow-hidden`}>
-                  <div className="w-full h-full rounded-full bg-[#e4f2f0] flex items-center justify-center overflow-hidden border border-[#274dad]/10">
-                    {userData?.profile?.avatar ? (
-                      <img src={userData.profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="font-heading text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-[#2099e9] to-[#274dad]">
-                        {userData?.displayName?.[0]?.toUpperCase() || user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'ID'}
-                      </span>
-                    )}
+                  <div className="w-full h-full rounded-full bg-[#e4f2f0] flex items-center justify-center overflow-hidden border border-[#274dad]/10 relative">
+                    {(() => {
+                      const userAvatar = userData?.profile?.avatar || userData?.avatar || userData?.avatar_url || user?.avatar || user?.photoURL || (typeof window !== 'undefined' ? localStorage.getItem('eureka_user_avatar') : null);
+                      return (
+                        <>
+                          {userAvatar ? (
+                            <img 
+                              src={userAvatar} 
+                              alt="Avatar" 
+                              className="w-full h-full object-cover" 
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.style.display = 'none';
+                                if (e.currentTarget.nextElementSibling) {
+                                  e.currentTarget.nextElementSibling.style.display = 'flex';
+                                }
+                              }}
+                            />
+                          ) : null}
+                          <span className={`font-heading text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-[#2099e9] to-[#274dad] ${userAvatar ? 'hidden' : 'flex'}`}>
+                            {userData?.displayName?.[0]?.toUpperCase() || user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'ID'}
+                          </span>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
                 <input

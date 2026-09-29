@@ -11,11 +11,25 @@ export const useTeacherAuth = () => {
 };
 
 export const TeacherAuthProvider = ({ children }) => {
-  const [teacher, setTeacher] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
   const { user, loading: globalLoading, logout: globalLogout, refreshUser } = useAuth();
+
+  const getInitialUser = () => {
+    try {
+      const saved = localStorage.getItem('user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const activeUser = user || getInitialUser();
+  const isTeacherUser = activeUser?.role === 'teacher';
+  const isTeacherVerifiedUser = isTeacherUser && (activeUser?.teacherStatus === 'verified' || activeUser?.teacher_status === 'verified');
+
+  const [teacher, setTeacher] = useState(isTeacherUser ? activeUser : null);
+  const [loading, setLoading] = useState(globalLoading);
+  const [isAuthenticated, setIsAuthenticated] = useState(isTeacherUser);
+  const [isVerified, setIsVerified] = useState(isTeacherVerifiedUser);
 
   useEffect(() => {
     if (globalLoading) {
@@ -23,13 +37,14 @@ export const TeacherAuthProvider = ({ children }) => {
       return;
     }
 
-    if (user) {
-      const isTeacher = user.role === 'teacher';
-      const isTeacherVerified = user.teacherStatus === 'verified' || user.teacher_status === 'verified';
+    const currentUser = user || getInitialUser();
+    if (currentUser) {
+      const isTeacher = currentUser.role === 'teacher';
+      const isTeacherVerified = isTeacher && (currentUser.teacherStatus === 'verified' || currentUser.teacher_status === 'verified');
       
-      setTeacher(isTeacher ? user : null);
+      setTeacher(isTeacher ? currentUser : null);
       setIsAuthenticated(isTeacher);
-      setIsVerified(isTeacher && isTeacherVerified);
+      setIsVerified(isTeacherVerified);
     } else {
       setTeacher(null);
       setIsAuthenticated(false);

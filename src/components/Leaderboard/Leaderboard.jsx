@@ -153,12 +153,19 @@ const Leaderboard = ({ isOpen, onClose }) => {
 
                   return (
                     <div key={podiumItem.rank} className={`podium-item podium-${actualIndex + 1}`}>
-                      <div className="podium-avatar">
+                      <div className="podium-avatar overflow-hidden relative">
                         {podiumItem.avatar ? (
-                          <img src={podiumItem.avatar} alt="" />
-                        ) : (
-                          <span className="font-heading">{podiumItem.displayName?.[0] || podiumItem.username?.[0] || '?'}</span>
-                        )}
+                          <img 
+                            src={podiumItem.avatar} 
+                            alt="" 
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.style.display = 'none';
+                              if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <span className={`font-heading ${podiumItem.avatar ? 'hidden' : 'flex'}`}>{podiumItem.displayName?.[0] || podiumItem.username?.[0] || '?'}</span>
                         <div className="podium-rank">{getRankIcon(podiumItem.rank)}</div>
                       </div>
                       <div className="podium-name font-heading">{podiumItem.displayName || podiumItem.username}</div>
@@ -181,12 +188,19 @@ const Leaderboard = ({ isOpen, onClose }) => {
                       <div className="leaderboard-item-rank">
                         {getRankIcon(item.rank)}
                       </div>
-                      <div className="leaderboard-item-avatar">
+                      <div className="leaderboard-item-avatar overflow-hidden relative">
                         {item.avatar ? (
-                          <img src={item.avatar} alt="" />
-                        ) : (
-                          <span>{item.displayName?.[0] || item.username?.[0] || '?'}</span>
-                        )}
+                          <img 
+                            src={item.avatar} 
+                            alt="" 
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.style.display = 'none';
+                              if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <span className={item.avatar ? 'hidden' : 'flex'}>{item.displayName?.[0] || item.username?.[0] || '?'}</span>
                       </div>
                       <div className="leaderboard-item-info">
                         <div className="leaderboard-item-name font-heading">{item.displayName || item.username}</div>
@@ -216,8 +230,26 @@ const Leaderboard = ({ isOpen, onClose }) => {
                         {userRank.rank}
                       </span>
                     </div>
-                    <div className="leaderboard-item-avatar user">
-                      <span className="font-heading">{user?.displayName?.[0] || user?.email?.[0] || '?'}</span>
+                    <div className="leaderboard-item-avatar user overflow-hidden relative">
+                      {(() => {
+                        const userAv = user?.avatar || user?.photoURL || (typeof window !== 'undefined' ? localStorage.getItem('eureka_user_avatar') : null);
+                        return (
+                          <>
+                            {userAv ? (
+                              <img 
+                                src={userAv} 
+                                alt="" 
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.style.display = 'none';
+                                  if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <span className={`font-heading ${userAv ? 'hidden' : 'flex'}`}>{user?.displayName?.[0] || user?.email?.[0] || '?'}</span>
+                          </>
+                        );
+                      })()}
                     </div>
                     <div className="leaderboard-item-info">
                       <div className="leaderboard-item-name font-heading">{user?.displayName || 'Bạn'}</div>

@@ -82,18 +82,33 @@ const PhysicsHome = () => {
    const [isAutoplay, setIsAutoplay] = useState(true);
 
    // Supabase Real-time Leaderboard State (100% Real Supabase Data)
-   const [leaderboard, setLeaderboard] = useState([]);
-   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
+   const [leaderboard, setLeaderboard] = useState(() => {
+      try {
+         const cached = localStorage.getItem('eureka_home_leaderboard');
+         if (!cached) return [];
+         const parsed = JSON.parse(cached);
+         return Array.isArray(parsed) ? parsed.filter(u => u.role !== 'teacher' && !u.displayName?.toLowerCase().includes('thầy')) : [];
+      } catch (e) { return []; }
+   });
+   const [loadingLeaderboard, setLoadingLeaderboard] = useState(() => {
+      try {
+         const cached = localStorage.getItem('eureka_home_leaderboard');
+         if (!cached) return true;
+         const parsed = JSON.parse(cached);
+         const filtered = Array.isArray(parsed) ? parsed.filter(u => u.role !== 'teacher' && !u.displayName?.toLowerCase().includes('thầy')) : [];
+         return filtered.length === 0;
+      } catch (e) { return true; }
+   });
 
    const fetchLeaderboardData = async () => {
       try {
-         setLoadingLeaderboard(true);
+         if (leaderboard.length === 0) setLoadingLeaderboard(true);
 
          // 1. Try backend API first (uses Service Role Key to bypass RLS and fetch all registered users)
          try {
             const res = await api.get('/leaderboard', { params: { type: 'xp', limit: 20 } });
             if (res?.data?.success && Array.isArray(res.data.leaderboard) && res.data.leaderboard.length > 0) {
-               let items = [...res.data.leaderboard];
+               let items = res.data.leaderboard.filter(u => u.role !== 'teacher' && !u.displayName?.toLowerCase().includes('thầy'));
                items.sort((a, b) => (b.xp || 0) - (a.xp || 0));
 
                const formatted = items.slice(0, 6).map((u, index) => ({
@@ -101,10 +116,14 @@ const PhysicsHome = () => {
                   rank: index + 1,
                   displayName: u.displayName || u.username || u.email?.split('@')[0] || `Học viên #${index + 1}`,
                   avatar: u.avatar || null,
-                  xp: typeof u.xp === 'number' ? u.xp : 0
+                  xp: typeof u.xp === 'number' ? u.xp : 0,
+                  role: u.role || 'student'
                }));
 
                setLeaderboard(formatted);
+               try {
+                  localStorage.setItem('eureka_home_leaderboard', JSON.stringify(formatted));
+               } catch (e) {}
                setLoadingLeaderboard(false);
                return;
             }
@@ -112,7 +131,7 @@ const PhysicsHome = () => {
             console.warn('API Leaderboard fetch fallback to direct Supabase:', apiErr.message);
          }
 
-         // 2. Direct Supabase Query (Selecting VALID columns only: id, display_name, username, email, avatar, xp)
+         // 2. Direct Supabase Query (Selecting VALID columns only: id, display_name, username, email, avatar, xp, role)
          if (!supabase || typeof supabase.from !== 'function') {
             setLeaderboard([]);
             return;
@@ -120,20 +139,27 @@ const PhysicsHome = () => {
 
          const { data, error } = await supabase
             .from('users')
-            .select('id, display_name, username, email, avatar, xp')
+            .select('id, display_name, username, email, avatar, xp, role')
+            .or('role.eq.student,role.is.null')
             .order('xp', { ascending: false, nullsFirst: false })
             .limit(6);
 
          if (!error && data && Array.isArray(data) && data.length > 0) {
-            const formatted = data.map((u, index) => ({
-               id: u.id || `user-${index}`,
-               rank: index + 1,
-               displayName: u.display_name || u.username || u.email?.split('@')[0] || `Học viên #${index + 1}`,
-               avatar: u.avatar || null,
-               xp: typeof u.xp === 'number' ? u.xp : 0
-            }));
+            const formatted = data
+               .filter(u => u.role !== 'teacher' && !u.display_name?.toLowerCase().includes('thầy'))
+               .map((u, index) => ({
+                  id: u.id || `user-${index}`,
+                  rank: index + 1,
+                  displayName: u.display_name || u.username || u.email?.split('@')[0] || `Học viên #${index + 1}`,
+                  avatar: u.avatar || null,
+                  xp: typeof u.xp === 'number' ? u.xp : 0,
+                  role: u.role || 'student'
+               }));
 
             setLeaderboard(formatted);
+            try {
+               localStorage.setItem('eureka_home_leaderboard', JSON.stringify(formatted));
+            } catch (e) {}
          } else {
             if (error) console.warn('Direct Supabase fetch error:', error.message);
             setLeaderboard([]);
@@ -495,7 +521,7 @@ const PhysicsHome = () => {
                                  <div className="relative -mb-2.5 z-10">
                                     <div className="w-14 h-14 md:w-18 md:h-18 rounded-full p-1 bg-gradient-to-tr from-slate-400 via-slate-200 to-white shadow-md border-2 border-white group-hover:scale-105 transition-transform duration-300">
                                        {leaderboard[1].avatar ? (
-                                          <img src={leaderboard[1].avatar} alt={leaderboard[1].displayName} className="w-full h-full rounded-full object-cover" />
+                                          <img src={leaderboard[1].avatar} alt={leaderboard[1].displayName} className="w-full h-full rounded-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = "none"; if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = "flex"; }} />
                                        ) : (
                                           <div className="w-full h-full rounded-full bg-slate-200 flex items-center justify-center font-heading text-lg md:text-xl font-black text-slate-700">
                                              {leaderboard[1].displayName[0]?.toUpperCase()}
@@ -533,7 +559,7 @@ const PhysicsHome = () => {
                                  <div className="relative -mb-3 z-10">
                                     <div className="w-18 h-18 md:w-22 md:h-22 rounded-full p-1 bg-gradient-to-tr from-amber-400 via-yellow-200 to-amber-500 shadow-xl border-4 border-white group-hover:scale-105 transition-transform duration-300">
                                        {leaderboard[0].avatar ? (
-                                          <img src={leaderboard[0].avatar} alt={leaderboard[0].displayName} className="w-full h-full rounded-full object-cover" />
+                                          <img src={leaderboard[0].avatar} alt={leaderboard[0].displayName} className="w-full h-full rounded-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = "none"; if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = "flex"; }} />
                                        ) : (
                                           <div className="w-full h-full rounded-full bg-amber-100 flex items-center justify-center font-heading text-2xl md:text-3xl font-black text-amber-700">
                                              {leaderboard[0].displayName[0]?.toUpperCase()}
@@ -571,7 +597,7 @@ const PhysicsHome = () => {
                                  <div className="relative -mb-2.5 z-10">
                                     <div className="w-14 h-14 md:w-18 md:h-18 rounded-full p-1 bg-gradient-to-tr from-amber-600 via-amber-300 to-amber-700 shadow-md border-2 border-white group-hover:scale-105 transition-transform duration-300">
                                        {leaderboard[2].avatar ? (
-                                          <img src={leaderboard[2].avatar} alt={leaderboard[2].displayName} className="w-full h-full rounded-full object-cover" />
+                                          <img src={leaderboard[2].avatar} alt={leaderboard[2].displayName} className="w-full h-full rounded-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = "none"; if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = "flex"; }} />
                                        ) : (
                                           <div className="w-full h-full rounded-full bg-amber-200 flex items-center justify-center font-heading text-lg md:text-xl font-black text-amber-800">
                                              {leaderboard[2].displayName[0]?.toUpperCase()}
@@ -606,7 +632,7 @@ const PhysicsHome = () => {
                                        {/* Round Avatar */}
                                        <div className="w-10 h-10 rounded-full p-0.5 bg-slate-100 border border-slate-200 shadow-sm group-hover:border-indigo-400 transition-colors">
                                           {item.avatar ? (
-                                             <img src={item.avatar} alt={item.displayName} className="w-full h-full rounded-full object-cover" />
+                                             <img src={item.avatar} alt={item.displayName} className="w-full h-full rounded-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = "none"; if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = "flex"; }} />
                                           ) : (
                                              <div className="w-full h-full rounded-full bg-indigo-50 flex items-center justify-center font-heading text-base font-bold text-indigo-600">
                                                 {item.displayName[0]?.toUpperCase()}

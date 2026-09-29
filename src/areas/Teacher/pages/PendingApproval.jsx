@@ -24,7 +24,12 @@ const PendingApproval = () => {
   const { teacher, isAuthenticated, isVerified, isPending, isRejected, logout, refreshTeacher, loading } = useTeacherAuth();
   const [checking, setChecking] = useState(false);
   const [lastCheckedTime, setLastCheckedTime] = useState(null);
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_teacher_pending_notifs_' + (teacher?.id || 'default'));
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
   const [realtimeConnected, setRealtimeConnected] = useState(false);
 
   // Filter only feedback from rejection popup & admin rejection reasons for teacher registration
@@ -115,7 +120,11 @@ const PendingApproval = () => {
     try {
       const res = await api.get(`/classes/teacher/${teacher.id}/notifications`);
       if (res.data?.success && Array.isArray(res.data.notifications)) {
-        setNotifications(filterApplicationFeedback(res.data.notifications));
+        const filtered = filterApplicationFeedback(res.data.notifications);
+        setNotifications(filtered);
+        try {
+          localStorage.setItem('eureka_teacher_pending_notifs_' + teacher.id, JSON.stringify(filtered));
+        } catch (e) {}
         return;
       }
     } catch (e) {}
@@ -129,7 +138,11 @@ const PendingApproval = () => {
         .order('created_at', { ascending: false })
         .limit(10);
       if (data) {
-        setNotifications(filterApplicationFeedback(data));
+        const filtered = filterApplicationFeedback(data);
+        setNotifications(filtered);
+        try {
+          localStorage.setItem('eureka_teacher_pending_notifs_' + teacher.id, JSON.stringify(filtered));
+        } catch (e) {}
       }
     } catch (err) {}
   }, [teacher?.id, filterApplicationFeedback]);
@@ -141,6 +154,13 @@ const PendingApproval = () => {
     }
 
     if (!isAuthenticated && !loading) {
+      try {
+        const saved = localStorage.getItem('user');
+        if (saved) {
+          const u = JSON.parse(saved);
+          if (u?.role === 'teacher') return; // Wait for teacher session to hydrate
+        }
+      } catch (e) {}
       navigate('/login');
       return;
     }

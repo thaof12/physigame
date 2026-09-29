@@ -102,10 +102,20 @@ const MyClass = () => {
   const navigate = useNavigate();
   
   // Enrolled / Requested classes of the student
-  const [myClasses, setMyClasses] = useState([]);
+  const [myClasses, setMyClasses] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_student_myclasses_' + (user?.id || 'default'));
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
   
   // All public/featured classes for browsing
-  const [allClasses, setAllClasses] = useState([]);
+  const [allClasses, setAllClasses] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_student_allclasses');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
   
   // Active class state (null = outer exploration view)
   const [activeClass, setActiveClass] = useState(null);
@@ -128,7 +138,12 @@ const MyClass = () => {
   const [members, setMembers] = useState([]);
   
   // UI Loading/Message states
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_student_myclasses_' + (user?.id || 'default'));
+      return !cached || JSON.parse(cached).length === 0;
+    } catch (e) { return true; }
+  });
   const [joiningId, setJoiningId] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -145,7 +160,11 @@ const MyClass = () => {
     try {
       const response = await api.get(`/classes/student/${user.id}`);
       if (response.data?.success) {
-        setMyClasses(response.data.classes || []);
+        const list = response.data.classes || [];
+        setMyClasses(list);
+        try {
+          localStorage.setItem('eureka_student_myclasses_' + user.id, JSON.stringify(list));
+        } catch (e) {}
       }
     } catch (error) {
       console.error('Error fetching student classes:', error);
@@ -158,7 +177,11 @@ const MyClass = () => {
     try {
       const response = await api.get(`/classes/all?studentId=${user.id}`);
       if (response.data?.success) {
-        setAllClasses(response.data.classes || []);
+        const list = response.data.classes || [];
+        setAllClasses(list);
+        try {
+          localStorage.setItem('eureka_student_allclasses', JSON.stringify(list));
+        } catch (e) {}
       }
     } catch (error) {
       console.error('Error fetching all classes:', error);
@@ -166,38 +189,77 @@ const MyClass = () => {
   };
 
   const loadData = async () => {
-    setLoading(true);
+    if (myClasses.length === 0) setLoading(true);
     await Promise.all([fetchStudentClasses(), fetchAllClasses()]);
     setLoading(false);
   };
 
   useEffect(() => {
+    if (user?.id) {
+      try {
+        const cached = localStorage.getItem('eureka_student_myclasses_' + user.id);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setMyClasses(parsed);
+          }
+        }
+      } catch (e) {}
+    }
     loadData();
   }, [user]);
 
-  // 3. Fetch active class details
+  // 3. Fetch active class details with instant cache
   const fetchClassDetails = async () => {
     if (!activeClass?.id) return;
     try {
       setWarningMsg('');
+
+      // Instant cache load
+      try {
+        const cached = localStorage.getItem('eureka_student_class_details_' + activeClass.id);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.announcements) setAnnouncements(parsed.announcements);
+          if (parsed.assignments) setAssignments(parsed.assignments);
+          if (parsed.meetings) setMeetings(parsed.meetings);
+          if (parsed.discussions) setDiscussions(parsed.discussions);
+          if (parsed.members) setMembers(parsed.members);
+        }
+      } catch (e) {}
       
       const annRes = await api.get(`/classes/${activeClass.id}/announcements`);
       if (annRes.data?.warning === 'needs_migration') {
         setWarningMsg('Hệ thống đang nâng cấp tính năng thông báo. Vui lòng thử lại sau.');
       }
-      setAnnouncements(annRes.data?.announcements || []);
+      const freshAnn = annRes.data?.announcements || [];
+      setAnnouncements(freshAnn);
 
       const asgRes = await api.get(`/classes/${activeClass.id}/assignments?studentId=${user.id}`);
-      setAssignments(asgRes.data?.assignments || []);
+      const freshAsg = asgRes.data?.assignments || [];
+      setAssignments(freshAsg);
 
       const meetRes = await api.get(`/classes/${activeClass.id}/meetings`);
-      setMeetings(meetRes.data?.meetings || []);
+      const freshMeet = meetRes.data?.meetings || [];
+      setMeetings(freshMeet);
 
       const discRes = await api.get(`/classes/${activeClass.id}/discussions`);
-      setDiscussions(discRes.data?.discussions || []);
+      const freshDisc = discRes.data?.discussions || [];
+      setDiscussions(freshDisc);
 
       const memRes = await api.get(`/classes/${activeClass.id}/students`);
-      setMembers(memRes.data?.students || []);
+      const freshMem = memRes.data?.students || [];
+      setMembers(freshMem);
+
+      try {
+        localStorage.setItem('eureka_student_class_details_' + activeClass.id, JSON.stringify({
+          announcements: freshAnn,
+          assignments: freshAsg,
+          meetings: freshMeet,
+          discussions: freshDisc,
+          members: freshMem
+        }));
+      } catch (e) {}
       
     } catch (error) {
       console.error('Error fetching class details:', error);
@@ -448,12 +510,16 @@ const MyClass = () => {
                           src={activeClass.teacher.avatar} 
                           alt="Teacher" 
                           className="w-5 h-5 rounded-full object-cover border border-white shadow-sm flex-shrink-0" 
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.style.display = 'none';
+                            if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                          }}
                         />
-                      ) : (
-                        <div className="w-5 h-5 bg-indigo-100 border border-indigo-200 rounded-full flex items-center justify-center flex-shrink-0">
-                          <User className="w-3 h-3 text-indigo-600" />
-                        </div>
-                      )}
+                      ) : null}
+                      <div className={`w-5 h-5 bg-indigo-100 border border-indigo-200 rounded-full flex items-center justify-center flex-shrink-0 ${activeClass.teacher.avatar ? 'hidden' : 'flex'}`}>
+                        <User className="w-3 h-3 text-indigo-600" />
+                      </div>
                       <span>GV: {activeClass.teacher.name}</span>
                     </div>
                   )}
@@ -673,14 +739,49 @@ const MyClass = () => {
                         const isTeacher = disc.user?.role === 'teacher';
                         return (
                           <div key={disc.id} className={`flex items-end gap-3 max-w-[85%] ${isOwn ? 'ml-auto flex-row-reverse' : ''}`}>
-                            {!isOwn && (
-                              disc.user?.avatar ? (
-                                <img src={disc.user.avatar} alt="Avatar" className="w-8 h-8 rounded-lg object-cover border border-slate-100 shadow-sm" />
-                              ) : (
-                                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center font-bold text-xs text-indigo-600 uppercase border border-slate-200">
+                            {!isOwn ? (
+                              <div className="w-8 h-8 rounded-lg overflow-hidden border border-slate-100 shadow-sm relative flex-shrink-0">
+                                {disc.user?.avatar ? (
+                                  <img 
+                                    src={disc.user.avatar} 
+                                    alt="Avatar" 
+                                    className="w-full h-full object-cover" 
+                                    onError={(e) => {
+                                      e.currentTarget.onerror = null;
+                                      e.currentTarget.style.display = 'none';
+                                      if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                                    }}
+                                  />
+                                ) : null}
+                                <div className={`w-full h-full bg-indigo-100 flex items-center justify-center font-bold text-xs text-indigo-600 uppercase border border-slate-200 ${disc.user?.avatar ? 'hidden' : 'flex'}`}>
                                   {disc.user?.name?.charAt(0) || 'U'}
                                 </div>
-                              )
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg overflow-hidden border border-slate-100 shadow-sm relative flex-shrink-0">
+                                {(() => {
+                                  const myAv = user?.avatar || user?.photoURL || (typeof window !== 'undefined' ? localStorage.getItem('eureka_user_avatar') : null);
+                                  return (
+                                    <>
+                                      {myAv ? (
+                                        <img 
+                                          src={myAv} 
+                                          alt="My Avatar" 
+                                          className="w-full h-full object-cover" 
+                                          onError={(e) => {
+                                            e.currentTarget.onerror = null;
+                                            e.currentTarget.style.display = 'none';
+                                            if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                                          }}
+                                        />
+                                      ) : null}
+                                      <div className={`w-full h-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs uppercase ${myAv ? 'hidden' : 'flex'}`}>
+                                        {user?.displayName?.charAt(0) || 'ME'}
+                                      </div>
+                                    </>
+                                  );
+                                })()}
+                              </div>
                             )}
                             
                             <div className="space-y-1">
@@ -811,8 +912,22 @@ const MyClass = () => {
                           <div key={mem.id} className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50/50 transition-colors">
                             <div className="flex items-center gap-3">
                               <span className="w-6 text-xs font-black text-slate-400 text-center">#{index + 1}</span>
-                              <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center font-black text-xs text-slate-600 border border-slate-200 uppercase">
-                                {mem.name.charAt(0)}
+                              <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center font-black text-xs text-slate-600 border border-slate-200 uppercase overflow-hidden relative shadow-xs">
+                                {mem.avatar ? (
+                                  <img 
+                                    src={mem.avatar} 
+                                    alt={mem.name} 
+                                    className="w-full h-full object-cover" 
+                                    onError={(e) => {
+                                      e.currentTarget.onerror = null;
+                                      e.currentTarget.style.display = 'none';
+                                      if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                                    }}
+                                  />
+                                ) : null}
+                                <span className={mem.avatar ? 'hidden' : 'flex'}>
+                                  {mem.name.charAt(0)}
+                                </span>
                               </div>
                               <div>
                                 <h4 className="font-black text-slate-800 text-sm">{mem.name}</h4>
@@ -917,10 +1032,18 @@ const MyClass = () => {
                       {cls.teacher && (
                         <div className="flex items-center gap-2 pt-1 border-t border-slate-50 text-xs font-semibold text-slate-500">
                           {cls.teacher.avatar ? (
-                            <img src={cls.teacher.avatar} alt="Teacher" className="w-5 h-5 rounded-full object-cover" />
-                          ) : (
-                            <User className="w-3.5 h-3.5 text-slate-400" />
-                          )}
+                            <img 
+                              src={cls.teacher.avatar} 
+                              alt="Teacher" 
+                              className="w-5 h-5 rounded-full object-cover" 
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.style.display = 'none';
+                                if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <User className={`w-3.5 h-3.5 text-slate-400 ${cls.teacher.avatar ? 'hidden' : 'block'}`} />
                           <span>GV: {cls.teacher.name}</span>
                         </div>
                       )}
@@ -1038,12 +1161,20 @@ const MyClass = () => {
                         {cls.teacher ? (
                           <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
                             {cls.teacher.avatar ? (
-                              <img src={cls.teacher.avatar} alt="Teacher" className="w-6 h-6 rounded-full object-cover" />
-                            ) : (
-                              <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 font-bold flex items-center justify-center text-[10px]">
-                                {cls.teacher.name.charAt(0)}
-                              </div>
-                            )}
+                              <img 
+                                src={cls.teacher.avatar} 
+                                alt="Teacher" 
+                                className="w-6 h-6 rounded-full object-cover" 
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.style.display = 'none';
+                                  if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div className={`w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 font-bold flex items-center justify-center text-[10px] ${cls.teacher.avatar ? 'hidden' : 'flex'}`}>
+                              {cls.teacher.name.charAt(0)}
+                            </div>
                             <span className="truncate max-w-[120px]">{cls.teacher.name}</span>
                           </div>
                         ) : (

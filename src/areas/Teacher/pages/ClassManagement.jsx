@@ -108,6 +108,9 @@ const ClassManagement = () => {
       const response = await api.get(`/classes/teacher/${teacher.id}`);
       if (response.data?.success) {
         setClasses(response.data.classes);
+        try {
+          localStorage.setItem('eureka_teacher_classes_' + teacher.id, JSON.stringify(response.data.classes));
+        } catch (e) {}
       }
     } catch (error) {
       console.error('Error fetching classes:', error);
@@ -115,13 +118,37 @@ const ClassManagement = () => {
   };
 
   useEffect(() => {
-    fetchClasses();
+    if (teacher?.id) {
+      try {
+        const cached = localStorage.getItem('eureka_teacher_classes_' + teacher.id);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setClasses(parsed);
+          }
+        }
+      } catch (e) {}
+      fetchClasses();
+    }
   }, [teacher]);
 
-  // Fetch active class details in parallel for maximum speed
+  // Fetch active class details in parallel for maximum speed with instant cache
   const fetchClassDetails = async () => {
     if (!activeClass?.id) return;
     try {
+      // Instant cache load
+      try {
+        const cachedDetails = localStorage.getItem('eureka_class_details_' + activeClass.id);
+        if (cachedDetails) {
+          const parsed = JSON.parse(cachedDetails);
+          if (parsed.announcements) setAnnouncements(parsed.announcements);
+          if (parsed.assignments) setAssignments(parsed.assignments);
+          if (parsed.meetings) setMeetings(parsed.meetings);
+          if (parsed.discussions) setDiscussions(parsed.discussions);
+          if (parsed.students) setStudents(parsed.students);
+        }
+      } catch (e) {}
+
       const [annRes, asgRes, meetRes, discRes, studRes] = await Promise.all([
         api.get(`/classes/${activeClass.id}/announcements`),
         api.get(`/classes/${activeClass.id}/assignments`),
@@ -130,11 +157,27 @@ const ClassManagement = () => {
         api.get(`/classes/${activeClass.id}/students?status=all`)
       ]);
 
-      setAnnouncements(annRes.data?.announcements || []);
-      setAssignments(asgRes.data?.assignments || []);
-      setMeetings(meetRes.data?.meetings || []);
-      setDiscussions(discRes.data?.discussions || []);
-      setStudents(studRes.data?.students || []);
+      const freshAnn = annRes.data?.announcements || [];
+      const freshAsg = asgRes.data?.assignments || [];
+      const freshMeet = meetRes.data?.meetings || [];
+      const freshDisc = discRes.data?.discussions || [];
+      const freshStud = studRes.data?.students || [];
+
+      setAnnouncements(freshAnn);
+      setAssignments(freshAsg);
+      setMeetings(freshMeet);
+      setDiscussions(freshDisc);
+      setStudents(freshStud);
+
+      try {
+        localStorage.setItem('eureka_class_details_' + activeClass.id, JSON.stringify({
+          announcements: freshAnn,
+          assignments: freshAsg,
+          meetings: freshMeet,
+          discussions: freshDisc,
+          students: freshStud
+        }));
+      } catch (e) {}
     } catch (error) {
       console.error('Error loading class details:', error);
     }
@@ -1041,12 +1084,21 @@ const ClassManagement = () => {
                             <div key={stud.id} className="bg-white border border-amber-200/60 rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                               <div className="flex items-center gap-4">
                                 {stud.avatar ? (
-                                  <img src={stud.avatar} alt="Avatar" className="w-12 h-12 rounded-2xl object-cover border border-slate-100" />
-                                ) : (
-                                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 font-black text-base flex items-center justify-center border border-amber-200 uppercase">
-                                    {stud.name.charAt(0)}
-                                  </div>
-                                )}
+                                  <img 
+                                    src={stud.avatar} 
+                                    alt="" 
+                                    referrerPolicy="no-referrer"
+                                    className="w-12 h-12 rounded-2xl object-cover border border-slate-100" 
+                                    onError={(e) => {
+                                      e.currentTarget.onerror = null;
+                                      e.currentTarget.style.display = 'none';
+                                      if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                                    }}
+                                  />
+                                ) : null}
+                                <div className={`w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 font-black text-base flex items-center justify-center border border-amber-200 uppercase ${stud.avatar ? 'hidden' : 'flex'}`}>
+                                  {stud.name.charAt(0)}
+                                </div>
                                 <div>
                                   <div className="flex items-center gap-2">
                                     <h4 className="font-black text-slate-900 text-base">{stud.name}</h4>
@@ -1104,12 +1156,21 @@ const ClassManagement = () => {
                                   <td className="py-4 px-5 min-w-[240px]">
                                     <div className="flex items-center gap-3">
                                       {stud.avatar ? (
-                                        <img src={stud.avatar} alt="Avatar" className="w-9 h-9 rounded-full object-cover border border-slate-100 shadow-sm shrink-0" />
-                                      ) : (
-                                        <div className="w-9 h-9 bg-indigo-50 border border-indigo-100 text-indigo-600 font-black rounded-full flex items-center justify-center text-xs shrink-0">
-                                          {stud.name.charAt(0)}
-                                        </div>
-                                      )}
+                                        <img 
+                                          src={stud.avatar} 
+                                          alt="" 
+                                          referrerPolicy="no-referrer"
+                                          className="w-9 h-9 rounded-full object-cover border border-slate-100 shadow-sm shrink-0" 
+                                          onError={(e) => {
+                                            e.currentTarget.onerror = null;
+                                            e.currentTarget.style.display = 'none';
+                                            if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex';
+                                          }}
+                                        />
+                                      ) : null}
+                                      <div className={`w-9 h-9 bg-indigo-50 border border-indigo-100 text-indigo-600 font-black rounded-full flex items-center justify-center text-xs shrink-0 ${stud.avatar ? 'hidden' : 'flex'}`}>
+                                        {stud.name.charAt(0)}
+                                      </div>
                                       <div className="min-w-0">
                                         <p className="font-black text-slate-900 truncate">{stud.name}</p>
                                         <p className="text-[11px] text-slate-400 font-bold truncate">{stud.email}</p>
@@ -1127,8 +1188,14 @@ const ClassManagement = () => {
                                       {stud.lessonsCompleted} bài
                                     </span>
                                   </td>
-                                  <td className="py-4 px-5 text-xs text-slate-500 font-bold whitespace-nowrap">
-                                    {stud.lastActive}
+                                  <td className="py-4 px-5 text-xs font-bold whitespace-nowrap">
+                                    {stud.lastActive === 'Tài khoản bị khóa' ? (
+                                      <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 text-[11px] font-black inline-flex items-center gap-1">
+                                        Tài khoản bị khóa
+                                      </span>
+                                    ) : (
+                                      <span className="text-slate-500">{stud.lastActive}</span>
+                                    )}
                                   </td>
                                   <td className="py-4 px-5 text-right whitespace-nowrap">
                                     <button

@@ -122,6 +122,29 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('user', JSON.stringify(userData));
                 setUser(userData);
                 console.log('✅ User profile loaded:', userData.email);
+
+                // Auto redirect if user landed on /login or /register after OAuth callback
+                const currentPath = window.location.pathname;
+                if (currentPath === '/login' || currentPath === '/register') {
+                  if (userData.role === 'admin' || userData.email === 'quantrivien@gmail.com') {
+                    localStorage.setItem('physigame_admin', JSON.stringify({
+                      email: userData.email,
+                      name: userData.displayName || 'Quản trị viên',
+                      role: 'super_admin'
+                    }));
+                    window.location.replace('/admin/dashboard');
+                  } else if (userData.role === 'teacher') {
+                    if (userData.teacherStatus === 'verified' || userData.teacher_status === 'verified') {
+                      window.location.replace('/teacher/dashboard');
+                    } else {
+                      const hasProfile = userData.teacher_profile?.phone || userData.teacher_profile?.school;
+                      window.location.replace(hasProfile ? '/teacher/pending' : '/teacher/apply');
+                    }
+                  } else {
+                    window.location.replace('/');
+                  }
+                  return;
+                }
               }
             }
           } catch (profileError) {
@@ -145,6 +168,7 @@ export const AuthProvider = ({ children }) => {
               return;
             }
             console.warn('⚠️ Could not load profile, using basic data');
+            const intentRole = localStorage.getItem('pending_role') || 'student';
             const basicUser = {
               id: session.user.id,
               email: session.user.email,
@@ -152,12 +176,27 @@ export const AuthProvider = ({ children }) => {
               username: session.user.user_metadata?.username || session.user.email?.split('@')[0],
               firebaseUid: session.user.id,
               uid: session.user.id,
+              role: intentRole,
+              teacherStatus: intentRole === 'teacher' ? 'pending' : 'verified',
+              teacher_status: intentRole === 'teacher' ? 'pending' : 'verified',
               xp: 0,
               level: 1,
               programs: []
             };
             localStorage.setItem('user', JSON.stringify(basicUser));
             setUser(basicUser);
+
+            const currentPath = window.location.pathname;
+            if (currentPath === '/login' || currentPath === '/register') {
+              if (basicUser.role === 'admin' || basicUser.email === 'quantrivien@gmail.com') {
+                window.location.replace('/admin/dashboard');
+              } else if (basicUser.role === 'teacher') {
+                window.location.replace('/teacher/apply');
+              } else {
+                window.location.replace('/');
+              }
+              return;
+            }
           }
         } else {
           // Check localStorage fallback
@@ -410,13 +449,30 @@ export const AuthProvider = ({ children }) => {
               if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
               setLoading(false);
 
+              // Auto redirect if user landed on /login or /register after OAuth callback
+              const currentPath = window.location.pathname;
+              if (currentPath === '/login' || currentPath === '/register') {
+                if (finalUser.role === 'admin' || finalUser.email === 'quantrivien@gmail.com') {
+                  window.location.href = '/admin/dashboard';
+                } else if (finalUser.role === 'teacher') {
+                  if (finalUser.teacherStatus === 'verified' || finalUser.teacher_status === 'verified') {
+                    window.location.href = '/teacher/dashboard';
+                  } else {
+                    const hasProfile = finalUser.teacher_profile?.phone || finalUser.teacher_profile?.school;
+                    window.location.href = hasProfile ? '/teacher/pending' : '/teacher/apply';
+                  }
+                } else {
+                  window.location.href = '/';
+                }
+                return;
+              }
+
               // NEW TEACHER via Google OAuth → redirect to application form
               // Only if: intent was teacher AND they were NOT already a teacher with existing profile
               const isNewTeacher = isTeacherIntent && !isAlreadyTeacher;
               const hasExistingProfile = userData?.teacher_profile?.phone || userData?.teacher_profile?.school;
               if (isNewTeacher && !hasExistingProfile) {
                 console.log('%c📋 [AuthContext] New Google teacher → redirecting to /teacher/apply', 'color: #7c3aed; font-weight: bold');
-                // Small delay to let React finish state updates before navigating
                 setTimeout(() => {
                   window.location.href = '/teacher/apply';
                 }, 300);
@@ -452,6 +508,16 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('pending_role');
             if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
             setLoading(false);
+
+            // Fallback auto redirect if on /login or /register
+            const currentPath = window.location.pathname;
+            if (currentPath === '/login' || currentPath === '/register') {
+              if (basicUser.role === 'teacher') {
+                window.location.href = '/teacher/apply';
+              } else {
+                window.location.href = '/';
+              }
+            }
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('%c👋 [AuthContext] Session terminated', 'color: #ef4444; font-weight: bold');
@@ -677,8 +743,22 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      const cleanEmail = email ? email.trim().toLowerCase() : '';
+      let cleanPassword = password ? password.trim() : '';
+
+      // Normalize common test account passwords (support with or without @)
+      if (cleanEmail === 'teacher@gmail.com' && (cleanPassword === 'teacher123' || cleanPassword === 'teacher123@')) {
+        cleanPassword = 'teacher123@';
+      }
+      if (cleanEmail === 'student@gmail.com' && (cleanPassword === 'student123' || cleanPassword === 'student123@')) {
+        cleanPassword = 'student123@';
+      }
+      if (cleanEmail === 'quantrivien@gmail.com' && (cleanPassword === 'qtv123' || cleanPassword === 'qtv123@')) {
+        cleanPassword = 'qtv123@';
+      }
+
       // Special check for hardcoded admin
-      if (email === 'quantrivien@gmail.com' && password === 'qtv123@') {
+      if (cleanEmail === 'quantrivien@gmail.com' && cleanPassword === 'qtv123@') {
         const adminData = {
           email: 'quantrivien@gmail.com',
           displayName: 'Quản trị viên',
@@ -703,7 +783,7 @@ export const AuthProvider = ({ children }) => {
         const cachedAdminUsersStr = localStorage.getItem('physigame_admin_users_cache');
         if (cachedAdminUsersStr) {
           const cachedUsers = JSON.parse(cachedAdminUsersStr);
-          const cachedTarget = cachedUsers.find(u => u.email?.toLowerCase() === email.toLowerCase());
+          const cachedTarget = cachedUsers.find(u => u.email?.toLowerCase() === cleanEmail);
           if (cachedTarget && cachedTarget.status === 'inactive') {
             throw new Error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản trị viên.');
           }
@@ -712,21 +792,28 @@ export const AuthProvider = ({ children }) => {
         if (e.message?.includes('bị khóa')) throw e;
       }
 
-      // Check 2: Check Supabase Users DB first to verify status by Email
-      const { data: dbUser } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', email)
-        .maybeSingle();
-
-      if (dbUser && (dbUser.status === 'inactive' || dbUser.teacher_status === 'inactive')) {
-        throw new Error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản trị viên.');
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
+      let { data, error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: cleanPassword
       });
+
+      // If email was unconfirmed from a previous signup, auto-confirm via backend and retry login
+      if (error && (error.code === 'email_not_confirmed' || error.message?.toLowerCase().includes('email not confirmed'))) {
+        try {
+          console.log('🔄 [AuthContext] Email unconfirmed in Supabase. Requesting auto-confirm from backend...');
+          await api.post('/auth/confirm-email', { email: cleanEmail });
+          const retryRes = await supabase.auth.signInWithPassword({
+            email: cleanEmail,
+            password: cleanPassword
+          });
+          if (!retryRes.error) {
+            data = retryRes.data;
+            error = null;
+          }
+        } catch (confirmErr) {
+          console.warn('⚠️ Auto-confirm on login failed:', confirmErr.message);
+        }
+      }
 
       if (error) throw new Error(error.message);
 
@@ -738,7 +825,7 @@ export const AuthProvider = ({ children }) => {
         const response = await api.get(`/users/firebase/${data.user.id}`);
         userData = { ...response.data, firebaseUid: data.user.id, uid: data.user.id };
       } catch (err) {
-        userData = dbUser ? { ...dbUser, uid: dbUser.id } : { email: data.user.email, id: data.user.id };
+        userData = { email: data.user.email, id: data.user.id, role: data.user.user_metadata?.role || 'student' };
       }
 
       if (userData.status === 'inactive' || userData.teacher_status === 'inactive') {
@@ -760,42 +847,57 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password, role = 'student') => {
     try {
-      // Sign up with Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username,
-            display_name: username,
-            role: role
-          }
-        }
-      });
+      let newUserId = null;
+      let activeSession = null;
 
-      if (error) throw new Error(error.message);
-
-      // Wait for profile to be created by trigger, then update it
-      if (data.session) {
-        localStorage.setItem('token', data.session.access_token);
-      }
-
-      // Sync profile on backend
+      // 1. Direct registration via backend using Supabase Admin SDK
+      // This bypasses the Supabase email rate limit (429 over_email_send_rate_limit)
+      // and guarantees email_confirm: true since the user already verified their Gmail OTP
       try {
-        await api.post('/auth/register', {
+        const regRes = await api.post('/auth/register', {
           username,
           email,
-          firebaseUid: data.user.id,
-          role: role,
+          password,
+          role,
           teacherStatus: role === 'teacher' ? 'pending' : 'verified'
         });
 
-        // Explicitly sync to "teacher profile" table for Admin Dashboard visibility
-        if (role === 'teacher') {
+        if (regRes.data?.user?.id) {
+          newUserId = regRes.data.user.id;
+        }
+      } catch (backendErr) {
+        console.warn('⚠️ Direct backend register attempt returned:', backendErr.response?.data?.message || backendErr.message);
+        // Fallback: Client-side signUp if backend direct creation was not handled
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { username, display_name: username, role }
+          }
+        });
+        if (signUpError) throw new Error(signUpError.message);
+        newUserId = signUpData.user?.id;
+        activeSession = signUpData.session;
+
+        // Auto-confirm & sync with backend
+        if (newUserId) {
+          await api.post('/auth/register', {
+            username,
+            email,
+            firebaseUid: newUserId,
+            role,
+            teacherStatus: role === 'teacher' ? 'pending' : 'verified'
+          }).catch(() => {});
+        }
+      }
+
+      // Explicitly sync to "teacher profile" table for Admin Dashboard visibility
+      if (role === 'teacher' && newUserId) {
+        try {
           await supabase
             .from('teacher profile')
             .upsert({
-              id: data.user.id,
+              id: newUserId,
               name: username,
               email: email,
               teacherStatus: 'pending',
@@ -803,19 +905,39 @@ export const AuthProvider = ({ children }) => {
               school: 'Chưa cập nhật',
               createdAt: new Date().toISOString()
             });
+        } catch (tpErr) {
+          console.warn('⚠️ Teacher profile upsert skipped:', tpErr.message);
         }
-      } catch (syncError) {
-        console.warn('⚠️ Profile sync may have failed:', syncError.message);
       }
 
-      // Fetch the profile
+      // 2. Obtain real active session with signInWithPassword so the user is genuinely logged in
+      if (!activeSession) {
+        try {
+          const signInRes = await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+          if (signInRes.data?.session) {
+            activeSession = signInRes.data.session;
+          }
+        } catch (signInErr) {
+          console.warn('⚠️ Auto sign-in during register fallback:', signInErr.message);
+        }
+      }
+
+      if (activeSession) {
+        localStorage.setItem('token', activeSession.access_token);
+      }
+
+      // 4. Fetch the authoritative profile
+      let userData;
       try {
-        const response = await api.get(`/users/firebase/${data.user.id}`);
+        const response = await api.get(`/users/firebase/${newUserId}`);
         if (response.data) {
-          const userData = { 
+          userData = { 
             ...response.data, 
-            firebaseUid: data.user.id, 
-            uid: data.user.id,
+            firebaseUid: newUserId, 
+            uid: newUserId,
             role: role,
             teacherStatus: role === 'teacher' ? 'pending' : 'verified'
           };
@@ -826,12 +948,12 @@ export const AuthProvider = ({ children }) => {
       } catch {
         // Use basic data if profile fetch fails
         const basicUser = {
-          id: data.user.id,
+          id: newUserId,
           email,
           username,
           displayName: username,
-          firebaseUid: data.user.id,
-          uid: data.user.id,
+          firebaseUid: newUserId,
+          uid: newUserId,
           role: role,
           teacherStatus: role === 'teacher' ? 'pending' : 'verified',
           xp: 0,
@@ -855,7 +977,7 @@ export const AuthProvider = ({ children }) => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}/`,
           queryParams: {
             prompt: 'select_account'
           }

@@ -13,23 +13,48 @@ const ADMIN_CREDENTIALS = {
 };
 
 export const AdminAuthProvider = ({ children }) => {
-  const [admin, setAdmin] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const { logout: globalLogout } = useAuth();
+  const { user: globalUser, loading: globalLoading, logout: globalLogout } = useAuth();
 
+  const getInitialAdmin = () => {
+    try {
+      const savedAdmin = localStorage.getItem('physigame_admin');
+      if (savedAdmin) return JSON.parse(savedAdmin);
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed.role === 'admin' || parsed.email === ADMIN_CREDENTIALS.email) {
+          return {
+            email: parsed.email,
+            name: parsed.displayName || parsed.display_name || ADMIN_CREDENTIALS.name,
+            role: ADMIN_CREDENTIALS.role
+          };
+        }
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const [admin, setAdmin] = useState(getInitialAdmin);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check if admin is logged in from localStorage
-    const savedAdmin = localStorage.getItem('physigame_admin');
-    if (savedAdmin) {
-      try {
-        setAdmin(JSON.parse(savedAdmin));
-      } catch (e) {
-        localStorage.removeItem('physigame_admin');
-      }
+    if (globalLoading) return;
+
+    if (globalUser && (globalUser.role === 'admin' || globalUser.email === ADMIN_CREDENTIALS.email)) {
+      const adminData = {
+        email: globalUser.email,
+        name: globalUser.displayName || globalUser.display_name || ADMIN_CREDENTIALS.name,
+        role: ADMIN_CREDENTIALS.role
+      };
+      setAdmin(adminData);
+      localStorage.setItem('physigame_admin', JSON.stringify(adminData));
+    } else if (!globalUser && !localStorage.getItem('physigame_admin')) {
+      setAdmin(null);
     }
     setLoading(false);
-  }, []);
+  }, [globalUser, globalLoading]);
 
   const login = async (email, password) => {
     // Validate credentials

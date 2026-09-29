@@ -7,7 +7,7 @@ import { GraduationCap, BookOpen, Mail, Lock, CheckCircle2, ChevronLeft, Lightbu
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, loginWithGoogle } = useAuth();
+  const { user, loading: authLoading, login, loginWithGoogle } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [selectedRole, setSelectedRole] = useState('student');
   // Parse query parameters
@@ -21,23 +21,37 @@ const Login = () => {
   const [error, setError] = useState(initialError);
   const [loading, setLoading] = useState(false);
 
+  const handleRoleRedirect = (user) => {
+    if (!user) return;
+    if (user.role === 'admin' || user.email === 'quantrivien@gmail.com') {
+      localStorage.setItem('physigame_admin', JSON.stringify({
+        email: user.email,
+        name: user.displayName || 'Quản trị viên',
+        role: 'super_admin'
+      }));
+      navigate('/admin/dashboard', { replace: true });
+    } else if (user.role === 'teacher') {
+      if (user.teacherStatus === 'verified' || user.teacher_status === 'verified') {
+        navigate('/teacher/dashboard', { replace: true });
+      } else {
+        const hasProfile = user.teacher_profile?.phone || user.teacher_profile?.school || user.teacherProfile?.phone || user.teacherProfile?.school;
+        navigate(hasProfile ? '/teacher/pending' : '/teacher/apply', { replace: true });
+      }
+    } else {
+      navigate('/', { replace: true });
+    }
+  };
+
+  // Auto redirect if user is already authenticated (e.g. from Google OAuth callback)
+  React.useEffect(() => {
+    if (user && !authLoading && user.status !== 'inactive' && user.teacher_status !== 'inactive') {
+      handleRoleRedirect(user);
+    }
+  }, [user, authLoading]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
-  };
-
-  const handleRoleRedirect = (user) => {
-    if (user.role === 'admin' || user.email === 'quantrivien@gmail.com') {
-      navigate('/admin/dashboard');
-    } else if (user.role === 'teacher') {
-      if (user.teacherStatus === 'verified') {
-        navigate('/teacher/dashboard');
-      } else {
-        navigate('/teacher/pending');
-      }
-    } else {
-      navigate('/');
-    }
   };
 
   const handleGoogleLogin = async () => {
@@ -58,7 +72,9 @@ const Login = () => {
     setError('');
     setLoading(true);
     try {
-      const user = await login(formData.email, formData.password);
+      const email = formData.email ? formData.email.trim() : '';
+      const password = formData.password ? formData.password.trim() : '';
+      const user = await login(email, password);
       handleRoleRedirect(user);
     } catch (err) {
       setError(err.message || 'Sai thông tin đăng nhập.');
@@ -66,6 +82,20 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  const isOAuthCallback =
+    typeof window !== 'undefined' &&
+    (window.location.hash.includes('access_token') ||
+      window.location.search.includes('code='));
+
+  if (isOAuthCallback && !user) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center font-body text-[#0f172a]">
+        <div className="w-12 h-12 border-4 border-[#2099e9] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="font-heading font-extrabold text-base tracking-wide text-slate-700">Đang đồng bộ phiên đăng nhập...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex font-body bg-gray-100 items-center justify-center p-4 sm:p-8 relative overflow-hidden">

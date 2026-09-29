@@ -126,7 +126,7 @@ const AdminDashboard = () => {
           id: t.id,
           name: t.display_name || t.displayName || t.username || 'Giáo viên',
           email: resolvedEmail,
-          avatar: t.avatar || t.teacher_profile?.avatar || null,
+          avatar: t.avatar || t.avatar_url || t.profile?.avatar || t.teacher_profile?.avatar || t.teacherProfile?.avatar || null,
           subject: t.teacher_profile?.subject || 'Vật lý',
           school: t.teacher_profile?.school || 'Chưa cập nhật',
           joinDate: (t.teacher_profile?.applied_at || t.created_at) ? new Date(t.teacher_profile?.applied_at || t.created_at).toLocaleDateString('vi-VN') : '—',
@@ -251,21 +251,24 @@ const AdminDashboard = () => {
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden shrink-0">
-                        {teacher.avatar ? (
+                      <div className="w-14 h-14 rounded-full bg-white border-2 border-indigo-100 shadow-md flex items-center justify-center overflow-hidden shrink-0 relative">
+                        {teacher.avatar && teacher.avatar !== 'null' && teacher.avatar !== 'undefined' ? (
                           <img
                             src={teacher.avatar}
                             alt={teacher.name}
+                            referrerPolicy="no-referrer"
                             className="w-full h-full object-cover"
-                            onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                            }}
                           />
                         ) : null}
-                        <span
-                          className="font-heading text-white font-extrabold text-lg"
-                          style={{ display: teacher.avatar ? 'none' : 'flex' }}
+                        <div
+                          className={`${teacher.avatar && teacher.avatar !== 'null' && teacher.avatar !== 'undefined' ? 'hidden' : 'flex'} w-full h-full items-center justify-center bg-indigo-50 text-indigo-600 font-heading font-black text-lg`}
                         >
-                          {teacher.name[0].toUpperCase()}
-                        </span>
+                          {teacher.name ? teacher.name[0].toUpperCase() : <GraduationCap className="w-6 h-6 text-indigo-500" />}
+                        </div>
                       </div>
                       <div>
                         <h4 className="font-heading font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">{teacher.name}</h4>

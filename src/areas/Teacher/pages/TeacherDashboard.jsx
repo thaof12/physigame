@@ -21,25 +21,49 @@ import api from '../../../config/api';
 const TeacherDashboard = () => {
   const navigate = useNavigate();
   const { teacher } = useTeacherAuth();
-  const [learningMaterials, setLearningMaterials] = useState([]);
-  const [teacherClasses, setTeacherClasses] = useState([]);
-  const [notifications, setNotifications] = useState([]);
+  const [learningMaterials, setLearningMaterials] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_teacher_dash_materials_' + (teacher?.id || 'default'));
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
+  const [teacherClasses, setTeacherClasses] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_teacher_classes_' + (teacher?.id || 'default'));
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_teacher_dash_notifs_' + (teacher?.id || 'default'));
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
   const [loading, setLoading] = useState(false);
 
   const fetchDashboardData = async () => {
     if (!teacher?.id) return;
-    setLoading(true);
+    if (learningMaterials.length === 0 && teacherClasses.length === 0) {
+      setLoading(true);
+    }
     try {
       // 1. Fetch Notifications
       const notifRes = await api.get(`/classes/teacher/${teacher.id}/notifications`).catch(() => ({ data: { success: false } }));
       if (notifRes.data?.success) {
-        setNotifications((notifRes.data.notifications || []).slice(0, 4));
+        const freshNotifs = (notifRes.data.notifications || []).slice(0, 4);
+        setNotifications(freshNotifs);
+        try {
+          localStorage.setItem('eureka_teacher_dash_notifs_' + teacher.id, JSON.stringify(freshNotifs));
+        } catch (e) {}
       }
 
       // 2. Fetch Teacher Classes
       const classesRes = await api.get(`/classes/teacher/${teacher.id}`).catch(() => ({ data: { success: false, classes: [] } }));
       if (classesRes.data?.success && Array.isArray(classesRes.data.classes)) {
         setTeacherClasses(classesRes.data.classes);
+        try {
+          localStorage.setItem('eureka_teacher_classes_' + teacher.id, JSON.stringify(classesRes.data.classes));
+        } catch (e) {}
       }
 
       // 3. Fetch Lessons and Challenges (Học liệu)
@@ -74,7 +98,11 @@ const TeacherDashboard = () => {
         }))
       ];
 
-      setLearningMaterials(combinedMaterials.slice(0, 5));
+      const freshMaterials = combinedMaterials.slice(0, 5);
+      setLearningMaterials(freshMaterials);
+      try {
+        localStorage.setItem('eureka_teacher_dash_materials_' + teacher.id, JSON.stringify(freshMaterials));
+      } catch (e) {}
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {

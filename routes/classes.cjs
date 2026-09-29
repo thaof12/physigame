@@ -604,7 +604,7 @@ router.get('/:classId/students', async (req, res) => {
 
     const { data: students, error: studentsError } = await supabase
       .from('users')
-      .select('id, username, email, display_name, avatar, xp, level, created_at')
+      .select('id, username, email, display_name, avatar, xp, level, created_at, status')
       .in('id', studentIds);
 
     if (studentsError) throw studentsError;
@@ -655,6 +655,7 @@ router.get('/:classId/students', async (req, res) => {
     // Map students with stats in memory with zero extra DB roundtrips
     const studentsWithStats = (students || []).map((student) => {
       const mInfo = memberMap[student.id] || { status: 'approved', joinedAt: null };
+      const isAccountLocked = student.status === 'inactive';
 
       // Pending students: return immediately without expensive calculation
       if (mInfo.status === 'pending') {
@@ -666,10 +667,11 @@ router.get('/:classId/students', async (req, res) => {
           xp: student.xp || 0,
           level: student.level || 1,
           status: 'pending',
+          userStatus: student.status || 'active',
           joinedAt: mInfo.joinedAt,
           lessonsCompleted: 0,
           avgScore: 0,
-          lastActive: 'Chờ duyệt'
+          lastActive: isAccountLocked ? 'Tài khoản bị khóa' : 'Chờ duyệt'
         };
       }
 
@@ -688,7 +690,7 @@ router.get('/:classId/students', async (req, res) => {
         avgScore = 100;
       }
 
-      let lastActive = 'Không hoạt động';
+      let lastActive = isAccountLocked ? 'Tài khoản bị khóa' : 'Không hoạt động';
       let latestTime = null;
 
       userComps.forEach(c => {
@@ -722,6 +724,10 @@ router.get('/:classId/students', async (req, res) => {
         }
       }
 
+      if (isAccountLocked) {
+        lastActive = 'Tài khoản bị khóa';
+      }
+
       return {
         id: student.id,
         name: student.display_name || student.username || (student.email ? student.email.split('@')[0] : 'Học sinh'),
@@ -730,6 +736,7 @@ router.get('/:classId/students', async (req, res) => {
         xp: student.xp || 0,
         level: student.level || 1,
         status: mInfo.status,
+        userStatus: student.status || 'active',
         joinedAt: mInfo.joinedAt,
         lessonsCompleted,
         avgScore,

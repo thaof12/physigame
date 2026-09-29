@@ -177,23 +177,30 @@ const TeacherProfile = () => {
         <div className="flex items-center gap-6">
           <div className="relative">
             <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/10 overflow-hidden relative">
-              {teacher?.avatar ? (
-                <img
-                  src={teacher.avatar}
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.style.display = 'none';
-                    if (e.currentTarget.nextElementSibling) {
-                      e.currentTarget.nextElementSibling.style.display = 'flex';
-                    }
-                  }}
-                />
-              ) : null}
-              <span className={`font-heading text-3xl font-extrabold text-white ${teacher?.avatar ? 'hidden' : 'flex'}`}>
-                {(teacher?.displayName || teacher?.display_name)?.[0] || 'T'}
-              </span>
+              {(() => {
+                const teacherAvatar = teacher?.avatar || teacher?.photoURL || teacher?.avatar_url || teacher?.teacher_profile?.avatar || teacher?.teacherProfile?.avatar || (typeof window !== 'undefined' ? localStorage.getItem('eureka_teacher_avatar') : null);
+                return (
+                  <>
+                    {teacherAvatar ? (
+                      <img
+                        src={teacherAvatar}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.style.display = 'none';
+                          if (e.currentTarget.nextElementSibling) {
+                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                          }
+                        }}
+                      />
+                    ) : null}
+                    <span className={`font-heading text-3xl font-extrabold text-white ${teacherAvatar ? 'hidden' : 'flex'}`}>
+                      {(teacher?.displayName || teacher?.display_name)?.[0] || 'T'}
+                    </span>
+                  </>
+                );
+              })()}
             </div>
             <input 
               type="file" 

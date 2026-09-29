@@ -300,6 +300,8 @@ app.get(['/api/og', '/api/og.js'], async (req, res) => {
   <meta property="og:title" content="${siteName}">
   <meta property="og:description" content="${siteDescription}">
   <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:secure_url" content="${imageUrl}">
+  <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="${siteName}">

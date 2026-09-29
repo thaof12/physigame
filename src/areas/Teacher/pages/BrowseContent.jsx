@@ -54,10 +54,30 @@ const BrowseContent = () => {
   const [activeTab, setActiveTab] = useState('lessons');
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [filterGrade, setFilterGrade] = useState('all');
-  const [lessons, setLessons] = useState([]);
-  const [exercises, setExercises] = useState([]);
-  const [lockedIds, setLockedIds] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [lessons, setLessons] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_teacher_browse_lessons');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
+  const [exercises, setExercises] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_teacher_browse_exercises');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
+  const [lockedIds, setLockedIds] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_teacher_browse_locks');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_teacher_browse_lessons');
+      return !cached || JSON.parse(cached).length === 0;
+    } catch (e) { return true; }
+  });
 
   // Synchronize search query when URL parameters update
   useEffect(() => {
@@ -69,7 +89,8 @@ const BrowseContent = () => {
   const [selectedItem, setSelectedItem] = useState(null);
 
   const fetchSystemContent = async (isBackground = false) => {
-    if (!isBackground) setLoading(true);
+    // Only show loading spinner if we don't have any cached data
+    if (!isBackground && lessons.length === 0) setLoading(true);
     try {
       const [lessonsRes, exercisesRes, locksRes] = await Promise.all([
         api.get('/lessons?teacherId=all'),
@@ -81,8 +102,16 @@ const BrowseContent = () => {
       
       setLessons(newLessons);
       setExercises(newExercises);
+      try {
+        localStorage.setItem('eureka_teacher_browse_lessons', JSON.stringify(newLessons));
+        localStorage.setItem('eureka_teacher_browse_exercises', JSON.stringify(newExercises));
+      } catch (e) {}
+
       if (locksRes && locksRes.data && Array.isArray(locksRes.data.locked_ids)) {
         setLockedIds(locksRes.data.locked_ids);
+        try {
+          localStorage.setItem('eureka_teacher_browse_locks', JSON.stringify(locksRes.data.locked_ids));
+        } catch (e) {}
       }
 
       // If currently previewed item was deleted or locked, close modal
@@ -100,7 +129,7 @@ const BrowseContent = () => {
     } catch (error) {
       console.error('Error fetching content:', error);
     } finally {
-      if (!isBackground) setLoading(false);
+      setLoading(false);
     }
   };
 

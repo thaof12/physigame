@@ -278,23 +278,30 @@ const TeacherLayout = () => {
           {!sidebarCollapsed && (
             <div className="flex items-center gap-4 px-2 mb-8">
               <div className="w-14 h-14 bg-white border-2 border-[#f8fafc] rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-[#0f172a]/5 shrink-0 overflow-hidden relative">
-                {teacher?.avatar ? (
-                  <img
-                    src={teacher.avatar}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.style.display = 'none';
-                      if (e.currentTarget.nextElementSibling) {
-                        e.currentTarget.nextElementSibling.style.display = 'flex';
-                      }
-                    }}
-                  />
-                ) : null}
-                <span className={`text-[#0f172a] font-black text-xl italic ${teacher?.avatar ? 'hidden' : 'flex'}`}>
-                  {teacher?.displayName?.[0] || teacher?.email?.[0] || 'T'}
-                </span>
+                {(() => {
+                  const teacherAvatar = teacher?.avatar || teacher?.photoURL || teacher?.avatar_url || teacher?.teacher_profile?.avatar || teacher?.teacherProfile?.avatar || (typeof window !== 'undefined' ? localStorage.getItem('eureka_teacher_avatar') : null);
+                  return (
+                    <>
+                      {teacherAvatar ? (
+                        <img
+                          src={teacherAvatar}
+                          alt="Avatar"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.style.display = 'none';
+                            if (e.currentTarget.nextElementSibling) {
+                              e.currentTarget.nextElementSibling.style.display = 'flex';
+                            }
+                          }}
+                        />
+                      ) : null}
+                      <span className={`text-[#0f172a] font-black text-xl italic ${teacherAvatar ? 'hidden' : 'flex'}`}>
+                        {teacher?.displayName?.[0] || teacher?.email?.[0] || 'T'}
+                      </span>
+                    </>
+                  );
+                })()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-heading text-[10px] font-extrabold text-[#4f46e5] uppercase tracking-widest mb-0.5">Giảng Viên</p>

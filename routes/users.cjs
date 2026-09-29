@@ -110,6 +110,13 @@ router.post('/login', async (req, res) => {
 
     console.log('✅ Login successful:', { id: user.id, email: user.email });
 
+    // Update updated_at timestamp to record real-time activity
+    try {
+      await User.update(user.id, { updated_at: new Date().toISOString() });
+    } catch (upErr) {
+      console.warn('⚠️ [users.cjs] Failed to update updated_at on login:', upErr.message);
+    }
+
     res.json({
       message: 'Login successful',
       token: authData.session.access_token,
@@ -148,9 +155,14 @@ router.post('/auth/google', async (req, res) => {
       if (user) {
         user = await User.update(userId, {
           username: username || email.split('@')[0],
-          display_name: displayName || username || email.split('@')[0]
+          display_name: displayName || username || email.split('@')[0],
+          updated_at: new Date().toISOString()
         });
       }
+    } else if (user) {
+      try {
+        await User.update(user.id, { updated_at: new Date().toISOString() });
+      } catch (e) {}
     }
 
     if (!user) {
@@ -1441,6 +1453,14 @@ router.get('/check-status', async (req, res) => {
       rejectionReason: user.teacher_profile?.rejectionReason || null,
       isDeactivated
     };
+
+    // Throttled heartbeat: update updated_at every 3 minutes to record real-time active status
+    if (!isDeactivated && user.id) {
+      const lastUp = user.updated_at ? new Date(user.updated_at).getTime() : 0;
+      if (now - lastUp > 180000) {
+        User.update(user.id, { updated_at: new Date().toISOString() }).catch(() => {});
+      }
+    }
 
     statusCheckCache.set(cacheKey, { data: responseData, expiresAt: now + STATUS_CACHE_TTL });
     return res.json(responseData);

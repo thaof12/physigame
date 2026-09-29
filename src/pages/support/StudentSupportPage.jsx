@@ -26,7 +26,12 @@ const QUICK_TOPICS = [
 
 const StudentSupportPage = () => {
    const { user } = useAuth();
-   const [messages, setMessages] = useState([]);
+   const [messages, setMessages] = useState(() => {
+      try {
+         const cached = localStorage.getItem('eureka_student_admin_messages');
+         return cached ? JSON.parse(cached) : [];
+      } catch (e) { return []; }
+   });
    const [selectedTopic, setSelectedTopic] = useState(QUICK_TOPICS[0].tag);
    const [inputMessage, setInputMessage] = useState('');
    const [studentName, setStudentName] = useState('');
@@ -213,6 +218,29 @@ const StudentSupportPage = () => {
       saveMessages([]);
    };
 
+   const leftColRef = useRef(null);
+   const [chatHeight, setChatHeight] = useState(null);
+
+   // Dynamically match chat box height exactly to the left column ("Chọn chủ đề bạn cần trao đổi:") on lg screens
+   useEffect(() => {
+      if (!leftColRef.current) return;
+      const updateHeight = () => {
+         if (window.innerWidth >= 1024) {
+            setChatHeight(leftColRef.current.offsetHeight);
+         } else {
+            setChatHeight(null);
+         }
+      };
+      updateHeight();
+      const ro = new ResizeObserver(updateHeight);
+      ro.observe(leftColRef.current);
+      window.addEventListener('resize', updateHeight);
+      return () => {
+         ro.disconnect();
+         window.removeEventListener('resize', updateHeight);
+      };
+   }, []);
+
    return (
       <div className="w-full pt-32 pb-20 px-4 sm:px-6 md:px-10 max-w-7xl mx-auto font-body">
 
@@ -229,14 +257,14 @@ const StudentSupportPage = () => {
          </div>
 
          {/* Main Interface Grid */}
-         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
             {/* Left Column: Admin Status & Quick Topics */}
-            <div className="lg:col-span-4 space-y-6">
+            <div ref={leftColRef} className="lg:col-span-4 space-y-6">
 
                {/* Admin Status Card */}
                <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.04)] relative overflow-hidden">
-                  <div className="flex items-center gap-4 mb-5">
+                  <div className="flex items-center gap-4">
                      <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-[#274dad] flex items-center justify-center shrink-0 shadow-sm">
                         <ShieldCheck className="w-7 h-7" />
                      </div>
@@ -286,17 +314,20 @@ const StudentSupportPage = () => {
                </div>
             </div>
 
-            {/* Right Column: Live Chat Interface */}
-            <div className="lg:col-span-8 bg-white rounded-3xl border-2 border-indigo-200 shadow-[0_15px_40px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col min-h-[520px]">
+            {/* Right Column: Live Chat Interface (Locked to Left Column Bottom Edge on Desktop) */}
+            <div 
+               style={chatHeight ? { height: `${chatHeight}px` } : undefined}
+               className="lg:col-span-8 bg-white rounded-3xl border-2 border-indigo-200 shadow-[0_15px_40px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col h-[520px] lg:h-auto"
+            >
 
                {/* Chat Header Bar */}
-               <div className="px-6 py-4 bg-[#faf8f5] border-b border-slate-200/80 flex items-center justify-between">
+               <div className="px-6 py-3.5 bg-[#faf8f5] border-b border-slate-200/80 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-3">
-                     <div className="w-10 h-10 rounded-2xl bg-[#274dad] text-white flex items-center justify-center shadow-md">
-                        <MessageSquare className="w-5 h-5" />
+                     <div className="w-9 h-9 rounded-2xl bg-[#274dad] text-white flex items-center justify-center shadow-md">
+                        <MessageSquare className="w-4.5 h-4.5" />
                      </div>
                      <div>
-                        <h3 className="font-heading font-extrabold text-black text-sm sm:text-base">Kênh Hội Thoại Trực Tuyến</h3>
+                        <h3 className="font-heading font-extrabold text-black text-sm">Kênh Hội Thoại Trực Tuyến</h3>
                         <p className="text-xs text-slate-600">Đang chọn: <span className="font-bold text-[#274dad]">{selectedTopic}</span></p>
                      </div>
                   </div>
@@ -312,8 +343,8 @@ const StudentSupportPage = () => {
                   </button>
                </div>
 
-               {/* Message Feed */}
-               <div ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-4 bg-gradient-to-b from-slate-50/60 to-white min-h-[320px]">
+               {/* Message Feed with Contained Sleek Scrollbar */}
+               <div ref={chatContainerRef} className="flex-1 min-h-0 p-4 sm:p-5 overflow-y-auto space-y-4 bg-gradient-to-b from-slate-50/60 to-white chat-scrollbar">
                   {messages.map((msg) => {
                      const isAdmin = msg.sender === 'admin';
                      return (
@@ -321,19 +352,28 @@ const StudentSupportPage = () => {
                            key={msg.id}
                            className={`flex gap-3 max-w-[88%] ${isAdmin ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
                         >
-                           {/* Avatar */}
-                           <div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold font-heading shadow-sm overflow-hidden bg-slate-900 text-white">
+                           {/* Avatar with Error Fallback */}
+                           <div className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold font-heading shadow-sm overflow-hidden bg-slate-900 text-white relative">
                               {isAdmin ? (
                                  <div className="w-full h-full bg-[#274dad] flex items-center justify-center text-white rounded-full">
                                     <Bot className="w-5 h-5" />
                                  </div>
                               ) : (
                                  <>
-                                    {msg.avatar && (
-                                       <img src={msg.avatar} alt={msg.senderName} className="w-full h-full rounded-full object-cover" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.style.display = 'none'; if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex'; }} />
-                                    )}
+                                    {msg.avatar ? (
+                                       <img 
+                                          src={msg.avatar} 
+                                          alt={msg.senderName} 
+                                          className="w-full h-full rounded-full object-cover" 
+                                          onError={(e) => { 
+                                             e.currentTarget.onerror = null; 
+                                             e.currentTarget.style.display = 'none'; 
+                                             if (e.currentTarget.nextElementSibling) e.currentTarget.nextElementSibling.style.display = 'flex'; 
+                                          }} 
+                                       />
+                                    ) : null}
                                     <div className={`w-full h-full bg-slate-900 flex items-center justify-center text-white rounded-full ${msg.avatar ? 'hidden' : 'flex'}`}>
-                                       {msg.senderName[0]?.toUpperCase() || <User className="w-4 h-4" />}
+                                       {msg.senderName?.[0]?.toUpperCase() || <User className="w-4 h-4" />}
                                     </div>
                                  </>
                               )}
@@ -349,7 +389,7 @@ const StudentSupportPage = () => {
                                  <span className="text-[10px] text-slate-400 font-body">{msg.timestamp}</span>
                               </div>
 
-                              <div className={`p-4 rounded-2xl text-xs sm:text-sm font-body leading-relaxed shadow-sm ${isAdmin
+                              <div className={`p-3.5 rounded-2xl text-xs sm:text-sm font-body leading-relaxed shadow-sm ${isAdmin
                                  ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-none'
                                  : 'bg-[#274dad] text-white rounded-tr-none'
                                  }`}>
@@ -366,7 +406,7 @@ const StudentSupportPage = () => {
                         <div className="w-9 h-9 rounded-2xl bg-[#274dad] text-white flex items-center justify-center">
                            <Bot className="w-4 h-4 animate-spin" />
                         </div>
-                        <div className="p-3.5 bg-white border border-slate-200 rounded-2xl rounded-tl-none text-xs text-slate-400 font-body italic flex items-center gap-2">
+                        <div className="p-3 bg-white border border-slate-200 rounded-2xl rounded-tl-none text-xs text-slate-400 font-body italic flex items-center gap-2">
                            <span>Admin Eureka đang nhập phản hồi...</span>
                            <span className="inline-block w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
                         </div>
@@ -377,30 +417,30 @@ const StudentSupportPage = () => {
 
                {/* Toast Notification */}
                {successBanner && (
-                  <div className="mx-6 my-2 p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-body font-semibold flex items-center justify-between animate-fade-in">
+                  <div className="mx-4 sm:mx-6 my-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-body font-semibold flex items-center justify-between animate-fade-in shrink-0">
                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                         <span>Đã gửi yêu cầu tới Admin! Hệ thống đang tự động xử lý.</span>
                      </div>
                   </div>
                )}
 
                {/* Form Composer Area */}
-               <form onSubmit={handleSendMessage} className="p-4 sm:p-6 bg-white border-t border-slate-100 space-y-3">
-                  <div className="flex flex-col sm:flex-row items-center gap-3">
+               <form onSubmit={handleSendMessage} className="p-3.5 sm:p-4 bg-white border-t border-slate-100 space-y-2.5 shrink-0">
+                  <div className="flex flex-col sm:flex-row items-center gap-2.5">
                      <div className="w-full sm:w-1/2">
                         <input
                            type="text"
                            value={studentName}
                            onChange={(e) => setStudentName(e.target.value)}
                            placeholder="Nhập tên học sinh..."
-                           className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm font-body text-slate-800 focus:bg-white focus:border-[#274dad] focus:outline-none transition-all"
+                           className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm font-body text-slate-800 focus:bg-white focus:border-[#274dad] focus:outline-none transition-all"
                            required
                         />
                      </div>
-                     <div className="w-full sm:w-1/2 flex items-center gap-2 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-body text-slate-500">
+                     <div className="w-full sm:w-1/2 flex items-center gap-2 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-body text-slate-500">
                         <span className="font-bold text-slate-700">Đang chọn:</span>
-                        <span className="px-2.5 py-0.5 bg-indigo-100 text-[#274dad] rounded-md font-bold text-xs">
+                        <span className="px-2 py-0.5 bg-indigo-100 text-[#274dad] rounded font-bold text-xs">
                            {selectedTopic}
                         </span>
                      </div>
@@ -417,15 +457,15 @@ const StudentSupportPage = () => {
                            }
                         }}
                         placeholder={`Nhập câu hỏi hoặc thông tin cần Admin hỗ trợ về [${selectedTopic}]...`}
-                        rows={3}
-                        className="w-full pl-4 pr-14 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-xs sm:text-sm font-body text-slate-800 focus:bg-white focus:border-[#274dad] focus:outline-none transition-all resize-none"
+                        rows={2}
+                        className="w-full pl-3.5 pr-12 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm font-body text-slate-800 focus:bg-white focus:border-[#274dad] focus:outline-none transition-all resize-none"
                         required
                      />
 
                      <button
                         type="submit"
                         disabled={!inputMessage.trim() || isSubmitting}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-xl bg-[#274dad] text-white hover:bg-indigo-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-indigo-200 cursor-pointer"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2.5 rounded-xl bg-[#274dad] text-white hover:bg-indigo-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-indigo-200 cursor-pointer"
                         title="Gửi câu hỏi"
                      >
                         <Send className="w-4 h-4" />

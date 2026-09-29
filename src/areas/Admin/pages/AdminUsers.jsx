@@ -113,9 +113,24 @@ const statusFilterOptions = [
 // Empty mock data array - Real data only
 const mockUsers = [];
 const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
-  const [pendingTeachers, setPendingTeachers] = useState([]);
-  const [allTeachers, setAllTeachers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [allTeachers, setAllTeachers] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_admin_all_teachers');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
+  const [pendingTeachers, setPendingTeachers] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_admin_pending_teachers');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) { return []; }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('eureka_admin_all_teachers');
+      return !cached || JSON.parse(cached).length === 0;
+    } catch (e) { return true; }
+  });
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
   const [rejectModal, setRejectModal] = useState(null);
@@ -293,7 +308,7 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
           username: t.display_name || t.username || 'Giáo viên',
           displayName: t.display_name || t.username || 'Giáo viên',
           email: resolvedEmail,
-          avatar: t.avatar_url || t.avatar || t.profile?.avatar || t.teacher_profile?.avatar || null,
+          avatar: t.avatar || t.avatar_url || t.profile?.avatar || t.teacher_profile?.avatar || t.teacherProfile?.avatar || null,
           teacherStatus: t.teacher_status || 'pending',
           teacherProfile: {
             email: resolvedEmail,
@@ -312,7 +327,12 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
       }));
 
       setAllTeachers(formatted);
-      setPendingTeachers(formatted.filter(t => (t.teacherStatus || '').toLowerCase() === 'pending'));
+      const pendingList = formatted.filter(t => (t.teacherStatus || '').toLowerCase() === 'pending');
+      setPendingTeachers(pendingList);
+      try {
+        localStorage.setItem('eureka_admin_all_teachers', JSON.stringify(formatted));
+        localStorage.setItem('eureka_admin_pending_teachers', JSON.stringify(pendingList));
+      } catch (e) {}
     } catch (err) {
       console.error('Error fetching real teachers:', err);
       setError('Không thể tải danh sách giáo viên từ database');
@@ -546,11 +566,12 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center text-white font-heading font-extrabold text-lg shadow-lg shadow-indigo-500/20 overflow-hidden shrink-0 relative">
+                  <div className="w-14 h-14 rounded-full bg-white border-2 border-indigo-100 shadow-md flex items-center justify-center overflow-hidden shrink-0 relative">
                     {teacher.avatar && teacher.avatar !== 'null' && teacher.avatar !== 'undefined' ? (
                       <img
                         src={teacher.avatar}
                         alt=""
+                        referrerPolicy="no-referrer"
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.style.display = 'none';
@@ -558,9 +579,9 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
                         }}
                       />
                     ) : null}
-                    <span className={`${teacher.avatar && teacher.avatar !== 'null' && teacher.avatar !== 'undefined' ? 'hidden' : 'flex'} w-full h-full items-center justify-center`}>
-                      {(teacher.displayName || teacher.username || 'G')[0]?.toUpperCase()}
-                    </span>
+                    <div className={`${teacher.avatar && teacher.avatar !== 'null' && teacher.avatar !== 'undefined' ? 'hidden' : 'flex'} w-full h-full items-center justify-center bg-indigo-50 text-indigo-600 font-heading font-black text-lg`}>
+                      {(teacher.displayName || teacher.username) ? (teacher.displayName || teacher.username)[0].toUpperCase() : <GraduationCap className="w-6 h-6 text-indigo-500" />}
+                    </div>
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -675,11 +696,12 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
                 <div className="lg:col-span-7 space-y-6">
                   {/* Applicant Profile Card */}
                   <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-3xl flex items-center justify-center text-white font-heading font-black text-2xl sm:text-3xl shadow-lg shadow-indigo-500/20 shrink-0 overflow-hidden relative">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white border-2 border-indigo-100 shadow-md flex items-center justify-center shrink-0 overflow-hidden relative">
                       {selectedTeacherDetail.avatar && selectedTeacherDetail.avatar !== 'null' && selectedTeacherDetail.avatar !== 'undefined' ? (
                         <img
                           src={selectedTeacherDetail.avatar}
                           alt=""
+                          referrerPolicy="no-referrer"
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             e.target.style.display = 'none';
@@ -687,9 +709,9 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
                           }}
                         />
                       ) : null}
-                      <span className={`${selectedTeacherDetail.avatar && selectedTeacherDetail.avatar !== 'null' && selectedTeacherDetail.avatar !== 'undefined' ? 'hidden' : 'flex'} w-full h-full items-center justify-center`}>
-                        {(selectedTeacherDetail.displayName || selectedTeacherDetail.username || 'G')[0]?.toUpperCase()}
-                      </span>
+                      <div className={`${selectedTeacherDetail.avatar && selectedTeacherDetail.avatar !== 'null' && selectedTeacherDetail.avatar !== 'undefined' ? 'hidden' : 'flex'} w-full h-full items-center justify-center bg-indigo-50 text-indigo-600 font-heading font-black text-2xl sm:text-3xl`}>
+                        {(selectedTeacherDetail.displayName || selectedTeacherDetail.username) ? (selectedTeacherDetail.displayName || selectedTeacherDetail.username)[0].toUpperCase() : <GraduationCap className="w-8 h-8 text-indigo-500" />}
+                      </div>
                     </div>
                     <div className="space-y-2 text-center sm:text-left flex-1 min-w-0">
                       <h3 className="font-heading text-xl font-extrabold text-slate-900 truncate">
@@ -1060,15 +1082,49 @@ const PendingTeachersTab = ({ selectedTeacherIdFromState }) => {
   );
 };
 
+const formatLastActive = (dateStr, status) => {
+  if (status === 'inactive') return 'Tài khoản bị khóa';
+  if (!dateStr) return '—';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '—';
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    if (diffMs < 0) return 'Vừa xong';
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHours = Math.floor(diffMin / 60);
+
+    const pad = (n) => String(n).padStart(2, '0');
+    const timeStr = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const dateFormatted = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+
+    if (diffSec < 120) return 'Vừa xong';
+    if (diffMin < 60) return `${diffMin} phút trước`;
+    if (diffHours < 24 && d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) {
+      return `Hôm nay ${timeStr}`;
+    }
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (d.getDate() === yesterday.getDate() && d.getMonth() === yesterday.getMonth() && d.getFullYear() === yesterday.getFullYear()) {
+      return `Hôm qua ${timeStr}`;
+    }
+    return `${timeStr} ${dateFormatted}`;
+  } catch (e) {
+    return '—';
+  }
+};
+
 const getInitialUsersCache = () => {
   try {
-    const cached = localStorage.getItem('physigame_admin_users_cache');
+    const cached = localStorage.getItem('eureka_admin_users_cache') || localStorage.getItem('physigame_admin_users_cache');
     if (cached) {
       const parsed = JSON.parse(cached);
       if (Array.isArray(parsed) && parsed.length > 0) {
         // Filter out legacy mock users
         const realOnly = parsed.filter(u => typeof u.id === 'string' && u.id.length > 10 && !u.name?.startsWith('Nguyễn Văn'));
         if (realOnly.length > 0) return realOnly;
+        localStorage.removeItem('eureka_admin_users_cache');
         localStorage.removeItem('physigame_admin_users_cache');
       }
     }
@@ -1104,6 +1160,11 @@ const AdminUsers = () => {
 
   const itemsPerPage = 10;
 
+  // Auto-reset page to 1 whenever any filter changes to prevent empty page bug
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterRole, filterStatus, searchTerm]);
+
   useEffect(() => {
     if (showEditModal) {
       setEditFormData({
@@ -1127,7 +1188,10 @@ const AdminUsers = () => {
   }, [activeTab]);
 
   const fetchUsers = async () => {
-    setLoading(true);
+    // Instant SWR: Only show full loading state if we have no cached users
+    if (!users || users.length === 0) {
+      setLoading(true);
+    }
     try {
       let rawUsers = null;
       try {
@@ -1170,7 +1234,8 @@ const AdminUsers = () => {
             grade: u.profile?.grade || u.grade || (u.programs && u.programs[0]?.currentClass) || '?',
             status: resolvedStatus,
             joinDate: u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : '—',
-            lastActive: u.updated_at ? new Date(u.updated_at).toLocaleDateString('vi-VN') : '—',
+            lastActive: formatLastActive(u.updated_at || u.created_at, resolvedStatus),
+            rawLastActive: u.updated_at || u.created_at || null,
             lessonsCompleted: u.profile?.lessonsCompleted || (u.programs && u.programs[0]?.progress?.completedLessons?.length) || 0,
             exercisesCompleted: u.profile?.exercisesCompleted || 0,
             originalData: u
@@ -1179,6 +1244,7 @@ const AdminUsers = () => {
 
         setUsers(formatted);
         try {
+          localStorage.setItem('eureka_admin_users_cache', JSON.stringify(formatted));
           localStorage.setItem('physigame_admin_users_cache', JSON.stringify(formatted));
         } catch (e) {}
       }
@@ -1234,6 +1300,7 @@ const AdminUsers = () => {
     setUsers(prev => {
       const nextUsers = prev.map(u => (u.id === userData.id || (u.email && u.email === userData.email)) ? { ...u, ...updatedUserObj } : u);
       try {
+        localStorage.setItem('eureka_admin_users_cache', JSON.stringify(nextUsers));
         localStorage.setItem('physigame_admin_users_cache', JSON.stringify(nextUsers));
       } catch (e) {}
       return nextUsers;
@@ -1333,6 +1400,7 @@ const AdminUsers = () => {
       const updatedList = users.map(u => selectedUsers.includes(u.id) ? { ...u, status } : u);
       setUsers(updatedList);
       try {
+        localStorage.setItem('eureka_admin_users_cache', JSON.stringify(updatedList));
         localStorage.setItem('physigame_admin_users_cache', JSON.stringify(updatedList));
       } catch (e) {}
 
@@ -1420,6 +1488,13 @@ const AdminUsers = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // Safety: If currentPage exceeds totalPages (e.g., when switching to role with fewer results), reset to 1
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
 
   const toggleSelectAll = () => {
     if (selectedUsers.length === paginatedUsers.length) {
@@ -1538,7 +1613,10 @@ const AdminUsers = () => {
                   type="text"
                   placeholder="Tìm kiếm theo tên hoặc email..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full bg-[#e4f2f0]/30 border border-[#e4f2f0] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#274dad] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#2099e9] font-bold transition-all"
                 />
               </div>
@@ -1546,13 +1624,19 @@ const AdminUsers = () => {
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <CustomSelect
                   value={filterRole}
-                  onChange={setFilterRole}
+                  onChange={(val) => {
+                    setFilterRole(val);
+                    setCurrentPage(1);
+                  }}
                   options={roleFilterOptions}
                   className="w-full sm:w-48"
                 />
                 <CustomSelect
                   value={filterStatus}
-                  onChange={setFilterStatus}
+                  onChange={(val) => {
+                    setFilterStatus(val);
+                    setCurrentPage(1);
+                  }}
                   options={statusFilterOptions}
                   className="w-full sm:w-52"
                 />
@@ -1735,7 +1819,7 @@ const AdminUsers = () => {
                             )}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap">
-                            <span className="font-body text-xs font-bold text-slate-400">{user.lastActive || '—'}</span>
+                            <span className={`font-body text-xs font-bold ${user.status === 'inactive' ? 'text-rose-500 font-extrabold' : 'text-slate-400'}`}>{user.lastActive || '—'}</span>
                           </td>
                           <td className="px-4 py-4 text-right">
                             <div className="flex items-center justify-end gap-1">
@@ -1965,7 +2049,14 @@ const AdminUsers = () => {
 
                   <div className="bg-[#e4f2f0]/30 rounded-2xl p-4 border border-[#e4f2f0]">
                     <p className="font-heading text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Hoạt động cuối</p>
-                    <p className="font-heading font-extrabold text-[#274dad] text-sm">{showUserDetail.lastActive || '—'}</p>
+                    <p className={`font-heading font-extrabold text-sm ${showUserDetail.status === 'inactive' ? 'text-rose-500 font-black' : 'text-[#274dad]'}`}>
+                      {showUserDetail.status === 'inactive' ? 'Tài khoản bị khóa' : (showUserDetail.lastActive || '—')}
+                    </p>
+                    {showUserDetail.status !== 'inactive' && showUserDetail.rawLastActive && (
+                      <p className="font-body text-[10px] font-bold text-slate-400 mt-0.5">
+                        {new Date(showUserDetail.rawLastActive).toLocaleString('vi-VN')}
+                      </p>
+                    )}
                   </div>
                 </div>
 

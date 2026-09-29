@@ -29,19 +29,22 @@ router.get('/', async (req, res) => {
     }
 
     const { data: users, error } = await supabase
-      .from('users').select('id,username,display_name,email,xp,level,profile,avatar')
+      .from('users').select('id,username,display_name,email,xp,level,profile,avatar,role')
+      .or('role.eq.student,role.is.null')
       .order(sortField, { ascending: false })
       .limit(Math.max(parseInt(limit), 50));
 
     if (error) throw error;
 
     leaderboard = (users || []).map((user, index) => ({
+      id: user.id,
       rank: index + 1,
       username: user.username || user.email?.split('@')[0] || 'Anonymous',
       displayName: user.display_name || user.username || user.email?.split('@')[0],
       avatar: user.avatar || null,
       xp: user.xp || 0,
       level: user.level || 1,
+      role: user.role || 'student',
       streak: 0,
       pkRating: 1000,
       pkWins: 0,
@@ -49,7 +52,8 @@ router.get('/', async (req, res) => {
     }));
 
     const { count: totalCount } = await supabase
-      .from('users').select('id', { count: 'exact', head: true });
+      .from('users').select('id', { count: 'exact', head: true })
+      .or('role.eq.student,role.is.null');
     total = totalCount || 0;
 
     if (type === 'xp') {
@@ -60,9 +64,10 @@ router.get('/', async (req, res) => {
     let userRank = null;
     if (userId) {
       const currentUser = await User.findByAnyId(userId);
-      if (currentUser) {
+      if (currentUser && currentUser.role !== 'teacher') {
         const { count } = await supabase
           .from('users').select('id', { count: 'exact', head: true })
+          .or('role.eq.student,role.is.null')
           .gt(sortField, currentUser[sortField] || 0);
 
         userRank = {
@@ -88,7 +93,8 @@ router.get('/top', async (req, res) => {
     const { type = 'xp' } = req.query;
 
     const { data: topUsers, error } = await supabase
-      .from('users').select('username,display_name,xp,avatar')
+      .from('users').select('username,display_name,xp,avatar,role')
+      .or('role.eq.student,role.is.null')
       .order('xp', { ascending: false })
       .limit(3);
 
