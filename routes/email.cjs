@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
@@ -9,8 +11,9 @@ const GMAIL_USER = process.env.GMAIL_USER || 'phandangnhatminh0908@gmail.com';
 const GMAIL_PASS = process.env.GMAIL_PASS || 'qhybiykbgnrwcocd';
 const JWT_SECRET = process.env.JWT_SECRET || 'eureka-physics-otp-secret-2026';
 
-// Hosted URL for the official Eureka logo - prevents Gmail from displaying an attachment chip/badge!
-const OFFICIAL_LOGO_URL = 'https://eureka-th.vercel.app/images/eureka_official_logo.png';
+// Hosted high-speed CDN URL for the official Eureka logo (Cloudflare CDN via Supabase)
+// Embeds directly inside the email box without sending any file attachments, preventing Gmail attachment chips/badges!
+const OFFICIAL_LOGO_URL = 'https://vxfllcmmqtpsstlwowzn.supabase.co/storage/v1/object/public/teacher-certificates/branding/eureka_official_logo.png';
 
 // Create Nodemailer Transporter using Gmail SMTP with connection pooling for maximum speed
 const transporter = nodemailer.createTransport({
@@ -37,7 +40,8 @@ transporter.verify().then(() => {
 
 /**
  * Universal Email Sender Helper via Gmail SMTP
- * Embeds the hosted Eureka logo directly inside the email box without sending any file attachments.
+ * Embeds the official Eureka logo directly inside the email box without sending any file attachments.
+ * This guarantees Gmail NEVER shows an attachment chip / badge or paperclip icon in the inbox list!
  */
 async function sendViaGmail({ to, subject, htmlContent, textContent, teacherName }) {
   const targetEmail = Array.isArray(to) ? to[0] : to;
@@ -47,8 +51,9 @@ async function sendViaGmail({ to, subject, htmlContent, textContent, teacherName
 
   let finalHtml = htmlContent;
   if (finalHtml) {
-    // Replace any legacy CID with direct hosted logo URL to avoid attachment chip in Gmail
+    // Replace any legacy CID or older URLs with the direct CDN hosted logo URL
     finalHtml = finalHtml.replace(/cid:eureka_official_logo/gi, OFFICIAL_LOGO_URL);
+    finalHtml = finalHtml.replace(/https:\/\/eureka-th\.vercel\.app\/images\/eureka_official_logo\.png/gi, OFFICIAL_LOGO_URL);
 
     // Substitute legacy cursive span if present
     finalHtml = finalHtml.replace(
@@ -56,7 +61,7 @@ async function sendViaGmail({ to, subject, htmlContent, textContent, teacherName
       `<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 auto; text-align: center; border-collapse: collapse;">
         <tr>
           <td align="center" style="text-align: center; padding: 0;">
-            <img src="${OFFICIAL_LOGO_URL}" alt="Eureka" width="220" style="display: block; margin: 0 auto; width: 220px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
+            <img src="${OFFICIAL_LOGO_URL}" alt="Eureka Physics" width="220" style="display: block; margin: 0 auto; width: 220px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
           </td>
         </tr>
       </table>`
@@ -67,10 +72,17 @@ async function sendViaGmail({ to, subject, htmlContent, textContent, teacherName
   // This ensures Gmail will NEVER display an attachment chip/badge (eureka_official_...) in the inbox list!
   const mailOptions = {
     from: `"Eureka Physics" <${GMAIL_USER}>`,
+    replyTo: `"Eureka Physics" <${GMAIL_USER}>`,
     to: targetEmail,
     subject: subject,
     text: plainText,
-    html: finalHtml
+    html: finalHtml,
+    headers: {
+      'X-Entity-Ref-ID': Date.now().toString(),
+      'X-Priority': '3',
+      'X-Auto-Response-Suppress': 'OOF, AutoReply',
+      'Precedence': 'bulk'
+    }
   };
 
   const info = await transporter.sendMail(mailOptions);
@@ -123,7 +135,7 @@ function buildStatusHtml({ teacherName, status, rejectionReason, customTitle, cu
     badgeBorder = '#ef4444';
     title = 'Thông báo tạm khóa tài khoản giảng viên';
     mainMessage = 'Tài khoản giảng viên của thầy/cô trên hệ thống Eureka Physics hiện đã bị tạm dừng hoạt động do vi phạm quy định hoặc theo quyết định quản trị.';
-    callToAction = 'Nếu thầy/cô cần giải trình hoặc hỗ trợ mở khóa tài khoản, vui lòng phản hồi lại email này hoặc liên hệ support@physigame.edu.vn.';
+    callToAction = `Nếu thầy/cô cần giải trình hoặc hỗ trợ mở khóa tài khoản, vui lòng phản hồi lại email này hoặc liên hệ ${GMAIL_USER}.`;
   } else if (isDeleted) {
     statusBadgeText = 'TÀI KHOẢN ĐÃ ĐƯỢC XÓA';
     badgeBg = '#f8fafc';
@@ -144,7 +156,7 @@ function buildStatusHtml({ teacherName, status, rejectionReason, customTitle, cu
         <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 auto; text-align: center; border-collapse: collapse;">
           <tr>
             <td align="center" style="text-align: center; padding: 0;">
-              <img src="${OFFICIAL_LOGO_URL}" alt="Eureka" width="220" style="display: block; margin: 0 auto; width: 220px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
+              <img src="${OFFICIAL_LOGO_URL}" alt="Eureka Physics" width="220" style="display: block; margin: 0 auto; width: 220px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
             </td>
           </tr>
         </table>
@@ -176,7 +188,7 @@ function buildStatusHtml({ teacherName, status, rejectionReason, customTitle, cu
       <!-- Footer -->
       <div style="text-align: center; padding-top: 20px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; line-height: 1.6;">
         <p style="margin: 0;">Trân trọng,<br><strong style="color: #1e293b; font-size: 13px;">Ban Quản Trị Eureka Physics Lab</strong></p>
-        <p style="margin: 4px 0 0 0; color: #64748b;">Hỗ trợ kỹ thuật: <a href="mailto:support@physigame.edu.vn" style="color: #3b82f6; text-decoration: none; font-weight: 600;">support@physigame.edu.vn</a></p>
+        <p style="margin: 4px 0 0 0; color: #64748b;">Hỗ trợ kỹ thuật: <a href="mailto:${GMAIL_USER}" style="color: #3b82f6; text-decoration: none; font-weight: 600;">${GMAIL_USER}</a></p>
       </div>
     </div>
   `;
@@ -277,7 +289,7 @@ router.post('/send-feedback', async (req, res) => {
           <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 auto; text-align: center; border-collapse: collapse;">
             <tr>
               <td align="center" style="text-align: center; padding: 0;">
-                <img src="${OFFICIAL_LOGO_URL}" alt="Eureka" width="220" style="display: block; margin: 0 auto; width: 220px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
+                <img src="${OFFICIAL_LOGO_URL}" alt="Eureka Physics" width="220" style="display: block; margin: 0 auto; width: 220px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
               </td>
             </tr>
           </table>
@@ -297,7 +309,7 @@ router.post('/send-feedback', async (req, res) => {
 
         <div style="text-align: center; padding-top: 20px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; line-height: 1.6;">
           <p style="margin: 0;">Trân trọng,<br><strong style="color: #1e293b; font-size: 13px;">Ban Quản Trị Eureka Physics Lab</strong></p>
-          <p style="margin: 4px 0 0 0; color: #64748b;">Hỗ trợ kỹ thuật: <a href="mailto:support@physigame.edu.vn" style="color: #3b82f6; text-decoration: none; font-weight: 600;">support@physigame.edu.vn</a></p>
+          <p style="margin: 4px 0 0 0; color: #64748b;">Hỗ trợ kỹ thuật: <a href="mailto:${GMAIL_USER}" style="color: #3b82f6; text-decoration: none; font-weight: 600;">${GMAIL_USER}</a></p>
         </div>
       </div>
     `;
@@ -342,7 +354,7 @@ function buildOtpHtml({ username, otp }) {
         <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 auto; text-align: center; border-collapse: collapse;">
           <tr>
             <td align="center" style="text-align: center; padding: 0;">
-              <img src="${OFFICIAL_LOGO_URL}" alt="Eureka" width="220" style="display: block; margin: 0 auto; width: 220px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
+              <img src="${OFFICIAL_LOGO_URL}" alt="Eureka Physics" width="220" style="display: block; margin: 0 auto; width: 220px; max-width: 90%; height: auto; border: 0; outline: none; text-align: center;" />
             </td>
           </tr>
         </table>
@@ -369,7 +381,7 @@ function buildOtpHtml({ username, otp }) {
       <!-- Footer -->
       <div style="text-align: center; padding-top: 24px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; line-height: 1.6;">
         <p style="margin: 0;">Trân trọng,<br><strong style="color: #1e293b; font-size: 13px;">Ban Quản Trị Eureka Physics Lab</strong></p>
-        <p style="margin: 4px 0 0 0; color: #64748b;">Hỗ trợ kỹ thuật: <a href="mailto:support@physigame.edu.vn" style="color: #3b82f6; text-decoration: none; font-weight: 600;">support@physigame.edu.vn</a></p>
+        <p style="margin: 4px 0 0 0; color: #64748b;">Hỗ trợ kỹ thuật: <a href="mailto:${GMAIL_USER}" style="color: #3b82f6; text-decoration: none; font-weight: 600;">${GMAIL_USER}</a></p>
       </div>
     </div>
   `;
